@@ -1,0 +1,900 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Home PPOB Neumorphism - Clean & Crisp</title>
+    <!-- FontAwesome untuk Ikon -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* --- CONFIGURATION & BASE STYLE --- */
+        :root {
+            --bg-color: #e0e5ec;
+            --shadow-light: #ffffff;
+            --shadow-dark: #a3b1c6;
+            --accent-color: #00a8ff;
+            --accent-gradient: linear-gradient(135deg, #00c6ff, #0072ff);
+            --text-main: #4d547d;
+            --text-muted: #8893b0;
+            --border-radius-sm: 10px;
+            --border-radius-md: 16px;
+            --border-radius-pill: 50px;
+            --main-gap: 12px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        html, body {
+            width: 100%;
+            height: 100%;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+        }
+
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            overflow-x: hidden;
+            overflow-y: auto;
+            padding-bottom: 70px;
+        }
+
+        .app-container {
+            width: 100%;
+            max-width: 480px;
+            min-height: 100vh;
+            background-color: var(--bg-color);
+            position: relative;
+            margin: 0 auto;
+        }
+
+        ::-webkit-scrollbar { display: none !important; width: 0 !important; height: 0 !important; }
+        * { -ms-overflow-style: none !important; scrollbar-width: none !important; }
+
+        /* --- STICKY HEADER SECTION --- */
+        .header { position: sticky; top: 0; z-index: 100; padding: 16px; background: var(--bg-color); }
+        .header-top { display: flex; justify-content: space-between; align-items: center; }
+        .user-profile { display: flex; align-items: center; gap: 12px; }
+        .profile-img {
+            width: 42px; height: 42px; border-radius: 50%;
+            background-color: var(--bg-color); 
+            box-shadow: 4px 4px 8px var(--shadow-dark), -4px -4px 8px var(--shadow-light);
+            object-fit: cover; padding: 2px;
+        }
+        .user-info .greeting { font-size: 0.72rem; color: var(--text-muted); font-weight: 600; }
+        .user-info .username { font-size: 0.95rem; font-weight: 800; color: var(--text-main); }
+        .header-actions { display: flex; align-items: center; gap: 10px; }
+        
+        .menu-toggle-btn {
+            width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;
+            text-decoration: none; background: var(--bg-color); border-radius: 50%; color: var(--text-main);
+            box-shadow: 4px 4px 8px var(--shadow-dark), -4px -4px 8px var(--shadow-light); 
+            border: none; cursor: pointer; font-size: 0.9rem; transition: all 0.2s ease;
+        }
+        .menu-toggle-btn:active { 
+            box-shadow: inset 3px 3px 6px var(--shadow-dark), inset -3px -3px 6px var(--shadow-light);
+        }
+
+        /* --- SIDEBAR MENU --- */
+        .sidebar-overlay {
+            position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0, 0, 0, 0.3);
+            display: none; z-index: 998; opacity: 0; transition: opacity 0.3s ease;
+        }
+        .sidebar-overlay.show { display: block; opacity: 1; }
+        .sidebar {
+            position: fixed; top: 0; left: -280px; width: 280px; height: 100%;
+            background: var(--bg-color); z-index: 999; box-shadow: 10px 0 20px rgba(0,0,0,0.05);
+            transition: left 0.3s ease; display: flex; flex-direction: column; padding: 24px; overflow-y: auto;
+        }
+        .sidebar.show { left: 0; }
+        .sidebar-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; padding-bottom: 15px; }
+        .sidebar-title { font-size: 1rem; font-weight: 800; color: var(--text-main); display: flex; align-items: center; gap: 10px; }
+        .sidebar-title i { color: var(--accent-color); }
+        .sidebar-close {
+            width: 32px; height: 32px; border-radius: 50%; background: var(--bg-color); border: none;
+            box-shadow: 3px 3px 6px var(--shadow-dark), -3px -3px 6px var(--shadow-light); color: var(--text-muted); cursor: pointer; display: flex; align-items: center; justify-content: center; font-weight: bold;
+        }
+        .sidebar-menu-list { display: flex; flex-direction: column; gap: 14px; }
+        .sidebar-item {
+            display: flex; align-items: center; gap: 14px; padding: 12px 18px;
+            background: var(--bg-color); border-radius: var(--border-radius-md); text-decoration: none; color: var(--text-main);
+            font-size: 0.85rem; font-weight: 700; box-shadow: 4px 4px 8px var(--shadow-dark), -4px -4px 8px var(--shadow-light);
+            transition: all 0.2s ease; cursor: pointer;
+        }
+        .sidebar-item i { color: var(--accent-color); font-size: 1.1rem; width: 20px; text-align: center; }
+
+        /* --- SALDO UTAMA --- */
+        .wallet-section {
+            margin: 10px 16px var(--main-gap) 16px; padding: 16px 20px; background: var(--bg-color); 
+            border-radius: var(--border-radius-md); box-shadow: 6px 6px 12px var(--shadow-dark), -6px -6px 12px var(--shadow-light); 
+            display: flex; align-items: center; justify-content: space-between;
+        }
+        .wallet-info { display: flex; flex-direction: column; justify-content: center; }
+        .wallet-label { font-size: 0.7rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; display: flex; align-items: center; gap: 6px; letter-spacing: 0.5px; }
+        .wallet-label i { color: var(--accent-color); font-size: 0.85rem; }
+        .balance { font-weight: 800; font-size: 1.4rem; color: var(--text-main); margin-top: 6px; letter-spacing: 0.2px; line-height: 1; }
+
+        /* --- AKSI SALDO --- */
+        .wallet-actions-card {
+            margin: 0 16px var(--main-gap) 16px; padding: 8px 12px; background: var(--bg-color);
+            border-radius: var(--border-radius-md); box-shadow: 6px 6px 12px var(--shadow-dark), -6px -6px 12px var(--shadow-light);
+            display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;
+        }
+
+        .action-btn {
+            display: flex; flex-direction: row; align-items: center; justify-content: center; gap: 6px; padding: 6px 4px;
+            background: var(--bg-color); border-radius: var(--border-radius-pill);
+            box-shadow: 3px 3px 6px var(--shadow-dark), -3px -3px 6px var(--shadow-light);
+            text-decoration: none; color: var(--text-main); font-size: 0.7rem; font-weight: 700; transition: all 0.2s ease;
+        }
+        .action-btn:active { box-shadow: inset 3px 3px 6px var(--shadow-dark), inset -3px -3px 6px var(--shadow-light); transform: scale(0.97); }
+        .action-btn i { color: var(--accent-color); font-size: 0.85rem; }
+
+        /* --- RUNNING TEXT --- */
+        .ticker-container { 
+            margin: 0 16px var(--main-gap) 16px; display: flex; align-items: center; background: var(--bg-color); 
+            border-radius: var(--border-radius-pill); padding: 6px 14px; border: 2px solid var(--accent-color);
+            box-shadow: inset 3px 3px 6px var(--shadow-dark), inset -3px -3px 6px var(--shadow-light); 
+        }
+        .ticker-icon { 
+            color: var(--accent-color); margin-right: 10px; display: flex; align-items: center; justify-content: center; 
+            width: 24px; height: 24px; border-radius: 50%; background: var(--bg-color); 
+            box-shadow: 2px 2px 4px var(--shadow-dark), -2px -2px 4px var(--shadow-light); flex-shrink: 0; font-size: 0.65rem;
+        }
+        .ticker-content { flex: 1; overflow: hidden; display: flex; align-items: center; }
+        .ticker-content marquee { font-size: 0.72rem; font-weight: 600; color: var(--text-muted); }
+        .ticker-content span { margin-right: 40px; }
+
+        /* --- BATAS PEMISAH --- */
+        .section-divider { display: flex; align-items: center; justify-content: center; margin: var(--main-gap) 16px; position: relative; }
+        .divider-line { flex: 1; height: 2px; background: var(--shadow-dark); opacity: 0.5; border-radius: 2px; }
+        .divider-badge {
+            padding: 6px 16px; font-size: 0.7rem; font-weight: 800; color: var(--accent-color); background: var(--bg-color);
+            border-radius: var(--border-radius-pill); box-shadow: 3px 3px 6px var(--shadow-dark), -3px -3px 6px var(--shadow-light);
+            margin: 0 10px; display: flex; align-items: center; gap: 6px; text-transform: uppercase; letter-spacing: 0.5px;
+        }
+
+        /* --- ANIMASI PETIR KEDIP NYALA ORANGE API --- */
+        @keyframes fireGlow {
+            0%, 100% {
+                color: #ff4500;
+                text-shadow: 0 0 2px #ff4500, 0 0 6px #ff7700;
+                transform: scale(1);
+            }
+            50% {
+                color: #ffaa00;
+                text-shadow: 0 0 8px #ff4500, 0 0 16px #ff7700, 0 0 22px #ffae00;
+                transform: scale(1.25);
+            }
+        }
+
+        #quick-divider .divider-badge i {
+            display: inline-block;
+            animation: fireGlow 1.2s infinite ease-in-out;
+        }
+
+        /* --- CARD WRAPPER & INPUT POPUP --- */
+        .card-wrapper { position: relative; z-index: 101; background-color: var(--bg-color); padding: 0 16px; }
+
+        .popup-top-container {
+            display: none; height: 210px; overflow-y: auto; margin-bottom: var(--main-gap); padding: 14px;
+            background: var(--bg-color); border-radius: var(--border-radius-md);
+            box-shadow: inset 4px 4px 8px var(--shadow-dark), inset -4px -4px 8px var(--shadow-light);
+            animation: dropUpAnimation 0.3s ease-out forwards;
+        }
+
+        @keyframes dropUpAnimation {
+            0% { opacity: 0; transform: translateY(15px); }
+            100% { opacity: 1; transform: translateY(0); }
+        }
+
+        .card-container { background: transparent; display: flex; flex-direction: column; gap: var(--main-gap); }
+
+        .inset-tabs-wrapper {
+            display: none; overflow-x: auto; white-space: nowrap; gap: 10px; padding: 2px 2px 6px 2px;
+            scroll-behavior: smooth; width: 100%;
+        }
+
+        .tab-item-inset {
+            display: inline-flex; align-items: center; justify-content: center;
+            padding: 6px 16px; border-radius: var(--border-radius-pill); border: none; background: var(--bg-color);
+            color: var(--text-muted); font-size: 0.7rem; font-weight: 700; cursor: pointer;
+            transition: all 0.2s ease; flex-shrink: 0;
+            box-shadow: 3px 3px 6px var(--shadow-dark), -3px -3px 6px var(--shadow-light);
+        }
+        .tab-item-inset.active {
+            color: var(--accent-color); box-shadow: inset 3px 3px 5px var(--shadow-dark), inset -3px -3px 5px var(--shadow-light);
+        }
+
+        /* --- INSET INPUT BOX --- */
+        .input-box {
+            display: flex; align-items: center; padding: 8px 14px; gap: 10px; 
+            background: var(--bg-color); border-radius: var(--border-radius-pill);
+            border: 2px solid var(--accent-color);
+            box-shadow: inset 3px 3px 6px var(--shadow-dark), inset -3px -3px 6px var(--shadow-light);
+        }
+
+        .input-icon-left { 
+            color: var(--accent-color); font-size: 0.85rem; 
+            width: 26px; height: 26px; border-radius: 50%; background: var(--bg-color);
+            display: flex; align-items: center; justify-content: center;
+            box-shadow: 2px 2px 4px var(--shadow-dark), -2px -2px 4px var(--shadow-light); flex-shrink: 0;
+        }
+
+        .input-box input {
+            flex: 1; border: none; background: transparent; outline: none; 
+            font-size: 1rem; font-weight: 700; color: var(--text-main); width: 100%; letter-spacing: 0.5px;
+        }
+
+        .input-box input::placeholder { color: var(--text-muted); font-weight: 500; font-size: 0.85rem; opacity: 0.7; }
+
+        .operator-badge {
+            background-color: var(--bg-color); color: var(--accent-color);
+            padding: 3px 10px; border-radius: var(--border-radius-pill); font-size: 0.65rem; font-weight: 800;
+            display: none; text-transform: uppercase; flex-shrink: 0; letter-spacing: 0.5px;
+            box-shadow: 2px 2px 4px var(--shadow-dark), -2px -2px 4px var(--shadow-light);
+        }
+
+        .input-icon-right { color: var(--accent-color); font-size: 1rem; margin-left: 2px; cursor: pointer; transition: transform 0.2s; flex-shrink: 0; }
+        .input-icon-right:active { transform: scale(0.9); }
+
+        .filter-container { display: none !important; }
+
+        .product-list { display: flex; flex-direction: column; gap: 10px; }
+        .product-card {
+            background: var(--bg-color); border-radius: var(--border-radius-sm); padding: 12px 16px; display: flex; justify-content: space-between; align-items: center; cursor: pointer;
+            box-shadow: 4px 4px 8px var(--shadow-dark), -4px -4px 8px var(--shadow-light); transition: all 0.2s ease;
+        }
+        .product-card:active { transform: scale(0.98); box-shadow: inset 3px 3px 6px var(--shadow-dark), inset -3px -3px 6px var(--shadow-light); }
+        .product-info { flex: 1; padding-right: 8px; }
+        .product-title { font-size: 0.78rem; font-weight: 700; color: var(--text-main); line-height: 1.3; margin-bottom: 4px; }
+        .product-price { font-size: 0.85rem; font-weight: 800; color: var(--accent-color); }
+        .product-action {
+            display: flex; align-items: center; justify-content: center; width: 28px; height: 28px; border-radius: 50%;
+            color: var(--accent-color); box-shadow: 3px 3px 6px var(--shadow-dark), -3px -3px 6px var(--shadow-light); font-size: 0.75rem;
+        }
+
+        .empty-state { display: none; flex-direction: column; align-items: center; justify-content: center; padding: 20px; color: var(--text-muted); text-align: center; }
+
+        /* --- MENU UTAMA --- */
+        .purchase-container {
+            margin: 0 16px var(--main-gap) 16px; padding: 20px 16px; background: var(--bg-color); border-radius: var(--border-radius-md);
+            box-shadow: 6px 6px 12px var(--shadow-dark), -6px -6px 12px var(--shadow-light);
+        }
+        
+        .menu-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 18px 12px; }
+        .grid-item { display: flex; flex-direction: column; align-items: center; text-align: center; cursor: pointer; text-decoration: none; }
+        .icon-wrapper {
+            width: 52px; height: 52px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+            margin-bottom: 8px; font-size: 1.25rem; background: var(--bg-color); 
+            box-shadow: 4px 4px 8px var(--shadow-dark), -4px -4px 8px var(--shadow-light);
+            transition: all 0.2s ease; overflow: hidden;
+        }
+        .grid-item:active .icon-wrapper {
+            box-shadow: inset 3px 3px 6px var(--shadow-dark), inset -3px -3px 6px var(--shadow-light); transform: scale(0.95);
+        }
+        .grid-item span { font-size: 0.7rem; font-weight: 700; color: var(--text-main); }
+
+        .icon-pulsa, .icon-data, .icon-pln, .icon-gem, 
+        .icon-gaming, .icon-ewallet, .icon-emoney, .icon-ojek, 
+        .icon-p-transfer, .icon-sms, .icon-pertagas, .icon-intl,
+        .icon-quran, .icon-tasbih, .icon-sholat, .icon-kalkulator { color: var(--accent-color); }
+
+        /* --- CONTAINER MENU TAMBAHAN --- */
+        .extra-menu-container {
+            margin: 0 16px 20px 16px; padding: 18px 16px; background: var(--bg-color); border-radius: var(--border-radius-md);
+            box-shadow: 6px 6px 12px var(--shadow-dark), -6px -6px 12px var(--shadow-light);
+        }
+
+        .extra-menu-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px 12px; }
+
+        @media screen and (min-width: 550px) {
+            .menu-grid, .extra-menu-grid { grid-template-columns: repeat(6, 1fr); gap: 20px 14px; }
+            .icon-wrapper { width: 56px; height: 56px; font-size: 1.35rem; }
+        }
+
+        /* --- BOTTOM NAVIGATION BAR FIX --- */
+        .bottom-nav-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            width: 100%;
+            max-width: 480px;
+            margin: 0 auto;
+            background: var(--bg-color);
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            padding: 8px 10px;
+            box-shadow: 0 -4px 10px rgba(163, 177, 198, 0.4), 0 -4px 10px rgba(255, 255, 255, 0.8);
+            z-index: 999;
+            border-top-left-radius: 20px;
+            border-top-right-radius: 20px;
+        }
+
+        .nav-item-link {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+            color: var(--text-muted);
+            font-size: 0.68rem;
+            font-weight: 700;
+            gap: 3px;
+            flex: 1;
+            padding: 4px 0;
+            transition: all 0.2s ease;
+        }
+
+        .nav-item-link i {
+            font-size: 1.1rem;
+        }
+
+        .nav-item-link.active {
+            color: var(--accent-color);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="app-container" id="app-canvas">
+
+        <!-- Sidebar Overlay & Menu -->
+        <div class="sidebar-overlay" id="sidebar-overlay"></div>
+        <div class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <div class="sidebar-title"><i class="fa-solid fa-bars-staggered"></i> Menu Lainnya</div>
+                <button class="sidebar-close" id="sidebar-close">&times;</button>
+            </div>
+            <div class="sidebar-menu-list">
+                <a href="javascript:void(0)" class="sidebar-item" onclick="alert('Menu Keuangan akan segera hadir.')">
+                    <i class="fa-solid fa-wallet"></i> Keuangan
+                </a>
+                <a href="javascript:void(0)" class="sidebar-item" onclick="alert('Menu Catatan Hutang akan segera hadir.')">
+                    <i class="fa-solid fa-tags"></i> Catatan Hutang
+                </a>
+                <a href="javascript:void(0)" class="sidebar-item" onclick="alert('Menu Daftar Harga akan segera hadir.')">
+                    <i class="fa-solid fa-list-check"></i> Daftar Harga
+                </a>
+                <a href="javascript:void(0)" class="sidebar-item" onclick="alert('Menu Transaksi Terjadwal akan segera hadir.')">
+                    <i class="fa-solid fa-calendar-check"></i> Transaksi Terjadwal
+                </a>
+                <a href="javascript:void(0)" class="sidebar-item">
+                    <i class="fa-solid fa-file-invoice-dollar"></i> Laporan
+                </a>
+                <a href="javascript:void(0)" class="sidebar-item" onclick="alert('Menu Pengaturan akan segera hadir.')">
+                    <i class="fa-solid fa-gear"></i> Pengaturan
+                </a>
+            </div>
+        </div>
+
+        <!-- Sticky Header Section -->
+        <div class="header" id="main-header">
+            <div class="header-top">
+                <div class="user-profile">
+                    <img src="https://images.bukaolshop.com/hosting/180774/3b0c09d4696e527913.png" class="profile-img" alt="Logo">
+                    <div class="user-info">
+                        <div class="greeting" id="time-greeting">Selamat Datang,</div>
+                        <div class="username">Sahabat Arcell</div>
+                    </div>
+                </div>
+                
+                <div class="header-actions">
+                    <button class="menu-toggle-btn" id="menu-toggle" title="Menu Lainnya">
+                        <i class="fa-solid fa-bars"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 1. KARTU SALDO UTAMA -->
+        <div class="wallet-section" id="walletSection">
+            <div class="wallet-info">
+                <span class="wallet-label"><i class="fa-solid fa-wallet"></i> Saldo Anda</span>
+                <div class="balance" id="user-balance">Rp 0</div>
+            </div>
+        </div>
+
+        <!-- 2. KARTU TERPISAH: AKSI SALDO RAMPING -->
+        <div class="wallet-actions-card">
+            <a href="javascript:void(0)" class="action-btn">
+                <i class="fa-solid fa-circle-plus"></i>
+                <span>Isi Saldo</span>
+            </a>
+            <a href="javascript:void(0)" class="action-btn">
+                <i class="fa-solid fa-paper-plane"></i>
+                <span>Kirim</span>
+            </a>
+            <a href="/riwayat" class="action-btn">
+                <i class="fa-solid fa-clock-rotate-left"></i>
+                <span>Riwayat</span>
+            </a>
+        </div>
+
+        <!-- Running Text -->
+        <div class="ticker-container">
+            <div class="ticker-icon"><i class="fa-solid fa-bullhorn"></i></div>
+            <div class="ticker-content">
+                <marquee direction="left" scrollamount="4">
+                    <span>🔥 <b>INFO SERVER:</b> CUT OFF TRANSAKSI SETIAP JAM 23.30 - 00.15 WIB</span>
+                    <span>⚡ Token PLN lancar jaya 24 jam nonstop tanpa delay.</span>
+                </marquee>
+            </div>
+        </div>
+
+        <!-- DIVIDER TRANSAKSI CEPAT -->
+        <div class="section-divider" id="quick-divider">
+            <div class="divider-line"></div>
+            <div class="divider-badge"><i class="fa-solid fa-bolt"></i> Transaksi Cepat</div>
+            <div class="divider-line"></div>
+        </div>
+
+        <!-- DROP UP POPUP KE KOLOM SALDO -->
+        <div class="card-wrapper" id="cardWrapper">
+            
+            <div class="popup-top-container" id="popupTopContainer">
+                <div class="filter-container">
+                    <select id="sortFilter" onchange="applyPriceSort()">
+                        <option value="asc" selected>Harga: Murah ke Mahal</option>
+                        <option value="desc">Harga: Mahal ke Murah</option>
+                    </select>
+                </div>
+                <div class="empty-state" id="emptyState">
+                    <i class="fa-solid fa-spinner fa-spin" id="stateIcon"></i>
+                    <p id="emptyText"></p>
+                </div>
+                <div class="product-list" id="productList"></div>
+            </div>
+
+            <!-- INSET INPUT UTAMA -->
+            <div class="card-container">
+                <div class="inset-tabs-wrapper" id="insetTabsWrapper"></div>
+
+                <div class="input-box">
+                    <div class="input-icon-left">
+                        <i class="fa-solid fa-mobile-screen-button"></i>
+                    </div>
+                    
+                    <input type="tel" id="phoneInput" class="bo_input_nomor" placeholder="Ketik No. HP..." maxlength="20" autocomplete="off" />
+                    
+                    <span class="operator-badge" id="operatorBadge"></span>
+
+                    <div class="input-icon-right bo_tombol_kontak" id="contact-btn" style="display: none;">
+                        <i class="fa-solid fa-address-book"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- DIVIDER MENU PEMBELIAN -->
+        <div class="section-divider" id="main-menu-divider">
+            <div class="divider-line"></div>
+            <div class="divider-badge"><i class="fa-solid fa-bag-shopping"></i> Menu Utama</div>
+            <div class="divider-line"></div>
+        </div>
+
+        <!-- Container Menu Utama -->
+        <div class="purchase-container" id="purchase-container">
+            <div class="menu-grid">
+                <div class="grid-item" data-url="javascript:void(0)">
+                    <div class="icon-wrapper icon-pulsa"><i class="fa-solid fa-mobile-button"></i></div><span>Pulsa</span>
+                </div>
+                <div class="grid-item" data-url="javascript:void(0)">
+                    <div class="icon-wrapper icon-data"><i class="fa-solid fa-globe"></i></div><span>Paket Data</span>
+                </div>
+                <div class="grid-item" data-url="javascript:void(0)">
+                    <div class="icon-wrapper icon-pln"><i class="fa-solid fa-bolt-lightning"></i></div><span>Token PLN</span>
+                </div>
+                <div class="grid-item" data-url="javascript:void(0)">
+                    <div class="icon-wrapper icon-gem"><i class="fa-solid fa-gem"></i></div><span>Voucher</span>
+                </div>
+                <div class="grid-item" data-url="javascript:void(0)">
+                    <div class="icon-wrapper icon-gaming"><i class="fa-solid fa-gamepad"></i></div><span>Topup Game</span>
+                </div>
+                <div class="grid-item" data-url="javascript:void(0)">
+                    <div class="icon-wrapper icon-ewallet"><i class="fa-solid fa-wallet"></i></div><span>E-Wallet</span>
+                </div>
+                <div class="grid-item" data-url="javascript:void(0)">
+                    <div class="icon-wrapper icon-emoney"><i class="fa-solid fa-credit-card"></i></div><span>E-Money</span>
+                </div>
+                <div class="grid-item" data-url="javascript:void(0)">
+                    <div class="icon-wrapper icon-ojek"><i class="fa-solid fa-motorcycle"></i></div><span>Ojek Online</span>
+                </div>
+                <div class="grid-item" data-url="javascript:void(0)">
+                    <div class="icon-wrapper icon-p-transfer"><i class="fa-solid fa-arrow-right-arrow-left"></i></div><span>Pulsa Trans</span>
+                </div>
+                <div class="grid-item" data-url="javascript:void(0)">
+                    <div class="icon-wrapper icon-sms"><i class="fa-solid fa-comment-sms"></i></div><span>SMS & Telp</span>
+                </div>
+                <div class="grid-item" data-url="javascript:void(0)">
+                    <div class="icon-wrapper icon-pertagas"><i class="fa-solid fa-fire"></i></div><span>Pertagas</span>
+                </div>
+                <div class="grid-item" data-url="javascript:void(0)">
+                    <div class="icon-wrapper icon-intl"><i class="fa-solid fa-earth-americas"></i></div><span>International</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- DIVIDER MENU TAMBAHAN -->
+        <div class="section-divider" id="extra-menu-divider">
+            <div class="divider-line"></div>
+            <div class="divider-badge"><i class="fa-solid fa-layer-group"></i> Menu Tambahan</div>
+            <div class="divider-line"></div>
+        </div>
+
+        <!-- CONTAINER MENU TAMBAHAN -->
+        <div class="extra-menu-container" id="extra-menu-container">
+            <div class="extra-menu-grid">
+                <a href="https://quran.kemenag.go.id/" class="grid-item">
+                    <div class="icon-wrapper icon-quran"><i class="fa-solid fa-book-quran"></i></div>
+                    <span>Al-Quran</span>
+                </a>
+                <a href="https://www.tasbih.my.id/" class="grid-item">
+                    <div class="icon-wrapper icon-tasbih"><i class="fa-solid fa-hand-holding-heart"></i></div>
+                    <span>Tasbih</span>
+                </a>
+                <a href="https://jadwalsholat.org/" class="grid-item">
+                    <div class="icon-wrapper icon-mosque"><i class="fa-solid fa-mosque"></i></div>
+                    <span>Jadwal Sholat</span>
+                </a>
+                <a href="javascript:void(0)" class="grid-item">
+                    <div class="icon-wrapper icon-kalkulator"><i class="fa-solid fa-calculator"></i></div>
+                    <span>Kalkulator</span>
+                </a>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- BOTTOM NAVIGATION BAR -->
+    <div class="bottom-nav-bar">
+        <a href="/" class="nav-item-link active">
+            <i class="fa-solid fa-house"></i>
+            <span>Home</span>
+        </a>
+        <a href="/riwayat" class="nav-item-link">
+            <i class="fa-solid fa-clock-rotate-left"></i>
+            <span>Riwayat</span>
+        </a>
+        <a href="javascript:void(0)" class="nav-item-link" onclick="alert('Menu Rekap akan segera hadir.')">
+            <i class="fa-solid fa-chart-line"></i>
+            <span>Rekap</span>
+        </a>
+        <a href="javascript:void(0)" class="nav-item-link" onclick="alert('Menu Member akan segera hadir.')">
+            <i class="fa-solid fa-users"></i>
+            <span>Member</span>
+        </a>
+        <a href="javascript:void(0)" class="nav-item-link" onclick="alert('Menu Akun akan segera hadir.')">
+            <i class="fa-solid fa-user"></i>
+            <span>Akun</span>
+        </a>
+    </div>
+
+    <!-- JavaScript System Engine -->
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const menuToggleBtn = document.getElementById('menu-toggle');
+            const sidebar = document.getElementById('sidebar');
+            const sidebarOverlay = document.getElementById('sidebar-overlay');
+            const sidebarClose = document.getElementById('sidebar-close');
+
+            if (menuToggleBtn) menuToggleBtn.addEventListener('click', () => { sidebar.classList.add('show'); sidebarOverlay.classList.add('show'); });
+            if (sidebarClose) sidebarClose.addEventListener('click', () => { sidebar.classList.remove('show'); sidebarOverlay.classList.remove('show'); });
+            if (sidebarOverlay) sidebarOverlay.addEventListener('click', () => { sidebar.classList.remove('show'); sidebarOverlay.classList.remove('show'); });
+
+            const hour = new Date().getHours();
+            let greet = "Selamat Malam";
+            if (hour < 11) greet = "Selamat Pagi";
+            else if (hour < 15) greet = "Selamat Siang";
+            else if (hour < 18) greet = "Selamat Sore";
+            const greetingEl = document.getElementById('time-greeting');
+            if (greetingEl) greetingEl.innerText = greet + ",";
+
+            const prefixes = {
+                TELKOMSEL: ['0811', '0812', '0813', '0821', '0822', '0823', '0851', '0852', '0853'],
+                INDOSAT: ['0814', '0815', '0816', '0855', '0856', '0857', '0858'],
+                XL: ['0817', '0818', '0819', '0859', '0877', '0878'],
+                AXIS: ['0831', '0832', '0833', '0838'],
+                TRI: ['0895', '0896', '0897', '0898', '0899'],
+                SMARTFREN: ['0881', '0882', '0883', '0884', '0885', '0886', '0887', '0888', '0889']
+            };
+
+            const brandMapping = {
+                TELKOMSEL: "Telkomsel",
+                INDOSAT: "Indosat",
+                XL: "XL",
+                AXIS: "Axis",
+                TRI: "Tri",
+                SMARTFREN: "Smart"
+            };
+
+            const inputPhone = document.getElementById('phoneInput');
+            const badge = document.getElementById('operatorBadge');
+            const popupTopContainer = document.getElementById('popupTopContainer');
+            const emptyState = document.getElementById('emptyState');
+            const emptyText = document.getElementById('emptyText');
+            const stateIcon = document.getElementById('stateIcon');
+            const insetTabsWrapper = document.getElementById('insetTabsWrapper');
+            const productList = document.getElementById('productList');
+            const sortFilter = document.getElementById('sortFilter');
+            const contactBtn = document.getElementById('contact-btn');
+            const cardWrapper = document.getElementById('cardWrapper');
+            const walletSection = document.getElementById('walletSection');
+            const quickDivider = document.getElementById('quick-divider');
+
+            let currentOperator = null;
+            let groupedProducts = {};
+            let currentRawProducts = [];
+
+            function formatPhoneNumber(val) {
+                let cleaned = val.replace(/[^0-9+]/g, '');
+                if (cleaned.startsWith('+62')) cleaned = '0' + cleaned.substring(3);
+                else if (cleaned.startsWith('62')) cleaned = '0' + cleaned.substring(2);
+                else cleaned = cleaned.replace(/[^0-9]/g, '');
+
+                let match = cleaned.match(/.{1,4}/g);
+                return match ? match.join(' ') : cleaned;
+            }
+
+            function showLoading(text) {
+                if (productList) productList.style.display = 'none';
+                if (emptyState) emptyState.style.display = 'flex';
+                if (stateIcon) stateIcon.className = "fa-solid fa-spinner fa-spin";
+                if (emptyText) emptyText.innerHTML = text;
+                if (popupTopContainer) popupTopContainer.style.display = 'block';
+                if (quickDivider) quickDivider.style.display = 'none';
+            }
+
+            function extractSubCategory(productName, brand) {
+                let name = productName.replace(new RegExp(brand, 'gi'), '').trim();
+                let words = name.split(' ');
+                
+                if (words.length >= 2) {
+                    return `${words[0]} ${words[1]}`;
+                } else if (words.length === 1) {
+                    return words[0];
+                }
+                return "Paket Lain";
+            }
+
+            function loadKategoriByOperator(operatorKey) {
+                const digiBrand = brandMapping[operatorKey] || operatorKey;
+                showLoading(`Mencari paket <b>${operatorKey}</b>...`);
+
+                fetch('/api/digiflazz/price-list', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ brand: digiBrand })
+                })
+                .then(res => res.json())
+                .then(response => {
+                    if (response.status === 'success' && Array.isArray(response.data) && response.data.length > 0) {
+                        
+                        const validProducts = response.data.filter(p => {
+                            if (p.buyer_product_status === false || p.seller_product_status === false) return false;
+
+                            const categoryLower = (p.category || "").toLowerCase();
+                            const nameLower = (p.product_name || "").toLowerCase();
+
+                            const isBlocked = categoryLower.includes("pulsa") || 
+                                              nameLower.includes("pulsa") || 
+                                              categoryLower.includes("sms") || 
+                                              categoryLower.includes("masa aktif");
+
+                            return !isBlocked;
+                        });
+
+                        if (validProducts.length === 0) {
+                            if (emptyState) emptyState.style.display = 'none';
+                            alert(`Paket Data untuk ${operatorKey} sedang tidak tersedia.`);
+                            return;
+                        }
+
+                        groupedProducts = {};
+                        validProducts.forEach(prod => {
+                            let tabGroup = extractSubCategory(prod.product_name, digiBrand);
+                            if (!groupedProducts[tabGroup]) {
+                                groupedProducts[tabGroup] = [];
+                            }
+                            groupedProducts[tabGroup].push(prod);
+                        });
+
+                        const categories = Object.keys(groupedProducts);
+                        renderTabs(categories);
+
+                    } else {
+                        if (emptyState) emptyState.style.display = 'none';
+                        alert(`Gagal memuat data: ${response.message || 'Respons kosong'}. Cek terminal Termux.`);
+                    }
+                })
+                .catch(err => {
+                    console.error("Fetch Error:", err);
+                    if (emptyState) emptyState.style.display = 'none';
+                    alert("Koneksi ke backend lokal terputus.");
+                });
+            }
+
+            function renderTabs(categoriesArray) {
+                let html = "";
+                categoriesArray.forEach((cat, index) => {
+                    html += `<button class="tab-item-inset ${index === 0 ? 'active' : ''}" data-cat="${cat}">${cat}</button>`;
+                });
+                
+                if (insetTabsWrapper) {
+                    insetTabsWrapper.innerHTML = html;
+                    insetTabsWrapper.style.display = 'flex';
+
+                    insetTabsWrapper.querySelectorAll('.tab-item-inset').forEach(btn => {
+                        btn.addEventListener('click', function () {
+                            const catName = this.getAttribute('data-cat');
+                            selectCategory(this, catName);
+                        });
+                    });
+                }
+                
+                if (emptyState) emptyState.style.display = 'none';
+                if (productList) productList.style.display = 'flex';
+                if (popupTopContainer) popupTopContainer.style.display = 'block';
+                if (quickDivider) quickDivider.style.display = 'none';
+
+                if (categoriesArray.length > 0 && insetTabsWrapper.children[0]) {
+                    selectCategory(insetTabsWrapper.children[0], categoriesArray[0]);
+                }
+            }
+
+            function selectCategory(element, categoryName) {
+                if (insetTabsWrapper) {
+                    insetTabsWrapper.querySelectorAll('.tab-item-inset').forEach(el => el.classList.remove('active'));
+                }
+                if (element) element.classList.add('active');
+                
+                if (element && element.scrollIntoView) {
+                    element.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+                }
+
+                currentRawProducts = groupedProducts[categoryName] || [];
+                applyPriceSort();
+            }
+
+            window.applyPriceSort = function() {
+                if (!currentRawProducts || currentRawProducts.length === 0) {
+                    if (productList) productList.innerHTML = `<div style="text-align:center; color:var(--text-muted); padding:16px; font-size:0.75rem;">Tidak ada produk di kategori ini.</div>`;
+                    return;
+                }
+                
+                let sortValue = sortFilter ? sortFilter.value : 'asc';
+                let sortedProducts = [...currentRawProducts];
+                
+                sortedProducts.sort((a, b) => {
+                    let priceA = parseFloat(a.price || 0);
+                    let priceB = parseFloat(b.price || 0);
+                    return sortValue === 'asc' ? priceA - priceB : priceB - priceA;
+                });
+
+                renderProdukCards(sortedProducts);
+            };
+
+            function renderProdukCards(produkList) {
+                let html = "";
+                produkList.forEach((prod) => {
+                    let harga = prod.price || 0;
+                    let hargaFormatted = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(harga);
+                    
+                    html += `
+                        <div class="product-card" data-sku="${prod.buyer_sku_code}" data-name="${prod.product_name}" data-price="${harga}">
+                            <div class="product-info">
+                                <div class="product-title">${prod.product_name}</div>
+                                <div class="product-price">${hargaFormatted}</div>
+                            </div>
+                            <div class="product-action"><i class="fa-solid fa-chevron-right"></i></div>
+                        </div>
+                    `;
+                });
+                if (productList) {
+                    productList.innerHTML = html;
+                    
+                    productList.querySelectorAll('.product-card').forEach(card => {
+                        card.addEventListener('click', function () {
+                            const sku = this.getAttribute('data-sku');
+                            const name = this.getAttribute('data-name');
+                            const price = this.getAttribute('data-price');
+                            prosesBeli(sku, name, price);
+                        });
+                    });
+                }
+            }
+
+            function prosesBeli(skuCode, productName, price) {
+                let nomorTujuan = inputPhone.value.replace(/[^0-9]/g, '');
+                if (nomorTujuan.length < 4) { 
+                    alert('Silakan masukkan nomor tujuan yang valid terlebih dahulu.'); 
+                    inputPhone.focus(); 
+                    return; 
+                }
+
+                if (confirm(`Konfirmasi Pembelian:\n${productName}\nNomor: ${nomorTujuan}\nHarga: Rp ${parseInt(price).toLocaleString('id-ID')}`)) {
+                    fetch('/api/digiflazz/checkout', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ buyer_sku_code: skuCode, customer_no: nomorTujuan })
+                    })
+                    .then(res => res.json())
+                    .then(res => {
+                        if (res.status === 'success') {
+                            alert('Transaksi berhasil diproses!');
+                            location.reload();
+                        } else {
+                            alert('Gagal: ' + (res.message || 'Terjadi kesalahan'));
+                        }
+                    })
+                    .catch(() => alert('Terjadi kesalahan koneksi.'));
+                }
+            }
+
+            if (inputPhone) {
+                inputPhone.addEventListener('focus', () => {
+                    document.body.style.paddingBottom = "30vh"; 
+                    setTimeout(() => {
+                        if (cardWrapper) cardWrapper.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }, 300);
+                });
+
+                inputPhone.addEventListener('blur', () => {
+                    document.body.style.paddingBottom = "70px";
+                });
+
+                inputPhone.addEventListener('input', function (e) {
+                    let val = e.target.value;
+                    let formattedVal = formatPhoneNumber(val);
+                    inputPhone.value = formattedVal;
+
+                    let rawDigits = formattedVal.replace(/[^0-9]/g, '');
+                    
+                    if (contactBtn) contactBtn.style.display = rawDigits.length > 0 ? 'block' : 'none';
+
+                    let detectedOp = null;
+                    if (rawDigits.length >= 4) {
+                        let prefix = rawDigits.substring(0, 4);
+                        for (let op in prefixes) {
+                            if (prefixes[op].indexOf(prefix) !== -1) { 
+                                detectedOp = op; 
+                                break; 
+                            }
+                        }
+                    }
+
+                    if (detectedOp) {
+                        if (badge) {
+                            badge.innerText = detectedOp; 
+                            badge.style.display = 'inline-block';
+                        }
+
+                        if (currentOperator !== detectedOp) {
+                            currentOperator = detectedOp; 
+                            loadKategoriByOperator(detectedOp);
+                        }
+                    } else {
+                        if (badge) badge.style.display = 'none';
+                        if (insetTabsWrapper) insetTabsWrapper.style.display = 'none';
+                        if (emptyState) emptyState.style.display = 'none'; 
+                        if (popupTopContainer) popupTopContainer.style.display = 'none';
+                        if (quickDivider) quickDivider.style.display = 'flex';
+                        
+                        currentOperator = null;
+                    }
+                });
+            }
+        });
+    </script>
+</body>
+</html>
+
