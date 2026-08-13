@@ -719,7 +719,8 @@
                 .catch(err => {
                     console.error("Fetch Error:", err);
                     if (emptyState) emptyState.style.display = 'none';
-                    alert("Koneksi ke backend lokal terputus.");
+                    alert("Gagal terhubung ke server VPS: " + err.message);
+
                 });
             }
 
