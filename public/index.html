@@ -898,6 +898,198 @@
         }
 
         inputPhone.addEventListener('input', checkOperator);
+        
+        <script>
+    // Fungsi khusus untuk ambil Saldo Deposit Digiflazz dari VPS
+    function loadSaldoDigiflazz() {
+        fetch('/api/digiflazz/price-list', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({})
+        })
+        .then(() => fetch('/api/saldo')) // Panggil API Cek Saldo
+        .then(res => res.json())
+        .then(res => {
+            if (res.data && res.data.deposit !== undefined) {
+                // Format angka jadi Rupiah (contoh: Rp 2.000.000)
+                const saldoFormatted = new Intl.NumberFormat('id-ID', { 
+                    style: 'currency', 
+                    currency: 'IDR', 
+                    minimumFractionDigits: 0 
+                }).format(res.data.deposit);
+                
+                const balanceEl = document.getElementById('user-balance');
+                if (balanceEl) balanceEl.innerText = saldoFormatted;
+            }
+        })
+        .catch(err => console.error("Gagal sinkron saldo:", err));
+    }
+
+    // Jalankan otomatis saat halaman selesai di-load
+    window.addEventListener('DOMContentLoaded', loadSaldoDigiflazz);
+         <script>
+    // ==========================================
+    // SYSTEM TAB NAVIGATION & CONTENT SWITCHER
+    // ==========================================
+    
+    // 1. Fungsi Pindah Tab
+    function switchTab(element, tabName) {
+        // Highlighting Tombol Navigasi
+        document.querySelectorAll('.bottom-nav .nav-item').forEach(item => {
+            item.classList.remove('active');
+        });
+        element.classList.add('active');
+
+        // Logika Perpindahan Halaman / Konten View
+        switch (tabName) {
+            case 'home':
+                showHomeView();
+                break;
+            case 'history':
+                showHistoryView();
+                break;
+            case 'rekap':
+                showRekapView();
+                break;
+            case 'member':
+                showMemberView();
+                break;
+            case 'akun':
+                showAkunView();
+                break;
+            default:
+                showHomeView();
+        }
+    }
+
+    // 2. Handler Tampilan Masing-Masing Menu
+    function showHomeView() {
+        // Tampilkan elemen utama Home
+        if(document.getElementById('purchase-container')) document.getElementById('purchase-container').style.display = 'block';
+        if(document.getElementById('extra-menu-container')) document.getElementById('extra-menu-container').style.display = 'block';
+        
+        // Sembunyikan kontainer dinamis jika ada
+        const dynamicContainer = document.getElementById('dynamic-view-container');
+        if (dynamicContainer) dynamicContainer.style.display = 'none';
+    }
+
+    function showHistoryView() {
+        hideHomeElements();
+        let container = getOrCreateDynamicContainer();
+        container.innerHTML = `
+            <div style="padding: 16px;">
+                <h3 style="margin-bottom: 12px; color: var(--text-main); font-size: 1rem;"><i class="fa-solid fa-clock-rotate-left"></i> Riwayat Transaksi</h3>
+                <div id="history-list-content">
+                    <div style="text-align:center; padding: 20px; color: var(--text-muted);">
+                        <i class="fa-solid fa-spinner fa-spin fa-2x"></i><br>
+                        <small>Memuat riwayat...</small>
+                    </div>
+                </div>
+            </div>
+        `;
+        fetchHistoryData();
+    }
+
+    function showRekapView() {
+        hideHomeElements();
+        let container = getOrCreateDynamicContainer();
+        container.innerHTML = `
+            <div style="padding: 16px;">
+                <h3 style="margin-bottom: 12px; color: var(--text-main); font-size: 1rem;"><i class="fa-solid fa-chart-line"></i> Rekap Penjualan</h3>
+                <div style="background: var(--bg-color); padding: 16px; border-radius: var(--border-radius-md); box-shadow: 4px 4px 8px var(--shadow-dark), -4px -4px 8px var(--shadow-light);">
+                    <p style="font-size: 0.8rem; color: var(--text-muted);">Total Transaksi Hari Ini:</p>
+                    <h2 style="color: var(--accent-color); margin: 8px 0;">Rp 0</h2>
+                    <small style="color: var(--text-muted);">Fitur analisis rekap harian & bulanan siap diaktifkan.</small>
+                </div>
+            </div>
+        `;
+    }
+
+    function showMemberView() {
+        hideHomeElements();
+        let container = getOrCreateDynamicContainer();
+        container.innerHTML = `
+            <div style="padding: 16px;">
+                <h3 style="margin-bottom: 12px; color: var(--text-main); font-size: 1rem;"><i class="fa-solid fa-users"></i> Keanggotaan Member</h3>
+                <div style="background: var(--bg-color); padding: 16px; border-radius: var(--border-radius-md); box-shadow: 4px 4px 8px var(--shadow-dark), -4px -4px 8px var(--shadow-light); text-align: center;">
+                    <i class="fa-solid fa-id-card fa-3x" style="color: var(--accent-color); margin-bottom: 10px;"></i>
+                    <p style="font-size: 0.85rem; font-weight: 700; color: var(--text-main);">Level Akun: Member Premium</p>
+                    <p style="font-size: 0.75rem; color: var(--text-muted); margin-top: 4px;">Nikmati harga khusus grosir untuk setiap transaksi.</p>
+                </div>
+            </div>
+        `;
+    }
+
+    function showAkunView() {
+        hideHomeElements();
+        let container = getOrCreateDynamicContainer();
+        container.innerHTML = `
+            <div style="padding: 16px;">
+                <h3 style="margin-bottom: 12px; color: var(--text-main); font-size: 1rem;"><i class="fa-solid fa-user"></i> Pengaturan Akun</h3>
+                <div style="background: var(--bg-color); padding: 16px; border-radius: var(--border-radius-md); box-shadow: 4px 4px 8px var(--shadow-dark), -4px -4px 8px var(--shadow-light);">
+                    <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 16px;">
+                        <i class="fa-solid fa-circle-user fa-3x" style="color: var(--accent-color);"></i>
+                        <div>
+                            <strong style="color: var(--text-main); font-size: 0.95rem;">Sahabat Arcell</strong>
+                            <p style="font-size: 0.75rem; color: var(--text-muted);">arcellkomunika@vps.cloud</p>
+                        </div>
+                    </div>
+                    <button onclick="alert('Fitur edit profil')" style="width:100%; padding: 10px; border:none; border-radius: var(--border-radius-pill); background: var(--bg-color); box-shadow: 3px 3px 6px var(--shadow-dark), -3px -3px 6px var(--shadow-light); color: var(--text-main); font-weight:700; font-size: 0.8rem; cursor:pointer;">
+                        <i class="fa-solid fa-gear"></i> Pengaturan Profil
+                    </button>
+                </div>
+            </div>
+        `;
+    }
+
+    // Helper: Sembunyikan elemen home
+    function hideHomeElements() {
+        if(document.getElementById('purchase-container')) document.getElementById('purchase-container').style.display = 'none';
+        if(document.getElementById('extra-menu-container')) document.getElementById('extra-menu-container').style.display = 'none';
+    }
+
+    // Helper: Buat Container Dinamis jika belum ada
+    function getOrCreateDynamicContainer() {
+        let container = document.getElementById('dynamic-view-container');
+        if (!container) {
+            container = document.createElement('div');
+            container.id = 'dynamic-view-container';
+            const appCanvas = document.getElementById('app-canvas') || document.body;
+            appCanvas.appendChild(container);
+        }
+        container.style.display = 'block';
+        return container;
+    }
+
+    // Fetch Data Riwayat dari Backend
+    function fetchHistoryData() {
+        fetch('/api/riwayat')
+            .then(res => res.json())
+            .then(res => {
+                const historyContent = document.getElementById('history-list-content');
+                if (res.data && res.data.length > 0) {
+                    let html = '';
+                    res.data.forEach(item => {
+                        html += `
+                            <div style="background: var(--bg-color); padding: 12px 14px; border-radius: var(--border-radius-sm); margin-bottom: 10px; box-shadow: 3px 3px 6px var(--shadow-dark), -3px -3px 6px var(--shadow-light); display: flex; justify-content: space-between; align-items: center;">
+                                <div>
+                                    <div style="font-size: 0.8rem; font-weight: 700; color: var(--text-main);">${item.sku || 'Topup'}</div>
+                                    <small style="font-size: 0.7rem; color: var(--text-muted);">${item.target} • ${new Date(item.date).toLocaleDateString('id-ID')}</small>
+                                </div>
+                                <div style="font-size: 0.75rem; font-weight: 800; color: ${item.status === 'Sukses' ? 'green' : 'orange'};">${item.status}</div>
+                            </div>
+                        `;
+                    });
+                    historyContent.innerHTML = html;
+                } else {
+                    historyContent.innerHTML = `<div style="text-align:center; padding: 20px; color: var(--text-muted); font-size: 0.8rem;">Belum ada riwayat transaksi.</div>`;
+                }
+            })
+            .catch(() => {
+                const historyContent = document.getElementById('history-list-content');
+                if (historyContent) historyContent.innerHTML = `<div style="text-align:center; padding: 20px; color: var(--text-muted); font-size: 0.8rem;">Belum ada riwayat transaksi tersimpan.</div>`;
+            });
+    }
     </script>
 </body>
 </html>
