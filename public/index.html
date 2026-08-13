@@ -670,11 +670,23 @@
                 const digiBrand = brandMapping[operatorKey] || operatorKey;
                 showLoading(`Mencari paket <b>${operatorKey}</b>...`);
 
-                fetch('/api/digiflazz/price-list', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ brand: digiBrand })
-                })
+                fetch('/api/price-list', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ cmd: 'prepaid' })
+})
+.then(res => {
+    if (!res.ok) throw new Error("Endpoint API tidak ditemukan atau Server Error (" + res.status + ")");
+    return res.json();
+})
+.then(response => {
+    // Kode render produk kamu di sini ...
+})
+.catch(err => {
+    console.error("Fetch Error:", err);
+    alert("Gagal memuat data: " + err.message);
+});
+
                 .then(res => res.json())
                 .then(response => {
                     if (response.status === 'success' && Array.isArray(response.data) && response.data.length > 0) {
