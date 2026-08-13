@@ -853,13 +853,33 @@
                 }
             }
 
-            if (inputPhone) {
-                inputPhone.addEventListener('focus', () => {
-                    document.body.style.paddingBottom = "30vh"; 
-                    setTimeout(() => {
-                        if (cardWrapper) cardWrapper.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                    }, 300);
-                });
+const phoneInput = document.getElementById('phone-input'); // sesuaikan ID input nomor HP kamu
+
+if (phoneInput) {
+    phoneInput.addEventListener('input', function() {
+        const nomer = this.value;
+        if (nomer.length >= 4) {
+            // Panggil API Price List otomatis
+            loadProducts(); 
+        }
+    });
+}
+
+function loadProducts(category = 'pulsa') {
+    fetch('/api/price-list', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ cmd: 'prepaid' })
+    })
+    .then(res => res.json())
+    .then(data => {
+        console.log("Data produk diterima:", data);
+        // Render / Tampilkan produk ke container UI kamu di sini
+    })
+    .catch(err => {
+        console.error("Gagal load produk:", err);
+    });
+}
 
                 inputPhone.addEventListener('blur', () => {
                     document.body.style.paddingBottom = "70px";
