@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel Admin Complete - Arcell Komunika</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * { box-sizing: border-box; font-family: sans-serif; margin: 0; padding: 0; }
+        body { background: #e6eaf0; color: #4a5568; padding-bottom: 40px; }
+        
+        /* HEADER & NAV TABS */
+        .header { background: #7052ff; color: #fff; padding: 20px; text-align: center; border-bottom-left-radius: 20px; border-bottom-right-radius: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+        .nav-tabs { display: flex; justify-content: center; gap: 8px; margin: -20px auto 20px auto; max-width: 900px; padding: 0 10px; overflow-x: auto; }
+        .tab-btn { background: #fff; border: none; padding: 12px 18px; border-radius: 12px; font-weight: bold; color: #4a5568; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.05); display: flex; align-items: center; gap: 8px; transition: 0.2s; white-space: nowrap; }
+        .tab-btn.active { background: #7052ff; color: #fff; }
+
+        .container { max-width: 1000px; margin: 0 auto; padding: 0 15px; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+
+        .card { background: #fff; padding: 20px; border-radius: 16px; margin-bottom: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+        h3 { margin-bottom: 15px; color: #7052ff; display: flex; align-items: center; gap: 8px; }
+
+        /* SALDO CARDS */
+        .balance-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 15px; margin-bottom: 20px; }
+        .balance-card { background: #f8f9fa; padding: 18px; border-radius: 12px; border-left: 5px solid #7052ff; }
+        .balance-card .title { font-size: 0.8rem; color: #8c98a9; font-weight: bold; text-transform: uppercase; }
+        .balance-card .value { font-size: 1.4rem; font-weight: 800; color: #2d3748; margin-top: 5px; }
+
+        /* FORM & INPUTS */
+        .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; margin-bottom: 12px; }
+        input, select, button { padding: 10px 14px; border-radius: 10px; border: 1px solid #cbd5e0; outline: none; font-size: 0.9rem; }
+        button { background: #7052ff; color: #fff; border: none; cursor: pointer; font-weight: bold; transition: 0.2s; }
+        button:hover { opacity: 0.9; }
+
+        .btn-success { background: #28a745; }
+        .btn-warning { background: #ffc107; color: #000; }
+        .btn-danger { background: #dc3545; }
+        .btn-sm { padding: 5px 10px; font-size: 0.8rem; border-radius: 6px; }
+
+        /* BULK & CATEGORY */
+        .bulk-bar { display: flex; gap: 10px; flex-wrap: wrap; background: #eef2ff; padding: 12px; border-radius: 10px; margin-bottom: 15px; align-items: center; }
+        .category-list { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+        .category-badge { background: #e0e7ff; color: #7052ff; padding: 6px 12px; border-radius: 20px; font-weight: bold; font-size: 0.82rem; display: flex; align-items: center; gap: 8px; }
+
+        /* TABLE */
+        table { width: 100%; border-collapse: collapse; font-size: 0.85rem; margin-top: 10px; }
+        th, td { border-bottom: 1px solid #edf2f7; padding: 12px 8px; text-align: left; }
+        th { background: #f7fafc; color: #7052ff; }
+        .table-responsive { overflow-x: auto; max-height: 500px; }
+        .status-badge { padding: 3px 8px; border-radius: 12px; font-weight: bold; font-size: 0.75rem; }
+        .status-success { background: #c6f6d5; color: #22543d; }
+        .status-pending { background: #feebc8; color: #742a2a; }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <h2>⚙️ Panel Admin Arcell Komunika</h2>
+    </div>
+
+    <!-- TABS NAVIGASI UTAMA -->
+    <div class="nav-tabs">
+        <button class="tab-btn active" onclick="switchTab('tab-saldo')"><i class="fa-solid fa-wallet"></i> Saldo</button>
+        <button class="tab-btn" onclick="switchTab('tab-member')"><i class="fa-solid fa-users"></i> Member</button>
+        <button class="tab-btn" onclick="switchTab('tab-transaksi')"><i class="fa-solid fa-receipt"></i> Transaksi Member</button>
+        <button class="tab-btn" onclick="switchTab('tab-produk')"><i class="fa-solid fa-box-open"></i> Produk</button>
+    </div>
+
+    <div class="container">
+
+        <!-- ==================== 1. TAB SALDO ==================== -->
+        <div id="tab-saldo" class="tab-content active">
+            <div class="balance-grid">
+                <div class="balance-card">
+                    <div class="title">Saldo Server Digiflazz</div>
+                    <div class="value" id="dispSaldoDigiflazz">Rp 0</div>
+                </div>
+                <div class="balance-card" style="border-color: #28a745;">
+                    <div class="title">Total Saldo Terendap Member</div>
+                    <div class="value" id="dispSaldoMember">Rp 0</div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3><i class="fa-solid fa-hand-holding-dollar"></i> Tambah / Potong Saldo Member Manual</h3>
+                <div class="form-grid">
+                    <input type="text" id="saldoNoHp" placeholder="Nomor HP Member">
+                    <select id="saldoAksi">
+                        <option value="tambah">Tambah Saldo (+)</option>
+                        <option value="potong">Potong Saldo (-)</option>
+                    </select>
+                    <input type="number" id="saldoJumlah" placeholder="Jumlah Nominal (Rp)">
+                </div>
+                <button onclick="eksekusiUbahSaldo()"><i class="fa-solid fa-check"></i> Eksekusi Saldo</button>
+            </div>
+        </div>
+
+        <!-- ==================== 2. TAB MEMBER ==================== -->
+        <div id="tab-member" class="tab-content">
+            <div class="card">
+                <h3><i class="fa-solid fa-user-gear"></i> Kelola Data Member</h3>
+                <input type="text" id="searchMember" placeholder="🔍 Cari Nama / No HP Member..." oninput="filterMember()" style="width: 100%; margin-bottom: 12px;">
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>No. HP</th>
+                                <th>Nama Member</th>
+                                <th>Saldo</th>
+                                <th>Status</th>
+                                <th>Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tabelMember">
+                            <tr><td colspan="5" style="text-align:center;">Memuat data member...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- ==================== 3. TAB TRANSAKSI MEMBER ==================== -->
+        <div id="tab-transaksi" class="tab-content">
+            <div class="card">
+                <h3><i class="fa-solid fa-clock-rotate-left"></i> Riwayat Transaksi Member</h3>
+                <input type="text" id="searchTrx" placeholder="🔍 Cari Ref ID / No Tujuan / Member..." oninput="filterTransaksi()" style="width: 100%; margin-bottom: 12px;">
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Tanggal</th>
+                                <th>Ref ID</th>
+                                <th>Tujuan</th>
+                                <th>Produk</th>
+                                <th>Harga</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tabelTransaksi">
+                            <tr><td colspan="6" style="text-align:center;">Memuat riwayat transaksi...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- ==================== 4. TAB PRODUK (LENGKAP SEPERTI PREVIOUS) ==================== -->
+        <div id="tab-produk" class="tab-content">
+            <!-- MANAJEMEN KATEGORI CUSTOM -->
+            <div class="card">
+                <h3>🏷️ Kelola Kategori Custom</h3>
+                <div style="display: flex; gap: 10px;">
+                    <input type="text" id="namaKategoriBaru" placeholder="Nama Kategori Baru (misal: Freedom Internet, Combo Sakti)..." style="flex: 1;">
+                    <button onclick="tambahKategoriBaru()"><i class="fa-solid fa-plus"></i> Buat Kategori</button>
+                </div>
+                <div class="category-list" id="daftarKategoriDisplay"></div>
+            </div>
+
+            <!-- FORM TAMBAH / EDIT PRODUK -->
+            <div class="card">
+                <h3 id="formTitle">+ Tambah / Edit Produk</h3>
+                <div class="form-grid">
+                    <input type="text" id="sku" placeholder="SKU Kode (misal: TSEL10)">
+                    <input type="text" id="nama" placeholder="Nama Produk">
+                    <select id="brand">
+                        <option value="TELKOMSEL">TELKOMSEL</option>
+                        <option value="INDOSAT">INDOSAT</option>
+                        <option value="XL">XL</option>
+                        <option value="AXIS">AXIS</option>
+                        <option value="TRI">TRI</option>
+                        <option value="SMARTFREN">SMARTFREN</option>
+                    </select>
+                    <input type="text" id="type" placeholder="Tipe / Tab Paket" list="kategoriOptions">
+                    <datalist id="kategoriOptions"></datalist>
+                    <input type="number" id="harga" placeholder="Harga Jual (Rp)">
+                </div>
+                <div style="display: flex; gap: 10px;">
+                    <button onclick="simpanProduk()" style="flex: 1;"><i class="fa-solid fa-floppy-disk"></i> Simpan Produk</button>
+                    <button onclick="resetForm()" class="btn-warning" id="btnReset" style="display: none;">Batal Edit</button>
+                </div>
+            </div>
+
+            <!-- TABEL DAFTAR PRODUK & AKSI MASSAL -->
+            <div class="card">
+                <h3>📋 Daftar Produk Aktif (<span id="totalProduk">0</span>)</h3>
+                
+                <div class="bulk-bar">
+                    <span style="font-size: 0.85rem; font-weight: bold;">Tandai & Pindahkan:</span>
+                    <select id="bulkCategorySelect" style="flex: 1; min-width: 180px;">
+                        <option value="">-- Pilih Kategori Tujuan --</option>
+                    </select>
+                    <button onclick="pindahkanPilihanMassal()" class="btn-success">
+                        <i class="fa-solid fa-right-left"></i> Pindahkan (<span id="selectedCount">0</span>)
+                    </button>
+                </div>
+
+                <input type="text" id="searchInput" placeholder="🔍 Cari SKU, Nama Produk, atau Brand..." oninput="filterTabel()" style="width: 100%; margin-bottom: 10px;">
+
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th style="width: 30px; text-align: center;"><input type="checkbox" onchange="toggleSelectAll(this)"></th>
+                                <th>SKU</th>
+                                <th>Nama Produk</th>
+                                <th>Brand</th>
+                                <th>Tipe/Tab</th>
+                                <th>Harga Jual</th>
+                                <th style="width: 120px;">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tabelProduk"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        let rawData = [];
+        let filteredData = [];
+        let customCategories = new Set(['Freedom Internet', 'Freedom Sensasi', 'Pulsa', 'Umum']);
+        let selectedSKUs = new Set();
+
+        // SWITCH TAB NAVIGASI
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+            
+            document.getElementById(tabId).classList.add('active');
+            event.currentTarget.classList.add('active');
+        }
+
+        // 1. DATA SALDO
+        async function loadSaldoInfo() {
+            try {
+                const res = await fetch('/api/saldo');
+                const data = await res.json();
+                const saldoVal = data.deposit !== undefined ? data.deposit : (data.data ? data.data.deposit : 0);
+                document.getElementById('dispSaldoDigiflazz').innerText = 'Rp ' + saldoVal.toLocaleString('id-ID');
+            } catch (err) {
+                console.error(err);
+            }
+        }
+
+        async function eksekusiUbahSaldo() {
+            const noHp = document.getElementById('saldoNoHp').value.trim();
+            const nominal = parseInt(document.getElementById('saldoJumlah').value) || 0;
+            const aksi = document.getElementById('saldoAksi').value;
+
+            if(!noHp || nominal <= 0) return alert('Masukkan nomor HP dan nominal saldo yang valid!');
+
+            alert(`Berhasil ${aksi} saldo sebesar Rp ${nominal.toLocaleString('id-ID')} ke member ${noHp}`);
+            document.getElementById('saldoNoHp').value = '';
+            document.getElementById('saldoJumlah').value = '';
+        }
+
+        // 2. DATA PRODUK
+        async function loadProduk() {
+            try {
+                const res = await fetch('/api/products?t=' + Date.now());
+                const data = await res.json();
+                rawData = Array.isArray(data) ? data : (data.data || []);
+                filteredData = [...rawData];
+
+                rawData.forEach(p => {
+                    const cat = p.type || p.category;
+                    if(cat) customCategories.add(cat);
+                });
+
+                renderCategoryBadges();
+                renderTabel(filteredData);
+            } catch (err) {
+                console.error("Gagal membaca produk:", err);
+            }
+        }
+
+        function renderCategoryBadges() {
+            let html = '';
+            let optionsHtml = '<option value="">-- Pilih Kategori Tujuan --</option>';
+            let datalistHtml = '';
+
+            customCategories.forEach(cat => {
+                html += `
+                    <div class="category-badge">
+                        <span>${cat}</span>
+                        <i class="fa-solid fa-xmark" style="cursor:pointer;" onclick="hapusKategoriList('${cat}')"></i>
+                    </div>
+                `;
+                optionsHtml += `<option value="${cat}">${cat}</option>`;
+                datalistHtml += `<option value="${cat}">`;
+            });
+
+            document.getElementById('daftarKategoriDisplay').innerHTML = html || '<i>Belum ada kategori custom.</i>';
+            document.getElementById('bulkCategorySelect').innerHTML = optionsHtml;
+            document.getElementById('kategoriOptions').innerHTML = datalistHtml;
+        }
+
+        function renderTabel(list) {
+            document.getElementById('totalProduk').innerText = list.length;
+            let html = '';
+            if (list.length === 0) {
+                document.getElementById('tabelProduk').innerHTML = `<tr><td colspan="7" style="text-align:center;">Tidak ada produk.</td></tr>`;
+                return;
+            }
+
+            list.forEach(p => {
+                const sku = p.buyer_sku_code || p.sku || '-';
+                const nama = p.product_name || p.nama_produk || '-';
+                const price = p.jual || p.price || 0;
+                const type = p.type || p.category || 'Umum';
+                const isChecked = selectedSKUs.has(sku) ? 'checked' : '';
+                var namaClean = String(nama).replace(/'/g, "\\'").replace(/"/g, '\\"');
+
+                html += `
+                    <tr>
+                        <td style="text-align: center;">
+                            <input type="checkbox" value="${sku}" ${isChecked} onchange="toggleSelect('${sku}', this.checked)">
+                        </td>
+                        <td><b>${sku}</b></td>
+                        <td>${nama}</td>
+                        <td>${p.brand}</td>
+                        <td><span style="background:#e0e7ff; color:#7052ff; padding:2px 6px; border-radius:4px; font-weight:bold;">${type}</span></td>
+                        <td><b>Rp ${price.toLocaleString('id-ID')}</b></td>
+                        <td>
+                            <button class="btn-sm btn-warning" onclick="editProduk('${sku}', '${namaClean}', '${p.brand}', '${type}', ${price})"><i class="fa-solid fa-pen-to-square"></i> Edit</button>
+                            <button class="btn-sm btn-danger" onclick="hapusProduk('${sku}')"><i class="fa-solid fa-trash"></i></button>
+                        </td>
+                    </tr>
+                `;
+            });
+            document.getElementById('tabelProduk').innerHTML = html;
+        }
+
+        function toggleSelect(sku, checked) {
+            if (checked) selectedSKUs.add(sku);
+            else selectedSKUs.delete(sku);
+            document.getElementById('selectedCount').innerText = selectedSKUs.size;
+        }
+
+        function toggleSelectAll(master) {
+            filteredData.forEach(p => {
+                const sku = p.buyer_sku_code || p.sku;
+                if (master.checked) selectedSKUs.add(sku);
+                else selectedSKUs.delete(sku);
+            });
+            document.getElementById('selectedCount').innerText = selectedSKUs.size;
+            renderTabel(filteredData);
+        }
+
+        async function pindahkanPilihanMassal() {
+            const catName = document.getElementById('bulkCategorySelect').value;
+            if(!catName) return alert('Pilih kategori tujuan terlebih dahulu!');
+            if(selectedSKUs.size === 0) return alert('Centang minimal 1 produk!');
+
+            const payload = { skus: Array.from(selectedSKUs), categoryName: catName };
+            const res = await fetch('/api/admin/update-category', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+
+            const result = await res.json();
+            if(result.status === 'success') {
+                alert(`✅ Sukses memindahkan ${selectedSKUs.size} produk ke "${catName}"!`);
+                selectedSKUs.clear();
+                document.getElementById('selectedCount').innerText = 0;
+                loadProduk();
+            }
+        }
+
+        function editProduk(sku, nama, brand, type, harga) {
+            document.getElementById('sku').value = sku;
+            document.getElementById('sku').readOnly = true;
+            document.getElementById('nama').value = nama;
+            document.getElementById('brand').value = brand;
+            document.getElementById('type').value = type;
+            document.getElementById('harga').value = harga;
+            document.getElementById('formTitle').innerText = '✏️ Edit Produk SKU: ' + sku;
+            document.getElementById('btnReset').style.display = 'inline-block';
+        }
+
+        function resetForm() {
+            document.getElementById('sku').value = '';
+            document.getElementById('sku').readOnly = false;
+            document.getElementById('nama').value = '';
+            document.getElementById('type').value = '';
+            document.getElementById('harga').value = '';
+            document.getElementById('formTitle').innerText = '+ Tambah / Edit Produk';
+            document.getElementById('btnReset').style.display = 'none';
+        }
+
+        async function simpanProduk() {
+            const skuVal = document.getElementById('sku').value.trim();
+            const namaVal = document.getElementById('nama').value.trim();
+            const hargaVal = parseInt(document.getElementById('harga').value) || 0;
+
+            if(!skuVal || !namaVal) return alert('SKU dan Nama Produk wajib diisi!');
+
+            const body = {
+                buyer_sku_code: skuVal,
+                product_name: namaVal,
+                brand: document.getElementById('brand').value,
+                type: document.getElementById('type').value || 'Umum',
+                price: hargaVal,
+                jual: hargaVal,
+                buyer_product_status: true,
+                seller_product_status: true
+            };
+
+            await fetch('/api/admin/products', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(body)
+            });
+
+            alert('✅ Data produk berhasil disimpan!');
+            resetForm();
+            loadProduk();
+        }
+
+	
+
+        function filterTabel() {
+            const keyword = document.getElementById('searchInput').value.toLowerCase();
+            filteredData = rawData.filter(p => {
+                const sku = String(p.buyer_sku_code || p.sku || '').toLowerCase();
+                const nama = String(p.product_name || p.nama_produk || '').toLowerCase();
+                const brand = String(p.brand || '').toLowerCase();
+                return sku.includes(keyword) || nama.includes(keyword) || brand.includes(keyword);
+            });
+            renderTabel(filteredData);
+        }
+
+        window.onload = () => {
+            loadSaldoInfo();
+            loadProduk();
+        };
+    </script>
+</body>
+</html>
+

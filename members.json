@@ -1,1 +1,9 @@
-[]
+[
+  {
+    "member_id": "ARC9921",
+    "name": "Arcell",
+    "phone": "087875966012",
+    "balance": 1000000000,
+    "status": "aktif"
+  }
+]

@@ -1,52 +1,659 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-    <meta charset="UTF-8">
+    <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Rekap Penjualan - Arcell Komunika</title>
+    <title>Rekap Transaksi Ringkas - Arcell Komunika</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        :root { --bg-color: #e0e5ec; --shadow-light: #ffffff; --shadow-dark: #a3b1c6; --accent-color: #00a8ff; --text-main: #4d547d; --text-muted: #8893b0; --bottom-nav-height: 65px; }
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, sans-serif; -webkit-tap-highlight-color: transparent; }
-        body { background: var(--bg-color); color: var(--text-main); padding-bottom: calc(var(--bottom-nav-height) + 20px); display: flex; justify-content: center; }
-        .app-container { width: 100%; max-width: 480px; min-height: 100vh; background: var(--bg-color); padding: 16px; position: relative; }
-        
-        .page-header { font-size: 1.1rem; font-weight: 800; margin-bottom: 20px; display: flex; align-items: center; gap: 10px; }
-        .page-header i { color: var(--accent-color); }
+        :root {
+            --bg-color: #e6eef8;
+            --card-bg: #e6eef8;
+            --shadow-light: #ffffff;
+            --shadow-dark: #b8c6d9;
+            
+            --accent-blue: #7052ff;
+            --accent-blue-light: #e0ecff;
+            --accent-green: #27ae60;
+            --accent-red: #e74c3c;
+            --accent-orange: #f39c12;
+            --accent-purple: #8e44ad;
+            --accent-untung: #00A8FF;
+            
+            --text-main: #3a4b68;
+            --text-muted: #8395a7;
+            --border-color: rgba(255, 255, 255, 0.5);
+            
+            --neu-shadow-raised: 6px 6px 12px var(--shadow-dark), -6px -6px 12px var(--shadow-light);
+            --neu-shadow-raised-sm: 3px 3px 6px var(--shadow-dark), -3px -3px 6px var(--shadow-light);
+            --neu-shadow-inset: inset 3px 3px 6px var(--shadow-dark), inset -3px -3px 6px var(--shadow-light);
+            --neu-shadow-inset-sm: inset 2px 2px 4px var(--shadow-dark), inset -2px -2px 4px var(--shadow-light);
+            
+            --neu-radius: 16px;
+            --neu-radius-sm: 10px;
+            --neu-radius-pill: 30px;
+        }
 
-        .rekap-card { background: var(--bg-color); padding: 18px; border-radius: 16px; box-shadow: 6px 6px 12px var(--shadow-dark), -6px -6px 12px var(--shadow-light); margin-bottom: 16px; }
-        .rekap-title { font-size: 0.75rem; color: var(--text-muted); font-weight: 700; text-transform: uppercase; }
-        .rekap-value { font-size: 1.5rem; font-weight: 800; color: var(--accent-color); margin-top: 4px; }
+        * { 
+            box-sizing: border-box; 
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body { 
+            background-color: var(--bg-color); 
+            padding: 12px; 
+            padding-bottom: 80px;
+            color: var(--text-main); 
+            min-height: 100vh;
+        }
+
+        /* Sticky Summary Box */
+        .summary-box {
+            background: var(--card-bg);
+            border-radius: var(--neu-radius);
+            padding: 14px 16px;
+            margin-bottom: 12px;
+            position: sticky;
+            top: 8px;
+            z-index: 100;
+            box-shadow: var(--neu-shadow-raised);
+            border: 1px solid var(--border-color);
+        }
+        .summary-header { 
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 6px;
+        }
+        .summary-title { 
+            font-size: 10px; 
+            text-transform: uppercase; 
+            color: var(--text-muted);
+            letter-spacing: 0.8px; 
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .summary-title i { color: var(--accent-blue); }
+        .summary-value { 
+            font-size: 20px; 
+            font-weight: 800; 
+            color: var(--text-main); 
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 8px;
+        }
+        .badge-qty {
+            font-size: 10px;
+            background: var(--card-bg);
+            color: var(--accent-blue);
+            padding: 4px 10px;
+            border-radius: var(--neu-radius-pill);
+            box-shadow: var(--neu-shadow-inset-sm);
+            font-weight: 800;
+        }
+        .summary-grid { 
+            display: flex; 
+            gap: 10px; 
+            border-top: 1px solid var(--border-color); 
+            padding-top: 8px; 
+        }
+        .summary-item { flex: 1; }
+        .summary-item-label { font-size: 9px; color: var(--text-muted); font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; }
+        .summary-item-value { font-size: 12px; font-weight: 800; margin-top: 2px; color: var(--text-main); }
+
+        /* Controls */
+        .controls-wrapper {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-bottom: 12px;
+        }
         
-        .bottom-nav { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 480px; height: var(--bottom-nav-height); background: var(--bg-color); display: flex; justify-content: space-around; align-items: center; box-shadow: 0 -6px 12px var(--shadow-dark), 0 -2px 6px var(--shadow-light); z-index: 900; }
-        .nav-item { display: flex; flex-direction: column; align-items: center; justify-content: center; text-decoration: none; color: var(--text-muted); width: 18%; height: 48px; border-radius: 10px; }
-        .nav-item i { font-size: 1.15rem; margin-bottom: 3px; }
-        .nav-item span { font-size: 0.65rem; font-weight: 700; }
-        .nav-item.active { color: var(--accent-color); box-shadow: inset 3px 3px 6px var(--shadow-dark), inset -3px -3px 6px var(--shadow-light); }
+        input.search-input, select.select-filter {
+            width: 100%;
+            padding: 10px 14px;
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--text-main); 
+            background: var(--card-bg);
+            border: none;
+            outline: none;
+            border-radius: var(--neu-radius-pill);
+            box-shadow: var(--neu-shadow-inset);
+        }
+
+        /* Group & Card Neumorphic */
+        .date-group { margin-bottom: 14px; }
+        .date-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 2px 6px 6px 6px;
+            font-size: 11px;
+            font-weight: 800;
+            color: var(--text-muted);
+        }
+        
+        .card {
+            background: var(--card-bg);
+            border-radius: var(--neu-radius-sm);
+            padding: 10px 12px;
+            margin-bottom: 8px;
+            box-shadow: var(--neu-shadow-raised-sm);
+            border: 1px solid var(--border-color);
+        }
+        .card.hidden { display: none; }
+        
+        .header {
+            display: flex;
+            justify-content: space-between;
+            font-size: 9px;
+            color: var(--text-muted);
+            margin-bottom: 4px;
+            font-weight: 700;
+        }
+        .produk-title { 
+            font-weight: 800; 
+            font-size: 12px; 
+            color: var(--text-main); 
+            margin-bottom: 8px; 
+            line-height: 1.2; 
+        }
+        
+        .price-row {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .inset-box {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            background: var(--card-bg);
+            padding: 4px 8px;
+            border-radius: var(--neu-radius-pill);
+            box-shadow: var(--neu-shadow-inset-sm);
+            gap: 4px;
+        }
+
+        .price-label { 
+            color: var(--text-muted); 
+            font-size: 8px; 
+            font-weight: 800; 
+            text-transform: uppercase; 
+            white-space: nowrap;
+        }
+        
+        .input-harga {
+            width: 100%;
+            padding: 2px 0;
+            font-size: 11px;
+            font-weight: 800;
+            border: none;
+            outline: none;
+            background: transparent;
+            box-shadow: none;
+            text-align: right;
+        }
+        .input-modal { color: var(--accent-red); }
+        .input-jual { color: var(--accent-green); }
+
+        .laba-col {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            justify-content: center;
+            padding-left: 4px;
+            min-width: 65px;
+        }
+        .laba-title { font-weight: 700; color: var(--text-muted); font-size: 8px; text-transform: uppercase; }
+        .laba-value { font-weight: 800; font-size: 11px; color: var(--accent-untung); }
+        
+        .footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 8px;
+            padding-top: 4px;
+            border-top: 1px dashed var(--shadow-dark);
+        }
+        .status {
+            font-weight: 800;
+            font-size: 9px;
+            text-transform: uppercase;
+            padding: 2px 8px;
+            border-radius: 10px;
+        }
+        .status.sukses { color: var(--accent-green); }
+        .status.gagal { color: var(--accent-red); }
+        .status.pending { color: var(--accent-orange); }
+
+        .info-text { text-align: center; color: var(--text-muted); margin-top: 40px; font-size: 11px; font-weight: 700; }
+        .loader {
+            border: 3px solid var(--shadow-dark);
+            border-top: 3px solid var(--accent-blue);
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            animation: spin 1s linear infinite;
+            margin: 10px auto;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        #toast {
+            visibility: hidden;
+            min-width: 160px;
+            background-color: var(--card-bg);
+            color: var(--text-main);
+            text-align: center;
+            border-radius: var(--neu-radius-pill);
+            padding: 8px 14px;
+            position: fixed;
+            z-index: 999;
+            left: 50%;
+            bottom: 20px;
+            transform: translateX(-50%);
+            font-size: 10px;
+            font-weight: 800;
+            opacity: 0;
+            box-shadow: var(--neu-shadow-raised);
+            transition: opacity 0.3s, bottom 0.3s;
+        }
+        #toast.show { visibility: visible; opacity: 1; bottom: 20px; }
     </style>
 </head>
 <body>
-    <div class="app-container">
-        <div class="page-header"><i class="fa-solid fa-chart-line"></i> Rekap Penjualan</div>
 
-        <div class="rekap-card">
-            <div class="rekap-title">Total Omset Bulan Ini</div>
-            <div class="rekap-value">Rp 0</div>
-        </div>
-
-        <div class="rekap-card">
-            <div class="rekap-title">Total Keuntungan (Margin)</div>
-            <div class="rekap-value" style="color: #2ed573;">Rp 0</div>
-        </div>
-
-        <nav class="bottom-nav">
-            <a href="index.html" class="nav-item"><i class="fa-solid fa-house"></i><span>Home</span></a>
-            <a href="history.html" class="nav-item"><i class="fa-solid fa-clock-rotate-left"></i><span>History</span></a>
-            <a href="rekap.html" class="nav-item active"><i class="fa-solid fa-chart-line"></i><span>Rekap</span></a>
-            <a href="member.html" class="nav-item"><i class="fa-solid fa-users"></i><span>Member</span></a>
-            <a href="akun.html" class="nav-item"><i class="fa-solid fa-user"></i><span>Akun</span></a>
-        </nav>
+<div id="app">
+    <div class="info-text">
+        <div class="loader"></div>
+        <b>Memuat Transaksi Server VPS...</b>
     </div>
+</div>
+
+<div id="toast">✅ Aksi Berhasil</div>
+
+<script>
+    let allTransactions = []; 
+    let debounceTimer;
+
+    const cleanNumber = (val) => {
+        if (!val) return 0;
+        if (typeof val === 'number') return val;
+        return parseInt(String(val).replace(/[^0-9]/g, '')) || 0;
+    };
+
+    const formatRp = (angka) => `Rp ${cleanNumber(angka).toLocaleString("id-ID")}`;
+
+    const extractDate = (dateStr) => {
+        if (!dateStr) return getTodayDateStr();
+        // Format Tgl "22/8/2026, 00.15.02" / ISO String
+        if (dateStr.includes('/')) {
+            const parts = dateStr.split(',')[0].split('/');
+            if (parts.length === 3) {
+                const day = parts[0].padStart(2, '0');
+                const month = parts[1].padStart(2, '0');
+                const year = parts[2];
+                return `${year}-${month}-${day}`;
+            }
+        }
+        return dateStr.split("T")[0] || dateStr.split(" ")[0];
+    };
+
+    const getTodayDateStr = () => {
+        const d = new Date();
+        const year = d.getFullYear();
+        const month = String(d.getMonth() + 1).padStart(2, '0');
+        const day = String(d.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+    };
+
+    const handleInputFocus = (e) => {
+        const val = cleanNumber(e.target.value);
+        e.target.value = val === 0 ? '' : val;
+    };
+
+    const handleInputBlur = (e) => {
+        const val = cleanNumber(e.target.value);
+        e.target.value = val === 0 ? '' : val.toLocaleString("id-ID");
+    };
+
+    const getStoredPrice = (noPem, namaBarang, tipe, defaultVal = 0) => {
+        const savedTx = localStorage.getItem(`tx_${tipe}_${noPem}`);
+        if (savedTx && cleanNumber(savedTx) > 0) return cleanNumber(savedTx);
+        
+        const savedMaster = localStorage.getItem(`master_${tipe}_${namaBarang}`);
+        if (savedMaster && cleanNumber(savedMaster) > 0) return cleanNumber(savedMaster);
+        
+        return defaultVal;
+    };
+
+    const getWeekKey = (dateStr) => {
+        const parts = dateStr.split('-');
+        if (parts.length < 3) return "Lainnya";
+        const d = new Date(parts[0], parts[1] - 1, parts[2]);
+        if (isNaN(d)) return dateStr;
+        
+        const day = d.getDay();
+        const diff = d.getDate() - day + (day === 0 ? -6 : 1);
+        const monday = new Date(d.setDate(diff));
+        
+        const mDay = String(monday.getDate()).padStart(2, '0');
+        const mMonth = String(monday.getMonth() + 1).padStart(2, '0');
+        return `Mg (${mDay}/${mMonth})`;
+    };
+
+    const getMonthKey = (dateStr) => {
+        const parts = dateStr.split('-');
+        if (parts.length < 2) return "Lainnya";
+        const months = ["Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul", "Agt", "Sep", "Okt", "Nov", "Des"];
+        const mIdx = parseInt(parts[1], 10) - 1;
+        return `${months[mIdx] || parts[1]} ${parts[0]}`;
+    };
+
+    const processPriceUpdate = (noPem, namaBarang) => {
+        const inpModal = document.getElementById(`modal-inp-${noPem}`);
+        const inpJual = document.getElementById(`jual-inp-${noPem}`);
+
+        if(!inpModal || !inpJual) return;
+
+        const modalVal = cleanNumber(inpModal.value);
+        const jualVal = cleanNumber(inpJual.value);
+
+        localStorage.setItem(`tx_modal_${noPem}`, modalVal);
+        localStorage.setItem(`tx_jual_${noPem}`, jualVal);
+
+        if (modalVal > 0) localStorage.setItem(`master_modal_${namaBarang}`, modalVal);
+        if (jualVal > 0) localStorage.setItem(`master_jual_${namaBarang}`, jualVal);
+
+        document.querySelectorAll(".card-tx").forEach(card => {
+            const cNama = card.getAttribute("data-nama");
+            const cNoPem = card.getAttribute("data-nopem");
+
+            if (cNama === namaBarang) {
+                const cInpM = document.getElementById(`modal-inp-${cNoPem}`);
+                const cInpJ = document.getElementById(`jual-inp-${cNoPem}`);
+
+                if (cInpM && cNoPem !== noPem && modalVal > 0 && document.activeElement !== cInpM) {
+                    cInpM.value = modalVal.toLocaleString("id-ID");
+                    localStorage.setItem(`tx_modal_${cNoPem}`, modalVal);
+                }
+                if (cInpJ && cNoPem !== noPem && jualVal > 0 && document.activeElement !== cInpJ) {
+                    cInpJ.value = jualVal.toLocaleString("id-ID");
+                    localStorage.setItem(`tx_jual_${cNoPem}`, jualVal);
+                }
+
+                const elM = document.getElementById(`modal-inp-${cNoPem}`);
+                const elJ = document.getElementById(`jual-inp-${cNoPem}`);
+                const m = elM ? cleanNumber(elM.value) : 0;
+                const j = elJ ? cleanNumber(elJ.value) : 0;
+                
+                const labaEl = document.getElementById(`laba-${cNoPem}`);
+                
+                if (labaEl) {
+                    const laba = j - m;
+                    labaEl.innerText = formatRp(laba);
+                    labaEl.style.color = laba >= 0 ? "var(--accent-untung)" : "var(--accent-red)";
+                }
+            }
+        });
+
+        calculateTodaySummary();
+    };
+
+    const updatePrices = (noPem, namaBarang) => {
+        clearTimeout(debounceTimer);
+        debounceTimer = setTimeout(() => {
+            processPriceUpdate(noPem, namaBarang);
+        }, 400); 
+    };
+
+    const filterUI = () => {
+        const selectEl = document.getElementById("filter-tgl-select");
+        const searchEl = document.getElementById("search-input");
+        if(!selectEl || !searchEl) return;
+
+        const filterVal = selectEl.value;
+        const keyword = searchEl.value.toLowerCase();
+
+        document.querySelectorAll(".date-group").forEach(group => {
+            const groupTgl = group.getAttribute("data-tgl");
+            let isMatchedPeriod = false;
+
+            if (filterVal === "ALL") {
+                isMatchedPeriod = true;
+            } else if (filterVal.startsWith("WEEK_")) {
+                const weekTarget = filterVal.replace("WEEK_", "");
+                isMatchedPeriod = (getWeekKey(groupTgl) === weekTarget);
+            } else if (filterVal.startsWith("MONTH_")) {
+                const monthTarget = filterVal.replace("MONTH_", "");
+                isMatchedPeriod = (getMonthKey(groupTgl) === monthTarget);
+            } else {
+                isMatchedPeriod = (groupTgl === filterVal);
+            }
+
+            let hasVisibleCardInGroup = false;
+
+            if (isMatchedPeriod) {
+                const cards = group.querySelectorAll(".card-tx");
+                cards.forEach(card => {
+                    const textContent = card.innerText.toLowerCase();
+                    const matchesKeyword = textContent.includes(keyword);
+
+                    if (matchesKeyword) {
+                        card.classList.remove("hidden");
+                        hasVisibleCardInGroup = true;
+                    } else {
+                        card.classList.add("hidden");
+                    }
+                });
+                group.style.display = hasVisibleCardInGroup ? "block" : "none";
+            } else {
+                group.style.display = "none";
+            }
+        });
+    };
+
+    // KALKULASI RINGKASAN (HANYA MENGHITUNG TRANSAKSI SUKSES)
+    const calculateTodaySummary = () => {
+        let todayModal = 0;
+        let todayJual = 0;
+        let todayItem = 0;
+        const todayStr = getTodayDateStr();
+
+        document.querySelectorAll(`.card-tx[data-tgl="${todayStr}"]`).forEach(card => {
+            const status = card.getAttribute("data-status");
+            
+            // FILTER: Hanya transaksi SUKSES / LUNAS / SELESAI yang dihitung!
+            if (['sukses', 'lunas', 'selesai'].includes(status)) {
+                const noPem = card.getAttribute("data-nopem");
+                const nama = card.getAttribute("data-nama");
+                
+                const inpM = document.getElementById(`modal-inp-${noPem}`);
+                const inpJ = document.getElementById(`jual-inp-${noPem}`);
+                
+                const mVal = inpM ? cleanNumber(inpM.value) : getStoredPrice(noPem, nama, 'modal');
+                const jVal = inpJ ? cleanNumber(inpJ.value) : getStoredPrice(noPem, nama, 'jual');
+
+                todayModal += mVal;
+                todayJual += jVal;
+                todayItem++;
+            }
+        });
+
+        const todayLaba = todayJual - todayModal;
+        const labaEl = document.getElementById("dash-laba-hari-ini");
+        const modalEl = document.getElementById("dash-modal-hari-ini");
+        const jualEl = document.getElementById("dash-jual-hari-ini");
+        const qtyEl = document.getElementById("dash-qty-hari-ini");
+
+        if(labaEl) {
+            labaEl.innerText = formatRp(todayLaba);
+            labaEl.style.color = todayLaba >= 0 ? "var(--accent-untung)" : "var(--accent-red)";
+        }
+        if(modalEl) modalEl.innerText = formatRp(todayModal);
+        if(jualEl) jualEl.innerText = formatRp(todayJual);
+        if(qtyEl) qtyEl.innerText = `${todayItem} Pcs`;
+    };
+
+    // BACA TRANSAKSI DARI SERVER VPS (/api/history)
+    const loadData = async () => {
+        try {
+            const res = await fetch('/api/history?t=' + Date.now());
+            const result = await res.json();
+            
+            allTransactions = result.data || result || [];
+            
+            // FILTER UTAMA: Hanya tampilkan transaksi yang SUKSES
+            const suksesTransactions = allTransactions.filter(item => {
+                const st = (item.status || '').toLowerCase();
+                return st === 'sukses' || st === 'lunas' || st === 'selesai';
+            });
+
+            renderUI(suksesTransactions);
+        } catch (err) {
+            console.error("Gagal memuat transaksi:", err);
+            document.getElementById("app").innerHTML = `<div class="info-text">Gagal terhubung ke server VPS.</div>`;
+        }
+    };
+
+    const renderUI = (list) => {
+        const container = document.getElementById("app");
+
+        if (!list || list.length === 0) {
+            container.innerHTML = '<div class="info-text">Belum ada riwayat transaksi sukses.</div>';
+            return;
+        }
+
+        const groups = list.reduce((acc, item) => {
+            const date = extractDate(item.waktu || item.date || item.tanggal);
+            acc[date] = acc[date] || [];
+            acc[date].push(item);
+            return acc;
+        }, {});
+
+        const dates = Object.keys(groups);
+        const weeksSet = new Set();
+        const monthsSet = new Set();
+        dates.forEach(d => {
+            weeksSet.add(getWeekKey(d));
+            monthsSet.add(getMonthKey(d));
+        });
+
+        const weeks = Array.from(weeksSet);
+        const months = Array.from(monthsSet);
+
+        let html = `
+            <div class="summary-box">
+                <div class="summary-header">
+                    <span class="summary-title"><i class="fa-solid fa-wallet"></i> ESTIMASI UNTUNG HARI INI</span>
+                </div>
+                <div class="summary-value">
+                    <span id="dash-laba-hari-ini" style="color:var(--accent-untung);">Rp 0</span>
+                    <span class="badge-qty" id="dash-qty-hari-ini">0 Pcs</span>
+                </div>
+                <div class="summary-grid">
+                    <div class="summary-item">
+                        <div class="summary-item-label">Total Omset Hari Ini</div>
+                        <div class="summary-item-value" id="dash-jual-hari-ini">Rp 0</div>
+                    </div>
+                    <div class="summary-item">
+                        <div class="summary-item-label">Total Modal Hari Ini</div>
+                        <div class="summary-item-value" id="dash-modal-hari-ini">Rp 0</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="controls-wrapper">
+                <input type="text" id="search-input" class="search-input" placeholder="🔍 Cari barang / Ref ID..." onkeyup="filterUI()">
+                
+                <select id="filter-tgl-select" class="select-filter" onchange="filterUI()">
+                    <option value="ALL" selected>🏆 Semua Transaksi Sukses (${list.length})</option>
+                    <optgroup label="📅 Harian">
+                        ${dates.map((tgl) => `<option value="${tgl}">${tgl}</option>`).join('')}
+                    </optgroup>
+                    <optgroup label="🗓️ Mingguan">
+                        ${weeks.map(w => `<option value="WEEK_${w}">${w}</option>`).join('')}
+                    </optgroup>
+                    <optgroup label="📊 Bulanan">
+                        ${months.map(m => `<option value="MONTH_${m}">${m}</option>`).join('')}
+                    </optgroup>
+                </select>
+            </div>
+        `;
+
+        dates.forEach(tgl => {
+            html += `
+                <div class="date-group" data-tgl="${tgl}">
+                    <div class="date-header">
+                        <span>📅 ${tgl}</span>
+                        <span>${groups[tgl].length} Transaksi</span>
+                    </div>
+                    ${groups[tgl].map(item => {
+                        const noPem = item.ref_id || 'TRX-' + Date.now();
+                        const nama = item.produk || item.product_name || "Produk Tanpa Nama";
+                        const jam = item.waktu ? item.waktu.split(',')[1] || item.waktu : '-';
+                        const namaSafe = nama.replace(/'/g, "\\'");
+                        const statusClean = (item.status || 'sukses').toLowerCase();
+                        
+                        // Default Modal
+                        const defaultJual = item.harga || item.price || 0;
+                        const defaultModal = defaultJual > 1000 ? defaultJual - 1000 : defaultJual;
+
+                        const hModal = getStoredPrice(noPem, nama, 'modal', defaultModal);
+                        const hJual = getStoredPrice(noPem, nama, 'jual', defaultJual);
+                        const laba = hJual - hModal;
+
+                        return `
+                        <div class="card card-tx" data-nopem="${noPem}" data-nama="${nama}" data-tgl="${tgl}" data-status="${statusClean}">
+                            <div class="header">
+                                <span>Ref: <b>${noPem}</b></span>
+                                <span>⏱️ ${jam}</span>
+                            </div>
+                            <div class="produk-title">${nama} (${item.no_tujuan || item.customer_no || '-'})</div>
+                            
+                            <div class="price-row">
+                                <div class="inset-box">
+                                    <span class="price-label">Modal</span>
+                                    <input type="text" inputmode="numeric" id="modal-inp-${noPem}" class="input-harga input-modal" placeholder="0" value="${hModal ? hModal.toLocaleString('id-ID') : ''}" onfocus="handleInputFocus(event)" onblur="handleInputBlur(event)" oninput="updatePrices('${noPem}', '${namaSafe}')">
+                                </div>
+                                <div class="inset-box">
+                                    <span class="price-label">Jual</span>
+                                    <input type="text" inputmode="numeric" id="jual-inp-${noPem}" class="input-harga input-jual" placeholder="0" value="${hJual ? hJual.toLocaleString('id-ID') : ''}" onfocus="handleInputFocus(event)" onblur="handleInputBlur(event)" oninput="updatePrices('${noPem}', '${namaSafe}')">
+                                </div>
+                                <div class="laba-col">
+                                    <span class="laba-title">Untung</span>
+                                    <span class="laba-value" id="laba-${noPem}" style="color:${laba>=0?'var(--accent-untung)':'var(--accent-red)'}">${formatRp(laba)}</span>
+                                </div>
+                            </div>
+
+                            <div class="footer">
+                                <span class="status ${statusClean}">${statusClean}</span>
+                                <span style="font-size: 9px; color: var(--text-muted); font-weight: 700;">Member: ${item.user_hp || item.member_name || 'Umum'}</span>
+                            </div>
+                        </div>`;
+                    }).join('')}
+                </div>`;
+        });
+
+        container.innerHTML = html;
+        
+        setTimeout(() => {
+            calculateTodaySummary();
+            filterUI();
+        }, 50);
+    };
+
+    document.addEventListener("DOMContentLoaded", loadData);
+</script>
+
 </body>
 </html>
 

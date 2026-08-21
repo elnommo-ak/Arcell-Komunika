@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Top Up Saldo - Arcell Komunika</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            /* Background Mesh Gradient Soft */
+            background: radial-gradient(circle at 10% 20%, rgba(0, 123, 255, 0.15), transparent 40%),
+                        radial-gradient(circle at 90% 80%, rgba(111, 66, 193, 0.15), transparent 40%),
+                        #eef2f7;
+            margin: 0;
+            padding: 20px 15px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        /* Glassmorphism Card Container */
+        .glass-card {
+            background: rgba(255, 255, 255, 0.55);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.8);
+            width: 100%;
+            max-width: 440px;
+            padding: 28px 24px;
+            border-radius: 24px;
+            box-shadow: 0 16px 40px rgba(0, 0, 0, 0.06),
+                        inset 0 1px 0 rgba(255, 255, 255, 0.9);
+        }
+
+        .header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+
+        .btn-back {
+            background: rgba(255, 255, 255, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.8);
+            width: 38px;
+            height: 38px;
+            border-radius: 12px;
+            font-size: 18px;
+            cursor: pointer;
+            margin-right: 14px;
+            color: #2d3748;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+
+        .btn-back:hover {
+            background: rgba(255, 255, 255, 0.9);
+            transform: translateY(-1px);
+        }
+
+        .title {
+            font-size: 19px;
+            font-weight: 700;
+            color: #1a202c;
+            margin: 0;
+            letter-spacing: -0.3px;
+        }
+
+        .form-group {
+            margin-bottom: 18px;
+        }
+
+        label {
+            display: block;
+            font-size: 13px;
+            font-weight: 600;
+            color: #4a5568;
+            margin-bottom: 8px;
+        }
+
+        /* Glass Inputs & Selects */
+        input, select {
+            width: 100%;
+            padding: 13px 16px;
+            background: rgba(255, 255, 255, 0.7);
+            border: 1px solid rgba(203, 213, 225, 0.7);
+            border-radius: 14px;
+            font-size: 14px;
+            color: #1a202c;
+            outline: none;
+            backdrop-filter: blur(4px);
+            transition: all 0.25s ease;
+        }
+
+        input:focus, select:focus {
+            background: rgba(255, 255, 255, 0.95);
+            border-color: #3182ce;
+            box-shadow: 0 0 0 4px rgba(49, 130, 206, 0.15);
+        }
+
+        /* Glass Gradient Button */
+        .btn-submit {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #3182ce 0%, #2b6cb0 100%);
+            color: #ffffff;
+            border: none;
+            border-radius: 14px;
+            font-size: 15px;
+            font-weight: 700;
+            cursor: pointer;
+            margin-top: 10px;
+            box-shadow: 0 8px 20px rgba(49, 130, 206, 0.3);
+            transition: all 0.25s;
+        }
+
+        .btn-submit:hover {
+            opacity: 0.95;
+            transform: translateY(-1px);
+            box-shadow: 0 10px 24px rgba(49, 130, 206, 0.4);
+        }
+
+        /* Result Glass Box */
+        .result-box {
+            display: none;
+            background: rgba(255, 255, 255, 0.65);
+            border: 1px solid rgba(255, 255, 255, 0.9);
+            padding: 20px;
+            border-radius: 18px;
+            backdrop-filter: blur(10px);
+        }
+
+        .success-title {
+            color: #276749;
+            font-size: 16px;
+            font-weight: 700;
+            margin-top: 0;
+            margin-bottom: 16px;
+            text-align: center;
+        }
+
+        .copy-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: rgba(255, 255, 255, 0.85);
+            padding: 11px 14px;
+            border: 1px solid rgba(226, 232, 240, 0.8);
+            border-radius: 12px;
+            margin-top: 6px;
+        }
+
+        .copy-value {
+            font-weight: 700;
+            font-size: 15px;
+            color: #2d3748;
+        }
+
+        .btn-copy {
+            border: none;
+            padding: 7px 14px;
+            border-radius: 10px;
+            font-size: 12px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-copy-blue {
+            background: #ebf8ff;
+            color: #2b6cb0;
+            border: 1px solid #bee3f8;
+        }
+
+        .btn-copy-green {
+            background: #f0fff4;
+            color: #276749;
+            border: 1px solid #c6f6d5;
+        }
+
+        .badge-notes {
+            background: #fffaf0;
+            color: #c05621;
+            border: 1px solid #feebc8;
+            padding: 6px 12px;
+            border-radius: 10px;
+            font-weight: 700;
+            font-size: 13px;
+            display: inline-block;
+        }
+
+        .warning-text {
+            color: #c53030;
+            font-size: 12px;
+            margin-top: 16px;
+            line-height: 1.5;
+            background: rgba(254, 215, 215, 0.4);
+            border: 1px solid rgba(254, 178, 178, 0.6);
+            padding: 12px;
+            border-radius: 12px;
+        }
+
+        .btn-secondary {
+            width: 100%;
+            padding: 13px;
+            background: rgba(237, 242, 247, 0.8);
+            color: #4a5568;
+            border: 1px solid rgba(203, 213, 225, 0.6);
+            border-radius: 14px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 16px;
+            transition: all 0.2s;
+        }
+
+        .btn-secondary:hover {
+            background: rgba(226, 232, 240, 0.9);
+        }
+    </style>
+</head>
+<body>
+
+<div class="glass-card">
+    <div class="header">
+        <button class="btn-back" onclick="window.location.href='home.html'">&#8592;</button>
+        <h1 class="title">Top Up Saldo Digiflazz</h1>
+    </div>
+
+    <!-- Form Input Deposit -->
+    <div id="form-deposit-input">
+        <div class="form-group">
+            <label for="depo_amount">Jumlah Deposit (Rp)</label>
+            <input type="number" id="depo_amount" placeholder="Contoh: 100000" min="10000">
+        </div>
+
+        <div class="form-group">
+            <label for="depo_bank">Pilih Bank Tujuan</label>
+            <select id="depo_bank">
+                <option value="BCA">BCA</option>
+                <option value="MANDIRI">MANDIRI</option>
+                <option value="BRI">BRI</option>
+                <option value="BNI">BNI</option>
+                <option value="ShopeePay">ShopeePay</option>
+                <option value="Flip">Flip</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="depo_owner">Nama Pemilik Rekening Pengirim</label>
+            <input type="text" id="depo_owner" placeholder="Nama sesuai rekening bank Anda">
+        </div>
+
+        <button class="btn-submit" onclick="submitDepositTicket()">AMBIL TIKET DEPOSIT</button>
+    </div>
+
+    <!-- Rincian Tiket Transfer (Sembunyi secara default) -->
+    <div id="form-deposit-result" class="result-box">
+        <div class="success-title">✔ Tiket Berhasil Dibuat</div>
+        
+        <div class="form-group">
+            <label>Bank Tujuan:</label>
+            <span id="res_bank" style="font-weight: 700; color: #2b6cb0;"></span>
+        </div>
+
+        <div class="form-group">
+            <label>Nomor Rekening Tujuan:</label>
+            <div class="copy-row">
+                <span id="res_rekening" class="copy-value"></span>
+                <button class="btn-copy btn-copy-blue" onclick="copyToClipboard('res_rekening', this)">Salin Rekening</button>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label>Total Transfer (Harus Sama Persis):</label>
+            <div class="copy-row">
+                <span id="res_amount_display" class="copy-value" style="color: #e53e3e;"></span>
+                <input type="hidden" id="res_amount_raw">
+                <button class="btn-copy btn-copy-green" onclick="copyToClipboard('res_amount_raw', this)">Salin Nominal</button>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label>Kode Unik / Berita:</label>
+            <div>
+                <span id="res_notes" class="badge-notes"></span>
+            </div>
+        </div>
+
+        <div class="warning-text">
+            ⚠️ Transfer nominal harus <b>SAMA PERSIS</b> hingga 3 digit terakhir agar saldo otomatis masuk ke akun Digiflazz Anda.
+        </div>
+
+        <button class="btn-secondary" onclick="resetForm()">Buat Tiket Baru</button>
+        <button class="btn-submit" onclick="window.location.href='home.html'" style="margin-top: 8px;">Kembali ke Home</button>
+    </div>
+</div>
+
+<script>
+async function submitDepositTicket() {
+    const amount = document.getElementById('depo_amount').value;
+    const bank = document.getElementById('depo_bank').value;
+    const owner_name = document.getElementById('depo_owner').value;
+
+    if (!amount || amount < 10000) {
+        alert("Minimal nominal deposit adalah Rp 10.000");
+        return;
+    }
+    if (!owner_name.trim()) {
+        alert("Harap masukkan nama pengirim rekening!");
+        return;
+    }
+
+    try {
+        const response = await fetch('/api/digiflazz/deposit', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                amount: parseInt(amount),
+                bank: bank,
+                owner_name: owner_name
+            })
+        });
+
+        const result = await response.json();
+
+        if (result.status === 'success' && result.data) {
+            const data = result.data;
+            
+            document.getElementById('res_bank').innerText = data.bank + ' (' + (data.payment_method || 'Bank Transfer') + ')';
+            document.getElementById('res_rekening').innerText = data.account_no;
+            
+            document.getElementById('res_amount_display').innerText = 'Rp ' + Number(data.amount).toLocaleString('id-ID');
+            document.getElementById('res_amount_raw').value = data.amount;
+            
+            document.getElementById('res_notes').innerText = data.notes || '-';
+
+            document.getElementById('form-deposit-input').style.display = 'none';
+            document.getElementById('form-deposit-result').style.display = 'block';
+        } else {
+            alert("Gagal mengambil tiket: " + (result.message || "Terjadi kesalahan"));
+        }
+    } catch (err) {
+        console.error("Deposit Error:", err);
+        alert("Terjadi kendala koneksi ke server.");
+    }
+}
+
+function copyToClipboard(elementId, btnElement) {
+    let textToCopy = '';
+    const targetElem = document.getElementById(elementId);
+
+    if (targetElem.tagName === 'INPUT') {
+        textToCopy = targetElem.value;
+    } else {
+        textToCopy = targetElem.innerText;
+    }
+
+    if (!textToCopy) return;
+
+    navigator.clipboard.writeText(textToCopy).then(() => {
+        const originalText = btnElement.innerText;
+        btnElement.innerText = '✔ Tersalin';
+
+        setTimeout(() => {
+            btnElement.innerText = originalText;
+        }, 2000);
+    }).catch(err => {
+        console.error("Gagal menyalin:", err);
+        alert("Gagal menyalin otomatis.");
+    });
+}
+
+function resetForm() {
+    document.getElementById('depo_amount').value = '';
+    document.getElementById('depo_owner').value = '';
+    document.getElementById('form-deposit-input').style.display = 'block';
+    document.getElementById('form-deposit-result').style.display = 'none';
+}
+</script>
+
+</body>
+</html>
+

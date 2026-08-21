@@ -292,7 +292,7 @@
         <div class="card-body-content">
             <div class="card-left">
                 <div class="produk-title">${item.produk || item.sku || 'Produk PPOB'}</div>
-		<div class="produk-status-kirim"></div>
+                <div class="produk-status-kirim"><i class="bi bi-receipt me-1"></i>{}</div>
             </div>
             <div class="card-right">
                 <span class="status ${statusClass}">${statusStr}</span>

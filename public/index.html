@@ -3,24 +3,52 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Home PPOB Neumorphism - Clean & Crisp</title>
-    <!-- FontAwesome untuk Ikon -->
+    <title>Arcell Komunika - Home PPOB</title>
+    <!-- FontAwesome & Bootstrap Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    
+    <!-- 🔔 ONESIGNAL PUSH NOTIFICATION SDK -->
+    <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
+    <script>
+      window.OneSignalDeferred = window.OneSignalDeferred || [];
+      OneSignalDeferred.push(async function(OneSignal) {
+        await OneSignal.init({
+          appId: "c7cc2a6a-84b8-4579-9c6b-f4d8077f0f65",
+          allowLocalhostAsSecureOrigin: true
+        });
+      });
+    </script>
+
+    <!-- 🔒 PROTEKSI WAJIB LOGIN -->
+    <script>
+      (function() {
+          const isLoggedIn = localStorage.getItem('isLoggedIn');
+          if (isLoggedIn !== 'true') {
+              window.location.href = 'akun.html';
+          }
+      })();
+    </script>
+
     <style>
-        /* --- CONFIGURATION & BASE STYLE --- */
+        /* --- CLEAN WHITE NEUMORPHISM THEME --- */
         :root {
-            --bg-color: #e0e5ec;
-            --shadow-light: #ffffff;
-            --shadow-dark: #a3b1c6;
-            --accent-color: #00a8ff;
-            --accent-gradient: linear-gradient(135deg, #00c6ff, #0072ff);
-            --text-main: #4d547d;
-            --text-muted: #8893b0;
-            --border-radius-sm: 10px;
-            --border-radius-md: 16px;
+            --bg-base: #e6eaf0;
+            --neu-light: #ffffff;
+            --neu-dark: #babecc;
+            --text-main: #4a5568;
+            --text-muted: #8c98a9;
+            --accent-purple: #7052ff;
+            --border-radius-sm: 14px;
+            --border-radius-md: 22px;
             --border-radius-pill: 50px;
-            --main-gap: 12px;
-            --bottom-nav-height: 65px;
+            --main-gap: 16px;
+            --bottom-nav-height: 70px;
+            
+            /* Clean Neumorphism Shadows */
+            --neu-shadow-flat: 6px 6px 12px var(--neu-dark), -6px -6px 12px var(--neu-light);
+            --neu-shadow-sm: 3px 3px 6px var(--neu-dark), -3px -3px 6px var(--neu-light);
+            --neu-shadow-inset: inset 3px 3px 6px var(--neu-dark), inset -3px -3px 6px var(--neu-light);
         }
 
         * {
@@ -33,8 +61,8 @@
 
         html, body {
             width: 100%;
-            height: 100%;
-            background-color: var(--bg-color);
+            height: 115%;
+            background-color: var(--bg-base);
             color: var(--text-main);
         }
 
@@ -51,7 +79,7 @@
             width: 100%;
             max-width: 480px;
             min-height: 100vh;
-            background-color: var(--bg-color);
+            background-color: var(--bg-base);
             position: relative;
             margin: 0 auto;
         }
@@ -59,136 +87,118 @@
         ::-webkit-scrollbar { display: none !important; width: 0 !important; height: 0 !important; }
         * { -ms-overflow-style: none !important; scrollbar-width: none !important; }
 
-        /* --- STICKY HEADER SECTION --- */
-        .header { position: sticky; top: 0; z-index: 100; padding: 16px; background: var(--bg-color); }
+        /* --- STICKY HEADER --- */
+        .header { 
+            position: sticky; top: 0; z-index: 100; padding: 16px; 
+            background: var(--bg-base);
+        }
         .header-top { display: flex; justify-content: space-between; align-items: center; }
         .user-profile { display: flex; align-items: center; gap: 12px; }
         .profile-img {
-            width: 42px; height: 42px; border-radius: 50%;
-            background-color: var(--bg-color); 
-            box-shadow: 4px 4px 8px var(--shadow-dark), -4px -4px 8px var(--shadow-light);
-            object-fit: cover; padding: 2px;
+            width: 44px; height: 44px; border-radius: 50%;
+            background: var(--bg-base); box-shadow: var(--neu-shadow-sm);
+            object-fit: cover; padding: 3px;
         }
         .user-info .greeting { font-size: 0.72rem; color: var(--text-muted); font-weight: 600; }
-        .user-info .username { font-size: 0.95rem; font-weight: 800; color: var(--text-main); }
-        .header-actions { display: flex; align-items: center; gap: 10px; }
+        .user-info .username { font-size: 0.98rem; font-weight: 800; color: var(--text-main); }
         
         .menu-toggle-btn {
-            width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;
-            text-decoration: none; background: var(--bg-color); border-radius: 50%; color: var(--text-main);
-            box-shadow: 4px 4px 8px var(--shadow-dark), -4px -4px 8px var(--shadow-light); 
-            border: none; cursor: pointer; font-size: 0.9rem; transition: all 0.2s ease;
+            width: 42px; height: 42px; display: flex; align-items: center; justify-content: center;
+            background: var(--bg-base); border-radius: 50%; color: var(--text-main);
+            box-shadow: var(--neu-shadow-sm); border: none;
+            cursor: pointer; font-size: 0.95rem; transition: all 0.2s ease;
         }
-        .menu-toggle-btn:active { 
-            box-shadow: inset 3px 3px 6px var(--shadow-dark), inset -3px -3px 6px var(--shadow-light);
-        }
+        .menu-toggle-btn:active { box-shadow: var(--neu-shadow-inset); }
 
         /* --- SIDEBAR MENU --- */
         .sidebar-overlay {
-            position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0, 0, 0, 0.3);
-            display: none; z-index: 998; opacity: 0; transition: opacity 0.3s ease;
+            position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(74, 85, 104, 0.2);
+            backdrop-filter: blur(4px); display: none; z-index: 998; opacity: 0; transition: opacity 0.3s ease;
         }
         .sidebar-overlay.show { display: block; opacity: 1; }
         .sidebar {
-            position: fixed; top: 0; left: -280px; width: 280px; height: 100%;
-            background: var(--bg-color); z-index: 999; box-shadow: 10px 0 20px rgba(0,0,0,0.05);
-            transition: left 0.3s ease; display: flex; flex-direction: column; padding: 24px; overflow-y: auto;
+            position: fixed; top: 0; left: -290px; width: 290px; height: 100%;
+            background: var(--bg-base); z-index: 999;
+            box-shadow: 10px 0 30px rgba(0,0,0,0.08); transition: left 0.3s ease;
+            display: flex; flex-direction: column; padding: 24px; overflow-y: auto;
         }
         .sidebar.show { left: 0; }
         .sidebar-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; padding-bottom: 15px; }
         .sidebar-title { font-size: 1rem; font-weight: 800; color: var(--text-main); display: flex; align-items: center; gap: 10px; }
-        .sidebar-title i { color: var(--accent-color); }
+        .sidebar-title i { color: var(--accent-purple); }
         .sidebar-close {
-            width: 32px; height: 32px; border-radius: 50%; background: var(--bg-color); border: none;
-            box-shadow: 3px 3px 6px var(--shadow-dark), -3px -3px 6px var(--shadow-light); color: var(--text-muted); cursor: pointer; display: flex; align-items: center; justify-content: center; font-weight: bold;
+            width: 34px; height: 34px; border-radius: 50%; background: var(--bg-base); border: none;
+            box-shadow: var(--neu-shadow-sm); color: var(--text-muted); cursor: pointer; display: flex; align-items: center; justify-content: center; font-weight: bold;
         }
+        .sidebar-close:active { box-shadow: var(--neu-shadow-inset); }
         .sidebar-menu-list { display: flex; flex-direction: column; gap: 14px; }
         .sidebar-item {
-            display: flex; align-items: center; gap: 14px; padding: 12px 18px;
-            background: var(--bg-color); border-radius: var(--border-radius-md); text-decoration: none; color: var(--text-main);
-            font-size: 0.85rem; font-weight: 700; box-shadow: 4px 4px 8px var(--shadow-dark), -4px -4px 8px var(--shadow-light);
-            transition: all 0.2s ease; cursor: pointer;
+            display: flex; align-items: center; gap: 14px; padding: 14px 18px;
+            background: var(--bg-base); border-radius: var(--border-radius-md);
+            text-decoration: none; color: var(--text-main); font-size: 0.88rem; font-weight: 700;
+            box-shadow: var(--neu-shadow-sm); transition: all 0.2s ease; cursor: pointer;
         }
-        .sidebar-item i { color: var(--accent-color); font-size: 1.1rem; width: 20px; text-align: center; }
+        .sidebar-item:active { box-shadow: var(--neu-shadow-inset); }
+        .sidebar-item i { color: var(--accent-purple); font-size: 1.1rem; width: 20px; text-align: center; }
 
-        /* --- SALDO UTAMA --- */
+        /* --- KARTU SALDO UTAMA --- */
         .wallet-section {
-            margin: 10px 16px var(--main-gap) 16px; padding: 16px 20px; background: var(--bg-color); 
-            border-radius: var(--border-radius-md); box-shadow: 6px 6px 12px var(--shadow-dark), -6px -6px 12px var(--shadow-light); 
-            display: flex; align-items: center; justify-content: space-between;
+            margin: 10px 16px var(--main-gap) 16px; padding: 20px 22px; 
+            background: var(--bg-base); border-radius: var(--border-radius-md); 
+            box-shadow: var(--neu-shadow-flat); display: flex; align-items: center; justify-content: space-between;
         }
         .wallet-info { display: flex; flex-direction: column; justify-content: center; }
-        .wallet-label { font-size: 0.7rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; display: flex; align-items: center; gap: 6px; letter-spacing: 0.5px; }
-        .wallet-label i { color: var(--accent-color); font-size: 0.85rem; }
-        .balance { font-weight: 800; font-size: 1.4rem; color: var(--text-main); margin-top: 6px; letter-spacing: 0.2px; line-height: 1; }
+        .wallet-label { font-size: 0.72rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; display: flex; align-items: center; gap: 6px; letter-spacing: 0.5px; }
+        .wallet-label i { color: var(--accent-purple); font-size: 0.85rem; }
+        .balance { font-weight: 800; font-size: 1.5rem; color: var(--text-main); margin-top: 6px; letter-spacing: 0.2px; line-height: 1; }
 
         /* --- AKSI SALDO --- */
         .wallet-actions-card {
-            margin: 0 16px var(--main-gap) 16px; padding: 8px 12px; background: var(--bg-color);
-            border-radius: var(--border-radius-md); box-shadow: 6px 6px 12px var(--shadow-dark), -6px -6px 12px var(--shadow-light);
-            display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;
+            margin: 0 16px var(--main-gap) 16px; padding: 10px 14px; 
+            background: var(--bg-base); border-radius: var(--border-radius-md); 
+            box-shadow: var(--neu-shadow-flat); display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px;
         }
 
         .action-btn {
-            display: flex; flex-direction: row; align-items: center; justify-content: center; gap: 6px; padding: 6px 4px;
-            background: var(--bg-color); border-radius: var(--border-radius-pill);
-            box-shadow: 3px 3px 6px var(--shadow-dark), -3px -3px 6px var(--shadow-light);
-            text-decoration: none; color: var(--text-main); font-size: 0.7rem; font-weight: 700; transition: all 0.2s ease;
+            display: flex; flex-direction: row; align-items: center; justify-content: center; gap: 6px; padding: 10px 6px;
+            background: var(--bg-base); border-radius: var(--border-radius-pill);
+            box-shadow: var(--neu-shadow-sm); text-decoration: none; color: var(--text-main); 
+            font-size: 0.72rem; font-weight: 700; transition: all 0.2s ease;
         }
-        .action-btn:active { box-shadow: inset 3px 3px 6px var(--shadow-dark), inset -3px -3px 6px var(--shadow-light); transform: scale(0.97); }
-        .action-btn i { color: var(--accent-color); font-size: 0.85rem; }
+        .action-btn:active { box-shadow: var(--neu-shadow-inset); }
+        .action-btn i { color: var(--accent-purple); font-size: 0.85rem; }
 
         /* --- RUNNING TEXT --- */
         .ticker-container { 
-            margin: 0 16px var(--main-gap) 16px; display: flex; align-items: center; background: var(--bg-color); 
-            border-radius: var(--border-radius-pill); padding: 6px 14px; border: 2px solid var(--accent-color);
-            box-shadow: inset 3px 3px 6px var(--shadow-dark), inset -3px -3px 6px var(--shadow-light); 
+            margin: 0 16px var(--main-gap) 16px; display: flex; align-items: center; 
+            background: var(--bg-base); border-radius: var(--border-radius-pill); padding: 8px 16px;
+            box-shadow: var(--neu-shadow-inset);
         }
         .ticker-icon { 
-            color: var(--accent-color); margin-right: 10px; display: flex; align-items: center; justify-content: center; 
-            width: 24px; height: 24px; border-radius: 50%; background: var(--bg-color); 
-            box-shadow: 2px 2px 4px var(--shadow-dark), -2px -2px 4px var(--shadow-light); flex-shrink: 0; font-size: 0.65rem;
+            color: #ffffff; margin-right: 10px; display: flex; align-items: center; justify-content: center; 
+            width: 26px; height: 26px; border-radius: 50%; background: var(--accent-purple);
+            box-shadow: var(--neu-shadow-sm); flex-shrink: 0; font-size: 0.7rem;
         }
         .ticker-content { flex: 1; overflow: hidden; display: flex; align-items: center; }
-        .ticker-content marquee { font-size: 0.72rem; font-weight: 600; color: var(--text-muted); }
+        .ticker-content marquee { font-size: 0.75rem; font-weight: 700; color: var(--text-muted); }
         .ticker-content span { margin-right: 40px; }
 
-        /* --- BATAS PEMISAH --- */
+        /* --- DIVIDER BADGE --- */
         .section-divider { display: flex; align-items: center; justify-content: center; margin: var(--main-gap) 16px; position: relative; }
-        .divider-line { flex: 1; height: 2px; background: var(--shadow-dark); opacity: 0.5; border-radius: 2px; }
+        .divider-line { flex: 1; height: 2px; background: var(--neu-dark); opacity: 0.4; border-radius: 2px; }
         .divider-badge {
-            padding: 6px 16px; font-size: 0.7rem; font-weight: 800; color: var(--accent-color); background: var(--bg-color);
-            border-radius: var(--border-radius-pill); box-shadow: 3px 3px 6px var(--shadow-dark), -3px -3px 6px var(--shadow-light);
-            margin: 0 10px; display: flex; align-items: center; gap: 6px; text-transform: uppercase; letter-spacing: 0.5px;
+            padding: 6px 16px; font-size: 0.7rem; font-weight: 800; color: var(--accent-purple); 
+            background: var(--bg-base); border-radius: var(--border-radius-pill);
+            box-shadow: var(--neu-shadow-sm); margin: 0 10px; display: flex; align-items: center; gap: 6px; text-transform: uppercase; letter-spacing: 0.5px;
         }
 
-        /* --- ANIMASI PETIR KEDIP NYALA ORANGE API --- */
-        @keyframes fireGlow {
-            0%, 100% {
-                color: #ff4500;
-                text-shadow: 0 0 2px #ff4500, 0 0 6px #ff7700;
-                transform: scale(1);
-            }
-            50% {
-                color: #ffaa00;
-                text-shadow: 0 0 8px #ff4500, 0 0 16px #ff7700, 0 0 22px #ffae00;
-                transform: scale(1.25);
-            }
-        }
-
-        #quick-divider .divider-badge i {
-            display: inline-block;
-            animation: fireGlow 1.2s infinite ease-in-out;
-        }
-
-        /* --- CARD WRAPPER & INPUT POPUP --- */
-        .card-wrapper { position: relative; z-index: 101; background-color: var(--bg-color); padding: 0 16px; }
+        /* --- INPUT POPUP & LIST --- */
+        .card-wrapper { position: relative; z-index: 101; padding: 0 16px; }
 
         .popup-top-container {
             display: none; height: 210px; overflow-y: auto; margin-bottom: var(--main-gap); padding: 14px;
-            background: var(--bg-color); border-radius: var(--border-radius-md);
-            box-shadow: inset 4px 4px 8px var(--shadow-dark), inset -4px -4px 8px var(--shadow-light);
-            animation: dropUpAnimation 0.3s ease-out forwards;
+            background: var(--bg-base); border-radius: var(--border-radius-md);
+            box-shadow: var(--neu-shadow-inset); animation: dropUpAnimation 0.3s ease-out forwards;
         }
 
         @keyframes dropUpAnimation {
@@ -196,107 +206,132 @@
             100% { opacity: 1; transform: translateY(0); }
         }
 
-        .card-container { background: transparent; display: flex; flex-direction: column; gap: var(--main-gap); }
+        .card-container { display: flex; flex-direction: column; gap: var(--main-gap); }
 
         .inset-tabs-wrapper {
-            display: none; overflow-x: auto; white-space: nowrap; gap: 10px; padding: 2px 2px 6px 2px;
+            display: none; overflow-x: auto; white-space: nowrap; gap: 10px; padding: 4px 2px 8px 2px;
             scroll-behavior: smooth; width: 100%;
         }
 
         .tab-item-inset {
             display: inline-flex; align-items: center; justify-content: center;
-            padding: 6px 16px; border-radius: var(--border-radius-pill); border: none; background: var(--bg-color);
-            color: var(--text-muted); font-size: 0.7rem; font-weight: 700; cursor: pointer;
-            transition: all 0.2s ease; flex-shrink: 0;
-            box-shadow: 3px 3px 6px var(--shadow-dark), -3px -3px 6px var(--shadow-light);
+            padding: 8px 18px; border-radius: var(--border-radius-pill); border: none;
+            background: var(--bg-base); color: var(--text-muted); font-size: 0.72rem; font-weight: 700;
+            cursor: pointer; transition: all 0.2s ease; flex-shrink: 0; box-shadow: var(--neu-shadow-sm);
         }
         .tab-item-inset.active {
-            color: var(--accent-color); box-shadow: inset 3px 3px 5px var(--shadow-dark), inset -3px -3px 5px var(--shadow-light);
+            color: var(--accent-purple); box-shadow: var(--neu-shadow-inset);
         }
 
-        /* --- INSET INPUT BOX --- */
+        /* Input Box Clean Inset */
         .input-box {
-            display: flex; align-items: center; padding: 8px 14px; gap: 10px; 
-            background: var(--bg-color); border-radius: var(--border-radius-pill);
-            border: 2px solid var(--accent-color);
-            box-shadow: inset 3px 3px 6px var(--shadow-dark), inset -3px -3px 6px var(--shadow-light);
+            display: flex; align-items: center; padding: 10px 18px; gap: 12px; 
+            background: var(--bg-base); border-radius: var(--border-radius-pill);
+            box-shadow: var(--neu-shadow-inset); transition: all 0.25s;
         }
 
         .input-icon-left { 
-            color: var(--accent-color); font-size: 0.85rem; 
-            width: 26px; height: 26px; border-radius: 50%; background: var(--bg-color);
-            display: flex; align-items: center; justify-content: center;
-            box-shadow: 2px 2px 4px var(--shadow-dark), -2px -2px 4px var(--shadow-light); flex-shrink: 0;
+            color: var(--accent-purple); font-size: 0.9rem; 
+            width: 30px; height: 30px; border-radius: 50%; background: var(--bg-base);
+            box-shadow: var(--neu-shadow-sm); display: flex; align-items: center; justify-content: center; flex-shrink: 0;
         }
 
         .input-box input {
             flex: 1; border: none; background: transparent; outline: none; 
-            font-size: 1rem; font-weight: 700; color: var(--text-main); width: 100%; letter-spacing: 0.5px;
+            font-size: 1.05rem; font-weight: 700; color: var(--text-main); width: 100%; letter-spacing: 0.5px;
         }
 
-        .input-box input::placeholder { color: var(--text-muted); font-weight: 500; font-size: 0.85rem; opacity: 0.7; }
+        .input-box input::placeholder { color: var(--text-muted); font-weight: 500; font-size: 0.85rem; opacity: 0.8; }
 
         .operator-badge {
-            background-color: var(--bg-color); color: var(--accent-color);
-            padding: 3px 10px; border-radius: var(--border-radius-pill); font-size: 0.65rem; font-weight: 800;
+            background: var(--bg-base); color: var(--accent-purple); box-shadow: var(--neu-shadow-sm);
+            padding: 4px 12px; border-radius: var(--border-radius-pill); font-size: 0.65rem; font-weight: 800;
             display: none; text-transform: uppercase; flex-shrink: 0; letter-spacing: 0.5px;
-            box-shadow: 2px 2px 4px var(--shadow-dark), -2px -2px 4px var(--shadow-light);
         }
 
-        .input-icon-right { color: var(--accent-color); font-size: 1rem; margin-left: 2px; cursor: pointer; transition: transform 0.2s; flex-shrink: 0; }
-        .input-icon-right:active { transform: scale(0.9); }
+        .input-icon-right { color: var(--accent-purple); font-size: 1rem; margin-left: 2px; cursor: pointer; flex-shrink: 0; }
 
-        .filter-container { display: none !important; }
+        .filter-container { display: flex; justify-content: flex-end; margin-bottom: 8px; }
+        .filter-container select {
+            background: var(--bg-base); color: var(--text-main); border: none; outline: none;
+            padding: 6px 14px; border-radius: 12px; font-size: 0.7rem; font-weight: 700;
+            box-shadow: var(--neu-shadow-sm); cursor: pointer;
+        }
 
-        .product-list { display: flex; flex-direction: column; gap: 10px; }
+        /* Product Card Neumorphic Light */
+        .product-list { display: flex; flex-direction: column; gap: 12px; }
         .product-card {
-            background: var(--bg-color); border-radius: var(--border-radius-sm); padding: 12px 16px; display: flex; justify-content: space-between; align-items: center; cursor: pointer;
-            box-shadow: 4px 4px 8px var(--shadow-dark), -4px -4px 8px var(--shadow-light); transition: all 0.2s ease;
+            background: var(--bg-base); border-radius: var(--border-radius-sm);
+            padding: 14px 18px; display: flex; justify-content: space-between; align-items: center; cursor: pointer;
+            box-shadow: var(--neu-shadow-sm); transition: all 0.2s ease;
         }
-        .product-card:active { transform: scale(0.98); box-shadow: inset 3px 3px 6px var(--shadow-dark), inset -3px -3px 6px var(--shadow-light); }
+        .product-card:active { box-shadow: var(--neu-shadow-inset); transform: scale(0.98); }
         .product-info { flex: 1; padding-right: 8px; }
-        .product-title { font-size: 0.78rem; font-weight: 700; color: var(--text-main); line-height: 1.3; margin-bottom: 4px; }
-        .product-price { font-size: 0.85rem; font-weight: 800; color: var(--accent-color); }
+        .product-title { font-size: 0.8rem; font-weight: 700; color: var(--text-main); line-height: 1.3; margin-bottom: 4px; }
+        .product-price { font-size: 0.88rem; font-weight: 800; color: var(--accent-purple); }
         .product-action {
-            display: flex; align-items: center; justify-content: center; width: 28px; height: 28px; border-radius: 50%;
-            color: var(--accent-color); box-shadow: 3px 3px 6px var(--shadow-dark), -3px -3px 6px var(--shadow-light); font-size: 0.75rem;
+            display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 50%;
+            color: #ffffff; background: var(--accent-purple); box-shadow: var(--neu-shadow-sm); font-size: 0.8rem;
         }
 
         .empty-state { display: none; flex-direction: column; align-items: center; justify-content: center; padding: 20px; color: var(--text-muted); text-align: center; }
 
-        /* --- MENU UTAMA --- */
+        /* MENU UTAMA */
         .purchase-container {
-            margin: 0 16px var(--main-gap) 16px; padding: 20px 16px; background: var(--bg-color); border-radius: var(--border-radius-md);
-            box-shadow: 6px 6px 12px var(--shadow-dark), -6px -6px 12px var(--shadow-light);
+            margin: 0 16px var(--main-gap) 16px; padding: 22px 16px; 
+            background: var(--bg-base); border-radius: var(--border-radius-md); 
+            box-shadow: var(--neu-shadow-flat);
         }
-        
-        .menu-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 18px 12px; }
+
+        .menu-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px 12px; }
         .grid-item { display: flex; flex-direction: column; align-items: center; text-align: center; cursor: pointer; text-decoration: none; }
         .icon-wrapper {
-            width: 52px; height: 52px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
-            margin-bottom: 8px; font-size: 1.25rem; background: var(--bg-color); 
-            box-shadow: 4px 4px 8px var(--shadow-dark), -4px -4px 8px var(--shadow-light);
-            transition: all 0.2s ease; overflow: hidden;
+            width: 54px; height: 54px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+            margin-bottom: 8px; font-size: 1.3rem; background: var(--bg-base); 
+            box-shadow: var(--neu-shadow-sm); transition: all 0.2s ease; color: var(--accent-purple);
         }
-        .grid-item:active .icon-wrapper {
-            box-shadow: inset 3px 3px 6px var(--shadow-dark), inset -3px -3px 6px var(--shadow-light); transform: scale(0.95);
-        }
-        .grid-item span { font-size: 0.7rem; font-weight: 700; color: var(--text-main); }
+        .grid-item:active .icon-wrapper { box-shadow: var(--neu-shadow-inset); transform: scale(0.95); }
+        .grid-item span { font-size: 0.72rem; font-weight: 700; color: var(--text-main); }
 
-        .icon-pulsa, .icon-data, .icon-pln, .icon-gem, 
-        .icon-gaming, .icon-ewallet, .icon-emoney, .icon-ojek, 
-        .icon-p-transfer, .icon-sms, .icon-pertagas, .icon-intl,
-        .icon-quran, .icon-tasbih, .icon-sholat, .icon-kalkulator { color: var(--accent-color); }
-
-        /* --- CONTAINER MENU TAMBAHAN --- */
+        /* MENU TAMBAHAN */
         .extra-menu-container {
-            margin: 0 16px 20px 16px; padding: 18px 16px; background: var(--bg-color); border-radius: var(--border-radius-md);
-            box-shadow: 6px 6px 12px var(--shadow-dark), -6px -6px 12px var(--shadow-light);
+            margin: 0 16px 20px 16px; padding: 20px 16px; 
+            background: var(--bg-base); border-radius: var(--border-radius-md); 
+            box-shadow: var(--neu-shadow-flat);
         }
 
         .extra-menu-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px 12px; }
 
-        /* --- BOTTOM NAVIGATION BAR --- */
+        /* BOTTOM SHEET SLIDE-UP */
+        .modal-checkout-backdrop {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(74, 85, 104, 0.3); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
+            z-index: 999 !important; display: none; opacity: 0; transition: opacity 0.3s ease;
+        }
+
+        .modal-checkout-backdrop.show { display: block; opacity: 1; }
+
+        .bottom-sheet {
+            position: fixed; bottom: -100%; left: 50%; transform: translateX(-50%);
+            width: 100%; max-width: 480px; background: var(--bg-base);
+            border-top-left-radius: 30px; border-top-right-radius: 30px;
+            box-shadow: 0px -10px 30px rgba(0, 0, 0, 0.1); z-index: 1000 !important;
+            padding: 18px 22px calc(var(--bottom-nav-height) + 20px) 22px !important;
+            transition: bottom 0.35s cubic-bezier(0.25, 1, 0.5, 1); max-height: 85vh; overflow-y: auto;
+        }
+
+        .bottom-sheet.active { bottom: 0; }
+        .sheet-drag-handle { width: 44px; height: 5px; background: var(--neu-dark); border-radius: 10px; margin: 0 auto 16px auto; opacity: 0.6; }
+
+        .btn-bayar-now {
+            background: var(--accent-purple); color: #ffffff; font-weight: 800; border-radius: 50px;
+            padding: 16px; border: none; width: 100%;
+            box-shadow: var(--neu-shadow-sm); font-size: 14px; text-transform: uppercase; letter-spacing: 0.5px; cursor: pointer;
+            display: flex; align-items: center; justify-content: center; gap: 8px; transition: all 0.2s ease;
+        }
+        .btn-bayar-now:active { box-shadow: var(--neu-shadow-inset); }
+
+        /* --- BOTTOM NAV NEUMORPHISM --- */
         .bottom-nav {
             position: fixed;
             bottom: 0;
@@ -305,13 +340,15 @@
             width: 100%;
             max-width: 480px;
             height: var(--bottom-nav-height);
-            background: var(--bg-color);
+            background: var(--bg-base);
             display: flex;
             justify-content: space-around;
             align-items: center;
-            padding: 0 8px;
-            box-shadow: 0 -6px 12px var(--shadow-dark), 0 -2px 6px var(--shadow-light);
-            z-index: 900;
+            box-shadow: 0 -5px 15px rgba(0,0,0,0.05);
+            border-top-left-radius: 20px;
+            border-top-right-radius: 20px;
+            padding: 0 10px;
+            z-index: 999;
         }
 
         .nav-item {
@@ -321,36 +358,24 @@
             justify-content: center;
             text-decoration: none;
             color: var(--text-muted);
-            width: 18%;
-            height: 48px;
-            border-radius: var(--border-radius-sm);
-            transition: all 0.2s ease;
+            font-size: 11px;
+            font-weight: 600;
+            width: 60px;
+            height: 50px;
+            border-radius: 14px;
+            transition: all 0.3s ease;
+            background: var(--bg-base);
+            box-shadow: var(--neu-shadow-sm);
         }
 
         .nav-item i {
-            font-size: 1.15rem;
+            font-size: 18px;
             margin-bottom: 3px;
-            transition: all 0.2s ease;
         }
 
-        .nav-item span {
-            font-size: 0.65rem;
-            font-weight: 700;
-            letter-spacing: 0.2px;
-        }
-
-        /* State Aktif untuk Bottom Nav Bar */
         .nav-item.active {
-            color: var(--accent-color);
-            box-shadow: inset 3px 3px 6px var(--shadow-dark), inset -3px -3px 6px var(--shadow-light);
-        }
-
-        .nav-item.active i {
-            transform: translateY(-1px);
-        }
-
-        .nav-item:active {
-            box-shadow: inset 2px 2px 4px var(--shadow-dark), inset -2px -2px 4px var(--shadow-light);
+            color: var(--accent-purple);
+            box-shadow: var(--neu-shadow-inset);
         }
 
         @media screen and (min-width: 550px) {
@@ -377,17 +402,11 @@
                 <a href="javascript:void(0)" class="sidebar-item" onclick="alert('Menu Catatan Hutang akan segera hadir.')">
                     <i class="fa-solid fa-tags"></i> Catatan Hutang
                 </a>
-                <a href="javascript:void(0)" class="sidebar-item" onclick="alert('Menu Daftar Harga akan segera hadir.')">
-                    <i class="fa-solid fa-list-check"></i> Daftar Harga
+                <a href="member.html" class="sidebar-item">
+                    <i class="fa-solid fa-list-check"></i> Kelola Produk Admin
                 </a>
-                <a href="javascript:void(0)" class="sidebar-item" onclick="alert('Menu Transaksi Terjadwal akan segera hadir.')">
-                    <i class="fa-solid fa-calendar-check"></i> Transaksi Terjadwal
-                </a>
-                <a href="javascript:void(0)" class="sidebar-item">
-                    <i class="fa-solid fa-file-invoice-dollar"></i> Laporan
-                </a>
-                <a href="javascript:void(0)" class="sidebar-item" onclick="alert('Menu Pengaturan akan segera hadir.')">
-                    <i class="fa-solid fa-gear"></i> Pengaturan
+                <a href="history.html" class="sidebar-item">
+                    <i class="fa-solid fa-file-invoice-dollar"></i> Riwayat Transaksi
                 </a>
             </div>
         </div>
@@ -419,9 +438,9 @@
             </div>
         </div>
 
-        <!-- 2. KARTU TERPISAH: AKSI SALDO RAMPING -->
+        <!-- 2. AKSI SALDO RAMPING -->
         <div class="wallet-actions-card">
-            <a href="javascript:void(0)" class="action-btn">
+            <a href="deposit.html" class="action-btn">
                 <i class="fa-solid fa-circle-plus"></i>
                 <span>Isi Saldo</span>
             </a>
@@ -429,7 +448,7 @@
                 <i class="fa-solid fa-paper-plane"></i>
                 <span>Kirim</span>
             </a>
-            <a href="javascript:void(0)" class="action-btn">
+            <a href="history.html" class="action-btn">
                 <i class="fa-solid fa-clock-rotate-left"></i>
                 <span>Riwayat</span>
             </a>
@@ -441,7 +460,7 @@
             <div class="ticker-content">
                 <marquee direction="left" scrollamount="4">
                     <span>🔥 <b>INFO SERVER:</b> CUT OFF TRANSAKSI SETIAP JAM 23.30 - 00.15 WIB</span>
-                    <span>⚡ Token PLN lancar jaya 24 jam nonstop tanpa delay.</span>
+                    <span>⚡ Token PLN & Produk PPOB lancar jaya 24 jam nonstop.</span>
                 </marquee>
             </div>
         </div>
@@ -453,7 +472,7 @@
             <div class="divider-line"></div>
         </div>
 
-        <!-- DROP UP POPUP KE KOLOM SALDO -->
+        <!-- DROP UP POPUP TRANSAKSI CEPAT LOKAL -->
         <div class="card-wrapper" id="cardWrapper">
             
             <div class="popup-top-container" id="popupTopContainer">
@@ -500,42 +519,18 @@
         <!-- Container Menu Utama -->
         <div class="purchase-container" id="purchase-container">
             <div class="menu-grid">
-                <div class="grid-item" data-url="javascript:void(0)">
-                    <div class="icon-wrapper icon-pulsa"><i class="fa-solid fa-mobile-button"></i></div><span>Pulsa</span>
-                </div>
-                <div class="grid-item" data-url="javascript:void(0)">
-                    <div class="icon-wrapper icon-data"><i class="fa-solid fa-globe"></i></div><span>Paket Data</span>
-                </div>
-                <div class="grid-item" data-url="javascript:void(0)">
-                    <div class="icon-wrapper icon-pln"><i class="fa-solid fa-bolt-lightning"></i></div><span>Token PLN</span>
-                </div>
-                <div class="grid-item" data-url="javascript:void(0)">
-                    <div class="icon-wrapper icon-gem"><i class="fa-solid fa-gem"></i></div><span>Voucher</span>
-                </div>
-                <div class="grid-item" data-url="javascript:void(0)">
-                    <div class="icon-wrapper icon-gaming"><i class="fa-solid fa-gamepad"></i></div><span>Topup Game</span>
-                </div>
-                <div class="grid-item" data-url="javascript:void(0)">
-                    <div class="icon-wrapper icon-ewallet"><i class="fa-solid fa-wallet"></i></div><span>E-Wallet</span>
-                </div>
-                <div class="grid-item" data-url="javascript:void(0)">
-                    <div class="icon-wrapper icon-emoney"><i class="fa-solid fa-credit-card"></i></div><span>E-Money</span>
-                </div>
-                <div class="grid-item" data-url="javascript:void(0)">
-                    <div class="icon-wrapper icon-ojek"><i class="fa-solid fa-motorcycle"></i></div><span>Ojek Online</span>
-                </div>
-                <div class="grid-item" data-url="javascript:void(0)">
-                    <div class="icon-wrapper icon-p-transfer"><i class="fa-solid fa-arrow-right-arrow-left"></i></div><span>Pulsa Trans</span>
-                </div>
-                <div class="grid-item" data-url="javascript:void(0)">
-                    <div class="icon-wrapper icon-sms"><i class="fa-solid fa-comment-sms"></i></div><span>SMS & Telp</span>
-                </div>
-                <div class="grid-item" data-url="javascript:void(0)">
-                    <div class="icon-wrapper icon-pertagas"><i class="fa-solid fa-fire"></i></div><span>Pertagas</span>
-                </div>
-                <div class="grid-item" data-url="javascript:void(0)">
-                    <div class="icon-wrapper icon-intl"><i class="fa-solid fa-earth-americas"></i></div><span>International</span>
-                </div>
+                <a href="javascript:void(0)" class="grid-item"><div class="icon-wrapper"><i class="fa-solid fa-mobile-button"></i></div><span>Pulsa</span></a>
+                <a href="javascript:void(0)" class="grid-item"><div class="icon-wrapper"><i class="fa-solid fa-globe"></i></div><span>Paket Data</span></a>
+                <a href="javascript:void(0)" class="grid-item"><div class="icon-wrapper"><i class="fa-solid fa-bolt-lightning"></i></div><span>Token PLN</span></a>
+                <a href="javascript:void(0)" class="grid-item"><div class="icon-wrapper"><i class="fa-solid fa-gem"></i></div><span>Voucher</span></a>
+                <a href="javascript:void(0)" class="grid-item"><div class="icon-wrapper"><i class="fa-solid fa-gamepad"></i></div><span>Topup Game</span></a>
+                <a href="javascript:void(0)" class="grid-item"><div class="icon-wrapper"><i class="fa-solid fa-wallet"></i></div><span>E-Wallet</span></a>
+                <a href="javascript:void(0)" class="grid-item"><div class="icon-wrapper"><i class="fa-solid fa-credit-card"></i></div><span>E-Money</span></a>
+                <a href="javascript:void(0)" class="grid-item"><div class="icon-wrapper"><i class="fa-solid fa-motorcycle"></i></div><span>Ojek Online</span></a>
+                <a href="javascript:void(0)" class="grid-item"><div class="icon-wrapper"><i class="fa-solid fa-arrow-right-arrow-left"></i></div><span>Pulsa Trans</span></a>
+                <a href="javascript:void(0)" class="grid-item"><div class="icon-wrapper"><i class="fa-solid fa-comment-sms"></i></div><span>SMS & Telp</span></a>
+                <a href="javascript:void(0)" class="grid-item"><div class="icon-wrapper"><i class="fa-solid fa-fire"></i></div><span>Pertagas</span></a>
+                <a href="javascript:void(0)" class="grid-item"><div class="icon-wrapper"><i class="fa-solid fa-earth-americas"></i></div><span>International</span></a>
             </div>
         </div>
 
@@ -549,46 +544,71 @@
         <!-- CONTAINER MENU TAMBAHAN -->
         <div class="extra-menu-container" id="extra-menu-container">
             <div class="extra-menu-grid">
-                <a href="https://quran.kemenag.go.id/" class="grid-item">
-                    <div class="icon-wrapper icon-quran"><i class="fa-solid fa-book-quran"></i></div>
-                    <span>Al-Quran</span>
-                </a>
-                <a href="https://www.tasbih.my.id/" class="grid-item">
-                    <div class="icon-wrapper icon-tasbih"><i class="fa-solid fa-hand-holding-heart"></i></div>
-                    <span>Tasbih</span>
-                </a>
-                <a href="https://jadwalsholat.org/" class="grid-item">
-                    <div class="icon-wrapper icon-mosque"><i class="fa-solid fa-mosque"></i></div>
-                    <span>Jadwal Sholat</span>
-                </a>
-                <a href="javascript:void(0)" class="grid-item">
-                    <div class="icon-wrapper icon-kalkulator"><i class="fa-solid fa-calculator"></i></div>
-                    <span>Kalkulator</span>
-                </a>
+                <a href="https://quran.kemenag.go.id/" class="grid-item"><div class="icon-wrapper"><i class="fa-solid fa-book-quran"></i></div><span>Al-Quran</span></a>
+                <a href="https://www.tasbih.my.id/" class="grid-item"><div class="icon-wrapper"><i class="fa-solid fa-hand-holding-heart"></i></div><span>Tasbih</span></a>
+                <a href="https://jadwalsholat.org/" class="grid-item"><div class="icon-wrapper"><i class="fa-solid fa-mosque"></i></div><span>Jadwal Sholat</span></a>
+                <a href="javascript:void(0)" class="grid-item"><div class="icon-wrapper"><i class="fa-solid fa-calculator"></i></div><span>Kalkulator</span></a>
             </div>
         </div>
 
-        <!-- BOTTOM NAVIGATION BAR -->
-<nav class="bottom-nav">
-    <a href="index.html" class="nav-item [tambahkan 'active' di sini hanya untuk halaman home]">
-        <i class="fa-solid fa-house"></i><span>Home</span>
-    </a>
-    <a href="history.html" class="nav-item [tambahkan 'active' di sini untuk halaman history]">
-        <i class="fa-solid fa-clock-rotate-left"></i><span>History</span>
-    </a>
-    <a href="rekap.html" class="nav-item [tambahkan 'active' di sini untuk halaman rekap]">
-        <i class="fa-solid fa-chart-line"></i><span>Rekap</span>
-    </a>
-    <a href="member.html" class="nav-item [tambahkan 'active' di sini untuk halaman member]">
-        <i class="fa-solid fa-users"></i><span>Member</span>
-    </a>
-    <a href="akun.html" class="nav-item [tambahkan 'active' di sini untuk halaman akun]">
-        <i class="fa-solid fa-user"></i><span>Akun</span>
-    </a>
-</nav>
+        <!-- 📌 SLIDE-UP BOTTOM SHEET -->
+        <div id="checkoutBackdrop" class="modal-checkout-backdrop" onclick="tutupCheckoutSheet()"></div>
+        <div id="checkoutBottomSheet" class="bottom-sheet">
+            <div class="sheet-drag-handle"></div>
+            
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                <h4 style="font-size: 0.95rem; font-weight: 800; color: var(--text-main);">Konfirmasi Pembelian</h4>
+                <button type="button" onclick="tutupCheckoutSheet()" style="background: none; border: none; font-size: 1.2rem; color: var(--text-muted); cursor: pointer;">&times;</button>
+            </div>
 
+            <div style="background: var(--bg-base); box-shadow: var(--neu-shadow-inset); border-radius: 18px; padding: 16px; margin-bottom: 18px;">
+                <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                    <span style="font-size: 0.75rem; color: var(--text-muted); font-weight: 600;">Produk</span>
+                    <span id="sheet_nama_produk" style="font-size: 0.75rem; font-weight: 800; color: var(--text-main); text-align: right; max-width: 60%;"> - </span>
+                </div>
+                <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                    <span style="font-size: 0.75rem; color: var(--text-muted); font-weight: 600;">No. Tujuan</span>
+                    <span id="sheet_no_tujuan" style="font-size: 0.75rem; font-weight: 800; color: var(--accent-purple);"> - </span>
+                </div>
+                <hr style="border: none; border-top: 2px dashed var(--neu-dark); opacity: 0.5; margin: 10px 0;">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <span style="font-size: 0.8rem; font-weight: 700; color: var(--text-main);">Total Bayar</span>
+                    <span id="sheet_total_harga" style="font-size: 1.1rem; font-weight: 800; color: var(--accent-purple);">Rp 0</span>
+                </div>
+            </div>
 
-    <!-- JavaScript System - Integrated with Digiflazz & Auto-Grouping & Filter Pulsa -->
+            <button id="btnProsesBayar" onclick="eksekusiCheckoutDigiflazz()" class="btn-bayar-now">
+                <i class="fa-solid fa-shield-halved"></i> Bayar Sekarang
+            </button>
+        </div>
+
+        <!-- 📌 BOTTOM NAVIGATION BAR INTEGRATED -->
+        <div class="bottom-nav">
+            <a href="home.html" class="nav-item active">
+                <i class="fa-solid fa-house"></i>
+                <span>Home</span>
+            </a>
+            <a href="history.html" class="nav-item">
+                <i class="fa-solid fa-clock-rotate-left"></i>
+                <span>History</span>
+            </a>
+            <a href="rekap.html" class="nav-item">
+                <i class="fa-solid fa-chart-line"></i>
+                <span>Rekap</span>
+            </a>
+            <a href="member.html" class="nav-item">
+                <i class="fa-solid fa-users"></i>
+                <span>Member</span>
+            </a>
+            <a href="akun.html" class="nav-item">
+                <i class="fa-solid fa-user"></i>
+                <span>Akun</span>
+            </a>
+        </div>
+
+    </div>
+
+    <!-- JavaScript System -->
     <script>
         const menuToggleBtn = document.getElementById('menu-toggle');
         const sidebar = document.getElementById('sidebar');
@@ -602,37 +622,53 @@
         sidebarClose.addEventListener('click', closeSidebar);
         sidebarOverlay.addEventListener('click', closeSidebar);
 
-        function switchTab(element) {
-            document.querySelectorAll('.bottom-nav .nav-item').forEach(item => {
-                item.classList.remove('active');
-            });
-            element.classList.add('active');
-        }
+        // Variable Penampung Master Produk Global
+        let masterProduk = [];
 
-        // ========================================================
-        // 🔹 FUNGSI AMBIL SALDO DIGIFLAZZ OTOMATIS KE HEADER
-        // ========================================================
         function loadSaldoDigiflazz() {
             fetch('/api/saldo')
                 .then(res => res.json())
                 .then(res => {
-                    if (res.data && res.data.deposit !== undefined) {
-                        const saldoFormatted = new Intl.NumberFormat('id-ID', { 
-                            style: 'currency', 
-                            currency: 'IDR', 
-                            minimumFractionDigits: 0 
-                        }).format(res.data.deposit);
-                        
-                        const balanceEl = document.getElementById('user-balance');
-                        if (balanceEl) balanceEl.innerText = saldoFormatted;
-                    }
+                    const saldoVal = res.deposit !== undefined ? res.deposit : (res.data ? res.data.deposit : 0);
+                    
+                    const saldoFormatted = new Intl.NumberFormat('id-ID', { 
+                        style: 'currency', 
+                        currency: 'IDR', 
+                        maximumFractionDigits: 0 
+                    }).format(saldoVal);
+                    
+                    const balanceEl = document.getElementById('user-balance');
+                    if (balanceEl) balanceEl.innerText = saldoFormatted;
                 })
                 .catch(err => console.error("Gagal sinkron saldo Digiflazz:", err));
         }
 
+        // FUNGSI UNTUK MENGAMBIL DATA PRODUK LANGSUNG DARI VPS (/api/products)
+        async function fetchMasterProduk() {
+            try {
+                const res = await fetch('/api/products?t=' + Date.now());
+                if (res.ok) {
+                    const data = await res.json();
+                    
+                    if (Array.isArray(data)) {
+                        masterProduk = data;
+                    } else if (data.data && Array.isArray(data.data)) {
+                        masterProduk = data.data;
+                    } else {
+                        masterProduk = [];
+                    }
+
+                    localStorage.setItem('admin_master_produk', JSON.stringify(masterProduk));
+                }
+            } catch (err) {
+                console.warn("Gagal terhubung ke API, menggunakan cache lokal:", err);
+                masterProduk = JSON.parse(localStorage.getItem('admin_master_produk') || '[]');
+            }
+        }
+
         window.addEventListener('DOMContentLoaded', () => {
-            // Run Auto Saldo
             loadSaldoDigiflazz();
+            fetchMasterProduk();
 
             const hour = new Date().getHours();
             let greet = "Selamat Malam";
@@ -641,15 +677,6 @@
             else if(hour < 18) greet = "Selamat Sore";
             document.getElementById('time-greeting').innerText = greet + ",";
         });
-
-        const operatorKeywords = {
-            INDOSAT: ["Indosat"],
-            TELKOMSEL: ["Telkomsel"],
-            XL: ["XL"],
-            AXIS: ["Axis"],
-            TRI: ["Tri"],
-            SMARTFREN: ["Smart"]
-        };
 
         const prefixes = {
             TELKOMSEL: ['0811', '0812', '0813', '0821', '0822', '0823', '0851', '0852', '0853'],
@@ -677,6 +704,7 @@
         let currentOperator = null;
         let groupedProducts = {};
         let currentRawProducts = [];
+        let dataCheckoutAktif = {};
 
         function formatPhoneNumber(val) {
             let cleaned = val.replace(/[^0-9+]/g, '');
@@ -688,84 +716,55 @@
             return match ? match.join(' ') : cleaned;
         }
 
-        function showLoading(text) {
-            productList.style.display = 'none';
-            emptyState.style.display = 'flex';
-            stateIcon.className = "fa-solid fa-spinner fa-spin";
-            emptyText.innerHTML = text;
-            popupTopContainer.style.display = 'block';
-            if (quickDivider) quickDivider.style.display = 'none';
-        }
-
-        // Fungsi mengekstrak kata pertama/kedua nama produk untuk dijadikan TAB
-        function extractSubCategory(productName, brand) {
-            let name = productName.replace(new RegExp(brand, 'gi'), '').trim();
-            let words = name.split(' ');
-            
-            if (words.length >= 2) {
-                return `${words[0]} ${words[1]}`;
-            } else if (words.length === 1) {
-                return words[0];
+        // FUNGSI FILTER OPERATOR KETAT DIGIFLAZZ
+        function loadKategoriLokalByOperator(operatorKey) {
+            if (!masterProduk || masterProduk.length === 0) {
+                masterProduk = JSON.parse(localStorage.getItem('admin_master_produk') || '[]');
             }
-            return "Paket Lain";
-        }
 
-        function loadKategoriByOperator(operatorKey) {
-            showLoading(`Mencari paket <b>${operatorKey}</b>...`);
+            const opKey = operatorKey.toUpperCase();
 
-            fetch('/api/digiflazz/price-list', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ brand: operatorKey })
-            })
-            .then(res => res.json())
-            .then(response => {
-                if (response.status === 'success' && response.data && response.data.length > 0) {
-                    
-                    // Filter: Aktif & Hanya Paket Data/Internet (MEMBLOKIR PULSA REGULER/TRANSFER/Masa Aktif)
-                    const validProducts = response.data.filter(p => {
-                        if (!p.buyer_product_status || !p.seller_product_status) return false;
+            const validProducts = masterProduk.filter(p => {
+                const brandP = String(p.brand || p.operator || '').toUpperCase();
 
-                        const categoryLower = (p.category || "").toLowerCase();
-                        const nameLower = (p.product_name || "").toLowerCase();
-
-                        const isBlocked = categoryLower.includes("pulsa") || 
-                                          nameLower.includes("pulsa") || 
-                                          categoryLower.includes("sms") || 
-                                          categoryLower.includes("masa aktif");
-
-                        return !isBlocked;
-                    });
-
-                    if (validProducts.length === 0) {
-                        emptyState.style.display = 'none';
-                        alert(`Paket Data ${operatorKey} sedang tidak tersedia.`);
-                        return;
-                    }
-
-                    // Kelompokkan produk secara otomatis menjadi Tab Inset
-                    groupedProducts = {};
-                    validProducts.forEach(prod => {
-                        let tabGroup = extractSubCategory(prod.product_name, operatorKey);
-                        if (!groupedProducts[tabGroup]) {
-                            groupedProducts[tabGroup] = [];
-                        }
-                        groupedProducts[tabGroup].push(prod);
-                    });
-
-                    const categories = Object.keys(groupedProducts);
-                    renderTabs(categories);
-
-                } else {
-                    emptyState.style.display = 'none';
-                    alert("Gagal memuat produk. Pastikan file .env sudah diisi Username & API Key Digiflazz.");
+                if (opKey === 'TELKOMSEL') {
+                    return brandP.includes('TELKOMSEL') || brandP.includes('TSEL') || brandP.includes('BY.U') || brandP.includes('BYU');
+                } else if (opKey === 'INDOSAT') {
+                    return brandP.includes('INDOSAT') || brandP.includes('ISAT');
+                } else if (opKey === 'XL') {
+                    return brandP === 'XL' || brandP.includes('XL ');
+                } else if (opKey === 'AXIS') {
+                    return brandP.includes('AXIS');
+                } else if (opKey === 'TRI') {
+                    return brandP.includes('THREE') || brandP.includes('TRI') || brandP === '3';
+                } else if (opKey === 'SMARTFREN') {
+                    return brandP.includes('SMART') || brandP.includes('SF');
                 }
-            })
-            .catch(err => {
-                console.error(err);
-                emptyState.style.display = 'none';
-                alert("Gagal terhubung ke server backend lokal.");
+
+                return brandP.includes(opKey);
             });
+
+            if (validProducts.length === 0) {
+                emptyState.style.display = 'flex';
+                stateIcon.className = "fa-solid fa-box-open";
+                emptyText.innerHTML = `Belum ada produk tersedia untuk <b>${operatorKey}</b>.`;
+                popupTopContainer.style.display = 'block';
+                insetTabsWrapper.style.display = 'none';
+                productList.style.display = 'none';
+                return;
+            }
+
+            groupedProducts = {};
+            validProducts.forEach(prod => {
+                let subGroup = prod.category || prod.type || prod.subkategori || 'Umum';
+                if (!groupedProducts[subGroup]) {
+                    groupedProducts[subGroup] = [];
+                }
+                groupedProducts[subGroup].push(prod);
+            });
+
+            const subCategories = Object.keys(groupedProducts);
+            renderTabs(subCategories);
         }
 
         function renderTabs(categoriesArray) {
@@ -798,7 +797,7 @@
 
         window.applyPriceSort = function() {
             if (!currentRawProducts || currentRawProducts.length === 0) {
-                productList.innerHTML = `<div style="text-align:center; color:var(--text-muted); padding:16px; font-size:0.75rem;">Tidak ada produk di kategori ini.</div>`;
+                productList.innerHTML = `<div style="text-align:center; color:var(--text-muted); padding:16px; font-size:0.75rem;">Tidak ada produk di sub-kategori ini.</div>`;
                 return;
             }
             
@@ -806,8 +805,8 @@
             var sortedProducts = [...currentRawProducts];
             
             sortedProducts.sort((a, b) => {
-                let priceA = parseFloat(a.price || 0);
-                let priceB = parseFloat(b.price || 0);
+                let priceA = parseFloat(a.jual || a.price || a.harga || 0);
+                let priceB = parseFloat(b.jual || b.price || b.harga || 0);
                 return sortValue === 'asc' ? priceA - priceB : priceB - priceA;
             });
 
@@ -822,35 +821,93 @@
                 return; 
             }
 
-            if (confirm(`Konfirmasi Pembelian:\n${productName}\nNomor: ${nomorTujuan}\nHarga: Rp ${parseInt(price).toLocaleString('id-ID')}`)) {
-                fetch('/api/digiflazz/checkout', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ buyer_sku_code: skuCode, customer_no: nomorTujuan })
-                })
-                .then(res => res.json())
-                .then(res => {
-                    if (res.status === 'success') {
-                        alert('Transaksi berhasil diproses!');
-                        location.reload();
-                    } else {
-                        alert('Gagal: ' + (res.message || 'Terjadi kesalahan'));
-                    }
-                })
-                .catch(() => alert('Terjadi kesalahan koneksi.'));
-            }
+            dataCheckoutAktif = {
+                buyer_sku_code: skuCode,
+                product_name: productName,
+                customer_no: nomorTujuan,
+                ref_id: 'TRX-' + Date.now()
+            };
+
+            document.getElementById('sheet_nama_produk').innerText = productName;
+            document.getElementById('sheet_no_tujuan').innerText = nomorTujuan;
+            document.getElementById('sheet_total_harga').innerText = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(price);
+
+            const backdrop = document.getElementById('checkoutBackdrop');
+            const sheet = document.getElementById('checkoutBottomSheet');
+
+            backdrop.classList.add('show');
+            setTimeout(() => { sheet.classList.add('active'); }, 10);
         }
 
+        function tutupCheckoutSheet() {
+            const backdrop = document.getElementById('checkoutBackdrop');
+            const sheet = document.getElementById('checkoutBottomSheet');
+
+            sheet.classList.remove('active');
+            setTimeout(() => { backdrop.classList.remove('show'); }, 300);
+        }
+
+        async function eksekusiCheckoutDigiflazz() {
+        const btn = document.getElementById('btnProsesBayar');
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Memproses...';
+
+    // Payload disesuaikan dengan Route Checkout
+    const payload = {
+        buyer_sku_code: dataCheckoutAktif.buyer_sku_code,
+        customer_no: dataCheckoutAktif.customer_no,
+        user_hp: dataCheckoutAktif.customer_no, // Menggunakan nomor tujuan sebagai user_hp
+        nama_produk: dataCheckoutAktif.product_name,
+        harga_jual: dataCheckoutAktif.price
+    };
+
+    try {
+        const response = await fetch('/api/digiflazz/checkout', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+
+        const res = await response.json();
+
+        if (res.status === 'success' && res.data) {
+            tutupCheckoutSheet();
+            alert('✅ Transaksi Berhasil Diproses!\nRef ID: ' + res.data.ref_id + '\nStatus: ' + res.data.status);
+            
+            if (typeof loadSaldoDigiflazz === 'function') loadSaldoDigiflazz();
+            
+            // Reset input
+            document.getElementById('phoneInput').value = '';
+            document.getElementById('operatorBadge').style.display = 'none';
+            document.getElementById('popupTopContainer').style.display = 'none';
+        } else {
+            alert('❌ Gagal Transaksi: ' + (res.message || 'Terjadi kesalahan'));
+        }
+    } catch (err) {
+        console.error(err);
+        alert('❌ Gagal terhubung ke Server VPS');
+    } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fa-solid fa-shield-halved"></i> Bayar Sekarang';
+    }
+}
+        // FUNGSI RENDER CARDS PRODUK SINKRON DIGIFLAZZ
         function renderProdukCards(produkList) {
             var html = "";
             produkList.forEach((prod) => {
-                let harga = prod.price || 0;
+                let harga = prod.jual || prod.price || prod.harga || 0;
                 var hargaFormatted = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(harga);
                 
+                var namaProduk = prod.product_name || prod.nama_produk || prod.nama || 'Produk';
+                var skuProduk = prod.buyer_sku_code || prod.sku || '';
+
+                var namaClean = String(namaProduk).replace(/'/g, "\\'").replace(/"/g, '\\"');
+                var skuClean = String(skuProduk).replace(/'/g, "\\'").replace(/"/g, '\\"');
+
                 html += `
-                    <div class="product-card" onclick="prosesBeli('${prod.buyer_sku_code}', '${prod.product_name}', ${harga})">
+                    <div class="product-card" onclick="prosesBeli('${skuClean}', '${namaClean}', ${harga})">
                         <div class="product-info">
-                            <div class="product-title">${prod.product_name}</div>
+                            <div class="product-title">${namaProduk}</div>
                             <div class="product-price">${hargaFormatted}</div>
                         </div>
                         <div class="product-action"><i class="fa-solid fa-chevron-right"></i></div>
@@ -865,10 +922,6 @@
             setTimeout(() => {
                 cardWrapper.scrollIntoView({ behavior: 'smooth', block: 'start' });
             }, 300);
-        });
-
-        inputPhone.addEventListener('blur', () => {
-            document.body.style.paddingBottom = "calc(var(--bottom-nav-height) + 20px)";
         });
 
         function checkOperator(e) {
@@ -898,7 +951,7 @@
 
                 if (currentOperator !== detectedOp) {
                     currentOperator = detectedOp; 
-                    loadKategoriByOperator(detectedOp);
+                    loadKategoriLokalByOperator(detectedOp);
                     
                     setTimeout(() => {
                         walletSection.scrollIntoView({ behavior: 'smooth', block: 'start' });

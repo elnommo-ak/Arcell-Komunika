@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="id" dir="ltr">
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+  <meta charset="utf-8">
+  <title>Detail Transaksi - Arcell Komunika</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+  
+  <style media="screen">
+    :root {
+      --accent-blue: #0088FF;
+      --bg-color: #EBF1F5;
+      --text-dark: #2D3748;
+      --text-muted: #718096;
+      
+      --neo-shadow-out: 8px 8px 16px #c5d0db, -8px -8px 16px #ffffff;
+      --neo-shadow-out-sm: 4px 4px 8px #c5d0db, -4px -4px 8px #ffffff;
+      --neo-shadow-in: inset 3px 3px 6px #c5d0db, inset -3px -3px 6px #ffffff;
+      --font-family: 'Poppins', sans-serif;
+    }
+
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+    body {
+      background-color: var(--bg-color);
+      color: var(--text-dark);
+      font-family: var(--font-family);
+      font-size: 13px;
+      margin: 0; padding: 0;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .header-status { padding: 20px 15px 10px; }
+
+    .card-status {
+      background-color: var(--bg-color);
+      border-radius: 20px;
+      box-shadow: var(--neo-shadow-out);
+      padding: 18px;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      text-align: center; border: none;
+    }
+
+    .icon-wrapper-status {
+      width: 48px; height: 48px; border-radius: 50%;
+      background: var(--bg-color);
+      box-shadow: var(--neo-shadow-out-sm);
+      display: flex; align-items: center; justify-content: center; margin-bottom: 8px;
+    }
+
+    .status-label {
+      font-size: 10px; text-transform: uppercase;
+      letter-spacing: 0.8px; color: var(--text-muted); font-weight: 600;
+    }
+
+    .status-value {
+      font-size: 16px; font-weight: 700; color: var(--accent-blue);
+      text-transform: capitalize;
+    }
+
+    .status-value.success { color: #28a745; }
+    .status-value.pending { color: #ffc107; }
+    .status-value.failed { color: #dc3545; }
+
+    .container-fluid { padding-left: 15px; padding-right: 15px; padding-bottom: 25px; }
+
+    .card {
+      background-color: var(--bg-color);
+      border-radius: 20px;
+      box-shadow: var(--neo-shadow-out);
+      border: none; margin-top: 24px; margin-bottom: 0px;
+    }
+
+    .card-body { padding: 20px 18px 18px; position: relative; }
+
+    .card-title-neo-container {
+      display: flex; align-items: center; justify-content: center;
+      margin-top: -34px; margin-bottom: 15px;
+    }
+
+    .card-title-neo {
+      font-size: 11px; font-weight: 700; color: var(--accent-blue);
+      text-transform: uppercase; letter-spacing: 0.8px; background: var(--bg-color);
+      padding: 6px 20px; border-radius: 50px; box-shadow: var(--neo-shadow-out-sm);
+      border: 1px solid rgba(255, 255, 255, 0.6); display: inline-flex; align-items: center; gap: 6px;
+    }
+
+    .detail-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+    .detail-row:last-child { margin-bottom: 0; }
+
+    .label-teks { font-size: 12px; font-weight: 500; color: var(--text-muted); flex: 1; }
+    .value-teks { font-size: 12px; font-weight: 600; color: var(--text-dark); text-align: right; flex: 1.5; word-break: break-word; }
+    .value-id { color: var(--accent-blue) !important; font-weight: 700; }
+
+    .produk-item {
+      padding: 14px; border-radius: 15px; background-color: var(--bg-color);
+      box-shadow: var(--neo-shadow-in); margin-bottom: 12px;
+    }
+    .produk-item:last-child { margin-bottom: 0; }
+
+    .resi-container {
+      margin-top: 10px; padding: 10px; background-color: var(--bg-color);
+      border-radius: 12px; box-shadow: var(--neo-shadow-in); text-align: center;
+    }
+
+    .resi-label { font-size: 10px; font-weight: 600; color: var(--accent-blue); margin-bottom: 2px; }
+    .resi-value { font-size: 13px; font-weight: 700; color: var(--text-dark); word-break: break-all; display: flex; align-items: center; justify-content: center; gap: 6px; }
+
+    .copy-btn {
+      color: var(--accent-blue); font-size: 13px; padding: 2px 6px;
+      background: none; border: none; cursor: pointer;
+    }
+
+    .total-label { font-weight: 600; color: var(--text-dark); }
+    .total-value { font-size: 15px; font-weight: 700; color: var(--accent-blue); }
+    .note-teks { font-size: 10px; color: var(--text-muted); font-style: italic; text-align: right; margin-top: 6px; margin-bottom: 0; }
+
+    .btn-container { position: fixed; bottom: 15px; left: 0; width: 100%; padding: 0 15px; z-index: 100; }
+
+    .btn-action {
+      background-color: var(--bg-color); border-radius: 50px; box-shadow: var(--neo-shadow-out);
+      color: var(--accent-blue); font-weight: 700; font-size: 13px; text-transform: uppercase;
+      letter-spacing: 0.5px; border: none; padding: 14px 0; width: 100%;
+      display: flex; align-items: center; justify-content: center; text-decoration: none !important;
+    }
+    .btn-action:active { box-shadow: var(--neo-shadow-in); transform: scale(0.98); color: var(--accent-blue); }
+  </style>
+</head>
+
+<body>
+
+  <div class="container-fluid">
+    
+    <!-- 1. STATUS KIRIM -->
+    <div class="header-status">
+      <div class="card-status">
+        <div class="icon-wrapper-status" id="status_icon_container">
+          <i class="bi bi-clock-history" id="status_icon" style="font-size: 22px; color: var(--accent-blue);"></i>
+        </div>
+        <div class="status-label">Status Kirim</div>
+        <div class="status-value" id="status_kirim">Memuat...</div>
+      </div>
+    </div>
+
+    <!-- 2. INFO TRANSAKSI -->
+    <div class="card">
+      <div class="card-body">
+        <div class="card-title-neo-container">
+          <div class="card-title-neo">
+            <i class="bi bi-info-circle-fill"></i> Informasi Pesanan
+          </div>
+        </div>
+        
+        <div class="detail-row">
+          <span class="label-teks">ID Transaksi</span>
+          <span class="value-teks value-id" id="info_ref_id">-</span>
+        </div>
+        <div class="detail-row">
+          <span class="label-teks">Tanggal / Waktu</span>
+          <span class="value-teks" id="info_dibuat_pada">-</span>
+        </div>
+        <div class="detail-row">
+          <span class="label-teks">Kategori</span>
+          <span class="value-teks" id="info_ekspedisi">-</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 3. DETAIL PRODUK -->
+    <div class="card">
+      <div class="card-body">
+        <div class="card-title-neo-container">
+          <div class="card-title-neo">
+            <i class="bi bi-box-seam-fill"></i> Rincian Produk
+          </div>
+        </div>
+        <div id="keranjang_transaksi">
+          <div style="text-align: center; color: var(--text-muted);">Memuat rincian produk...</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 4. PEMBAYARAN -->
+    <div class="card">
+      <div class="card-body">
+        <div class="card-title-neo-container">
+          <div class="card-title-neo">
+            <i class="bi bi-wallet2"></i> Detail Pembayaran
+          </div>
+        </div>
+        
+        <div class="detail-row mb-3">
+          <span class="label-teks">Metode Bayar</span>
+          <span class="value-teks text-capitalize" id="penerima_bank">Saldo Member</span>
+        </div>
+        
+        <div class="produk-item">
+          <div class="detail-row mb-1">
+            <span class="label-teks total-label">Total Transaksi</span>
+            <span class="value-teks total-value" id="total_transaksi">Rp0</span>
+          </div>
+
+          <div class="detail-row pt-2 mt-1" style="border-top: 1px dashed #cbd5e0;">
+            <span class="label-teks" style="font-size: 11px;">Harga Jual Rekomendasi</span>
+            <span class="value-teks" style="font-size: 13px; color: #28a745;" id="harga_jual_rekomendasi">Rp0</span>
+          </div>
+          <p class="note-teks">*Harga perkiraan jangan dijadikan acuan</p>
+        </div>
+      </div>
+    </div>
+
+    <div style="height: 70px;"></div>
+
+  </div>
+
+  <!-- 5. TOMBOL STRUK FLOATING -->
+  <div id="cetak-struk" class="btn-container"></div>
+
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+  <script type="text/javascript">
+    $(document).ready(function(){
+      var urlParams = new URLSearchParams(window.location.search);
+      var refId = urlParams.get('id') || '';
+
+      var targetUrl = window.location.origin + '/api/transaction/detail?id=' + encodeURIComponent(refId) + '&t=' + Date.now();
+
+      $.ajax({
+        url: targetUrl,
+        type: 'GET',
+        dataType: 'json',
+        success: function(res) {
+          if (res && res.status === 'success' && res.data) {
+            renderDataDetail(res.data);
+          } else {
+            showErrorState("Data Tidak Ditemukan", "Transaksi tidak ada di data lokal.");
+          }
+        },
+        error: function(xhr, status, error) {
+          console.error("AJAX Error:", error);
+          showErrorState("Gagal Memuat Data", "Terjadi kesalahan respon server.");
+        }
+      });
+    });
+
+    function showErrorState(title, message) {
+      $('#status_kirim').text(title).attr('class', 'status-value failed');
+      $('#status_icon').attr('class', 'bi bi-x-circle-fill').css('color', '#dc3545');
+      $('#info_ref_id').text('-');
+      $('#keranjang_transaksi').html('<div style="text-align:center; color:var(--text-muted); padding:15px;">' + message + '</div>');
+    }
+
+    function renderDataDetail(data) {
+      $('#info_ref_id').text(data.nomor_pembayaran || '-');
+      
+      var statusKirim = data.status_pengiriman || "DIPROSES";
+      $('#status_kirim').text(statusKirim);
+      
+      var statusLower = statusKirim.toLowerCase();
+      if (statusLower === "selesai" || statusLower === "sukses" || statusLower === "lunas") {
+        $('#status_kirim').attr('class', 'status-value success');
+        $('#status_icon').attr('class', 'bi bi-check-circle-fill').css('color', '#28a745');
+      } else if (statusLower === "batal" || statusLower === "gagal") {
+        $('#status_kirim').attr('class', 'status-value failed');
+        $('#status_icon').attr('class', 'bi bi-x-circle-fill').css('color', '#dc3545');
+      } else {
+        $('#status_kirim').attr('class', 'status-value pending');
+        $('#status_icon').attr('class', 'bi bi-clock-history').css('color', '#ffc107');
+      }
+
+      if (data.tanggal_buat) {
+        $('#info_dibuat_pada').text(data.tanggal_buat);
+      }
+
+      var itemUtama = (data.data_transaksi && data.data_transaksi[0]) ? data.data_transaksi[0] : null;
+      var prodUtama = (itemUtama && itemUtama.data_produk) ? itemUtama.data_produk[0] : null;
+      var namaProduk = prodUtama ? prodUtama.nama_barang : 'Produk PPOB';
+
+      var kategori = "Produk Digital";
+      if (/pln|token|listrik/i.test(namaProduk)) kategori = "Token PLN";
+      else if (/game|diamond|mlbb|ff|pubg/i.test(namaProduk)) kategori = "Voucher Game";
+      else if (/gb|mb|data|kuota/i.test(namaProduk)) kategori = "Paket Data";
+      else if (/pulsa|transfer/i.test(namaProduk)) kategori = "Pulsa";
+
+      $('#info_ekspedisi').text(kategori);
+
+      var htmlProduk = '<div class="produk-item">' +
+        '<div class="detail-row"><span class="label-teks">Nama Produk</span><span class="value-teks">' + namaProduk + '</span></div>' +
+        '<div class="detail-row"><span class="label-teks">Harga</span><span class="value-teks value-id">' + formatRupiah(data.total_transaksi) + '</span></div>';
+
+      if (prodUtama && prodUtama.catatan && prodUtama.catatan !== '-') {
+        htmlProduk += '<div class="detail-row">' +
+          '<span class="label-teks">Nomor Tujuan</span>' +
+          '<div class="value-teks d-flex align-items-center justify-content-end">' +
+            '<button onclick="copyText(\'' + prodUtama.catatan + '\', this)" class="copy-btn mr-1" title="Salin"><i class="bi bi-copy"></i></button>' +
+            '<span>' + prodUtama.catatan + '</span>' +
+          '</div></div>';
+      }
+
+      if (prodUtama && prodUtama.nomor_resi && prodUtama.nomor_resi !== '-') {
+        htmlProduk += '<div class="resi-container">' +
+          '<div class="resi-label">Nomor Resi / SN</div>' +
+          '<div class="resi-value"><span>' + prodUtama.nomor_resi + '</span>' +
+            '<button onclick="copyText(\'' + prodUtama.nomor_resi + '\', this)" class="copy-btn" title="Salin SN"><i class="bi bi-copy"></i></button>' +
+          '</div></div>';
+      }
+
+      htmlProduk += '</div>';
+      $('#keranjang_transaksi').html(htmlProduk);
+
+      var total = data.total_transaksi || 0;
+      $('#total_transaksi').text(formatRupiah(total));
+
+      var harga6Persen = total * 1.06;
+      var hargaBulat = Math.round(harga6Persen / 1000) * 1000;
+      $('#harga_jual_rekomendasi').text(formatRupiah(hargaBulat));
+
+      if (statusLower === "selesai" || statusLower === "sukses" || statusLower === "lunas") {
+        $('#cetak-struk').html('<button onclick="window.print()" class="btn btn-action"><i class="bi bi-receipt-cutoff mr-2"></i> Cetak / Simpan Struk</button>');
+      }
+    }
+
+    function copyText(teks, btn) {
+      if (navigator.clipboard) {
+        navigator.clipboard.writeText(teks);
+      }
+      var $icon = $(btn).find('i');
+      $icon.removeClass('bi-copy').addClass('bi-check2-circle').css('color', '#28a745');
+      setTimeout(function() {
+        $icon.removeClass('bi-check2-circle').addClass('bi-copy').css('color', '');
+      }, 1500);
+    }
+
+    function formatRupiah(angka) {
+      if (!angka) return "Rp0";
+      return 'Rp' + parseInt(angka).toLocaleString('id-ID');
+    }
+  </script>
+</body>
+</html>
+

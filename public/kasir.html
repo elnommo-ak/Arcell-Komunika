@@ -1,0 +1,954 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Kasir & POS Faktur - Arcell Komunika</title>
+    <!-- FontAwesome & Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+    <!-- PROTEKSI WAJIB LOGIN -->
+    <script>
+      (function() {
+          const isLoggedIn = localStorage.getItem('isLoggedIn');
+          if (isLoggedIn !== 'true') {
+              window.location.href = 'akun.html';
+          }
+      })();
+    </script>
+
+    <style>
+        * {
+            margin: 0; padding: 0; box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        :root {
+            --bg-color: #e6eaf0;
+            --neu-light: #ffffff;
+            --neu-dark: #babecc;
+            --text-main: #4a5568;
+            --text-muted: #8c98a9;
+            --text-light: #a0aec0;
+            --primary: #7052ff;
+            --secondary: #3182ce;
+            --success: #10b981;
+            --success-bg: #d1fae5;
+            --danger: #ef4444;
+            --danger-bg: #fee2e2;
+            --info: #00a3c4;
+            --bottom-nav-height: 70px;
+            
+            --shadow-out-1: 6px 6px 12px var(--neu-dark), -6px -6px 12px var(--neu-light);
+            --shadow-out-2: 3px 3px 6px var(--neu-dark), -3px -3px 6px var(--neu-light);
+            --shadow-in-1: inset 3px 3px 6px var(--neu-dark), inset -3px -3px 6px var(--neu-light);
+            --shadow-in-2: inset 2px 2px 4px var(--neu-dark), inset -2px -2px 4px var(--neu-light);
+        }
+
+        body { 
+            background-color: var(--bg-color); 
+            color: var(--text-main); 
+            padding-bottom: calc(var(--bottom-nav-height) + 20px); 
+            min-height: 100vh;
+        }
+        ::-webkit-scrollbar { width: 0px; background: transparent; }
+
+        .header { 
+            position: sticky; top: 0; z-index: 99;
+            background-color: var(--bg-color); padding: 15px 20px 10px 20px; 
+        }
+        .header-top { display: flex; justify-content: space-between; align-items: center; }
+        .user-profile { display: flex; align-items: center; gap: 12px; }
+        .profile-img {
+            width: 44px; height: 44px; border-radius: 50%;
+            background-color: var(--bg-color); box-shadow: var(--shadow-out-2);
+            border: 2px solid var(--bg-color); object-fit: cover; padding: 2px;
+        }
+        .user-info .greeting { font-size: 0.72rem; color: var(--text-muted); font-weight: 600; }
+        .user-info .username { font-size: 0.98rem; font-weight: 800; color: var(--text-main); }
+        
+        .menu-btn {
+            width: 42px; height: 42px; display: flex; align-items: center; justify-content: center;
+            text-decoration: none; background: var(--bg-color); border-radius: 50%; color: var(--text-main);
+            box-shadow: var(--shadow-out-2); position: relative; cursor: pointer;
+            transition: all 0.2s ease-in-out; border: none; font-size: 0.95rem;
+        }
+        .menu-btn:active { box-shadow: var(--shadow-in-2); transform: scale(0.96); color: var(--primary); }
+
+        .drawer-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(74, 85, 104, 0.2); backdrop-filter: blur(4px); z-index: 999; opacity: 0; visibility: hidden; transition: all 0.3s ease;
+        }
+        .drawer-overlay.open { opacity: 1; visibility: visible; }
+
+        .slide-menu {
+            position: fixed; top: 0; left: -290px; width: 290px; height: 100%;
+            background: var(--bg-color); z-index: 1000; box-shadow: 10px 0 30px rgba(0,0,0,0.08);
+            transition: left 0.35s cubic-bezier(0.25, 0.8, 0.25, 1); display: flex; flex-direction: column;
+            padding: 24px; overflow-y: auto;
+        }
+        .slide-menu.open { left: 0; }
+
+        .drawer-header {
+            display: flex; align-items: center; gap: 12px; padding-bottom: 20px;
+            border-bottom: 2px dashed var(--neu-dark); margin-bottom: 15px;
+        }
+        .drawer-avatar {
+            width: 50px; height: 50px; border-radius: 50%; box-shadow: var(--shadow-out-2);
+            object-fit: cover; border: 2px solid var(--bg-color);
+        }
+        .drawer-title { font-size: 0.95rem; font-weight: 800; color: var(--text-main); }
+        .drawer-subtitle { font-size: 0.65rem; color: var(--text-muted); font-weight: 600; margin-top: 2px; }
+
+        .drawer-list { display: flex; flex-direction: column; gap: 10px; }
+        .drawer-item {
+            display: flex; align-items: center; gap: 14px; padding: 12px 16px;
+            background: var(--bg-color); border-radius: 14px; box-shadow: var(--shadow-out-2);
+            text-decoration: none; color: var(--text-main); font-size: 0.8rem; font-weight: 800;
+            transition: all 0.2s ease; cursor: pointer; border: none; width: 100%; text-align: left;
+        }
+        .drawer-item:active { box-shadow: var(--shadow-in-2); transform: scale(0.97); color: var(--primary); }
+        .drawer-item i { font-size: 1rem; width: 20px; text-align: center; color: var(--primary); }
+        .drawer-item.danger { color: var(--danger); }
+        .drawer-item.danger i { color: var(--danger); }
+
+        #app { padding: 0 16px; margin-top: 10px; }
+
+        .neo-input-box {
+            display: flex; align-items: center; padding: 12px 16px; gap: 12px; background: var(--bg-color); border-radius: 16px;
+            box-shadow: var(--shadow-in-1); transition: box-shadow 0.3s ease;
+        }
+        .neo-input-box i { color: var(--text-light); font-size: 1rem; width: 20px; text-align: center;}
+        .neo-input-box select { 
+            flex: 1; border: none; background: transparent; outline: none; font-size: 0.95rem; font-weight: 700; color: var(--text-main); width: 100%;
+        }
+
+        .pos-receipt-card {
+            background: #ffffff; border-radius: 16px; padding: 18px 15px; margin-bottom: 16px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.06); border: 1px solid #e2e8f0; position: relative; font-family: 'Courier New', Courier, monospace;
+        }
+        .pos-header { text-align: center; border-bottom: 2px dashed #cbd5e1; padding-bottom: 12px; margin-bottom: 12px; }
+        .pos-store-name { font-size: 1.1rem; font-weight: 900; color: #1e293b; letter-spacing: 0.5px; font-family: -apple-system, sans-serif; }
+        .pos-store-sub { font-size: 0.68rem; color: #64748b; margin-top: 2px; font-family: -apple-system, sans-serif; }
+
+        .pos-meta-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 12px; font-size: 0.72rem; color: #334155; font-family: -apple-system, sans-serif; }
+        .pos-meta-field { display: flex; flex-direction: column; }
+        .pos-meta-label { font-size: 0.62rem; font-weight: 700; color: #94a3b8; text-transform: uppercase; }
+        .pos-meta-input {
+            border: none; border-bottom: 1.5px dashed #cbd5e1; padding: 4px 0; font-size: 0.75rem; font-weight: 700; color: #1e293b; outline: none; background: transparent; width: 100%; font-family: -apple-system, sans-serif;
+        }
+        .pos-meta-input:focus { border-bottom-color: var(--primary); }
+
+        .pos-table-header {
+            display: grid; grid-template-columns: 2fr 1fr 1.2fr 1.2fr 30px; gap: 4px; font-size: 0.65rem; font-weight: 800; color: #64748b; border-bottom: 1px solid #e2e8f0; padding-bottom: 6px; margin-bottom: 8px; text-transform: uppercase; font-family: -apple-system, sans-serif;
+        }
+
+        .pos-item-row { display: grid; grid-template-columns: 2fr 1fr 1.2fr 1.2fr 30px; gap: 4px; align-items: center; margin-bottom: 8px; padding-bottom: 6px; border-bottom: 1px dashed #f1f5f9; }
+        .pos-item-row input {
+            width: 100%; border: 1px solid #cbd5e1; border-radius: 6px; padding: 5px 6px; font-size: 0.72rem; font-weight: 700; color: #0f172a; outline: none; background: #f8fafc;
+        }
+        .pos-item-row input:focus { border-color: var(--primary); background: #fff; }
+        .pos-item-row .inp-modal { color: #dc2626; }
+        .pos-item-row .inp-jual { color: #16a34a; }
+
+        .btn-remove-item { background: transparent; border: none; color: var(--danger); cursor: pointer; font-size: 0.85rem; padding: 2px 6px; }
+
+        .pos-summary-box { border-top: 2px dashed #cbd5e1; padding-top: 10px; margin-top: 12px; font-family: -apple-system, sans-serif; }
+        .pos-summary-row { display: flex; justify-content: space-between; align-items: center; font-size: 0.78rem; font-weight: 700; margin-bottom: 6px; color: #475569; }
+        .pos-summary-row.grand-total { font-size: 1.05rem; font-weight: 900; color: #0f172a; border-top: 1px solid #e2e8f0; padding-top: 6px; margin-top: 6px; }
+
+        .pos-bayar-box { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 10px; margin-top: 10px; }
+
+        .faktur-group-card {
+            background: #ffffff; border-radius: 16px; margin-bottom: 12px; box-shadow: var(--shadow-out-2); border: 1px solid rgba(226, 232, 240, 0.8); overflow: hidden; transition: all 0.25s ease;
+        }
+        .faktur-group-header { padding: 14px 16px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; background: #ffffff; }
+
+        .faktur-fullscreen-overlay {
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(74, 85, 104, 0.3); backdrop-filter: blur(4px); z-index: 9999; display: flex; align-items: flex-end; justify-content: center; opacity: 0; visibility: hidden; transition: opacity 0.25s ease, visibility 0.25s ease;
+        }
+        .faktur-fullscreen-overlay.open { opacity: 1; visibility: visible; }
+        .faktur-fullscreen-card {
+            background: #ffffff; width: 100%; height: 100%; max-width: 500px; display: flex; flex-direction: column; box-shadow: 0 -10px 30px rgba(0,0,0,0.15); animation: slideUpModal 0.3s ease forwards; overflow: hidden;
+        }
+        @keyframes slideUpModal { from { transform: translateY(100%); } to { transform: translateY(0); } }
+        .faktur-fullscreen-header { padding: 14px 18px; background: #f8fafc; border-bottom: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center; }
+        .faktur-fullscreen-header .title { font-size: 0.95rem; font-weight: 800; color: #0f172a; display: flex; align-items: center; gap: 8px; }
+        .faktur-fullscreen-close { background: #e2e8f0; border: none; width: 34px; height: 34px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #475569; cursor: pointer; font-size: 1rem; transition: 0.2s; }
+        .faktur-fullscreen-close:active { transform: scale(0.9); background: #cbd5e1; }
+        .faktur-fullscreen-body { flex: 1; overflow-y: auto; padding: 18px; background: #f1f5f9; }
+        .faktur-fullscreen-footer { padding: 12px 18px; background: #ffffff; border-top: 1px solid #e2e8f0; display: flex; flex-direction: column; gap: 8px; }
+
+        .neo-btn {
+            width: 100%; padding: 14px; border: none; border-radius: 16px; background: var(--primary); color: white; font-weight: 800; font-size: 0.9rem; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 8px; box-shadow: var(--shadow-out-2); transition: all 0.2s ease; text-decoration: none;
+        }
+        .neo-btn:active { transform: scale(0.97); box-shadow: var(--shadow-in-2); }
+        .neo-btn.secondary { background: var(--bg-color); color: var(--primary); box-shadow: var(--shadow-out-2); }
+        .neo-btn.secondary:active { box-shadow: var(--shadow-in-2); }
+
+        .date-badge { font-size: 0.75rem; font-weight: 800; color: var(--text-main); margin: 16px 0 8px 4px; display: flex; justify-content: space-between; align-items: center;}
+
+        #toast {
+            visibility: hidden; min-width: 250px; background-color: var(--bg-color); color: var(--text-main); text-align: center; border-radius: 20px; padding: 12px 20px; position: fixed; z-index: 99999; left: 50%; bottom: calc(var(--bottom-nav-height) + 15px); transform: translateX(-50%); font-size: 0.8rem; font-weight: 800; box-shadow: var(--shadow-out-1); opacity: 0; transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        }
+        #toast i { margin-right: 6px; font-size: 1rem; }
+        #toast.show { visibility: visible; opacity: 1; }
+        
+        .empty-state { text-align: center; padding: 30px 10px; color: var(--text-muted); font-size: 0.8rem; font-weight: 600; }
+        .empty-state i { font-size: 2.5rem; margin-bottom: 12px; color: var(--neu-dark); }
+
+        .bottom-nav {
+            position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 480px;
+            height: var(--bottom-nav-height); background: var(--bg-color); display: flex; justify-content: space-around;
+            align-items: center; box-shadow: 0 -5px 15px rgba(0,0,0,0.05); border-top-left-radius: 20px;
+            border-top-right-radius: 20px; padding: 0 10px; z-index: 999;
+        }
+        .nav-item {
+            display: flex; flex-direction: column; align-items: center; justify-content: center; text-decoration: none;
+            color: var(--text-muted); font-size: 11px; font-weight: 600; width: 60px; height: 50px;
+            border-radius: 14px; transition: all 0.3s ease; background: var(--bg-color); box-shadow: var(--shadow-out-2);
+        }
+        .nav-item i { font-size: 18px; margin-bottom: 3px; }
+        .nav-item.active { color: var(--primary); box-shadow: var(--shadow-in-1); }
+
+        /* Style Tambahan Filter Digiflazz */
+        .df-select-filter {
+            width: 100%; padding: 8px 10px; border-radius: 10px; border: 1px solid #cbd5e1; font-weight: 700; font-size: 0.75rem; color: #1e293b; background: #fff; outline: none;
+        }
+    </style>
+</head>
+<body>
+
+    <datalist id="customer-suggestions"></datalist>
+
+    <div class="header">
+        <div class="header-top">
+            <div class="user-profile">
+                <img src="https://images.bukaolshop.com/hosting/180774/3b0c09d4696e527913.png" class="profile-img" alt="Logo">
+                <div class="user-info">
+                    <div class="greeting" id="time-greeting">Selamat Datang,</div>
+                    <div class="username">Sahabat Arcell</div>
+                </div>
+            </div>
+            <button class="menu-btn" onclick="toggleDrawer()" title="Menu Utama">
+                <i class="fa-solid fa-bars"></i>
+            </button>
+        </div>
+    </div>
+
+    <div class="drawer-overlay" id="drawer-overlay" onclick="toggleDrawer()"></div>
+    <div class="slide-menu" id="slide-menu">
+        <div class="drawer-header">
+            <img src="https://images.bukaolshop.com/hosting/180774/3b0c09d4696e527913.png" class="drawer-avatar" alt="Logo">
+            <div>
+                <div class="drawer-title">Arcell Komunika</div>
+                <div class="drawer-subtitle">Kasir Pintar</div>
+            </div>
+        </div>
+        <div class="drawer-list">
+            <a href="javascript:void(0)" onclick="fetchDigiflazzProducts()" class="drawer-item"><i class="fa-solid fa-arrows-rotate"></i> Sync Produk Digiflazz</a>
+            <a href="javascript:void(0)" onclick="resetAllData()" class="drawer-item danger"><i class="fa-solid fa-trash-arrow-up"></i> Reset Data Lokal</a>
+            <a href="javascript:void(0)" onclick="logoutApp()" class="drawer-item danger"><i class="fa-solid fa-right-from-bracket"></i> Logout</a>
+        </div>
+    </div>
+
+    <div id="app">
+        <div class="pos-receipt-card" id="printable-pos-receipt">
+            <div class="pos-header">
+                <div class="pos-store-name"><i class="fa-solid fa-store" style="color:var(--primary);"></i> ARCELL KOMUNIKA</div>
+                <div class="pos-store-sub">Struk Penjualan / Nota Kasir</div>
+            </div>
+
+            <div class="pos-meta-grid">
+                <div class="pos-meta-field">
+                    <span class="pos-meta-label">No. Faktur / Nota</span>
+                    <input type="text" class="pos-meta-input" id="faktur-no-inp">
+                </div>
+                <div class="pos-meta-field">
+                    <span class="pos-meta-label">Tanggal</span>
+                    <input type="date" class="pos-meta-input" id="faktur-date-inp">
+                </div>
+                <div class="pos-meta-field" style="grid-column: span 2;">
+                    <span class="pos-meta-label">Nama Pelanggan</span>
+                    <input type="text" class="pos-meta-input" id="faktur-pembeli-inp" list="customer-suggestions" placeholder="Pilih / Ketik Nama Pelanggan..." autocomplete="off">
+                </div>
+            </div>
+
+            <div class="pos-table-header">
+                <span>ITEM</span>
+                <span>QTY</span>
+                <span>MODAL</span>
+                <span>JUAL</span>
+                <span></span>
+            </div>
+
+            <div id="faktur-items-container"></div>
+
+            <div style="display: flex; gap: 8px; margin: 10px 0 14px 0;">
+                <button type="button" class="neo-btn secondary" style="font-size:0.75rem; padding:8px; border-radius:10px; flex: 1;" onclick="addFakturItemRow()">
+                    <i class="fa-solid fa-plus"></i> Manual
+                </button>
+                <button type="button" class="neo-btn" style="font-size:0.75rem; padding:8px; border-radius:10px; flex: 1; background: var(--info);" onclick="openDigiflazzSelector()">
+                    <i class="fa-solid fa-cloud-arrow-down"></i> Produk Digiflazz
+                </button>
+            </div>
+
+            <div class="pos-summary-box">
+                <div class="pos-summary-row">
+                    <span>TOTAL HARGA BARANG:</span>
+                    <span id="faktur-summary-subtotal" style="color:#0f172a; font-weight:800;">Rp 0</span>
+                </div>
+                
+                <div class="pos-summary-row" style="margin-bottom:6px;">
+                    <span style="color:var(--danger);">FAKTUR SEBELUMNYA:</span>
+                    <input type="text" inputmode="numeric" id="faktur-sisa-lama-inp" placeholder="0" style="width:110px; border:1px solid #cbd5e1; border-radius:6px; padding:3px 6px; font-weight:800; font-size:0.75rem; text-align:right; color:var(--danger);" onfocus="handleInputFocus(event)" onblur="handleInputBlur(event)" oninput="calcFakturTotals()">
+                </div>
+
+                <div class="pos-summary-row">
+                    <span>ESTIMASI LABA:</span>
+                    <span id="faktur-summary-laba" style="color:var(--success);">Rp 0</span>
+                </div>
+                <div class="pos-summary-row grand-total">
+                    <span>TOTAL TAGIHAN:</span>
+                    <span id="faktur-summary-jual" style="color:var(--primary);">Rp 0</span>
+                </div>
+
+                <div class="pos-bayar-box">
+                    <div class="pos-summary-row" style="margin-bottom:6px;">
+                        <span>PEMBAYARAN:</span>
+                        <input type="text" inputmode="numeric" id="faktur-bayar-inp" placeholder="0" style="width:110px; border:1px solid #cbd5e1; border-radius:6px; padding:4px 6px; font-weight:800; font-size:0.8rem; text-align:right; color:var(--success);" onfocus="handleInputFocus(event)" onblur="handleInputBlur(event)" oninput="calcKembalian()">
+                    </div>
+                    <div class="pos-summary-row" style="margin-bottom:0;">
+                        <span id="faktur-bayar-status-label">KEMBALIAN:</span>
+                        <span id="faktur-kembalian-val" style="font-weight:900;">Rp 0</span>
+                    </div>
+                </div>
+            </div>
+
+            <div style="margin-top:16px;">
+                <button class="neo-btn" style="font-size:0.8rem; padding:12px; border-radius:12px;" onclick="saveFakturPenjualan()">
+                    <i class="fa-solid fa-floppy-disk"></i> Simpan Faktur
+                </button>
+            </div>
+        </div>
+
+        <div class="date-badge" id="riwayat-faktur-header-badge">Riwayat Faktur Kasir</div>
+
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:12px;">
+            <div class="neo-input-box" style="border-radius:14px; padding:0 12px;">
+                <i class="fa-solid fa-calendar-days" style="color:var(--primary);"></i>
+                <select id="filter-kas-tgl-select" style="padding:10px 0; color:var(--text-main); font-weight:700;" onchange="renderKasTabUI()">
+                    <option value="ALL" selected>Semua Tanggal</option>
+                </select>
+            </div>
+            <div class="neo-input-box" style="border-radius:14px; padding:0 12px;">
+                <i class="fa-solid fa-user-tag" style="color:var(--primary);"></i>
+                <select id="filter-pembeli-select" style="padding:10px 0; color:var(--text-main); font-weight:700;" onchange="renderKasTabUI()">
+                    <option value="ALL" selected>Semua Pelanggan</option>
+                </select>
+            </div>
+        </div>
+
+        <div id="kas-history-list"></div>
+    </div>
+
+    <!-- MODAL DETAIL & KATALOG FULLSCREEN -->
+    <div class="faktur-fullscreen-overlay" id="faktur-fullscreen-modal">
+        <div class="faktur-fullscreen-card">
+            <div class="faktur-fullscreen-header">
+                <div class="title"><i class="fa-solid fa-receipt" style="color:var(--primary);"></i> <span id="faktur-modal-title">Detail Faktur</span></div>
+                <button class="faktur-fullscreen-close" onclick="closeFakturFullscreen()"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="faktur-fullscreen-body" id="faktur-modal-body-content"></div>
+            <div class="faktur-fullscreen-footer" id="faktur-modal-footer-actions"></div>
+        </div>
+    </div>
+
+    <div id="toast"><i class="fa-solid fa-circle-check" style="color:var(--success);"></i> <span id="toast-msg">Berhasil</span></div>
+
+    <!-- BOTTOM NAVIGATION BAR -->
+    <div class="bottom-nav">
+        <a href="index.html" class="nav-item">
+            <i class="fa-solid fa-house"></i>
+            <span>Home</span>
+        </a>
+        <a href="history.html" class="nav-item">
+            <i class="fa-solid fa-clock-rotate-left"></i>
+            <span>History</span>
+        </a>
+        <a href="rekap.html" class="nav-item">
+            <i class="fa-solid fa-chart-line"></i>
+            <span>Rekap</span>
+        </a>
+        <a href="javascript:void(0)" class="nav-item active">
+            <i class="fa-solid fa-cash-register"></i>
+            <span>Kasir</span>
+        </a>
+        <a href="akun.html" class="nav-item">
+            <i class="fa-solid fa-user"></i>
+            <span>Akun</span>
+        </a>
+    </div>
+
+<script>
+    let fakturItemCounter = 0;
+    let loadedItemsCount = 40; // Untuk Pagination Infinite Scroll Digiflazz
+
+    /* =========================================================
+       📌 INTEGRASI DIGIFLAZZ (FIX KEYBOARD & FILTER BRAND/KATEGORI)
+    ========================================================= */
+    const fetchDigiflazzProducts = async () => {
+        showToast("Mengunduh data dari server...");
+        try {
+            const response = await fetch('/api/digiflazz/price-list', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' }
+            });
+
+            if (!response.ok) throw new Error(`HTTP Error Status: ${response.status}`);
+
+            const resData = await response.json();
+
+            if (resData && resData.status === 'success' && Array.isArray(resData.data)) {
+                localStorage.setItem('digiflazz_products', JSON.stringify(resData.data));
+                localStorage.setItem('digiflazz_last_update', new Date().toLocaleString('id-ID'));
+                showToast(`Sukses! ${resData.data.length} produk tersimpan!`);
+                
+                if (document.getElementById("faktur-fullscreen-modal").classList.contains("open")) {
+                    openDigiflazzSelector();
+                }
+            } else {
+                showToast(resData.message || "Gagal mengambil price list", true);
+            }
+        } catch (err) {
+            console.error("Fetch Error:", err);
+            showToast("Gagal terhubung ke Server Node.js!", true);
+        }
+    };
+
+    const getStoredDigiflazzProducts = () => {
+        try { return JSON.parse(localStorage.getItem('digiflazz_products') || '[]'); } 
+        catch (e) { return []; }
+    };
+
+    const openDigiflazzSelector = () => {
+        const products = getStoredDigiflazzProducts();
+        const lastSync = localStorage.getItem('digiflazz_last_update') || 'Belum Pernah';
+
+        document.getElementById("faktur-modal-title").innerText = "Katalog Produk Digiflazz";
+        document.getElementById("faktur-modal-footer-actions").innerHTML = `
+            <button class="neo-btn" style="background:var(--primary);" onclick="fetchDigiflazzProducts()">
+                <i class="fa-solid fa-rotate"></i> Sync Ulang Digiflazz
+            </button>
+        `;
+
+        if (products.length === 0) {
+            document.getElementById("faktur-modal-body-content").innerHTML = `
+                <div class="empty-state">
+                    <i class="fa-solid fa-cloud-arrow-down"></i><br>
+                    Belum ada data produk tersimpan.<br><br>
+                    <button class="neo-btn" style="width:auto; display:inline-flex; padding:10px 18px; font-size:0.8rem;" onclick="fetchDigiflazzProducts()">
+                        <i class="fa-solid fa-download"></i> Unduh Price List Digiflazz
+                    </button>
+                </div>`;
+            document.getElementById("faktur-fullscreen-modal").classList.add("open");
+            return;
+        }
+
+        // Ambil daftar Kategori & Brand Unik
+        const categories = [...new Set(products.map(p => p.category || 'Lainnya'))].sort();
+        const brands = [...new Set(products.map(p => p.brand || 'Lainnya'))].sort();
+
+        let categoryOptions = '<option value="ALL">Semua Kategori</option>';
+        categories.forEach(c => categoryOptions += `<option value="${c}">${c}</option>`);
+
+        let brandOptions = '<option value="ALL">Semua Brand</option>';
+        brands.forEach(b => brandOptions += `<option value="${b}">${b}</option>`);
+
+        // Render struktur utama tanpa me-render ulang input box saat mengetik
+        document.getElementById("faktur-modal-body-content").innerHTML = `
+            <div style="margin-bottom:12px; display:flex; flex-direction:column; gap:8px;">
+                <input type="text" id="df-search-input" placeholder="Cari nama produk, SKU..." 
+                    style="width: 100%; padding: 10px 14px; border-radius: 12px; border: 1px solid #cbd5e1; font-weight:700; font-size:0.82rem; outline:none;"
+                    oninput="filterAndRenderDigiflazzList(true)">
+                
+                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:6px;">
+                    <select id="df-category-select" class="df-select-filter" onchange="filterAndRenderDigiflazzList(true)">
+                        ${categoryOptions}
+                    </select>
+                    <select id="df-brand-select" class="df-select-filter" onchange="filterAndRenderDigiflazzList(true)">
+                        ${brandOptions}
+                    </select>
+                </div>
+
+                <div style="font-size:0.65rem; color:#64748b; text-align:right;">
+                    Sync: <b>${lastSync}</b> | Total: <b>${products.length} Produk</b>
+                </div>
+            </div>
+            <div id="df-product-list-container" style="display:flex; flex-direction:column; gap:8px;"></div>
+            <div id="df-load-more-box" style="margin-top:12px; text-align:center;"></div>
+        `;
+
+        filterAndRenderDigiflazzList(true);
+        document.getElementById("faktur-fullscreen-modal").classList.add("open");
+    };
+
+    const filterAndRenderDigiflazzList = (resetPagination = false) => {
+        if (resetPagination) loadedItemsCount = 40;
+
+        const products = getStoredDigiflazzProducts();
+        const searchVal = (document.getElementById("df-search-input")?.value || '').toLowerCase();
+        const selectedCat = document.getElementById("df-category-select")?.value || 'ALL';
+        const selectedBrand = document.getElementById("df-brand-select")?.value || 'ALL';
+
+        const filtered = products.filter(p => {
+            const matchSearch = (p.product_name || '').toLowerCase().includes(searchVal) || (p.buyer_sku_code || '').toLowerCase().includes(searchVal);
+            const matchCat = selectedCat === 'ALL' || p.category === selectedCat;
+            const matchBrand = selectedBrand === 'ALL' || p.brand === selectedBrand;
+            return matchSearch && matchCat && matchBrand;
+        });
+
+        const listContainer = document.getElementById("df-product-list-container");
+        const loadMoreBox = document.getElementById("df-load-more-box");
+        if (!listContainer) return;
+
+        if (filtered.length === 0) {
+            listContainer.innerHTML = `<div class="empty-state">Produk tidak ditemukan.</div>`;
+            if (loadMoreBox) loadMoreBox.innerHTML = '';
+            return;
+        }
+
+        const visibleItems = filtered.slice(0, loadedItemsCount);
+        let html = '';
+
+        visibleItems.forEach(p => {
+            const hargaModal = p.price || 0;
+            html += `
+                <div style="background:#ffffff; padding:12px; border-radius:12px; border:1px solid #cbd5e1; display:flex; justify-content:space-between; align-items:center;">
+                    <div style="flex:1; padding-right:8px;">
+                        <div style="font-size:0.8rem; font-weight:800; color:#0f172a;">${p.product_name}</div>
+                        <div style="font-size:0.68rem; color:#64748b; margin-top:2px;">
+                            <span style="background:#e2e8f0; padding:2px 6px; border-radius:4px; font-weight:700; color:#334155;">${p.brand}</span>
+                            • ${p.category} | SKU: <b>${p.buyer_sku_code}</b>
+                        </div>
+                    </div>
+                    <div style="text-align:right;">
+                        <div style="font-size:0.85rem; font-weight:900; color:var(--danger);">${formatRp(hargaModal)}</div>
+                        <button class="neo-btn" style="padding:5px 10px; font-size:0.7rem; margin-top:4px; height:auto; border-radius:8px;" 
+                            onclick="selectDigiflazzProduct('${p.buyer_sku_code}')">
+                            + Pilih
+                        </button>
+                    </div>
+                </div>
+            `;
+        });
+
+        listContainer.innerHTML = html;
+
+        // Tampilkan tombol "Muat Lebih Banyak" jika masih ada produk tersisa
+        if (filtered.length > loadedItemsCount) {
+            loadMoreBox.innerHTML = `
+                <button type="button" class="neo-btn secondary" style="font-size:0.75rem; padding:8px;" onclick="loadMoreDigiflazzProducts()">
+                    Muat Lebih Banyak (${filtered.length - loadedItemsCount} Produk Tersisa)
+                </button>
+            `;
+        } else {
+            loadMoreBox.innerHTML = `<div style="font-size:0.7rem; color:#94a3b8; padding:8px;">Menampilkan seluruh ${filtered.length} produk</div>`;
+        }
+    };
+
+    const loadMoreDigiflazzProducts = () => {
+        loadedItemsCount += 40;
+        filterAndRenderDigiflazzList(false);
+    };
+
+    const selectDigiflazzProduct = (skuCode) => {
+        const products = getStoredDigiflazzProducts();
+        const prod = products.find(p => p.buyer_sku_code === skuCode);
+        if (!prod) return;
+
+        fakturItemCounter++;
+        const container = document.getElementById("faktur-items-container");
+        const row = document.createElement("div");
+        row.className = "pos-item-row";
+        row.id = `faktur-item-${fakturItemCounter}`;
+
+        const hargaModal = prod.price || 0;
+        const hargaJual = Math.ceil((hargaModal + 2000) / 500) * 500;
+
+        row.innerHTML = `
+            <div><input type="text" class="faktur-nama-inp" value="${prod.product_name}"></div>
+            <div><input type="number" class="faktur-qty-inp" value="1" min="1" oninput="calcFakturTotals()"></div>
+            <div><input type="text" inputmode="numeric" class="faktur-modal-inp inp-modal" value="${hargaModal.toLocaleString('id-ID')}" onfocus="handleInputFocus(event)" onblur="handleInputBlur(event)" oninput="calcFakturTotals()"></div>
+            <div><input type="text" inputmode="numeric" class="faktur-jual-inp inp-jual" value="${hargaJual.toLocaleString('id-ID')}" onfocus="handleInputFocus(event)" onblur="handleInputBlur(event)" oninput="calcFakturTotals()"></div>
+            <div style="text-align:center;"><button type="button" class="btn-remove-item" onclick="removeFakturItemRow(${fakturItemCounter})"><i class="fa-solid fa-xmark"></i></button></div>
+        `;
+
+        container.appendChild(row);
+        calcFakturTotals();
+        closeFakturFullscreen();
+        showToast("Produk Digiflazz ditambahkan!");
+    };
+
+    /* =========================================================
+       📌 LOGIK KASIR LOKAL & UTILITAS
+    ========================================================= */
+    const getStoredCustomers = () => {
+        try { return JSON.parse(localStorage.getItem('master_customer_list') || '[]'); } 
+        catch (e) { return []; }
+    };
+
+    const saveCustomerName = (nama) => {
+        if (!nama || !nama.trim()) return;
+        const cleanName = nama.trim();
+        if (cleanName.toLowerCase() === "pelanggan umum") return;
+
+        let customers = getStoredCustomers();
+        if (!customers.some(c => c.toLowerCase() === cleanName.toLowerCase())) {
+            customers.unshift(cleanName);
+            localStorage.setItem('master_customer_list', JSON.stringify(customers));
+            updateCustomerDatalist();
+            updateCustomerFilterSelect();
+        }
+    };
+
+    const updateCustomerDatalist = () => {
+        const datalist = document.getElementById('customer-suggestions');
+        if (!datalist) return;
+        datalist.innerHTML = getStoredCustomers().map(c => `<option value="${c}"></option>`).join('');
+    };
+
+    const updateCustomerFilterSelect = () => {
+        const filterSelect = document.getElementById('filter-pembeli-select');
+        if (!filterSelect) return;
+        const currentVal = filterSelect.value || 'ALL';
+        let html = '<option value="ALL">Semua Pelanggan</option><option value="Pelanggan Umum">Pelanggan Umum</option>';
+        getStoredCustomers().forEach(c => { html += `<option value="${c}">${c}</option>`; });
+        filterSelect.innerHTML = html;
+        filterSelect.value = currentVal;
+    };
+
+    const toggleDrawer = () => {
+        document.getElementById('slide-menu').classList.toggle('open');
+        document.getElementById('drawer-overlay').classList.toggle('open');
+    };
+
+    const logoutApp = () => {
+        if(confirm("Apakah Anda yakin ingin keluar / logout?")) {
+            localStorage.setItem('isLoggedIn', 'false');
+            window.location.href = 'akun.html';
+        }
+    };
+
+    const getTodayString = () => {
+        const d = new Date();
+        return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+    };
+
+    const cleanNumber = (val) => {
+        if (!val) return 0;
+        if (typeof val === 'number') return val;
+        return parseInt(String(val).replace(/[^0-9-]/g, '')) || 0;
+    };
+
+    const formatRp = (angka) => {
+        return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(cleanNumber(angka));
+    };
+
+    const showToast = (msg, isError = false) => {
+        const toast = document.getElementById("toast");
+        toast.innerHTML = `${isError ? '<i class="fa-solid fa-circle-exclamation" style="color:var(--danger);"></i>' : '<i class="fa-solid fa-circle-check" style="color:var(--success);"></i>'} <span>${msg}</span>`;
+        toast.classList.add("show");
+        setTimeout(() => toast.classList.remove("show"), 2500);
+    };
+
+    window.handleInputFocus = (e) => {
+        const val = cleanNumber(e.target.value);
+        e.target.value = val === 0 ? '' : val;
+    };
+
+    window.handleInputBlur = (e) => {
+        const val = cleanNumber(e.target.value);
+        e.target.value = val === 0 ? '' : val.toLocaleString("id-ID");
+    };
+
+    window.resetAllData = () => {
+        if(confirm("Reset seluruh data transaksi lokal, pelanggan, dan cache produk Digiflazz?")) {
+            localStorage.removeItem('manual_faktur_full_list');
+            localStorage.removeItem('master_customer_list');
+            localStorage.removeItem('digiflazz_products');
+            localStorage.removeItem('digiflazz_last_update');
+            showToast("Semua Data Direset!");
+            setTimeout(() => location.reload(), 1000);
+        }
+    };
+
+    const getStoredManualFakturs = () => JSON.parse(localStorage.getItem('manual_faktur_full_list') || '[]');
+    const saveManualFakturs = (list) => localStorage.setItem('manual_faktur_full_list', JSON.stringify(list));
+
+    window.addFakturItemRow = () => {
+        fakturItemCounter++;
+        const container = document.getElementById("faktur-items-container");
+        if (!container) return;
+
+        const row = document.createElement("div");
+        row.className = "pos-item-row";
+        row.id = `faktur-item-${fakturItemCounter}`;
+        row.innerHTML = `
+            <div><input type="text" class="faktur-nama-inp" placeholder="Nama Barang"></div>
+            <div><input type="number" class="faktur-qty-inp" placeholder="1" value="1" min="1" oninput="calcFakturTotals()"></div>
+            <div><input type="text" inputmode="numeric" class="faktur-modal-inp inp-modal" placeholder="0" onfocus="handleInputFocus(event)" onblur="handleInputBlur(event)" oninput="calcFakturTotals()"></div>
+            <div><input type="text" inputmode="numeric" class="faktur-jual-inp inp-jual" placeholder="0" onfocus="handleInputFocus(event)" onblur="handleInputBlur(event)" oninput="calcFakturTotals()"></div>
+            <div style="text-align:center;"><button type="button" class="btn-remove-item" onclick="removeFakturItemRow(${fakturItemCounter})"><i class="fa-solid fa-xmark"></i></button></div>
+        `;
+        container.appendChild(row);
+        calcFakturTotals();
+    };
+
+    window.removeFakturItemRow = (id) => {
+        const row = document.getElementById(`faktur-item-${id}`);
+        if (row) { row.remove(); calcFakturTotals(); }
+    };
+
+    window.calcFakturTotals = () => {
+        let subtotalJual = 0, grandTotalModal = 0;
+        document.querySelectorAll(".pos-item-row").forEach(row => {
+            const modal = cleanNumber(row.querySelector(".faktur-modal-inp")?.value || 0);
+            const jual = cleanNumber(row.querySelector(".faktur-jual-inp")?.value || 0);
+            const qty = parseInt(row.querySelector(".faktur-qty-inp")?.value || 1) || 1;
+            grandTotalModal += (modal * qty);
+            subtotalJual += (jual * qty);
+        });
+
+        const sisaSebelumnya = cleanNumber(document.getElementById("faktur-sisa-lama-inp")?.value || 0);
+        const totalTagihan = subtotalJual + sisaSebelumnya;
+        const totalLaba = subtotalJual - grandTotalModal;
+
+        document.getElementById("faktur-summary-subtotal").innerText = formatRp(subtotalJual);
+        document.getElementById("faktur-summary-jual").innerText = formatRp(totalTagihan);
+        const elLaba = document.getElementById("faktur-summary-laba");
+        elLaba.innerText = formatRp(totalLaba);
+        elLaba.style.color = totalLaba >= 0 ? "var(--success)" : "var(--danger)";
+
+        calcKembalian(totalTagihan);
+    };
+
+    window.calcKembalian = (totalTagihanParam) => {
+        const subtotal = cleanNumber(document.getElementById("faktur-summary-subtotal")?.innerText || 0);
+        const sisaLama = cleanNumber(document.getElementById("faktur-sisa-lama-inp")?.value || 0);
+        const totalTagihan = totalTagihanParam !== undefined ? totalTagihanParam : (subtotal + sisaLama);
+        const bayar = cleanNumber(document.getElementById("faktur-bayar-inp")?.value || 0);
+        const selisih = bayar - totalTagihan;
+        
+        const elStatus = document.getElementById("faktur-bayar-status-label");
+        const elVal = document.getElementById("faktur-kembalian-val");
+
+        if (selisih >= 0) {
+            elStatus.innerText = "KEMBALIAN:";
+            elVal.innerText = formatRp(selisih);
+            elVal.style.color = "var(--text-main)";
+        } else {
+            elStatus.innerText = "TOTAL SISA TAGIHAN:";
+            elVal.innerText = formatRp(Math.abs(selisih));
+            elVal.style.color = "var(--danger)";
+        }
+    };
+
+    window.saveFakturPenjualan = () => {
+        const pembeli = document.getElementById("faktur-pembeli-inp")?.value.trim() || "Pelanggan Umum";
+        const noFaktur = document.getElementById("faktur-no-inp")?.value.trim() || ("INV-" + Date.now().toString().slice(-6));
+        const txDate = document.getElementById("faktur-date-inp")?.value || getTodayString();
+        const sisaLama = cleanNumber(document.getElementById("faktur-sisa-lama-inp")?.value || 0);
+        const bayarNominal = cleanNumber(document.getElementById("faktur-bayar-inp")?.value || 0);
+        
+        const rows = document.querySelectorAll(".pos-item-row");
+        if (rows.length === 0) return showToast("Tambahkan minimal 1 item produk!", true);
+
+        const itemsList = [];
+        let totalModalFaktur = 0, subtotalJualFaktur = 0;
+
+        rows.forEach((row) => {
+            const nama = row.querySelector(".faktur-nama-inp")?.value.trim();
+            const modal = cleanNumber(row.querySelector(".faktur-modal-inp")?.value || 0);
+            const jual = cleanNumber(row.querySelector(".faktur-jual-inp")?.value || 0);
+            const qty = parseInt(row.querySelector(".faktur-qty-inp")?.value || 1) || 1;
+
+            if (nama && jual > 0) {
+                itemsList.push({ nama, qty, modal, jual, subtotal_modal: modal * qty, subtotal_jual: jual * qty });
+                totalModalFaktur += (modal * qty);
+                subtotalJualFaktur += (jual * qty);
+            }
+        });
+
+        if (itemsList.length === 0) return showToast("Isi nama produk & harga jual secara lengkap!", true);
+
+        saveCustomerName(pembeli);
+
+        const grandTotalTagihan = subtotalJualFaktur + sisaLama;
+        const newFakturRecord = {
+            id: noFaktur,
+            no_faktur: noFaktur,
+            pembeli: pembeli,
+            tanggal: txDate,
+            waktu: new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }),
+            items: itemsList,
+            total_items: itemsList.reduce((acc, i) => acc + i.qty, 0),
+            subtotal_jual: subtotalJualFaktur,
+            sisa_lama: sisaLama,
+            total_tagihan: grandTotalTagihan,
+            total_modal: totalModalFaktur,
+            total_laba: subtotalJualFaktur - totalModalFaktur,
+            bayar: bayarNominal,
+            sisa_hutang: bayarNominal < grandTotalTagihan ? (grandTotalTagihan - bayarNominal) : 0,
+            kembalian: bayarNominal > grandTotalTagihan ? (bayarNominal - grandTotalTagihan) : 0
+        };
+
+        let currentFakturs = getStoredManualFakturs();
+        const existingIdx = currentFakturs.findIndex(f => f.no_faktur === noFaktur);
+
+        if (existingIdx >= 0) {
+            currentFakturs[existingIdx] = newFakturRecord;
+            showToast(`Faktur ${noFaktur} diperbarui!`);
+        } else {
+            currentFakturs.unshift(newFakturRecord);
+            showToast(`Faktur ${noFaktur} disimpan!`);
+        }
+
+        saveManualFakturs(currentFakturs);
+        resetFakturForm();
+        renderKasTabUI();
+    };
+
+    window.resetFakturForm = () => {
+        document.getElementById("faktur-pembeli-inp").value = "";
+        document.getElementById("faktur-sisa-lama-inp").value = "";
+        document.getElementById("faktur-bayar-inp").value = "";
+        document.getElementById("faktur-no-inp").value = "INV-" + Date.now().toString().slice(-6);
+        document.getElementById("faktur-items-container").innerHTML = "";
+        fakturItemCounter = 0;
+        addFakturItemRow();
+    };
+
+    const renderKasTabUI = () => {
+        const selectedTgl = document.getElementById("filter-kas-tgl-select")?.value || "ALL";
+        const selectedPembeli = document.getElementById("filter-pembeli-select")?.value || "ALL";
+        const container = document.getElementById("kas-history-list");
+        if (!container) return;
+
+        let fakturs = getStoredManualFakturs();
+
+        const datesMap = {};
+        fakturs.forEach(f => { if(f.tanggal) datesMap[f.tanggal] = true; });
+        const dateSelect = document.getElementById("filter-kas-tgl-select");
+        if (dateSelect) {
+            let optHtml = '<option value="ALL">Semua Tanggal</option>';
+            Object.keys(datesMap).sort().reverse().forEach(d => {
+                optHtml += `<option value="${d}" ${d === selectedTgl ? 'selected' : ''}>${d}</option>`;
+            });
+            dateSelect.innerHTML = optHtml;
+        }
+
+        if (selectedPembeli !== "ALL") {
+            fakturs = fakturs.filter(k => (k.pembeli || "Pelanggan Umum").toLowerCase() === selectedPembeli.toLowerCase());
+        }
+        if (selectedTgl !== "ALL") {
+            fakturs = fakturs.filter(k => k.tanggal === selectedTgl);
+        }
+
+        if (fakturs.length === 0) {
+            container.innerHTML = `<div class="empty-state"><i class="fa-solid fa-box-open"></i><br>Belum ada riwayat faktur tersimpan.</div>`;
+            return;
+        }
+
+        container.innerHTML = fakturs.map(f => `
+            <div class="faktur-group-card" onclick="openFakturFullscreen('${f.no_faktur}')">
+                <div class="faktur-group-header">
+                    <div>
+                        <div style="font-size:0.85rem; font-weight:800; color:#1e293b;">
+                            <i class="fa-solid fa-receipt" style="color:var(--primary); margin-right:6px;"></i> ${f.no_faktur} 
+                            <span style="font-size:0.75rem; font-weight:700; color:var(--primary);">(${f.pembeli})</span>
+                        </div>
+                        <div style="font-size:0.68rem; color:var(--text-muted); margin-top:3px;">
+                            <i class="fa-regular fa-calendar"></i> ${f.tanggal} • ${f.waktu || ''} | <b>${f.total_items || 0} Items</b>
+                        </div>
+                    </div>
+                    <div style="text-align:right;">
+                        <div style="font-size:0.95rem; font-weight:900; color:var(--success);">${formatRp(f.total_tagihan || f.total_jual)}</div>
+                        ${f.sisa_hutang > 0 ? `<div style="font-size:0.65rem; font-weight:800; color:var(--danger);">Sisa: ${formatRp(f.sisa_hutang)}</div>` : `<div style="font-size:0.65rem; font-weight:800; color:var(--success);">LUNAS</div>`}
+                    </div>
+                </div>
+            </div>
+        `).join('');
+    };
+
+    window.openFakturFullscreen = (noFaktur) => {
+        const f = getStoredManualFakturs().find(item => item.no_faktur === noFaktur);
+        if (!f) return showToast("Faktur tidak ditemukan!", true);
+
+        document.getElementById("faktur-modal-title").innerText = `${f.no_faktur} (${f.pembeli})`;
+        
+        document.getElementById("faktur-modal-body-content").innerHTML = `
+            <div style="background:#ffffff; padding:20px 16px; border-radius:16px; border:1px solid #cbd5e1;">
+                <div style="text-align:center; border-bottom:2px dashed #cbd5e1; padding-bottom:12px; margin-bottom:14px;">
+                    <div style="font-size:1.1rem; font-weight:900; color:#1e293b;">ARCELL KOMUNIKA</div>
+                    <div style="font-size:0.75rem; color:#64748b;">No: ${f.no_faktur} | ${f.tanggal} ${f.waktu || ''}</div>
+                    <div style="font-size:0.75rem; color:#64748b; font-weight:700;">Pelanggan: ${f.pembeli}</div>
+                </div>
+                ${f.items.map(item => `
+                    <div style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px dashed #edf2f7; font-size:0.8rem;">
+                        <div>
+                            <div style="font-weight:700; color:#0f172a;">${item.nama}</div>
+                            <div style="font-size:0.7rem; color:var(--text-muted);">${item.qty} x ${formatRp(item.jual)}</div>
+                        </div>
+                        <span style="font-weight:800; color:var(--success);">${formatRp(item.subtotal_jual)}</span>
+                    </div>
+                `).join('')}
+                <div style="border-top:2px dashed #cbd5e1; margin-top:14px; padding-top:10px; font-size:0.82rem;">
+                    <div style="display:flex; justify-content:space-between; font-weight:900; font-size:0.95rem; color:#0f172a;">
+                        <span>TOTAL TAGIHAN:</span>
+                        <span style="color:var(--primary);">${formatRp(f.total_tagihan)}</span>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        document.getElementById("faktur-modal-footer-actions").innerHTML = `
+            <button class="neo-btn secondary" style="color:var(--danger);" onclick="deleteManualFaktur('${f.no_faktur}')">
+                <i class="fa-solid fa-trash-can"></i> Hapus Faktur
+            </button>
+        `;
+
+        document.getElementById("faktur-fullscreen-modal").classList.add("open");
+    };
+
+    window.closeFakturFullscreen = () => {
+        document.getElementById("faktur-fullscreen-modal").classList.remove("remove");
+        document.getElementById("faktur-fullscreen-modal").classList.remove("open");
+    };
+
+    window.deleteManualFaktur = (noFaktur) => {
+        if(confirm(`Hapus Faktur ${noFaktur}?`)) {
+            const current = getStoredManualFakturs().filter(f => f.no_faktur !== noFaktur);
+            saveManualFakturs(current);
+            showToast("Faktur dihapus!");
+            closeFakturFullscreen();
+            renderKasTabUI();
+        }
+    };
+
+    document.addEventListener("DOMContentLoaded", () => {
+        document.getElementById("time-greeting").innerText = (new Date().getHours() < 12 ? "Selamat Pagi," : new Date().getHours() < 18 ? "Selamat Siang," : "Selamat Malam,");
+        document.getElementById("faktur-no-inp").value = "INV-" + Date.now().toString().slice(-6);
+        document.getElementById("faktur-date-inp").value = getTodayString();
+        addFakturItemRow();
+        updateCustomerDatalist();
+        updateCustomerFilterSelect();
+        renderKasTabUI();
+    });
+</script>
+
+</body>
+</html>
+

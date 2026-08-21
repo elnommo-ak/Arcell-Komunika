@@ -1,0 +1,735 @@
+const express = require('express');
+const cors = require('cors');
+const path = require('path');
+const fs = require('fs').promises;
+const fsSync = require('fs');
+const crypto = require('crypto');
+const axios = require('axios');
+require('dotenv').config();
+
+const app = express();
+const PORT = process.env.PORT || 3000;
+
+// Trust Proxy agar IP dibaca dengan benar di balik Nginx / VPS
+app.set('trust proxy', true);
+
+// Middleware
+app.use(cors());
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+// Serve File Statis dari Folder Public
+app.use(express.static(path.join(__dirname, 'public')));
+
+// Lokasi Penyimpanan File JSON
+const TRX_FILE = path.join(__dirname, 'transactions.json');
+
+// Helper Simpan & Update Transaksi Lokal (Async)
+async function saveTransactionToHistory(trxData) {
+    try {
+        let history = [];
+        if (fsSync.existsSync(TRX_FILE)) {
+            const content = await fs.readFile(TRX_FILE, 'utf8');
+            history = JSON.parse(content || '[]');
+        }
+        
+        const index = history.findIndex(t => t.ref_id === trxData.ref_id);
+        if (index !== -1) {
+            history[index] = { ...history[index], ...trxData };
+        } else {
+            history.unshift(trxData);
+        }
+
+        await fs.writeFile(TRX_FILE, JSON.stringify(history, null, 2), 'utf8');
+    } catch (err) {
+        console.error("Gagal menyimpan transaksi ke file:", err.message);
+    }
+}
+
+// ========================================================
+// 📌 1. API CEK SALDO DIGIFLAZZ (SAFE VERSION)
+// ========================================================
+app.get('/api/saldo', async (req, res) => {
+    try {
+        const username = (process.env.DIGIFLAZZ_USERNAME || '').trim();
+        const apiKey = (process.env.DIGIFLAZZ_API_KEY || '').trim();
+
+        if (!username || !apiKey) {
+            return res.json({ status: 'error', deposit: 0, message: 'API Key belum di-config' });
+        }
+
+        const sign = crypto.createHash('md5').update(username + apiKey + "depo").digest('hex');
+
+        // Request ke Digiflazz
+        const response = await axios.post('https://api.digiflazz.com/v1/cek-saldo', {
+            cmd: 'deposit',
+            username: username,
+            sign: sign
+        }, { timeout: 8000 }); // Timeout diset 8 detik
+
+        // Ambil data deposit dari respon Digiflazz
+        const depositAmount = response.data && response.data.data ? response.data.data.deposit : 0;
+
+        return res.json({ 
+            status: 'success', 
+            deposit: depositAmount,
+            data: response.data.data 
+        });
+
+    } catch (error) {
+        // Tangkap error timeout/koneksi tanpa merusak (crash) server
+        console.warn("⚠️ Gagal/Timeout Cek Saldo Digiflazz:", error.message);
+
+        // Berikan nilai deposit 0 agar tampilan frontend tetap berjalan normal
+        return res.json({ 
+            status: 'warning', 
+            deposit: 0, 
+            message: 'Koneksi ke Digiflazz lambat/timeout' 
+        });
+    }
+});
+
+
+// ========================================================
+// 📌 2. API DAFTAR HARGA / PRODUK DIGIFLAZZ
+// ========================================================
+app.post('/api/digiflazz/price-list', async (req, res) => {
+    try {
+        const username = (process.env.DIGIFLAZZ_USERNAME || '').trim();
+        const apiKey = (process.env.DIGIFLAZZ_API_KEY || '').trim();
+        const sign = crypto.createHash('md5').update(username + apiKey + "pricelist").digest('hex');
+
+        const response = await axios.post('https://api.digiflazz.com/v1/price-list', {
+            cmd: 'prepaid',
+            username: username,
+            sign: sign
+        }, { timeout: 15000 });
+
+        let products = response.data.data || [];
+
+        // 📌 SIMPAN / REFRESH DATABASE PRODUK LOKAL AUTOMATIS
+        if (products.length > 0) {
+            const PRODUCTS_FILE = path.join(__dirname, 'products.json');
+            await fs.writeFile(PRODUCTS_FILE, JSON.stringify(products, null, 2), 'utf8');
+        }
+
+        return res.json({ status: 'success', data: products });
+    } catch (error) {
+        return res.status(500).json({ status: 'error', message: error.message, data: [] });
+    }
+});
+
+// Route khusus untuk dibaca oleh frontend index.html
+app.get('/api/products', async (req, res) => {
+    try {
+        const PRODUCTS_FILE = path.join(__dirname, 'products.json');
+        const data = await fs.readFile(PRODUCTS_FILE, 'utf8');
+        return res.json(JSON.parse(data));
+    } catch (error) {
+        return res.json([]);
+    }
+});
+
+// ========================================================
+// 📌 ENDPOINT UPDATE KATEGORI PRODUK SECARA MASSAL (CHECKBOX)
+// ========================================================
+app.post('/api/admin/update-category', async (req, res) => {
+    try {
+        const { skus, categoryName } = req.body;
+
+        if (!skus || !Array.isArray(skus) || !categoryName) {
+            return res.status(400).json({ status: 'error', message: 'Payload tidak lengkap' });
+        }
+
+        const PRODUCTS_FILE = path.join(__dirname, 'products.json');
+        const rawData = await fs.readFile(PRODUCTS_FILE, 'utf8');
+        let products = JSON.parse(rawData);
+
+        let updatedCount = 0;
+
+        // Loop dan ubah tipe/kategori produk yang dicentang
+        products = products.map(p => {
+            const currentSku = p.buyer_sku_code || p.sku;
+            if (skus.includes(currentSku)) {
+                p.type = categoryName; // Ubah tipe/tab paket
+                p.category = categoryName;
+                updatedCount++;
+            }
+            return p;
+        });
+
+        // Simpan kembali ke products.json
+        await fs.writeFile(PRODUCTS_FILE, JSON.stringify(products, null, 2), 'utf8');
+
+        return res.json({
+            status: 'success',
+            message: 'Kategori berhasil diperbarui',
+            updatedCount: updatedCount
+        });
+
+    } catch (error) {
+        console.error("Error update category:", error);
+        return res.status(500).json({ status: 'error', message: error.message });
+    }
+});
+
+// ========================================================
+// 📌 3. API CHECKOUT / TRANSAKSI (FIXED NAME & PRICE)
+// ========================================================
+app.post('/api/digiflazz/checkout', async (req, res) => {
+    const { buyer_sku_code, customer_no, user_hp, product_name: reqProductName, selling_price: reqSellingPrice, is_testing = false } = req.body || {};
+    const refId = 'TRX_' + Date.now();
+    const waktuSekarang = new Date().toLocaleString('id-ID', { timeZone: 'Asia/Jakarta' });
+
+    // 1. Dapatkan nama produk (Fallback ke katalog lokal/req.body jika Digiflazz tidak menyediakan)
+    let namaProdukFix = reqProductName || buyer_sku_code;
+    
+    try {
+        // Ambil dari pencarian katalog jika reqProductName kosong
+        if (!reqProductName && global.digiflazzCatalog) {
+            const foundProd = global.digiflazzCatalog.find(p => p.buyer_sku_code === buyer_sku_code);
+            if (foundProd) {
+                namaProdukFix = foundProd.product_name;
+            }
+        }
+
+        const username = (process.env.DIGIFLAZZ_USERNAME || '').trim();
+        const apiKey = (process.env.DIGIFLAZZ_API_KEY || '').trim();
+
+        if (!username || !apiKey) {
+            return res.status(400).json({ status: 'error', message: 'Username / API Key belum diatur di .env' });
+        }
+
+        const sign = crypto.createHash('md5').update(username + apiKey + refId).digest('hex');
+        const hostUrl = process.env.SERVER_URL || 'http://103.89.5.244:3000';
+        const callbackUrl = `${hostUrl}/webhook`;
+
+        const payload = {
+            username: username,
+            buyer_sku_code: buyer_sku_code,
+            customer_no: customer_no,
+            ref_id: refId,
+            sign: sign,
+            cb_url: callbackUrl
+        };
+
+        if (is_testing || (customer_no && customer_no.startsWith('08780000123'))) {
+            payload.testing = false;
+        }
+
+        const response = await axios.post('https://api.digiflazz.com/v1/transaction', payload, { timeout: 15000 });
+
+        const digiData = response.data ? response.data.data : null;
+        const statusTx = digiData ? (digiData.status || 'PROSES').toUpperCase() : 'PENDING';
+        const snValue = digiData ? (digiData.sn || digiData.message || '-') : '-';
+
+        // 2. Hitung harga modal & harga jual dengan benar
+        const hargaModal = digiData && digiData.price ? Number(digiData.price) : 0;
+        // Gunakan harga jual dari frontend/request, atau hitung markup otomatis jika kosong
+        const hargaJual = reqSellingPrice 
+            ? Number(reqSellingPrice)
+            : (hargaModal > 0 ? Math.ceil((hargaModal + 2000) / 500) * 500 : 0);
+
+        // 3. Simpan ke database/JSON history dengan nama & harga valid
+async function saveTransactionToHistory(tx) {
+    const newTx = {
+        ref_id: tx.ref_id,
+        sku: tx.sku,
+        no_tujuan: tx.no_tujuan,
+        produk: tx.produk,               // Digunakan oleh history.html
+        product_name: tx.produk,         // Compatibility standard
+        nama_barang: tx.produk,          // Compatibility standard
+        price: tx.price || 0,
+        harga: tx.harga || 0,
+        status: tx.status,
+        sn: tx.sn,
+        waktu: tx.waktu,
+        tanggal: tx.waktu,
+        user_hp: tx.user_hp
+    };
+    
+    // ... Simpan ke history_db.json
+}
+
+
+        return res.json({ 
+            status: 'success', 
+            data: {
+                ...digiData,
+                product_name: namaProdukFix,
+                selling_price: hargaJual
+            } 
+        });
+
+    } catch (error) {
+        console.error("Error Checkout Digiflazz:", error.response?.data || error.message);
+
+        const errorMsg = error.response?.data?.data?.message || error.message || 'Gagal Diproses';
+
+        await saveTransactionToHistory({
+            ref_id: refId,
+            sku: buyer_sku_code,
+            no_tujuan: customer_no,
+            produk: namaProdukFix, // variabel namaProdukFix aman digunakan di sini
+            harga: 0,
+            status: 'GAGAL',
+            sn: errorMsg,
+            waktu: waktuSekarang,
+            user_hp: user_hp || customer_no
+        });
+
+        return res.status(400).json({
+            status: 'error',
+            message: errorMsg,
+            data: error.response?.data?.data || null
+        });
+    }
+});
+
+
+// ========================================================
+// 📌 4. API CEK STATUS TRANSAKSI PENDING
+// ========================================================
+app.post('/api/digiflazz/check-status', async (req, res) => {
+    const { ref_id } = req.body;
+
+    if (!ref_id) {
+        return res.status(400).json({ status: 'error', message: 'Parameter ref_id wajib diisi' });
+    }
+
+    try {
+        let history = [];
+        if (fsSync.existsSync(TRX_FILE)) {
+            const content = await fs.readFile(TRX_FILE, 'utf8');
+            history = JSON.parse(content || '[]');
+        }
+
+        const currentTrx = history.find(t => t.ref_id === ref_id);
+        if (!currentTrx) {
+            return res.status(404).json({ status: 'error', message: 'Transaksi tidak ditemukan' });
+        }
+
+        const username = (process.env.DIGIFLAZZ_USERNAME || '').trim();
+        const apiKey = (process.env.DIGIFLAZZ_API_KEY || '').trim();
+
+        const sign = crypto.createHash('md5').update(username + apiKey + ref_id).digest('hex');
+
+        const payload = {
+            username: username,
+            buyer_sku_code: currentTrx.sku,
+            customer_no: currentTrx.no_tujuan,
+            ref_id: ref_id,
+            sign: sign
+        };
+
+        if (currentTrx.no_tujuan && currentTrx.no_tujuan.startsWith('08780000123')) {
+            payload.testing = false;
+        }
+
+        const response = await axios.post('https://api.digiflazz.com/v1/transaction', payload, { timeout: 15000 });
+        const digiData = response.data ? response.data.data : null;
+
+        if (digiData) {
+            const statusStr = (digiData.status || 'PENDING').toUpperCase();
+
+            await saveTransactionToHistory({
+                ref_id: ref_id,
+                sku: currentTrx.sku,
+                no_tujuan: currentTrx.no_tujuan,
+                produk: digiData.product_name || currentTrx.produk,
+                harga: digiData.price || currentTrx.harga,
+                status: statusStr,
+                sn: digiData.sn || digiData.message || '-',
+                waktu: currentTrx.waktu,
+                user_hp: currentTrx.user_hp
+            });
+
+            return res.json({ status: 'success', data: digiData });
+        }
+
+        return res.status(400).json({ status: 'error', message: 'Gagal mendapatkan status terbaru' });
+
+    } catch (error) {
+        console.error("Error Cek Status:", error.response?.data || error.message);
+        return res.status(500).json({ 
+            status: 'error', 
+            message: error.response?.data?.data?.message || error.message 
+        });
+    }
+});
+
+// ========================================================
+// 📌 5. API RIWAYAT TRANSAKSI
+// ========================================================
+app.get('/api/history', async (req, res) => {
+    try {
+        const { hp } = req.query;
+        let history = [];
+        
+        if (fsSync.existsSync(TRX_FILE)) {
+            const content = await fs.readFile(TRX_FILE, 'utf8');
+            history = JSON.parse(content || '[]');
+        }
+
+        if (hp && hp !== 'admin' && hp !== '081234567890') {
+            history = history.filter(t => t.user_hp === hp || t.no_tujuan === hp);
+        }
+
+        return res.json({ status: 'success', data: history });
+    } catch (error) {
+        return res.json({ status: 'success', data: [] });
+    }
+});
+
+// ========================================================
+// 📌 ENDPOINT WEBHOOK DIGIFLAZZ (PING EVENT + CALLBACK TRX)
+// ========================================================
+app.post('/webhook', async (req, res) => {
+    try {
+        const body = req.body || {};
+
+        // 1. Tangani Ping Event dari Digiflazz
+        if (body.hook_id || body.sed || body.hook) {
+            console.log("----------------------------------------");
+            console.log("✅ [PING EVENT] Digiflazz Webhook Test Received!");
+            console.log(`📌 Hook ID : ${body.hook_id || '-'}`);
+            console.log(`📌 Target  : ${body.hook?.url || '-'}`);
+            console.log("----------------------------------------");
+
+            return res.status(200).json({
+                status: "success",
+                message: "Webhook Active and Ready"
+            });
+        }
+
+        // 2. Tangani Update Transaksi Realtime
+        if (body.data) {
+            const trx = body.data;
+            const statusRaw = (trx.status || '').toLowerCase();
+            
+            let statusFinal = 'PENDING';
+            if (statusRaw.includes('sukses') || statusRaw.includes('success')) statusFinal = 'SUKSES';
+            if (statusRaw.includes('gagal') || statusRaw.includes('failed')) statusFinal = 'GAGAL';
+
+            let history = [];
+            if (fsSync.existsSync(TRX_FILE)) {
+                const content = await fs.readFile(TRX_FILE, 'utf8');
+                history = JSON.parse(content || '[]');
+            }
+
+            const index = history.findIndex(t => t.ref_id === trx.ref_id);
+            
+            if (index !== -1) {
+                history[index].status = statusFinal;
+                history[index].sn = trx.sn || trx.message || '-';
+                if (trx.price) history[index].harga = trx.price;
+
+                await fs.writeFile(TRX_FILE, JSON.stringify(history, null, 2), 'utf8');
+                console.log(`⚡ [WEBHOOK UPDATE] Ref: ${trx.ref_id} -> Status: ${statusFinal}`);
+            } else {
+                await saveTransactionToHistory({
+                    ref_id: trx.ref_id,
+                    sku: trx.buyer_sku_code,
+                    no_tujuan: trx.customer_no,
+                    produk: trx.buyer_sku_code,
+                    harga: trx.price || 0,
+                    status: statusFinal,
+                    sn: trx.sn || trx.message || '-',
+                    waktu: new Date().toLocaleString('id-ID', { timeZone: 'Asia/Jakarta' }),
+                    user_hp: trx.customer_no
+                });
+            }
+        }
+
+        return res.status(200).json({ status: "success", message: "Processed" });
+    } catch (error) {
+        console.error("❌ Webhook Handling Error:", error.message);
+        // Selalu kembalikan 200 ke Digiflazz agar sistem mereka tidak menganggap webhook mati
+        return res.status(200).json({ status: "error", message: error.message });
+    }
+});
+
+
+// 🔹 ROUTE WEBHOOK / CALLBACK (DIGIFLAZZ NOTIFIKASI)
+app.post('/api/digiflazz/webhook', (req, res) => {
+    try {
+        console.log("📩 WEBHOOK CALLBACK MASUK DARI DIGIFLAZZ:", JSON.stringify(req.body));
+
+        const bodyData = req.body.data || req.body;
+        const ref_id = bodyData.ref_id;
+        const status = bodyData.status; 
+        const sn = bodyData.sn || '-';
+        const msg = bodyData.message || '';
+
+        if (ref_id) {
+            let history = getHistoryDB();
+            const idx = history.findIndex(h => h.ref_id === ref_id);
+
+            if (idx !== -1) {
+                history[idx].status = status;
+                history[idx].sn = sn;
+                history[idx].message = msg;
+
+                saveHistoryDB(history);
+                console.log(`✅ Status [${ref_id}] DIUPDATE VIA WEBHOOK JADI: ${status} | SN: ${sn}`);
+
+                // 🔔 BUNYIKAN NOTIFIKASI MELAYANG DI HP USER
+                const statusUpper = String(status).toUpperCase();
+                const namaProduk = history[idx].produk || 'Produk';
+                const noTujuan = history[idx].no_tujuan || '';
+
+                if (statusUpper === 'SUKSES' || statusUpper === 'LUNAS') {
+                    kirimPushNotif(
+                        "🎉 Transaksi Berhasil!",
+                        `${namaProduk} (${noTujuan}) SUKSES. SN: ${sn}`
+                    );
+                } else if (statusUpper === 'GAGAL' || statusUpper === 'BATAL') {
+                    kirimPushNotif(
+                        "❌ Transaksi Gagal",
+                        `${namaProduk} (${noTujuan}) Gagal diproses: ${msg}`
+                    );
+                }
+            }
+        }
+
+        res.status(200).json({ status: 'ok' });
+
+    } catch (e) {
+        console.error("❌ Error Webhook Processing:", e);
+        res.status(500).json({ status: 'error' });
+    }
+});
+
+// ========================================================
+// 📌 7. API REQUEST TIKET DEPOSIT DIGIFLAZZ
+// ========================================================
+app.post('/api/digiflazz/deposit', async (req, res) => {
+    try {
+        const { amount, bank, owner_name } = req.body || {};
+
+        if (!amount || !bank || !owner_name) {
+            return res.status(400).json({ 
+                status: 'error', 
+                message: 'Parameter amount, bank, dan owner_name wajib diisi!' 
+            });
+        }
+
+        const username = (process.env.DIGIFLAZZ_USERNAME || '').trim();
+        const apiKey = (process.env.DIGIFLAZZ_API_KEY || '').trim();
+
+        if (!username || !apiKey) {
+            return res.status(400).json({ status: 'error', message: 'API Key Digiflazz belum dikonfigurasi di .env' });
+        }
+
+        // Formula MD5 Sign Deposit: md5(username + apiKey + "deposit")
+        const sign = crypto.createHash('md5').update(username + apiKey + "deposit").digest('hex');
+
+        const payload = {
+            username: username,
+            amount: parseInt(amount),
+            Bank: bank, // Pilihan: BCA, MANDIRI, BRI, BNI, ShopeePay, Flip
+            owner_name: owner_name,
+            sign: sign
+        };
+
+        const response = await axios.post('https://api.digiflazz.com/v1/deposit', payload, { timeout: 15000 });
+        const digiData = response.data ? response.data.data : null;
+
+        return res.json({ 
+            status: 'success', 
+            data: digiData 
+        });
+
+    } catch (error) {
+        console.error("Error Request Deposit:", error.response?.data || error.message);
+        
+        const errorMsg = error.response?.data?.data?.message || error.message || 'Gagal mengambil tiket deposit';
+        return res.status(400).json({ 
+            status: 'error', 
+            message: errorMsg 
+        });
+    }
+});
+
+// ==========================================
+// KELOLA DATABASE MEMBER PERMANEN (members.json)
+// ==========================================
+const MEMBERS_FILE = path.join(__dirname, 'members.json');
+
+// Fungsi Helper Baca/Tulis File Member
+async function getMembersFromFile() {
+    try {
+        const data = await fs.readFile(MEMBERS_FILE, 'utf8');
+        return JSON.parse(data);
+    } catch (err) {
+        // Data default jika file belum ada
+        const defaultData = [
+            { member_id: 'ARC001', name: 'Member Contoh', phone: '08123456789', balance: 50000, status: 'aktif' },
+            { member_id: 'ARC002', name: 'Sahabat Arcell', phone: '087875966012', balance: 10000000, status: 'aktif' }
+        ];
+        await fs.writeFile(MEMBERS_FILE, JSON.stringify(defaultData, null, 2), 'utf8');
+        return defaultData;
+    }
+}
+
+async function saveMembersToFile(data) {
+    await fs.writeFile(MEMBERS_FILE, JSON.stringify(data, null, 2), 'utf8');
+}
+
+// 1. GET: Ambil Semua Member
+app.get('/api/admin/members', async (req, res) => {
+    try {
+        const members = await getMembersFromFile();
+        res.json({ status: 'success', data: members });
+    } catch (err) {
+        res.status(500).json({ status: 'error', message: err.message });
+    }
+});
+
+// 2. POST: Tambah Member Baru (Dengan Cek Duplikasi No HP)
+app.post('/api/admin/members', async (req, res) => {
+    try {
+        const { name, phone, balance } = req.body;
+        const cleanPhone = String(phone || '').replace(/[^0-9]/g, '').trim();
+
+        if (!cleanPhone || cleanPhone.length < 8) {
+            return res.status(400).json({ status: 'error', message: 'Nomor HP tidak valid!' });
+        }
+
+        const members = await getMembersFromFile();
+
+        // CEK DUPLIKASI NOMOR HP
+        const isExist = members.some(m => m.phone === cleanPhone);
+        if (isExist) {
+            return res.status(400).json({ status: 'error', message: `Nomor HP ${cleanPhone} sudah terdaftar!` });
+        }
+
+        const newMember = {
+            member_id: 'ARC' + Math.floor(1000 + Math.random() * 9000),
+            name: name || 'Tanpa Nama',
+            phone: cleanPhone,
+            balance: parseFloat(balance) || 0,
+            status: 'aktif'
+        };
+
+        members.push(newMember);
+        await saveMembersToFile(members);
+
+        res.json({ status: 'success', message: 'Member berhasil ditambahkan!', data: newMember });
+    } catch (err) {
+        res.status(500).json({ status: 'error', message: err.message });
+    }
+});
+
+// 3. DELETE: Hapus Member berdasarkan ID
+app.delete('/api/admin/members/:id', async (req, res) => {
+    try {
+        const { id } = req.params;
+        let members = await getMembersFromFile();
+        const initialLength = members.length;
+
+        members = members.filter(m => m.member_id !== id);
+
+        if (members.length < initialLength) {
+            await saveMembersToFile(members);
+            res.json({ status: 'success', message: `Member ${id} berhasil dihapus!` });
+        } else {
+            res.status(404).json({ status: 'error', message: 'Member tidak ditemukan' });
+        }
+    } catch (err) {
+        res.status(500).json({ status: 'error', message: err.message });
+    }
+});
+
+// ==========================================
+// 5. ROUTE API TRANSAKSI MEMBER
+// ==========================================
+
+// GET: Ambil Riwayat Transaksi Member
+app.get('/api/admin/transactions', (req, res) => {
+    res.json({
+        status: 'success',
+        data: dbTransactions
+    });
+});
+
+// POST: Checkout Transaksi Member (Integration)
+app.post('/api/digiflazz/checkout', (req, res) => {
+    const { buyer_sku_code, product_name, customer_no, ref_id } = req.body;
+
+    const newTrx = {
+        ref_id: ref_id || 'TRX-' + Date.now(),
+        member_id: 'ARC001',
+        member_name: 'Member Contoh',
+        product_name: product_name || buyer_sku_code,
+        customer_no: customer_no,
+        price: 12000,
+        status: 'sukses',
+        date: new Date().toISOString()
+    };
+
+    dbTransactions.unshift(newTrx); // Masukkan ke urutan teratas
+    dbSaldoServer -= 10000; // Kurangi saldo server
+
+    res.json({
+        status: 'success',
+        message: 'Transaksi berhasil diproses',
+        data: newTrx
+    });
+});
+
+// ==========================================
+// API GET PROFILE / SALDO MEMBER UTAMA
+// ==========================================
+app.get('/api/member/profile', async (req, res) => {
+    try {
+        const phone = req.query.phone; // Dikirim dari frontend index.html
+        const MEMBERS_FILE = path.join(__dirname, 'members.json');
+        
+        let members = [];
+        try {
+            const raw = await fs.readFile(MEMBERS_FILE, 'utf8');
+            members = JSON.parse(raw);
+        } catch (e) {
+            members = [];
+        }
+
+        // Cari data member berdasarkan No HP
+        const user = members.find(m => m.phone === phone || m.nohp === phone);
+
+        if (user) {
+            return res.json({
+                status: 'success',
+                data: {
+                    name: user.name,
+                    phone: user.phone,
+                    balance: parseFloat(user.balance || 0),
+                    member_id: user.member_id
+                }
+            });
+        } else {
+            // Jika member baru/belum ada di database
+            return res.json({
+                status: 'success',
+                data: {
+                    name: 'Sahabat Arcell',
+                    phone: phone || '-',
+                    balance: 0,
+                    member_id: 'ARC' + Math.floor(1000 + Math.random() * 9000)
+                }
+            });
+        }
+    } catch (error) {
+        return res.status(500).json({ status: 'error', message: error.message });
+    }
+});
+
+// ========================================================
+// 📌 START SERVER ON PORT 3000
+// ========================================================
+app.listen(PORT, '0.0.0.0', () => {
+    console.log(`========================================`);
+    console.log(`🚀 Arcell Engine Active on Port ${PORT}`);
+    console.log(`========================================`);
+});
+

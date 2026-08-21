@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Arcell Komunika - Mapping & Kelola Produk</title>
+    <!-- FontAwesome & SortableJS untuk Drag & Drop Reorder -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
+
+    <style>
+        :root {
+            --bg-base: #e6eaf0;
+            --neu-light: #ffffff;
+            --neu-dark: #babecc;
+            --text-main: #4a5568;
+            --text-muted: #8c98a9;
+            --accent-pink: #e83e8c;
+            --accent-purple: #7052ff;
+            --accent-blue: #007bff;
+            --accent-green: #2ac20e;
+            --accent-red: #dc3545;
+            
+            --neu-shadow-flat: 6px 6px 12px var(--neu-dark), -6px -6px 12px var(--neu-light);
+            --neu-shadow-sm: 3px 3px 6px var(--neu-dark), -3px -3px 6px var(--neu-light);
+            --neu-shadow-inset: inset 3px 3px 6px var(--neu-dark), inset -3px -3px 6px var(--neu-light);
+        }
+
+        * {
+            margin: 0; padding: 0; box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background-color: var(--bg-base);
+            color: var(--text-main);
+            padding: 14px;
+            padding-bottom: 90px;
+            min-height: 100vh;
+        }
+
+        /* --- KARTU A: TARIK OTOMATIS DIGIFLAZZ --- */
+        .card-tarik {
+            background: var(--bg-base);
+            border-radius: 20px;
+            padding: 18px;
+            box-shadow: var(--neu-shadow-flat);
+            margin-bottom: 20px;
+            border: 2px dashed #a2e8dd;
+        }
+
+        .card-label {
+            font-size: 0.75rem;
+            font-weight: 800;
+            color: var(--text-muted);
+            margin-bottom: 8px;
+        }
+
+        .select-custom {
+            width: 100%;
+            padding: 14px 18px;
+            border-radius: 50px;
+            border: none;
+            background: var(--bg-base);
+            box-shadow: var(--neu-shadow-inset);
+            font-size: 0.95rem;
+            font-weight: 800;
+            color: var(--text-main);
+            outline: none;
+            margin-bottom: 14px;
+        }
+
+        .btn-tarik {
+            width: 100%;
+            padding: 14px;
+            border-radius: 50px;
+            border: none;
+            background: var(--bg-base);
+            box-shadow: var(--neu-shadow-sm);
+            color: var(--accent-green);
+            font-weight: 800;
+            font-size: 0.9rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: all 0.2s ease;
+        }
+        .btn-tarik:active { box-shadow: var(--neu-shadow-inset); }
+
+        /* --- KARTU B: ATUR POSISI & MAPPING TAB --- */
+        .card-main {
+            background: var(--bg-base);
+            border-radius: 24px;
+            padding: 18px;
+            box-shadow: var(--neu-shadow-flat);
+        }
+
+        .main-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .title-group {
+            font-size: 0.85rem;
+            font-weight: 800;
+            color: var(--accent-blue);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .btn-reset {
+            font-size: 0.75rem;
+            font-weight: 800;
+            color: var(--accent-red);
+            background: none;
+            border: none;
+            cursor: pointer;
+        }
+
+        .hint-box {
+            font-size: 0.72rem;
+            color: var(--text-muted);
+            line-height: 1.4;
+            margin-bottom: 16px;
+        }
+
+        /* --- ACCORDION ITEM (LIST TAB DRAGGABLE) --- */
+        .tab-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .tab-item-box {
+            background: var(--bg-base);
+            border-radius: 18px;
+            box-shadow: var(--neu-shadow-sm);
+            overflow: hidden;
+            transition: all 0.2s ease;
+        }
+
+        .tab-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 14px 16px;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .tab-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .drag-handle {
+            color: var(--text-muted);
+            font-size: 1.1rem;
+            cursor: grab;
+            padding: 0 4px;
+        }
+
+        .folder-title {
+            font-size: 0.82rem;
+            font-weight: 800;
+            color: var(--accent-pink);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .badge-count {
+            background: rgba(0, 123, 255, 0.12);
+            color: var(--accent-blue);
+            font-size: 0.7rem;
+            font-weight: 800;
+            padding: 4px 10px;
+            border-radius: 50px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        /* DETAIL EXPANDABLE PRODUK */
+        .tab-content {
+            display: none;
+            padding: 0 16px 16px 16px;
+            border-top: 1px solid rgba(186, 190, 204, 0.3);
+            background: rgba(255, 255, 255, 0.2);
+        }
+        .tab-content.show { display: block; }
+
+        .sub-prod-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px dashed var(--neu-dark);
+            font-size: 0.78rem;
+        }
+
+        .sub-prod-title { font-weight: 700; color: var(--text-main); }
+        .sub-prod-sku { font-size: 0.68rem; color: var(--accent-purple); font-weight: 800; }
+
+        .btn-add-sku {
+            margin-top: 12px;
+            width: 100%;
+            padding: 10px;
+            border-radius: 50px;
+            border: none;
+            background: var(--bg-base);
+            box-shadow: var(--neu-shadow-sm);
+            color: var(--accent-purple);
+            font-weight: 800;
+            font-size: 0.75rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+        .btn-add-sku:active { box-shadow: var(--neu-shadow-inset); }
+
+        /* --- BOTTOM NAV BAR --- */
+        .bottom-nav {
+            position: fixed; bottom: 0; left: 50%; transform: translateX(-50%);
+            width: 100%; max-width: 480px; height: 65px;
+            background: var(--bg-base); display: flex; justify-content: space-around;
+            align-items: center; box-shadow: 0 -5px 15px rgba(0,0,0,0.05);
+            border-top-left-radius: 20px; border-top-right-radius: 20px;
+            padding: 0 10px; z-index: 999;
+        }
+        .nav-item {
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            text-decoration: none; color: var(--text-muted); font-size: 11px; font-weight: 600;
+            width: 60px; height: 48px; border-radius: 14px; transition: all 0.3s ease;
+            background: var(--bg-base); box-shadow: var(--neu-shadow-sm);
+        }
+        .nav-item i { font-size: 18px; margin-bottom: 3px; }
+        .nav-item.active { color: var(--accent-purple); box-shadow: var(--neu-shadow-inset); }
+
+        /* MODAL MANUAL SKU */
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.4); backdrop-filter: blur(4px);
+            display: none; align-items: center; justify-content: center; z-index: 1000; padding: 16px;
+        }
+        .modal-overlay.show { display: flex; }
+        .modal-box {
+            background: var(--bg-base); width: 100%; max-width: 380px;
+            padding: 20px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+        .modal-inp {
+            width: 100%; padding: 12px 16px; border-radius: 50px; border: none;
+            background: var(--bg-base); box-shadow: var(--neu-shadow-inset);
+            font-size: 0.85rem; font-weight: 700; outline: none; margin-bottom: 12px;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- 1. KARTU TARIK PRODUK AUTOMATIS -->
+    <div class="card-tarik">
+        <div class="card-label">Pilih Operator Untuk Ditarik</div>
+        <select id="select-operator" class="select-custom">
+            <option value="INDOSAT">Indosat</option>
+            <option value="TELKOMSEL">Telkomsel</option>
+            <option value="XL">XL Axiata</option>
+            <option value="AXIS">Axis</option>
+            <option value="TRI">Tri (3)</option>
+            <option value="SMARTFREN">Smartfren</option>
+            <option value="PLN">PLN / Token</option>
+            <option value="DANA">DANA</option>
+        </select>
+
+        <button class="btn-tarik" onclick="tarikProdukOperator()">
+            <i class="fa-solid fa-bolt"></i> Tarik Semua Produk
+        </button>
+    </div>
+
+    <!-- 2. KARTU MAPPING & ATUR POSISI TAB -->
+    <div class="card-main">
+        <div class="main-header">
+            <div class="title-group">
+                <i class="fa-solid fa-up-down-left-right"></i> ATUR POSISI (GESER NAIK/TURUN)
+            </div>
+            <button class="btn-reset" onclick="resetDatabase()">[Reset Database]</button>
+        </div>
+
+        <div class="hint-box">
+            💡 <b>Petunjuk:</b> Tekan & tahan ikon <i class="fa-solid fa-ellipsis-vertical"></i><i class="fa-solid fa-ellipsis-vertical"></i> lalu <b>geser naik/turun</b> untuk menentukan urutan tab di halaman depan!
+        </div>
+
+        <!-- LIST CONTAINER DRAGGABLE -->
+        <div class="tab-list" id="tabListContainer">
+            <!-- Render via JS -->
+        </div>
+    </div>
+
+    <!-- MODAL MAPPING MANUAL SKU -->
+    <div class="modal-overlay" id="modalSku">
+        <div class="modal-box">
+            <h4 style="margin-bottom: 14px; font-size: 0.95rem; font-weight: 800; color: var(--accent-purple);">
+                <i class="fa-solid fa-plus-circle"></i> Tambah Mapping SKU Manual
+            </h4>
+            <input type="hidden" id="targetSubcat">
+            <label style="font-size: 0.72rem; font-weight:700; color:var(--text-muted); display:block; margin-bottom:4px;">Buyer SKU Code Digiflazz</label>
+            <input type="text" id="manualSkuCode" class="modal-inp" placeholder="Contoh: xld10 / indosat5k">
+            
+            <label style="font-size: 0.72rem; font-weight:700; color:var(--text-muted); display:block; margin-bottom:4px;">Nama Produk Custom (Opsional)</label>
+            <input type="text" id="manualProdName" class="modal-inp" placeholder="Nama Tampilan Produk">
+
+            <div style="display: flex; gap: 8px; margin-top: 10px;">
+                <button onclick="closeModalSku()" style="flex:1; padding:12px; border-radius:50px; border:none; background:var(--bg-base); box-shadow:var(--neu-shadow-sm); font-weight:800; cursor:pointer;">Batal</button>
+                <button onclick="simpanManualSku()" style="flex:1; padding:12px; border-radius:50px; border:none; background:var(--accent-purple); color:#fff; font-weight:800; cursor:pointer;">Simpan SKU</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- BOTTOM NAV BAR -->
+    <div class="bottom-nav">
+        <a href="home.html" class="nav-item">
+            <i class="fa-solid fa-house"></i>
+            <span>Home</span>
+        </a>
+        <a href="history.html" class="nav-item">
+            <i class="fa-solid fa-clock-rotate-left"></i>
+            <span>History</span>
+        </a>
+        <a href="rekap.html" class="nav-item">
+            <i class="fa-solid fa-chart-line"></i>
+            <span>Rekap</span>
+        </a>
+        <a href="member.html" class="nav-item active">
+            <i class="fa-solid fa-users"></i>
+            <span>Member</span>
+        </a>
+        <a href="admin.html" class="nav-item">
+            <i class="fa-solid fa-user-shield"></i>
+            <span>Akun</span>
+        </a>
+    </div>
+
+    <script>
+        // DATA DEFAULT SESUAI GAMBAR
+        let defaultSubCategories = [
+            { id: '1', name: 'INDOSAT - Tambah Masa', count: 4, items: [] },
+            { id: '2', name: 'INDOSAT - Freedom Internet', count: 16, items: [] },
+            { id: '3', name: 'INDOSAT - Data Ramadan', count: 5, items: [] },
+            { id: '4', name: 'INDOSAT - Data Freedom', count: 3, items: [] },
+            { id: '5', name: 'INDOSAT - Data HiFi', count: 7, items: [] },
+            { id: '6', name: 'INDOSAT - Cek Sisa', count: 1, items: [] },
+            { id: '7', name: 'INDOSAT - Data Umroh', count: 8, items: [] },
+            { id: '8', name: 'XL - Data Ultra', count: 3, items: [] },
+            { id: '9', name: 'XL - Data Bebas', count: 2, items: [] },
+            { id: '10', name: 'XL - Data FlexMax', count: 11, items: [] }
+        ];
+
+        function getStoredMapping() {
+            return JSON.parse(localStorage.getItem('admin_tab_mapping') || JSON.stringify(defaultSubCategories));
+        }
+
+        function saveStoredMapping(data) {
+            localStorage.setItem('admin_tab_mapping', JSON.stringify(data));
+        }
+
+        function renderTabList() {
+            const data = getStoredMapping();
+            const container = document.getElementById('tabListContainer');
+            let html = '';
+
+            data.forEach((tab, index) => {
+                const totalProd = tab.items ? tab.items.length : tab.count;
+                html += `
+                    <div class="tab-item-box" data-id="${tab.id}">
+                        <div class="tab-header" onclick="toggleAccordion('content-${index}')">
+                            <div class="tab-left">
+                                <i class="fa-solid fa-grip-vertical drag-handle"></i>
+                                <div class="folder-title">
+                                    <i class="fa-solid fa-folder"></i> ${tab.name}
+                                </div>
+                            </div>
+                            <div class="badge-count">
+                                ${totalProd} Produk <i class="fa-solid fa-chevron-down"></i>
+                            </div>
+                        </div>
+
+                        <div class="tab-content" id="content-${index}">
+                            <div id="subItems-${index}">
+                                ${renderSubItems(tab.items || [])}
+                            </div>
+                            <button class="btn-add-sku" onclick="openModalSku('${tab.name}')">
+                                <i class="fa-solid fa-plus"></i> Tambah Produk (Input SKU)
+                            </button>
+                        </div>
+                    </div>
+                `;
+            });
+
+            container.innerHTML = html;
+            initSortable();
+        }
+
+        function renderSubItems(items) {
+            if (!items || items.length === 0) {
+                return `<div style="font-size:0.72rem; color:var(--text-muted); padding:8px 0; text-align:center;">Belum ada produk manual ditambahkan.</div>`;
+            }
+            return items.map(item => `
+                <div class="sub-prod-item">
+                    <span class="sub-prod-title">${item.product_name}</span>
+                    <span class="sub-prod-sku">${item.buyer_sku_code}</span>
+                </div>
+            `).join('');
+        }
+
+        function toggleAccordion(id) {
+            const el = document.getElementById(id);
+            if(el) el.classList.toggle('show');
+        }
+
+        function initSortable() {
+            const container = document.getElementById('tabListContainer');
+            Sortable.create(container, {
+                handle: '.drag-handle',
+                animation: 150,
+                onEnd: function () {
+                    // Simpan urutan baru setelah di-drag
+                    const newOrderIds = Array.from(container.children).map(el => el.getAttribute('data-id'));
+                    const currentData = getStoredMapping();
+                    
+                    let reordered = [];
+                    newOrderIds.forEach(id => {
+                        const found = currentData.find(item => item.id === id);
+                        if(found) reordered.push(found);
+                    });
+
+                    saveStoredMapping(reordered);
+                }
+            });
+        }
+
+        // AKSI TARIK PRODUK AUTOMATIS
+        async function tarikProdukOperator() {
+            const op = document.getElementById('select-operator').value;
+            alert(`🔥 Memulai penarikan produk otomatis Digiflazz untuk operator: ${op}`);
+            
+            try {
+                const res = await fetch('/api/digiflazz/sync-products');
+                const result = await res.json();
+                if (result.status === 'success') {
+                    alert(`✅ Berhasil narik & memperbarui produk ${op}!`);
+                } else {
+                    alert('Gagal tarik produk: ' + result.message);
+                }
+            } catch (err) {
+                alert('Tarik produk simulasi lokal selesai!');
+            }
+        }
+
+        // AKSI MAPPING SKU MANUAL
+        function openModalSku(subcatName) {
+            document.getElementById('targetSubcat').value = subcatName;
+            document.getElementById('manualSkuCode').value = '';
+            document.getElementById('manualProdName').value = '';
+            document.getElementById('modalSku').classList.add('show');
+        }
+
+        function closeModalSku() {
+            document.getElementById('modalSku').classList.remove('show');
+        }
+
+        function simpanManualSku() {
+            const subcatName = document.getElementById('targetSubcat').value;
+            const sku = document.getElementById('manualSkuCode').value.trim();
+            const name = document.getElementById('manualProdName').value.trim() || sku;
+
+            if (!sku) {
+                alert('Silakan isi Buyer SKU Code!');
+                return;
+            }
+
+            let data = getStoredMapping();
+            let targetTab = data.find(t => t.name === subcatName);
+
+            if (targetTab) {
+                if (!targetTab.items) targetTab.items = [];
+                targetTab.items.push({
+                    buyer_sku_code: sku,
+                    product_name: name
+                });
+                targetTab.count = targetTab.items.length;
+
+                saveStoredMapping(data);
+                closeModalSku();
+                renderTabList();
+                alert(`✅ SKU ${sku} berhasil dipetakan ke ${subcatName}`);
+            }
+        }
+
+        function resetDatabase() {
+            if (confirm('Yakin ingin mereset urutan dan mapping database ke awal?')) {
+                localStorage.removeItem('admin_tab_mapping');
+                renderTabList();
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            renderTabList();
+        });
+    </script>
+</body>
+</html>
+

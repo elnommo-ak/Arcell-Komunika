@@ -1,0 +1,778 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel Admin Complete - Arcell Komunika</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --bg-color: #e6ecf5;
+            --text-main: #3b4863;
+            --text-sub: #7b88a8;
+            --primary: #1e88e5;
+            --shadow-light: #ffffff;
+            --shadow-dark: #b8c4d9;
+        }
+
+        * { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; margin: 0; padding: 0; }
+        body { background: var(--bg-color); color: var(--text-main); padding-bottom: 40px; }
+
+        /* HEADER STYLING */
+        .header { 
+            background: var(--bg-color); 
+            color: var(--text-main); 
+            padding: 25px 20px 15px 20px; 
+            text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+        }
+        .header h2 {
+            font-size: 1.3rem;
+            color: var(--text-main);
+            font-weight: 700;
+        }
+
+        /* NEUMORPHIC TABS (2 BARIS x 2 KOLOM) */
+        .nav-tabs { 
+            display: grid; 
+            grid-template-columns: repeat(2, 1fr); 
+            gap: 12px; 
+            margin: 10px auto 25px auto; 
+            max-width: 1000px; 
+            padding: 0 15px; 
+        }
+        .tab-btn { 
+            background: var(--bg-color); 
+            border: none; 
+            padding: 12px 10px; 
+            border-radius: 16px; 
+            font-weight: 600; 
+            color: var(--text-sub); 
+            cursor: pointer; 
+            box-shadow: 6px 6px 12px var(--shadow-dark), -6px -6px 12px var(--shadow-light); 
+            display: flex; 
+            align-items: center; 
+            justify-content: center;
+            gap: 8px; 
+            transition: all 0.2s ease; 
+            font-size: 0.85rem;
+            width: 100%;
+        }
+        .tab-btn.active { 
+            color: var(--primary); 
+            box-shadow: inset 3px 3px 6px var(--shadow-dark), inset -3px -3px 6px var(--shadow-light); 
+        }
+
+        .container { max-width: 1000px; margin: 0 auto; padding: 0 15px; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+
+        /* NEUMORPHIC CARDS */
+        .card { 
+            background: var(--bg-color); 
+            padding: 22px; 
+            border-radius: 20px; 
+            margin-bottom: 25px; 
+            box-shadow: 8px 8px 16px var(--shadow-dark), -8px -8px 16px var(--shadow-light); 
+        }
+        h3 { margin-bottom: 18px; color: var(--primary); display: flex; align-items: center; gap: 8px; font-size: 1.05rem; }
+
+        /* SALDO CARDS */
+        .balance-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px; margin-bottom: 25px; }
+        .balance-card { 
+            background: var(--bg-color); 
+            padding: 20px; 
+            border-radius: 20px; 
+            box-shadow: 8px 8px 16px var(--shadow-dark), -8px -8px 16px var(--shadow-light);
+            border: 1px solid rgba(255,255,255,0.4);
+        }
+        .balance-card .title { font-size: 0.75rem; color: var(--text-sub); font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase; }
+        .balance-card .value { font-size: 1.5rem; font-weight: 800; color: var(--primary); margin-top: 8px; }
+
+        /* INPUTS & BUTTONS */
+        .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin-bottom: 15px; }
+        input, select { 
+            padding: 12px 16px; 
+            border-radius: 15px; 
+            border: none; 
+            outline: none; 
+            font-size: 0.9rem; 
+            background: var(--bg-color);
+            color: var(--text-main);
+            box-shadow: inset 4px 4px 8px var(--shadow-dark), inset -4px -4px 8px var(--shadow-light);
+            transition: all 0.2s ease;
+            width: 100%;
+        }
+        input:focus, select:focus {
+            box-shadow: inset 2px 2px 4px var(--shadow-dark), inset -2px -2px 4px var(--shadow-light), 0 0 0 2px rgba(30,136,229,0.3);
+        }
+        button { 
+            background: var(--bg-color); 
+            color: var(--primary); 
+            border: none; 
+            padding: 12px 20px;
+            border-radius: 20px;
+            cursor: pointer; 
+            font-weight: 700; 
+            transition: all 0.2s ease; 
+            box-shadow: 5px 5px 10px var(--shadow-dark), -5px -5px 10px var(--shadow-light);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        button:active { 
+            box-shadow: inset 3px 3px 6px var(--shadow-dark), inset -3px -3px 6px var(--shadow-light); 
+        }
+
+        .btn-success { color: #2e7d32; }
+        .btn-warning { color: #ed6c02; }
+        .btn-danger { color: #d32f2f; }
+        .btn-sm { padding: 6px 12px; font-size: 0.8rem; border-radius: 12px; }
+
+        /* BULK BAR & BADGES */
+        .bulk-bar { 
+            display: flex; 
+            gap: 12px; 
+            flex-wrap: wrap; 
+            background: var(--bg-color); 
+            padding: 15px; 
+            border-radius: 16px; 
+            margin-bottom: 20px; 
+            align-items: center; 
+            box-shadow: inset 3px 3px 6px var(--shadow-dark), inset -3px -3px 6px var(--shadow-light);
+        }
+        .category-list { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 15px; }
+        .category-badge { 
+            background: var(--bg-color); 
+            color: var(--primary); 
+            padding: 8px 16px; 
+            border-radius: 20px; 
+            font-weight: 700; 
+            font-size: 0.82rem; 
+            display: flex; 
+            align-items: center; 
+            gap: 8px; 
+            box-shadow: 4px 4px 8px var(--shadow-dark), -4px -4px 8px var(--shadow-light);
+        }
+
+        /* TABLES */
+        table { width: 100%; border-collapse: separate; border-spacing: 0 8px; font-size: 0.85rem; margin-top: 5px; }
+        th { padding: 12px 10px; text-align: left; color: var(--text-sub); font-weight: 700; border: none; }
+        td { 
+            padding: 12px 10px; 
+            text-align: left; 
+            background: var(--bg-color);
+            border: none;
+        }
+        tbody tr {
+            box-shadow: 4px 4px 8px var(--shadow-dark), -4px -4px 8px var(--shadow-light);
+            border-radius: 12px;
+        }
+        tbody tr td:first-child { border-top-left-radius: 12px; border-bottom-left-radius: 12px; }
+        tbody tr td:last-child { border-top-right-radius: 12px; border-bottom-right-radius: 12px; }
+
+        .table-responsive { 
+            overflow-x: auto; 
+            max-height: none !important; 
+            padding: 5px;
+        }
+
+        /* MODAL STYLING */
+        #modalMember .card {
+            border: 1px solid rgba(255,255,255,0.6);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <h2>⚙️ Panel Admin Arcell Komunika</h2>
+    </div>
+
+    <!-- TABS NAVIGASI UTAMA (DIUBAH MENJADI 2 BARIS X 2 KOLOM) -->
+    <div class="nav-tabs">
+        <button class="tab-btn active" onclick="switchTab('tab-saldo', event)"><i class="fa-solid fa-wallet"></i> Saldo</button>
+        <button class="tab-btn" onclick="switchTab('tab-member', event)"><i class="fa-solid fa-users"></i> Member</button>
+        <button class="tab-btn" onclick="switchTab('tab-transaksi', event)"><i class="fa-solid fa-receipt"></i> Transaksi Member</button>
+        <button class="tab-btn" onclick="switchTab('tab-produk', event)"><i class="fa-solid fa-box-open"></i> Produk</button>
+    </div>
+
+    <div class="container">
+
+        <!-- TAB 1: SALDO -->
+        <div id="tab-saldo" class="tab-content active">
+            <div class="balance-grid">
+                <div class="balance-card">
+                    <div class="title">Saldo Server Digiflazz</div>
+                    <div class="value" id="dispSaldoDigiflazz">Rp 0</div>
+                </div>
+                <div class="balance-card">
+                    <div class="title">Total Saldo Terendap Member</div>
+                    <div class="value" id="dispSaldoMember" style="color: #2e7d32;">Rp 0</div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3><i class="fa-solid fa-hand-holding-dollar"></i> Tambah / Potong Saldo Member Manual</h3>
+                <div class="form-grid">
+                    <input type="text" id="saldoNoHp" placeholder="Nomor HP Member">
+                    <select id="saldoAksi">
+                        <option value="tambah">Tambah Saldo (+)</option>
+                        <option value="potong">Potong Saldo (-)</option>
+                    </select>
+                    <input type="number" id="saldoJumlah" placeholder="Jumlah Nominal (Rp)">
+                </div>
+                <button onclick="eksekusiUbahSaldo()"><i class="fa-solid fa-check"></i> Eksekusi Saldo</button>
+            </div>
+        </div>
+
+        <!-- TAB 2: MEMBER -->
+        <div id="tab-member" class="tab-content">
+            <div class="card">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; flex-wrap: wrap; gap: 10px;">
+                    <h3 style="margin:0;"><i class="fa-solid fa-user-gear"></i> Kelola Data Member</h3>
+                    <button class="btn-success" onclick="bukaModalMember()"><i class="fa-solid fa-user-plus"></i> + Tambah Member</button>
+                </div>
+
+                <input type="text" id="searchMember" placeholder="🔍 Cari Nama / No HP Member..." oninput="filterMember()" style="width: 100%; margin-bottom: 15px;">
+                
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID Member</th>
+                                <th>No. HP</th>
+                                <th>Nama Member</th>
+                                <th>Saldo</th>
+                                <th>Status</th>
+                                <th>Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tabelMember">
+                            <tr><td colspan="6" style="text-align:center;">Memuat data member...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 3: TRANSAKSI MEMBER -->
+        <div id="tab-transaksi" class="tab-content">
+            <div class="card">
+                <h3><i class="fa-solid fa-clock-rotate-left"></i> Riwayat Transaksi Member</h3>
+                <input type="text" id="searchTrx" placeholder="🔍 Cari Ref ID / No Tujuan / Member..." oninput="filterTransaksi()" style="width: 100%; margin-bottom: 15px;">
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Tanggal</th>
+                                <th>Ref ID</th>
+                                <th>Tujuan</th>
+                                <th>Produk</th>
+                                <th>Harga</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tabelTransaksi">
+                            <tr><td colspan="6" style="text-align:center;">Memuat riwayat transaksi...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 4: PRODUK -->
+        <div id="tab-produk" class="tab-content">
+            <div class="card">
+                <h3>🏷️ Kelola Kategori Custom</h3>
+                <div style="display: flex; gap: 10px;">
+                    <input type="text" id="namaKategoriBaru" placeholder="Nama Kategori Baru..." style="flex: 1;">
+                    <button onclick="tambahKategoriBaru()"><i class="fa-solid fa-plus"></i> Buat Kategori</button>
+                </div>
+                <div class="category-list" id="daftarKategoriDisplay"></div>
+            </div>
+
+            <div class="card">
+                <h3 id="formTitle">+ Tambah / Edit Produk</h3>
+                <div class="form-grid">
+                    <input type="text" id="sku" placeholder="SKU Kode (misal: TSEL10)">
+                    <input type="text" id="nama" placeholder="Nama Produk">
+                    <select id="brand">
+                        <option value="TELKOMSEL">TELKOMSEL</option>
+                        <option value="INDOSAT">INDOSAT</option>
+                        <option value="XL">XL</option>
+                        <option value="AXIS">AXIS</option>
+                        <option value="TRI">TRI</option>
+                        <option value="SMARTFREN">SMARTFREN</option>
+                    </select>
+                    <input type="text" id="type" placeholder="Tipe / Tab Paket" list="kategoriOptions">
+                    <datalist id="kategoriOptions"></datalist>
+                    <input type="number" id="harga" placeholder="Harga Jual (Rp)">
+                </div>
+                <div style="display: flex; gap: 10px;">
+                    <button onclick="simpanProduk()" style="flex: 1;"><i class="fa-solid fa-floppy-disk"></i> Simpan Produk</button>
+                    <button onclick="resetForm()" class="btn-warning" id="btnReset" style="display: none;">Batal Edit</button>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3>📋 Daftar Produk Aktif (<span id="totalProduk">0</span>)</h3>
+                
+                <div class="bulk-bar">
+                    <span style="font-size: 0.85rem; font-weight: bold; color: var(--text-sub);">Tandai & Pindahkan:</span>
+                    <select id="bulkCategorySelect" style="flex: 1; min-width: 180px;">
+                        <option value="">-- Pilih Kategori Tujuan --</option>
+                    </select>
+                    <button onclick="pindahkanPilihanMassal()" class="btn-success">
+                        <i class="fa-solid fa-right-left"></i> Pindahkan (<span id="selectedCount">0</span>)
+                    </button>
+                </div>
+
+                <input type="text" id="searchInput" placeholder="🔍 Cari SKU, Nama Produk, atau Brand..." oninput="filterTabel()" style="width: 100%; margin-bottom: 15px;">
+
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th style="width: 30px; text-align: center;"><input type="checkbox" onchange="toggleSelectAll(this)"></th>
+                                <th>SKU</th>
+                                <th>Nama Produk</th>
+                                <th>Brand</th>
+                                <th>Tipe/Tab</th>
+                                <th>Harga Jual</th>
+                                <th style="width: 120px;">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tabelProduk"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- MODAL TAMBAH MEMBER -->
+    <div id="modalMember" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(230, 236, 245, 0.85); backdrop-filter: blur(5px); z-index: 9999; justify-content: center; align-items: center;">
+        <div class="card" style="width: 90%; max-width: 450px; padding: 25px;">
+            <h3><i class="fa-solid fa-user-plus"></i> Tambah Member Baru</h3>
+            <div style="display: flex; flex-direction: column; gap: 12px; margin-top: 15px;">
+                <input type="text" id="addNamaMember" placeholder="Nama Lengkap Member">
+                <input type="tel" id="addPhoneMember" placeholder="Nomor HP (misal: 08123456789)">
+                <input type="number" id="addSaldoMember" placeholder="Saldo Awal (Rp)" value="0">
+                <div style="display: flex; gap: 10px; margin-top: 10px;">
+                    <button onclick="simpanMemberBaru()" class="btn-success" style="flex: 1;"><i class="fa-solid fa-check"></i> Simpan</button>
+                    <button onclick="tutupModalMember()" class="btn-danger"><i class="fa-solid fa-xmark"></i> Batal</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let rawData = [];
+        let filteredData = [];
+        let rawMembers = [];
+        let rawTransactions = [];
+        let customCategories = new Set(['Freedom Internet', 'Freedom Sensasi', 'Pulsa', 'Umum']);
+        let selectedSKUs = new Set();
+
+        function switchTab(tabId, evt) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+            
+            document.getElementById(tabId).classList.add('active');
+            if (evt) evt.currentTarget.classList.add('active');
+        }
+
+        // ==================== SALDO & MEMBER ====================
+        async function loadSaldoInfo() {
+            try {
+                const res = await fetch('/api/saldo');
+                const data = await res.json();
+                const saldoVal = data.deposit !== undefined ? data.deposit : (data.data ? data.data.deposit : 0);
+                document.getElementById('dispSaldoDigiflazz').innerText = 'Rp ' + saldoVal.toLocaleString('id-ID');
+            } catch (err) { console.error(err); }
+        }
+
+        async function loadMembers() {
+            try {
+                const res = await fetch('/api/admin/members?t=' + Date.now());
+                const result = await res.json();
+                
+                if (Array.isArray(result)) rawMembers = result;
+                else if (result.data && Array.isArray(result.data)) rawMembers = result.data;
+                else rawMembers = [];
+
+                const totalSaldo = rawMembers.reduce((acc, curr) => acc + (parseFloat(curr.balance) || 0), 0);
+                document.getElementById('dispSaldoMember').innerText = 'Rp ' + totalSaldo.toLocaleString('id-ID');
+
+                renderTabelMember(rawMembers);
+            } catch (err) {
+                document.getElementById('tabelMember').innerHTML = `<tr><td colspan="6" style="text-align:center; color:red;">Gagal memuat data member.</td></tr>`;
+            }
+        }
+
+        function renderTabelMember(list) {
+            const el = document.getElementById('tabelMember');
+            if (!list || list.length === 0) {
+                el.innerHTML = `<tr><td colspan="6" style="text-align:center;">Belum ada member terdaftar.</td></tr>`;
+                return;
+            }
+
+            let html = '';
+            list.forEach(m => {
+                const idMem = m.member_id || m.id || '-';
+                const noHp = m.phone || m.nohp || '-';
+                const nama = m.name || m.nama || '-';
+                const saldo = parseFloat(m.balance || 0);
+
+                html += `
+                    <tr>
+                        <td><b>${idMem}</b></td>
+                        <td>${noHp}</td>
+                        <td>${nama}</td>
+                        <td><b>Rp ${saldo.toLocaleString('id-ID')}</b></td>
+                        <td><span style="box-shadow: inset 2px 2px 4px var(--shadow-dark), inset -2px -2px 4px var(--shadow-light); color:#2e7d32; padding:4px 10px; border-radius:12px; font-weight:bold; font-size:0.75rem;">${m.status || 'aktif'}</span></td>
+                        <td>
+                            <button class="btn-sm btn-warning" onclick="pilihUbahSaldo('${noHp}')"><i class="fa-solid fa-wallet"></i> Isi Saldo</button>
+                            <button class="btn-sm btn-danger" onclick="hapusMember('${idMem}')"><i class="fa-solid fa-trash"></i> Hapus</button>
+                        </td>
+                    </tr>
+                `;
+            });
+            el.innerHTML = html;
+        }
+
+        function filterMember() {
+            const kw = document.getElementById('searchMember').value.toLowerCase();
+            const filtered = rawMembers.filter(m => 
+                String(m.name || '').toLowerCase().includes(kw) || 
+                String(m.phone || '').includes(kw) ||
+                String(m.member_id || '').toLowerCase().includes(kw)
+            );
+            renderTabelMember(filtered);
+        }
+
+        function bukaModalMember() { document.getElementById('modalMember').style.display = 'flex'; }
+        function tutupModalMember() { 
+            document.getElementById('modalMember').style.display = 'none';
+            document.getElementById('addNamaMember').value = '';
+            document.getElementById('addPhoneMember').value = '';
+            document.getElementById('addSaldoMember').value = '0';
+        }
+
+        async function simpanMemberBaru() {
+            const name = document.getElementById('addNamaMember').value.trim();
+            const phone = document.getElementById('addPhoneMember').value.trim();
+            const balance = parseFloat(document.getElementById('addSaldoMember').value) || 0;
+
+            if (!name || !phone) return alert('Nama dan Nomor HP Member wajib diisi!');
+
+            try {
+                const res = await fetch('/api/admin/members', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name, phone, balance })
+                });
+
+                const result = await res.json();
+                if (result.status === 'success') {
+                    alert('✅ Member baru berhasil ditambahkan!');
+                    tutupModalMember();
+                    loadMembers();
+                } else {
+                    alert('❌ Gagal: ' + result.message);
+                }
+            } catch (err) { alert('❌ Terjadi kesalahan jaringan'); }
+        }
+
+        async function hapusMember(id) {
+            if (!confirm(`Yakin ingin menghapus member ID ${id}?`)) return;
+            try {
+                const res = await fetch('/api/admin/members/' + id, { method: 'DELETE' });
+                const result = await res.json();
+                if (result.status === 'success') {
+                    alert('✅ Member berhasil dihapus!');
+                    loadMembers();
+                } else alert('❌ Gagal: ' + result.message);
+            } catch (err) { alert('❌ Error jaringan'); }
+        }
+
+        function pilihUbahSaldo(phone) {
+            const tabBtn = document.querySelectorAll('.tab-btn')[0];
+            switchTab('tab-saldo');
+            tabBtn.classList.add('active');
+            document.getElementById('saldoNoHp').value = phone;
+        }
+
+        async function eksekusiUbahSaldo() {
+            const phone = document.getElementById('saldoNoHp').value.trim();
+            const amount = parseInt(document.getElementById('saldoJumlah').value) || 0;
+            const action = document.getElementById('saldoAksi').value;
+
+            if (!phone || amount <= 0) return alert('Input tidak valid!');
+
+            try {
+                const res = await fetch('/api/admin/update-user-balance', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ phone, action, amount })
+                });
+                const result = await res.json();
+                if (result.status === 'success') {
+                    alert('✅ ' + result.message);
+                    document.getElementById('saldoNoHp').value = '';
+                    document.getElementById('saldoJumlah').value = '';
+                    loadMembers();
+                } else alert('❌ ' + result.message);
+            } catch (err) { alert('❌ Error jaringan'); }
+        }
+
+        // ==================== TRANSAKSI ====================
+        async function loadTransactions() {
+            try {
+                const res = await fetch('/api/admin/transactions');
+                const result = await res.json();
+                rawTransactions = result.data || [];
+                renderTabelTransaksi(rawTransactions);
+            } catch (err) { console.error(err); }
+        }
+
+        function renderTabelTransaksi(list) {
+            const el = document.getElementById('tabelTransaksi');
+            if (!list || list.length === 0) {
+                el.innerHTML = `<tr><td colspan="6" style="text-align:center;">Belum ada riwayat transaksi.</td></tr>`;
+                return;
+            }
+
+            let html = '';
+            list.forEach(t => {
+                const tgl = t.date ? new Date(t.date).toLocaleString('id-ID') : '-';
+                html += `
+                    <tr>
+                        <td>${tgl}</td>
+                        <td><b>${t.ref_id || '-'}</b></td>
+                        <td>${t.customer_no || '-'} (${t.member_name || 'Member'})</td>
+                        <td>${t.product_name || '-'}</td>
+                        <td>Rp ${(t.price || 0).toLocaleString('id-ID')}</td>
+                        <td><span style="box-shadow: inset 2px 2px 4px var(--shadow-dark), inset -2px -2px 4px var(--shadow-light); color:#2e7d32; padding:4px 10px; border-radius:12px; font-weight:bold; font-size:0.75rem;">${t.status || 'sukses'}</span></td>
+                    </tr>
+                `;
+            });
+            el.innerHTML = html;
+        }
+
+        function filterTransaksi() {
+            const kw = document.getElementById('searchTrx').value.toLowerCase();
+            const filtered = rawTransactions.filter(t => 
+                String(t.ref_id || '').toLowerCase().includes(kw) || 
+                String(t.customer_no || '').includes(kw) ||
+                String(t.member_name || '').toLowerCase().includes(kw)
+            );
+            renderTabelTransaksi(filtered);
+        }
+
+        // ==================== PRODUK ====================
+        async function loadProduk() {
+            try {
+                const res = await fetch('/api/products?t=' + Date.now());
+                const data = await res.json();
+                rawData = Array.isArray(data) ? data : (data.data || []);
+                filteredData = [...rawData];
+
+                rawData.forEach(p => {
+                    const cat = p.type || p.category;
+                    if(cat) customCategories.add(cat);
+                });
+
+                renderCategoryBadges();
+                renderTabel(filteredData);
+            } catch (err) { console.error(err); }
+        }
+
+        function renderCategoryBadges() {
+            let html = '', optionsHtml = '<option value="">-- Pilih Kategori Tujuan --</option>', datalistHtml = '';
+            customCategories.forEach(cat => {
+                html += `<div class="category-badge"><span>${cat}</span><i class="fa-solid fa-xmark" style="cursor:pointer;" onclick="hapusKategoriList('${cat}')"></i></div>`;
+                optionsHtml += `<option value="${cat}">${cat}</option>`;
+                datalistHtml += `<option value="${cat}">`;
+            });
+
+            document.getElementById('daftarKategoriDisplay').innerHTML = html || '<i>Belum ada kategori.</i>';
+            document.getElementById('bulkCategorySelect').innerHTML = optionsHtml;
+            document.getElementById('kategoriOptions').innerHTML = datalistHtml;
+        }
+
+        function renderTabel(list) {
+            document.getElementById('totalProduk').innerText = list.length;
+            const el = document.getElementById('tabelProduk');
+            if (list.length === 0) {
+                el.innerHTML = `<tr><td colspan="7" style="text-align:center;">Tidak ada produk.</td></tr>`;
+                return;
+            }
+
+            let html = '';
+            list.forEach(p => {
+                const sku = p.buyer_sku_code || p.sku || '-';
+                const nama = p.product_name || p.nama_produk || '-';
+                const price = p.jual || p.price || 0;
+                const type = p.type || p.category || 'Umum';
+                const isChecked = selectedSKUs.has(sku) ? 'checked' : '';
+                var namaClean = String(nama).replace(/'/g, "\\'").replace(/"/g, '\\"');
+
+                html += `
+                    <tr>
+                        <td style="text-align: center;"><input type="checkbox" value="${sku}" ${isChecked} onchange="toggleSelect('${sku}', this.checked)"></td>
+                        <td><b>${sku}</b></td>
+                        <td>${nama}</td>
+                        <td>${p.brand}</td>
+                        <td><span style="box-shadow: inset 2px 2px 4px var(--shadow-dark), inset -2px -2px 4px var(--shadow-light); color:var(--primary); padding:4px 10px; border-radius:12px; font-weight:bold; font-size:0.75rem;">${type}</span></td>
+                        <td><b>Rp ${price.toLocaleString('id-ID')}</b></td>
+                        <td>
+                            <button class="btn-sm btn-warning" onclick="editProduk('${sku}', '${namaClean}', '${p.brand}', '${type}', ${price})"><i class="fa-solid fa-pen-to-square"></i> Edit</button>
+                            <button class="btn-sm btn-danger" onclick="hapusProduk('${sku}')"><i class="fa-solid fa-trash"></i></button>
+                        </td>
+                    </tr>
+                `;
+            });
+            el.innerHTML = html;
+        }
+
+        function tambahKategoriBaru() {
+            const input = document.getElementById('namaKategoriBaru');
+            const catName = input.value.trim();
+            if(!catName) return alert('Ketik nama kategori terlebih dahulu!');
+            customCategories.add(catName);
+            input.value = '';
+            renderCategoryBadges();
+        }
+
+        async function hapusKategoriList(catName) {
+            if (!confirm(`Hapus kategori "${catName}"? Produk di dalamnya akan dipindah ke "Umum".`)) return;
+            try {
+                const res = await fetch('/api/admin/delete-category', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ categoryName: catName })
+                });
+                const result = await res.json();
+                if (result.status === 'success') {
+                    customCategories.delete(catName);
+                    loadProduk();
+                }
+            } catch (err) { alert('❌ Error jaringan'); }
+        }
+
+        function toggleSelect(sku, checked) {
+            if (checked) selectedSKUs.add(sku); else selectedSKUs.delete(sku);
+            document.getElementById('selectedCount').innerText = selectedSKUs.size;
+        }
+
+        function toggleSelectAll(master) {
+            filteredData.forEach(p => {
+                const sku = p.buyer_sku_code || p.sku;
+                if (master.checked) selectedSKUs.add(sku); else selectedSKUs.delete(sku);
+            });
+            document.getElementById('selectedCount').innerText = selectedSKUs.size;
+            renderTabel(filteredData);
+        }
+
+        async function pindahkanPilihanMassal() {
+            const catName = document.getElementById('bulkCategorySelect').value;
+            if(!catName) return alert('Pilih kategori tujuan!');
+            if(selectedSKUs.size === 0) return alert('Centang minimal 1 produk!');
+
+            const res = await fetch('/api/admin/update-category', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ skus: Array.from(selectedSKUs), categoryName: catName })
+            });
+
+            const result = await res.json();
+            if(result.status === 'success') {
+                alert(`✅ ${selectedSKUs.size} produk berhasil dipindah ke "${catName}"!`);
+                selectedSKUs.clear();
+                document.getElementById('selectedCount').innerText = 0;
+                loadProduk();
+            }
+        }
+
+        function editProduk(sku, nama, brand, type, harga) {
+            document.getElementById('sku').value = sku;
+            document.getElementById('sku').readOnly = true;
+            document.getElementById('nama').value = nama;
+            document.getElementById('brand').value = brand;
+            document.getElementById('type').value = type;
+            document.getElementById('harga').value = harga;
+            document.getElementById('formTitle').innerText = '✏️ Edit Produk SKU: ' + sku;
+            document.getElementById('btnReset').style.display = 'inline-block';
+        }
+
+        function resetForm() {
+            document.getElementById('sku').value = '';
+            document.getElementById('sku').readOnly = false;
+            document.getElementById('nama').value = '';
+            document.getElementById('type').value = '';
+            document.getElementById('harga').value = '';
+            document.getElementById('formTitle').innerText = '+ Tambah / Edit Produk';
+            document.getElementById('btnReset').style.display = 'none';
+        }
+
+        async function simpanProduk() {
+            const skuVal = document.getElementById('sku').value.trim();
+            const namaVal = document.getElementById('nama').value.trim();
+            const hargaVal = parseInt(document.getElementById('harga').value) || 0;
+
+            if(!skuVal || !namaVal) return alert('SKU dan Nama Produk wajib diisi!');
+
+            const body = {
+                buyer_sku_code: skuVal,
+                product_name: namaVal,
+                brand: document.getElementById('brand').value,
+                type: document.getElementById('type').value || 'Umum',
+                price: hargaVal,
+                jual: hargaVal,
+                buyer_product_status: true,
+                seller_product_status: true
+            };
+
+            await fetch('/api/admin/products', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(body)
+            });
+
+            alert('✅ Produk berhasil disimpan!');
+            resetForm();
+            loadProduk();
+        }
+
+        async function hapusProduk(sku) {
+            if(!confirm('Hapus produk ' + sku + '?')) return;
+            await fetch('/api/admin/products/' + sku, { method: 'DELETE' });
+            loadProduk();
+        }
+
+        function filterTabel() {
+            const kw = document.getElementById('searchInput').value.toLowerCase();
+            filteredData = rawData.filter(p => {
+                const sku = String(p.buyer_sku_code || p.sku || '').toLowerCase();
+                const nama = String(p.product_name || p.nama_produk || '').toLowerCase();
+                const brand = String(p.brand || '').toLowerCase();
+                return sku.includes(kw) || nama.includes(kw) || brand.includes(kw);
+            });
+            renderTabel(filteredData);
+        }
+
+        window.onload = () => {
+            loadSaldoInfo();
+            loadMembers();
+            loadTransactions();
+            loadProduk();
+        };
+    </script>
+</body>
+</html>

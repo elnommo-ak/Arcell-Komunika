@@ -3,185 +3,308 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Akun Saya - Arcell Komunika</title>
+    <title>Akun & Profil - Arcell Komunika</title>
+    <!-- FontAwesome & Bootstrap Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
     <style>
+        /* --- CLEAN WHITE NEUMORPHISM THEME (SERASI DENGAN INDEX.HTML) --- */
         :root {
-            --bg-color: #e0e5ec;
-            --shadow-light: #ffffff;
-            --shadow-dark: #a3b1c6;
-            --accent-color: #00a8ff;
-            --text-main: #4d547d;
-            --text-muted: #8893b0;
-            --border-radius-md: 16px;
+            --bg-base: #e6eaf0;
+            --neu-light: #ffffff;
+            --neu-dark: #babecc;
+            --text-main: #4a5568;
+            --text-muted: #8c98a9;
+            --accent-purple: #7052ff;
+            --border-radius-sm: 14px;
+            --border-radius-md: 22px;
             --border-radius-pill: 50px;
-            --bottom-nav-height: 65px;
+            --bottom-nav-height: 70px;
+            
+            --neu-shadow-flat: 6px 6px 12px var(--neu-dark), -6px -6px 12px var(--neu-light);
+            --neu-shadow-sm: 3px 3px 6px var(--neu-dark), -3px -3px 6px var(--neu-light);
+            --neu-shadow-inset: inset 3px 3px 6px var(--neu-dark), inset -3px -3px 6px var(--neu-light);
         }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, sans-serif; -webkit-tap-highlight-color: transparent; }
-        body { background: var(--bg-color); color: var(--text-main); padding-bottom: calc(var(--bottom-nav-height) + 20px); display: flex; justify-content: center; }
-        .app-container { width: 100%; max-width: 480px; min-height: 100vh; background: var(--bg-color); padding: 16px; position: relative; }
-        
-        .page-header { font-size: 1.1rem; font-weight: 800; margin-bottom: 20px; display: flex; align-items: center; gap: 10px; }
-        .page-header i { color: var(--accent-color); }
-
-        /* CARD NEUMORPHISM */
-        .neumorph-card {
-            background: var(--bg-color); padding: 20px; border-radius: var(--border-radius-md);
-            box-shadow: 6px 6px 12px var(--shadow-dark), -6px -6px 12px var(--shadow-light); margin-bottom: 20px;
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            -webkit-tap-highlight-color: transparent;
         }
 
-        /* FORM LOGIN STYLE */
-        .login-box { text-align: center; }
-        .login-title { font-size: 1rem; font-weight: 800; margin-bottom: 6px; }
-        .login-subtitle { font-size: 0.75rem; color: var(--text-muted); margin-bottom: 20px; }
-        
-        .form-group { margin-bottom: 14px; text-align: left; }
-        .form-label { font-size: 0.7rem; font-weight: 700; color: var(--text-muted); margin-bottom: 6px; display: block; }
-        .form-input {
-            width: 100%; padding: 12px 16px; background: var(--bg-color); border: none; outline: none;
-            border-radius: var(--border-radius-pill); font-size: 0.85rem; font-weight: 700; color: var(--text-main);
-            box-shadow: inset 3px 3px 6px var(--shadow-dark), inset -3px -3px 6px var(--shadow-light);
+        body {
+            background-color: var(--bg-base);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px 16px calc(var(--bottom-nav-height) + 30px) 16px;
         }
 
-        .btn-login {
-            width: 100%; padding: 12px; border: none; outline: none; border-radius: var(--border-radius-pill);
-            background: var(--accent-color); color: #fff; font-size: 0.85rem; font-weight: 800; cursor: pointer;
-            box-shadow: 4px 4px 8px var(--shadow-dark), -4px -4px 8px var(--shadow-light); margin-top: 10px;
+        .app-container {
+            width: 100%;
+            max-width: 480px;
+            margin: 0 auto;
         }
-        .btn-login:active { transform: scale(0.98); }
 
-        /* PROFILE STYLE (SETELAH LOGIN) */
-        .profile-card { text-align: center; }
-        .profile-card img { width: 75px; height: 75px; border-radius: 50%; box-shadow: 4px 4px 8px var(--shadow-dark), -4px -4px 8px var(--shadow-light); padding: 3px; margin-bottom: 10px; }
-        
-        .menu-list { display: flex; flex-direction: column; gap: 12px; }
-        .menu-btn {
-            display: flex; align-items: center; justify-content: space-between; padding: 14px 18px;
-            background: var(--bg-color); border-radius: 12px; box-shadow: 4px 4px 8px var(--shadow-dark), -4px -4px 8px var(--shadow-light);
-            text-decoration: none; color: var(--text-main); font-weight: 700; font-size: 0.85rem; cursor: pointer; border: none; width: 100%;
+        .card-box {
+            background: var(--bg-base);
+            padding: 30px 24px;
+            border-radius: var(--border-radius-md);
+            box-shadow: var(--neu-shadow-flat);
+            text-align: center;
+            width: 100%;
         }
-        .menu-btn i { color: var(--accent-color); }
-        .menu-btn:active { box-shadow: inset 3px 3px 6px var(--shadow-dark), inset -3px -3px 6px var(--shadow-light); }
 
-        /* BOTTOM NAV */
-        .bottom-nav { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 480px; height: var(--bottom-nav-height); background: var(--bg-color); display: flex; justify-content: space-around; align-items: center; box-shadow: 0 -6px 12px var(--shadow-dark), 0 -2px 6px var(--shadow-light); z-index: 900; }
-        .nav-item { display: flex; flex-direction: column; align-items: center; justify-content: center; text-decoration: none; color: var(--text-muted); width: 18%; height: 48px; border-radius: 10px; }
-        .nav-item i { font-size: 1.15rem; margin-bottom: 3px; }
-        .nav-item span { font-size: 0.65rem; font-weight: 700; }
-        .nav-item.active { color: var(--accent-color); box-shadow: inset 3px 3px 6px var(--shadow-dark), inset -3px -3px 6px var(--shadow-light); }
+        h2 { color: var(--accent-purple); margin-bottom: 6px; font-weight: 800; font-size: 1.3rem; }
+        p { color: var(--text-muted); font-size: 0.82rem; margin-bottom: 24px; font-weight: 600; }
+
+        .input-group {
+            background: var(--bg-base);
+            border-radius: var(--border-radius-pill);
+            padding: 12px 18px;
+            box-shadow: var(--neu-shadow-inset);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+        .input-group i { color: var(--accent-purple); }
+        .input-group input {
+            border: none;
+            background: transparent;
+            outline: none;
+            width: 100%;
+            font-weight: 700;
+            color: var(--text-main);
+            font-size: 0.95rem;
+        }
+
+        .btn-action {
+            background: var(--accent-purple);
+            color: #ffffff;
+            width: 100%;
+            border: none;
+            padding: 14px;
+            border-radius: var(--border-radius-pill);
+            font-weight: 800;
+            font-size: 0.95rem;
+            cursor: pointer;
+            box-shadow: var(--neu-shadow-sm);
+            margin-top: 10px;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .btn-action:active { box-shadow: var(--neu-shadow-inset); }
+        .btn-danger { background: #dc3545; }
+
+        .profile-info {
+            background: var(--bg-base);
+            border-radius: var(--border-radius-sm);
+            padding: 18px;
+            box-shadow: var(--neu-shadow-inset);
+            margin-bottom: 20px;
+            text-align: left;
+        }
+        .profile-row { display: flex; justify-content: space-between; margin-bottom: 12px; font-size: 0.85rem; }
+        .profile-row:last-child { margin-bottom: 0; }
+        .profile-label { color: var(--text-muted); font-weight: 600; }
+        .profile-val { font-weight: 800; color: var(--text-main); }
+
+        /* --- BOTTOM NAV NEUMORPHISM (EXACT MATCH INDEX.HTML) --- */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100%;
+            max-width: 480px;
+            height: var(--bottom-nav-height);
+            background: var(--bg-base);
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            box-shadow: 0 -5px 15px rgba(0,0,0,0.05);
+            border-top-left-radius: 20px;
+            border-top-right-radius: 20px;
+            padding: 0 10px;
+            z-index: 999;
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+            color: var(--text-muted);
+            font-size: 11px;
+            font-weight: 600;
+            width: 60px;
+            height: 50px;
+            border-radius: 14px;
+            transition: all 0.3s ease;
+            background: var(--bg-base);
+            box-shadow: var(--neu-shadow-sm);
+        }
+
+        .nav-item i {
+            font-size: 18px;
+            margin-bottom: 3px;
+        }
+
+        .nav-item.active {
+            color: var(--accent-purple);
+            box-shadow: var(--neu-shadow-inset);
+        }
     </style>
 </head>
 <body>
+
     <div class="app-container">
-        <div class="page-header"><i class="fa-solid fa-user"></i> Akun Saya</div>
 
-        <!-- STATE 1: TAMPILAN JIKA BELUM LOGIN -->
-        <div id="loginSection" class="neumorph-card login-box" style="display: none;">
-            <div class="login-title">Masuk ke Akun Agen</div>
-            <div class="login-subtitle">Silakan masukkan Nomor HP dan PIN Agen Anda</div>
-            <form onsubmit="handleLogin(event)">
-                <div class="form-group">
-                    <label class="form-label">Nomor HP Agen</label>
-                    <input type="tel" id="loginHp" class="form-input" placeholder="081234567890" required>
-                </div>
-                <div class="form-group">
-                    <label class="form-label">PIN / Password (Default: 123456)</label>
-                    <input type="password" id="loginPin" class="form-input" placeholder="Masukkan PIN" maxlength="6" required>
-                </div>
-                <button type="submit" class="btn-login"><i class="fa-solid fa-right-to-bracket"></i> Masuk Sekarang</button>
-            </form>
-        </div>
+        <!-- KONDISI 1: TAMPILAN PROFIL & LOGOUT (BILA SUDAH LOGIN) -->
+        <div class="card-box" id="viewProfile" style="display: none;">
+            <h2>Profil Member</h2>
+            <p>Informasi Akun Arcell Komunika Anda</p>
 
-        <!-- STATE 2: TAMPILAN JIKA SUDAH LOGIN -->
-        <div id="profileSection" style="display: none;">
-            <div class="neumorph-card profile-card">
-                <img src="https://images.bukaolshop.com/hosting/180774/3b0c09d4696e527913.png" alt="Profile">
-                <div id="profileName" style="font-weight: 800; font-size: 1.1rem;">Sahabat Arcell</div>
-                <div id="profileRole" style="font-size: 0.75rem; color: var(--text-muted); margin-top: 2px;">Mitra Agen Premium</div>
+            <div style="font-size: 3.5rem; color: var(--accent-purple); margin-bottom: 15px;">
+                <i class="fa-solid fa-circle-user"></i>
             </div>
 
-            <div class="menu-list">
-                <button class="menu-btn" onclick="alert('PIN Keamanan Anda aktif.')">
-                    <span><i class="fa-solid fa-shield-halved"></i> Keamanan PIN & Akun</span>
-                    <i class="fa-solid fa-chevron-right"></i>
-                </button>
-                <button class="menu-btn" onclick="alert('Hubungi CS Digiflazz via Telegram / WhatsApp resmi.')">
-                    <span><i class="fa-solid fa-headset"></i> Bantuan CS Digiflazz</span>
-                    <i class="fa-solid fa-chevron-right"></i>
-                </button>
-                <button class="menu-btn" onclick="handleLogout()" style="color: #ff4757;">
-                    <span><i class="fa-solid fa-right-from-bracket"></i> Keluar / Logout</span>
-                </button>
+            <div class="profile-info">
+                <div class="profile-row">
+                    <span class="profile-label">ID Member:</span>
+                    <span class="profile-val" id="dispMemberId">-</span>
+                </div>
+                <div class="profile-row">
+                    <span class="profile-label">Nama Member:</span>
+                    <span class="profile-val" id="dispName">-</span>
+                </div>
+                <div class="profile-row">
+                    <span class="profile-label">Nomor HP:</span>
+                    <span class="profile-val" id="dispPhone">-</span>
+                </div>
             </div>
+
+            <button class="btn-action" onclick="window.location.href='index.html'" style="margin-bottom: 12px;">
+                <i class="fa-solid fa-house"></i> Beranda
+            </button>
+            <button class="btn-action btn-danger" onclick="prosesLogout()">
+                <i class="fa-solid fa-right-from-bracket"></i> Keluar (Logout)
+            </button>
         </div>
 
-        <!-- BOTTOM NAV BAR -->
-        <nav class="bottom-nav">
-            <a href="index.html" class="nav-item"><i class="fa-solid fa-house"></i><span>Home</span></a>
-            <a href="history.html" class="nav-item"><i class="fa-solid fa-clock-rotate-left"></i><span>History</span></a>
-            <a href="rekap.html" class="nav-item"><i class="fa-solid fa-chart-line"></i><span>Rekap</span></a>
-            <a href="member.html" class="nav-item"><i class="fa-solid fa-users"></i><span>Member</span></a>
-            <a href="akun.html" class="nav-item active"><i class="fa-solid fa-user"></i><span>Akun</span></a>
-        </nav>
+        <!-- KONDISI 2: TAMPILAN FORM LOGIN (BILA BELUM LOGIN) -->
+        <div class="card-box" id="viewLogin" style="display: none;">
+            <h2>Arcell Komunika</h2>
+            <p>Masukkan Nomor HP untuk masuk ke aplikasi</p>
+
+            <div class="input-group">
+                <i class="fa-solid fa-user"></i>
+                <input type="text" id="loginName" placeholder="Nama Lengkap (Opsional)">
+            </div>
+
+            <div class="input-group">
+                <i class="fa-solid fa-phone"></i>
+                <input type="tel" id="loginPhone" placeholder="Nomor HP (misal: 08123456789)">
+            </div>
+
+            <button class="btn-action" onclick="prosesLogin()">
+                <i class="fa-solid fa-right-to-bracket"></i> Masuk Sekarang
+            </button>
+        </div>
+
+    </div>
+
+    <!-- 📌 BOTTOM NAVIGATION BAR INTEGRATED -->
+    <div class="bottom-nav">
+        <a href="index.html" class="nav-item">
+            <i class="fa-solid fa-house"></i>
+            <span>Home</span>
+        </a>
+        <a href="history.html" class="nav-item">
+            <i class="fa-solid fa-clock-rotate-left"></i>
+            <span>History</span>
+        </a>
+        <a href="rekap.html" class="nav-item">
+            <i class="fa-solid fa-chart-line"></i>
+            <span>Rekap</span>
+        </a>
+	<a href="kasir.html" class="nav-item">
+            <i class="fa-solid fa-cash-register"></i>
+            <span>Kasir</span>
+        <a href="akun.html" class="nav-item active">
+            <i class="fa-solid fa-user"></i>
+            <span>Akun</span>
+        </a>
     </div>
 
     <script>
-        // Cek Status Login saat Halaman Dibuka
-        function checkLoginState() {
-            const userSession = localStorage.getItem('arcell_user');
-            const loginSection = document.getElementById('loginSection');
-            const profileSection = document.getElementById('profileSection');
+        window.onload = function() {
+            const isLoggedIn = localStorage.getItem('isLoggedIn');
 
-            if (userSession) {
-                const userData = JSON.parse(userSession);
-                document.getElementById('profileName').innerText = userData.nama || 'Sahabat Arcell';
-                document.getElementById('profileRole').innerText = userData.role || 'Agen Resmi';
-                
-                loginSection.style.display = 'none';
-                profileSection.style.display = 'block';
+            if (isLoggedIn === 'true') {
+                document.getElementById('viewProfile').style.display = 'block';
+                document.getElementById('viewLogin').style.display = 'none';
+
+                document.getElementById('dispName').innerText = localStorage.getItem('userName') || 'Member';
+                document.getElementById('dispPhone').innerText = localStorage.getItem('userPhone') || '-';
+                document.getElementById('dispMemberId').innerText = localStorage.getItem('memberId') || '-';
             } else {
-                loginSection.style.display = 'block';
-                profileSection.style.display = 'none';
+                document.getElementById('viewProfile').style.display = 'none';
+                document.getElementById('viewLogin').style.display = 'block';
             }
-        }
+        };
 
-        // Handle Submit Login
-        async function handleLogin(e) {
-            e.preventDefault();
-            const hp = document.getElementById('loginHp').value;
-            const pin = document.getElementById('loginPin').value;
+        async function prosesLogin() {
+            const name = document.getElementById('loginName').value.trim();
+            const phone = document.getElementById('loginPhone').value.trim();
+
+            if (!phone || phone.length < 8) {
+                return alert('Masukkan Nomor HP yang valid!');
+            }
 
             try {
-                const response = await fetch('/api/auth/login', {
+                const res = await fetch('/api/member/login', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ hp, pin })
+                    body: JSON.stringify({ name, phone })
                 });
 
-                const res = await response.json();
+                const result = await res.json();
 
-                if (res.status === 'success') {
-                    localStorage.setItem('arcell_user', JSON.stringify(res.data));
-                    alert('Selamat Datang Kembali, ' + res.data.nama + '!');
-                    checkLoginState();
+                if (result.status === 'success' && result.data) {
+                    localStorage.setItem('isLoggedIn', 'true');
+                    localStorage.setItem('userPhone', result.data.phone);
+                    localStorage.setItem('userName', result.data.name);
+                    localStorage.setItem('memberId', result.data.member_id);
+
+                    alert('✅ Login Berhasil! Selamat datang, ' + result.data.name);
+                    window.location.href = 'index.html';
                 } else {
-                    alert(res.message);
+                    alert('❌ Gagal Login: ' + result.message);
                 }
             } catch (err) {
-                alert('Gagal terhubung ke server login.');
+                alert('❌ Gagal terhubung ke server VPS');
             }
         }
 
-        // Handle Logout
-        function handleLogout() {
-            if (confirm('Apakah Anda yakin ingin keluar dari akun?')) {
-                localStorage.removeItem('arcell_user');
-                checkLoginState();
+        function prosesLogout() {
+            if (confirm('Apakah Anda yakin ingin keluar dari akun ini?')) {
+                localStorage.clear();
+                alert('✅ Anda telah berhasil logout!');
+                window.location.reload();
             }
         }
-
-        window.addEventListener('DOMContentLoaded', checkLoginState);
     </script>
 </body>
 </html>
