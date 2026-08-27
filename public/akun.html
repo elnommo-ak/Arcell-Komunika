@@ -225,87 +225,100 @@
 
     </div>
 
-    <!-- 📌 BOTTOM NAVIGATION BAR INTEGRATED -->
-    <div class="bottom-nav">
-        <a href="index.html" class="nav-item">
-            <i class="fa-solid fa-house"></i>
-            <span>Home</span>
-        </a>
-        <a href="history.html" class="nav-item">
-            <i class="fa-solid fa-clock-rotate-left"></i>
-            <span>History</span>
-        </a>
-        <a href="rekap.html" class="nav-item">
-            <i class="fa-solid fa-chart-line"></i>
-            <span>Rekap</span>
-        </a>
-	<a href="kasir.html" class="nav-item">
-            <i class="fa-solid fa-cash-register"></i>
-            <span>Kasir</span>
-        <a href="akun.html" class="nav-item active">
-            <i class="fa-solid fa-user"></i>
-            <span>Akun</span>
-        </a>
-    </div>
 
-    <script>
-        window.onload = function() {
-            const isLoggedIn = localStorage.getItem('isLoggedIn');
+<!-- 🔔 SDK ONESIGNAL (WAJIB ADA DI ATAS) -->
+<script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
+<script>
+    // Inisialisasi OneSignal
+    window.OneSignalDeferred = window.OneSignalDeferred || [];
+    OneSignalDeferred.push(async function(OneSignal) {
+        await OneSignal.init({
+            appId: "c7cc2a6a-84b8-4579-9c6b-f4d8077f0f65",
+            allowLocalhostAsSecureOrigin: true
+        });
 
-            if (isLoggedIn === 'true') {
-                document.getElementById('viewProfile').style.display = 'block';
-                document.getElementById('viewLogin').style.display = 'none';
+        // 🔹 CEK JIKA USER SUDAH LOGIN SEBELUMNYA (Auto-Sync saat page refresh)
+        const isLoggedIn = localStorage.getItem('isLoggedIn');
+        const memberId = localStorage.getItem('memberId');
+        
+        if (isLoggedIn === 'true' && memberId) {
+            await OneSignal.login(memberId);
+            console.log("🔔 OneSignal External ID Auto-Synced:", memberId);
+        }
+    });
+</script>
 
-                document.getElementById('dispName').innerText = localStorage.getItem('userName') || 'Member';
-                document.getElementById('dispPhone').innerText = localStorage.getItem('userPhone') || '-';
-                document.getElementById('dispMemberId').innerText = localStorage.getItem('memberId') || '-';
-            } else {
-                document.getElementById('viewProfile').style.display = 'none';
-                document.getElementById('viewLogin').style.display = 'block';
-            }
-        };
+<script>
+    window.onload = function() {
+        const isLoggedIn = localStorage.getItem('isLoggedIn');
 
-        async function prosesLogin() {
-            const name = document.getElementById('loginName').value.trim();
-            const phone = document.getElementById('loginPhone').value.trim();
+        if (isLoggedIn === 'true') {
+            document.getElementById('viewProfile').style.display = 'block';
+            document.getElementById('viewLogin').style.display = 'none';
 
-            if (!phone || phone.length < 8) {
-                return alert('Masukkan Nomor HP yang valid!');
-            }
+            document.getElementById('dispName').innerText = localStorage.getItem('userName') || 'Member';
+            document.getElementById('dispPhone').innerText = localStorage.getItem('userPhone') || '-';
+            document.getElementById('dispMemberId').innerText = localStorage.getItem('memberId') || '-';
+        } else {
+            document.getElementById('viewProfile').style.display = 'none';
+            document.getElementById('viewLogin').style.display = 'block';
+        }
+    };
 
-            try {
-                const res = await fetch('/api/member/login', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ name, phone })
+    async function prosesLogin() {
+        const name = document.getElementById('loginName').value.trim();
+        const phone = document.getElementById('loginPhone').value.trim();
+
+        if (!phone || phone.length < 8) {
+            return alert('Masukkan Nomor HP yang valid!');
+        }
+
+        try {
+            const res = await fetch('/api/member/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name, phone })
+            });
+
+            const result = await res.json();
+
+            if (result.status === 'success' && result.data) {
+                // 1. Simpan Session ke LocalStorage
+                localStorage.setItem('isLoggedIn', 'true');
+                localStorage.setItem('userPhone', result.data.phone);
+                localStorage.setItem('userName', result.data.name);
+                localStorage.setItem('memberId', result.data.member_id);
+
+                // 2. 🔔 DAFTARKAN MEMBER ID KE ONESIGNAL
+                window.OneSignalDeferred.push(async function(OneSignal) {
+                    await OneSignal.login(result.data.member_id);
+                    console.log("🔔 OneSignal External ID Set:", result.data.member_id);
                 });
 
-                const result = await res.json();
-
-                if (result.status === 'success' && result.data) {
-                    localStorage.setItem('isLoggedIn', 'true');
-                    localStorage.setItem('userPhone', result.data.phone);
-                    localStorage.setItem('userName', result.data.name);
-                    localStorage.setItem('memberId', result.data.member_id);
-
-                    alert('✅ Login Berhasil! Selamat datang, ' + result.data.name);
-                    window.location.href = 'index.html';
-                } else {
-                    alert('❌ Gagal Login: ' + result.message);
-                }
-            } catch (err) {
-                alert('❌ Gagal terhubung ke server VPS');
+                alert('✅ Login Berhasil! Selamat datang, ' + result.data.name);
+                window.location.href = 'index.html';
+            } else {
+                alert('❌ Gagal Login: ' + result.message);
             }
+        } catch (err) {
+            alert('❌ Gagal terhubung ke server VPS');
         }
+    }
 
-        function prosesLogout() {
-            if (confirm('Apakah Anda yakin ingin keluar dari akun ini?')) {
-                localStorage.clear();
-                alert('✅ Anda telah berhasil logout!');
-                window.location.reload();
-            }
+    function prosesLogout() {
+        if (confirm('Apakah Anda yakin ingin keluar dari akun ini?')) {
+            // 🔔 UNLINK MEMBER ID DARI ONESIGNAL SAAT LOGOUT
+            window.OneSignalDeferred.push(async function(OneSignal) {
+                await OneSignal.logout();
+                console.log("🔔 OneSignal Session Logged Out");
+            });
+
+            localStorage.clear();
+            alert('✅ Anda telah berhasil logout!');
+            window.location.reload();
         }
-    </script>
+    }
+</script>
 </body>
 </html>
 

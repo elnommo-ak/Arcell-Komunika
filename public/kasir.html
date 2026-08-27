@@ -213,7 +213,6 @@
         .nav-item i { font-size: 18px; margin-bottom: 3px; }
         .nav-item.active { color: var(--primary); box-shadow: var(--shadow-in-1); }
 
-        /* Style Tambahan Filter Digiflazz */
         .df-select-filter {
             width: 100%; padding: 8px 10px; border-radius: 10px; border: 1px solid #cbd5e1; font-weight: 700; font-size: 0.75rem; color: #1e293b; background: #fff; outline: none;
         }
@@ -394,10 +393,10 @@
 
 <script>
     let fakturItemCounter = 0;
-    let loadedItemsCount = 40; // Untuk Pagination Infinite Scroll Digiflazz
+    let loadedItemsCount = 40;
 
     /* =========================================================
-       📌 INTEGRASI DIGIFLAZZ (FIX KEYBOARD & FILTER BRAND/KATEGORI)
+       📌 INTEGRASI DIGIFLAZZ (PRICE LIST)
     ========================================================= */
     const fetchDigiflazzProducts = async () => {
         showToast("Mengunduh data dari server...");
@@ -457,7 +456,6 @@
             return;
         }
 
-        // Ambil daftar Kategori & Brand Unik
         const categories = [...new Set(products.map(p => p.category || 'Lainnya'))].sort();
         const brands = [...new Set(products.map(p => p.brand || 'Lainnya'))].sort();
 
@@ -467,7 +465,6 @@
         let brandOptions = '<option value="ALL">Semua Brand</option>';
         brands.forEach(b => brandOptions += `<option value="${b}">${b}</option>`);
 
-        // Render struktur utama tanpa me-render ulang input box saat mengetik
         document.getElementById("faktur-modal-body-content").innerHTML = `
             <div style="margin-bottom:12px; display:flex; flex-direction:column; gap:8px;">
                 <input type="text" id="df-search-input" placeholder="Cari nama produk, SKU..." 
@@ -547,7 +544,6 @@
 
         listContainer.innerHTML = html;
 
-        // Tampilkan tombol "Muat Lebih Banyak" jika masih ada produk tersisa
         if (filtered.length > loadedItemsCount) {
             loadMoreBox.innerHTML = `
                 <button type="button" class="neo-btn secondary" style="font-size:0.75rem; padding:8px;" onclick="loadMoreDigiflazzProducts()">
@@ -593,7 +589,7 @@
     };
 
     /* =========================================================
-       📌 LOGIK KASIR LOKAL & UTILITAS
+       📌 LOGIK KASIR LOKAL & INTEGRASI BACKEND SQLITE
     ========================================================= */
     const getStoredCustomers = () => {
         try { return JSON.parse(localStorage.getItem('master_customer_list') || '[]'); } 
@@ -756,7 +752,7 @@
         }
     };
 
-    window.saveFakturPenjualan = () => {
+    window.saveFakturPenjualan = async () => {
         const pembeli = document.getElementById("faktur-pembeli-inp")?.value.trim() || "Pelanggan Umum";
         const noFaktur = document.getElementById("faktur-no-inp")?.value.trim() || ("INV-" + Date.now().toString().slice(-6));
         const txDate = document.getElementById("faktur-date-inp")?.value || getTodayString();
@@ -805,18 +801,29 @@
             kembalian: bayarNominal > grandTotalTagihan ? (bayarNominal - grandTotalTagihan) : 0
         };
 
+        // 1. Simpan ke LocalStorage
         let currentFakturs = getStoredManualFakturs();
         const existingIdx = currentFakturs.findIndex(f => f.no_faktur === noFaktur);
 
         if (existingIdx >= 0) {
             currentFakturs[existingIdx] = newFakturRecord;
-            showToast(`Faktur ${noFaktur} diperbarui!`);
         } else {
             currentFakturs.unshift(newFakturRecord);
-            showToast(`Faktur ${noFaktur} disimpan!`);
+        }
+        saveManualFakturs(currentFakturs);
+
+        // 2. Sync / Simpan ke Server Node.js (SQLite)
+        try {
+            await fetch('/api/kasir/faktur', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(newFakturRecord)
+            });
+        } catch (e) {
+            console.log("Simpan lokal berhasil, offline mode aktif.");
         }
 
-        saveManualFakturs(currentFakturs);
+        showToast(`Faktur ${noFaktur} berhasil disimpan!`);
         resetFakturForm();
         renderKasTabUI();
     };
@@ -831,13 +838,27 @@
         addFakturItemRow();
     };
 
-    const renderKasTabUI = () => {
+    const renderKasTabUI = async () => {
         const selectedTgl = document.getElementById("filter-kas-tgl-select")?.value || "ALL";
         const selectedPembeli = document.getElementById("filter-pembeli-select")?.value || "ALL";
         const container = document.getElementById("kas-history-list");
         if (!container) return;
 
         let fakturs = getStoredManualFakturs();
+
+        // Coba Ambil Data Terbaru dari Backend SQLite
+        try {
+            const res = await fetch('/api/kasir/faktur');
+            if (res.ok) {
+                const apiData = await res.json();
+                if (Array.isArray(apiData) && apiData.length > 0) {
+                    fakturs = apiData;
+                    saveManualFakturs(fakturs);
+                }
+            }
+        } catch (e) {
+            console.log("Menggunakan data cache lokal.");
+        }
 
         const datesMap = {};
         fakturs.forEach(f => { if(f.tanggal) datesMap[f.tanggal] = true; });
@@ -889,6 +910,8 @@
 
         document.getElementById("faktur-modal-title").innerText = `${f.no_faktur} (${f.pembeli})`;
         
+        const items = typeof f.items === 'string' ? JSON.parse(f.items) : (f.items || []);
+
         document.getElementById("faktur-modal-body-content").innerHTML = `
             <div style="background:#ffffff; padding:20px 16px; border-radius:16px; border:1px solid #cbd5e1;">
                 <div style="text-align:center; border-bottom:2px dashed #cbd5e1; padding-bottom:12px; margin-bottom:14px;">
@@ -896,7 +919,7 @@
                     <div style="font-size:0.75rem; color:#64748b;">No: ${f.no_faktur} | ${f.tanggal} ${f.waktu || ''}</div>
                     <div style="font-size:0.75rem; color:#64748b; font-weight:700;">Pelanggan: ${f.pembeli}</div>
                 </div>
-                ${f.items.map(item => `
+                ${items.map(item => `
                     <div style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px dashed #edf2f7; font-size:0.8rem;">
                         <div>
                             <div style="font-weight:700; color:#0f172a;">${item.nama}</div>
@@ -924,14 +947,22 @@
     };
 
     window.closeFakturFullscreen = () => {
-        document.getElementById("faktur-fullscreen-modal").classList.remove("remove");
         document.getElementById("faktur-fullscreen-modal").classList.remove("open");
     };
 
-    window.deleteManualFaktur = (noFaktur) => {
+    window.deleteManualFaktur = async (noFaktur) => {
         if(confirm(`Hapus Faktur ${noFaktur}?`)) {
+            // 1. Hapus Lokal
             const current = getStoredManualFakturs().filter(f => f.no_faktur !== noFaktur);
             saveManualFakturs(current);
+
+            // 2. Hapus dari Server SQLite
+            try {
+                await fetch(`/api/kasir/faktur/${noFaktur}`, { method: 'DELETE' });
+            } catch (e) {
+                console.log("Penghapusan lokal selesai.");
+            }
+
             showToast("Faktur dihapus!");
             closeFakturFullscreen();
             renderKasTabUI();

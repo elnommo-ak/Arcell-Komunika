@@ -3,282 +3,318 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Rekap Transaksi Ringkas - Arcell Komunika</title>
+    <title>Rekap Transaksi - Arcell Komunika</title>
+    
+    <!-- FontAwesome & Bootstrap Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
     <style>
+        /* --- CLEAN WHITE NEUMORPHISM THEME (INDEX/HOME MATCH) --- */
         :root {
-            --bg-color: #e6eef8;
-            --card-bg: #e6eef8;
-            --shadow-light: #ffffff;
-            --shadow-dark: #b8c6d9;
+            --bg-base: #e6eaf0;
+            --neu-light: #ffffff;
+            --neu-dark: #babecc;
+            --text-main: #4a5568;
+            --text-muted: #8c98a9;
+            --accent-purple: #7052ff;
+            --success-color: #2e7d32;
+            --warning-color: #ed6c02;
+            --danger-color: #d32f2f;
+            --border-radius-sm: 14px;
+            --border-radius-md: 22px;
+            --border-radius-pill: 50px;
+            --main-gap: 16px;
+            --bottom-nav-height: 70px;
             
-            --accent-blue: #7052ff;
-            --accent-blue-light: #e0ecff;
-            --accent-green: #27ae60;
-            --accent-red: #e74c3c;
-            --accent-orange: #f39c12;
-            --accent-purple: #8e44ad;
-            --accent-untung: #00A8FF;
-            
-            --text-main: #3a4b68;
-            --text-muted: #8395a7;
-            --border-color: rgba(255, 255, 255, 0.5);
-            
-            --neu-shadow-raised: 6px 6px 12px var(--shadow-dark), -6px -6px 12px var(--shadow-light);
-            --neu-shadow-raised-sm: 3px 3px 6px var(--shadow-dark), -3px -3px 6px var(--shadow-light);
-            --neu-shadow-inset: inset 3px 3px 6px var(--shadow-dark), inset -3px -3px 6px var(--shadow-light);
-            --neu-shadow-inset-sm: inset 2px 2px 4px var(--shadow-dark), inset -2px -2px 4px var(--shadow-light);
-            
-            --neu-radius: 16px;
-            --neu-radius-sm: 10px;
-            --neu-radius-pill: 30px;
+            /* Clean Neumorphism Shadows */
+            --neu-shadow-flat: 6px 6px 12px var(--neu-dark), -6px -6px 12px var(--neu-light);
+            --neu-shadow-sm: 3px 3px 6px var(--neu-dark), -3px -3px 6px var(--neu-light);
+            --neu-shadow-inset: inset 3px 3px 6px var(--neu-dark), inset -3px -3px 6px var(--neu-light);
         }
 
-        * { 
-            box-sizing: border-box; 
+        * {
             margin: 0;
             padding: 0;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
             -webkit-tap-highlight-color: transparent;
         }
 
-        body { 
-            background-color: var(--bg-color); 
-            padding: 12px; 
-            padding-bottom: 80px;
-            color: var(--text-main); 
-            min-height: 100vh;
-        }
-
-        /* Sticky Summary Box */
-        .summary-box {
-            background: var(--card-bg);
-            border-radius: var(--neu-radius);
-            padding: 14px 16px;
-            margin-bottom: 12px;
-            position: sticky;
-            top: 8px;
-            z-index: 100;
-            box-shadow: var(--neu-shadow-raised);
-            border: 1px solid var(--border-color);
-        }
-        .summary-header { 
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 6px;
-        }
-        .summary-title { 
-            font-size: 10px; 
-            text-transform: uppercase; 
-            color: var(--text-muted);
-            letter-spacing: 0.8px; 
-            font-weight: 800;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-        .summary-title i { color: var(--accent-blue); }
-        .summary-value { 
-            font-size: 20px; 
-            font-weight: 800; 
-            color: var(--text-main); 
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            margin-bottom: 8px;
-        }
-        .badge-qty {
-            font-size: 10px;
-            background: var(--card-bg);
-            color: var(--accent-blue);
-            padding: 4px 10px;
-            border-radius: var(--neu-radius-pill);
-            box-shadow: var(--neu-shadow-inset-sm);
-            font-weight: 800;
-        }
-        .summary-grid { 
-            display: flex; 
-            gap: 10px; 
-            border-top: 1px solid var(--border-color); 
-            padding-top: 8px; 
-        }
-        .summary-item { flex: 1; }
-        .summary-item-label { font-size: 9px; color: var(--text-muted); font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; }
-        .summary-item-value { font-size: 12px; font-weight: 800; margin-top: 2px; color: var(--text-main); }
-
-        /* Controls */
-        .controls-wrapper {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-            margin-bottom: 12px;
-        }
-        
-        input.search-input, select.select-filter {
+        html, body {
             width: 100%;
-            padding: 10px 14px;
-            font-size: 11px;
+            height: 100%;
+            background-color: var(--bg-base);
+            color: var(--text-main);
+        }
+
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            overflow-x: hidden;
+            overflow-y: auto;
+            padding-bottom: calc(var(--bottom-nav-height) + 20px);
+        }
+
+        .app-container {
+            width: 100%;
+            max-width: 480px;
+            min-height: 100vh;
+            background-color: var(--bg-base);
+            position: relative;
+            margin: 0 auto;
+            padding: 16px;
+        }
+
+        ::-webkit-scrollbar { display: none !important; width: 0 !important; height: 0 !important; }
+        * { -ms-overflow-style: none !important; scrollbar-width: none !important; }
+
+        /* HEADER */
+        .nav-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 16px;
+        }
+
+        .header-title {
+            font-size: 1rem; font-weight: 800; color: var(--text-main);
+            display: flex; align-items: center; gap: 8px;
+        }
+        .header-title i { color: var(--accent-purple); }
+
+        /* STICKY SUMMARY CARD (TOP) */
+        .summary-box {
+            background: var(--bg-base);
+            border-radius: var(--border-radius-md);
+            padding: 18px;
+            margin-bottom: 16px;
+            position: sticky;
+            top: 10px;
+            z-index: 100;
+            box-shadow: var(--neu-shadow-flat);
+        }
+
+        .summary-header { 
+            display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;
+        }
+
+        .summary-title { 
+            font-size: 0.72rem; text-transform: uppercase; color: var(--text-muted);
+            letter-spacing: 0.5px; font-weight: 800; display: flex; align-items: center; gap: 6px;
+        }
+        .summary-title i { color: var(--accent-purple); }
+
+        .summary-value { 
+            font-size: 1.4rem; font-weight: 800; color: var(--accent-purple); 
+            display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;
+        }
+
+        .badge-qty {
+            font-size: 0.7rem; background: var(--bg-base); color: var(--accent-purple);
+            padding: 4px 12px; border-radius: var(--border-radius-pill);
+            box-shadow: var(--neu-shadow-inset); font-weight: 800;
+        }
+
+        .summary-grid { 
+            display: flex; gap: 12px; border-top: 1px dashed var(--neu-dark); padding-top: 10px;
+        }
+
+        .summary-item { flex: 1; }
+        .summary-item-label { font-size: 0.65rem; color: var(--text-muted); font-weight: 700; text-transform: uppercase; }
+        .summary-item-value { font-size: 0.85rem; font-weight: 800; margin-top: 2px; color: var(--text-main); }
+
+        /* CONTROLS */
+        .controls-wrapper {
+            display: flex; flex-direction: column; gap: 10px; margin-bottom: 16px;
+        }
+
+        .search-input, .select-filter {
+            width: 100%;
+            padding: 10px 18px;
+            font-size: 0.8rem;
             font-weight: 700;
             color: var(--text-main); 
-            background: var(--card-bg);
-            border: none;
-            outline: none;
-            border-radius: var(--neu-radius-pill);
+            background: var(--bg-base);
+            border: none; outline: none;
+            border-radius: var(--border-radius-pill);
             box-shadow: var(--neu-shadow-inset);
         }
 
-        /* Group & Card Neumorphic */
-        .date-group { margin-bottom: 14px; }
+        /* CARD NEUMORPHIC GROUP */
+        .date-group { margin-bottom: 18px; }
+
         .date-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 2px 6px 6px 6px;
-            font-size: 11px;
-            font-weight: 800;
-            color: var(--text-muted);
-        }
-        
-        .card {
-            background: var(--card-bg);
-            border-radius: var(--neu-radius-sm);
-            padding: 10px 12px;
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 4px 8px; font-size: 0.75rem; font-weight: 800; color: var(--text-muted);
             margin-bottom: 8px;
-            box-shadow: var(--neu-shadow-raised-sm);
-            border: 1px solid var(--border-color);
         }
-        .card.hidden { display: none; }
-        
-        .header {
-            display: flex;
-            justify-content: space-between;
-            font-size: 9px;
-            color: var(--text-muted);
-            margin-bottom: 4px;
-            font-weight: 700;
+
+        .card-tx {
+            background: var(--bg-base);
+            border-radius: var(--border-radius-sm);
+            padding: 14px 16px; margin-bottom: 12px;
+            box-shadow: var(--neu-shadow-sm);
+            transition: all 0.2s ease;
         }
+        .card-tx.hidden { display: none !important; }
+
+        .card-tx-header {
+            display: flex; justify-content: space-between; font-size: 0.7rem;
+            color: var(--text-muted); margin-bottom: 6px; font-weight: 700;
+        }
+
         .produk-title { 
-            font-weight: 800; 
-            font-size: 12px; 
-            color: var(--text-main); 
-            margin-bottom: 8px; 
-            line-height: 1.2; 
+            font-weight: 800; font-size: 0.85rem; color: var(--text-main); 
+            margin-bottom: 10px; line-height: 1.3; 
         }
-        
+
         .price-row {
-            display: flex;
-            align-items: center;
-            gap: 6px;
+            display: flex; align-items: center; gap: 8px; margin-bottom: 10px;
         }
 
         .inset-box {
-            flex: 1;
-            display: flex;
-            align-items: center;
-            background: var(--card-bg);
-            padding: 4px 8px;
-            border-radius: var(--neu-radius-pill);
-            box-shadow: var(--neu-shadow-inset-sm);
-            gap: 4px;
+            flex: 1; display: flex; align-items: center;
+            background: var(--bg-base); padding: 4px 10px;
+            border-radius: var(--border-radius-pill);
+            box-shadow: var(--neu-shadow-inset); gap: 4px;
         }
 
         .price-label { 
-            color: var(--text-muted); 
-            font-size: 8px; 
-            font-weight: 800; 
-            text-transform: uppercase; 
-            white-space: nowrap;
+            color: var(--text-muted); font-size: 0.65rem; font-weight: 800; 
+            text-transform: uppercase; white-space: nowrap;
         }
-        
+
         .input-harga {
-            width: 100%;
-            padding: 2px 0;
-            font-size: 11px;
-            font-weight: 800;
-            border: none;
-            outline: none;
-            background: transparent;
-            box-shadow: none;
-            text-align: right;
+            width: 100%; padding: 4px 0; font-size: 0.8rem; font-weight: 800;
+            border: none; outline: none; background: transparent; text-align: right;
         }
-        .input-modal { color: var(--accent-red); }
-        .input-jual { color: var(--accent-green); }
+        .input-modal { color: var(--danger-color); }
+        .input-jual { color: var(--success-color); }
 
         .laba-col {
-            display: flex;
-            flex-direction: column;
-            align-items: flex-end;
-            justify-content: center;
-            padding-left: 4px;
-            min-width: 65px;
+            display: flex; flex-direction: column; align-items: flex-end; justify-content: center;
+            padding-left: 4px; min-width: 75px;
         }
-        .laba-title { font-weight: 700; color: var(--text-muted); font-size: 8px; text-transform: uppercase; }
-        .laba-value { font-weight: 800; font-size: 11px; color: var(--accent-untung); }
-        
-        .footer {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-top: 8px;
-            padding-top: 4px;
-            border-top: 1px dashed var(--shadow-dark);
-        }
-        .status {
-            font-weight: 800;
-            font-size: 9px;
-            text-transform: uppercase;
-            padding: 2px 8px;
-            border-radius: 10px;
-        }
-        .status.sukses { color: var(--accent-green); }
-        .status.gagal { color: var(--accent-red); }
-        .status.pending { color: var(--accent-orange); }
+        .laba-title { font-weight: 700; color: var(--text-muted); font-size: 0.65rem; text-transform: uppercase; }
+        .laba-value { font-weight: 800; font-size: 0.85rem; color: var(--accent-purple); }
 
-        .info-text { text-align: center; color: var(--text-muted); margin-top: 40px; font-size: 11px; font-weight: 700; }
+        .card-tx-footer {
+            display: flex; justify-content: space-between; align-items: center;
+            padding-top: 8px; border-top: 1px dashed var(--neu-dark);
+        }
+
+        .status-badge {
+            font-weight: 800; font-size: 0.65rem; text-transform: uppercase;
+            padding: 3px 10px; border-radius: var(--border-radius-pill);
+            box-shadow: var(--neu-shadow-sm); background: var(--bg-base);
+        }
+        .status-badge.sukses { color: var(--success-color); }
+        .status-badge.gagal { color: var(--danger-color); }
+        .status-badge.pending { color: var(--warning-color); }
+
+        .info-text { text-align: center; color: var(--text-muted); margin-top: 40px; font-size: 0.8rem; font-weight: 700; }
+
         .loader {
-            border: 3px solid var(--shadow-dark);
-            border-top: 3px solid var(--accent-blue);
-            border-radius: 50%;
-            width: 24px;
-            height: 24px;
-            animation: spin 1s linear infinite;
-            margin: 10px auto;
+            border: 3px solid var(--neu-dark);
+            border-top: 3px solid var(--accent-purple);
+            border-radius: 50%; width: 26px; height: 26px;
+            animation: spin 1s linear infinite; margin: 12px auto;
         }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
-        #toast {
-            visibility: hidden;
-            min-width: 160px;
-            background-color: var(--card-bg);
-            color: var(--text-main);
-            text-align: center;
-            border-radius: var(--neu-radius-pill);
-            padding: 8px 14px;
+        /* --- BOTTOM NAVIGATION BAR INTEGRATED --- */
+        .bottom-nav {
             position: fixed;
-            z-index: 999;
+            bottom: 0;
             left: 50%;
-            bottom: 20px;
             transform: translateX(-50%);
-            font-size: 10px;
-            font-weight: 800;
-            opacity: 0;
-            box-shadow: var(--neu-shadow-raised);
-            transition: opacity 0.3s, bottom 0.3s;
+            width: 100%;
+            max-width: 480px;
+            height: var(--bottom-nav-height);
+            background: var(--bg-base);
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            box-shadow: 0 -5px 15px rgba(0,0,0,0.05);
+            border-top-left-radius: 20px;
+            border-top-right-radius: 20px;
+            padding: 0 10px;
+            z-index: 999;
         }
-        #toast.show { visibility: visible; opacity: 1; bottom: 20px; }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+            color: var(--text-muted);
+            font-size: 11px;
+            font-weight: 600;
+            width: 60px;
+            height: 50px;
+            border-radius: 14px;
+            transition: all 0.3s ease;
+            background: var(--bg-base);
+            box-shadow: var(--neu-shadow-sm);
+        }
+
+        .nav-item i {
+            font-size: 18px;
+            margin-bottom: 3px;
+        }
+
+        .nav-item.active {
+            color: var(--accent-purple);
+            box-shadow: var(--neu-shadow-inset);
+        }
     </style>
 </head>
 <body>
 
-<div id="app">
-    <div class="info-text">
-        <div class="loader"></div>
-        <b>Memuat Transaksi Server VPS...</b>
-    </div>
-</div>
+<div class="app-container">
 
-<div id="toast">✅ Aksi Berhasil</div>
+    <!-- HEADER NAVIGATION -->
+    <div class="nav-header">
+        <div class="header-title">
+            <i class="fa-solid fa-chart-line"></i> Rekap Transaksi
+        </div>
+    </div>
+
+    <!-- MAIN APP CONTAINER -->
+    <div id="app">
+        <div class="info-text">
+            <div class="loader"></div>
+            <b>Memuat Transaksi Server VPS...</b>
+        </div>
+    </div>
+
+    <!-- 📌 BOTTOM NAVIGATION BAR INTEGRATED -->
+    <div class="bottom-nav">
+        <a href="index.html" class="nav-item">
+            <i class="fa-solid fa-house"></i>
+            <span>Home</span>
+        </a>
+        <a href="history.html" class="nav-item">
+            <i class="fa-solid fa-clock-rotate-left"></i>
+            <span>History</span>
+        </a>
+        <a href="rekap.html" class="nav-item active">
+            <i class="fa-solid fa-chart-line"></i>
+            <span>Rekap</span>
+	<a href="kasir.html" class="nav-item">
+            <i class="fa-solid fa-cash-register"></i>
+            <span>Kasir</span>
+        </a>
+        <a href="akun.html" class="nav-item">
+            <i class="fa-solid fa-user"></i>
+            <span>Akun</span>
+        </a>
+    </div>
+
+</div>
 
 <script>
     let allTransactions = []; 
@@ -294,7 +330,6 @@
 
     const extractDate = (dateStr) => {
         if (!dateStr) return getTodayDateStr();
-        // Format Tgl "22/8/2026, 00.15.02" / ISO String
         if (dateStr.includes('/')) {
             const parts = dateStr.split(',')[0].split('/');
             if (parts.length === 3) {
@@ -400,12 +435,12 @@
                 if (labaEl) {
                     const laba = j - m;
                     labaEl.innerText = formatRp(laba);
-                    labaEl.style.color = laba >= 0 ? "var(--accent-untung)" : "var(--accent-red)";
+                    labaEl.style.color = laba >= 0 ? "var(--accent-purple)" : "var(--danger-color)";
                 }
             }
         });
 
-        calculateTodaySummary();
+        calculateFilteredSummary();
     };
 
     const updatePrices = (noPem, namaBarang) => {
@@ -415,13 +450,55 @@
         }, 400); 
     };
 
+    // KALKULASI RINGKASAN DINAMIS SESUAI FILTER/PENCARIAN SAAT INI
+    const calculateFilteredSummary = () => {
+        let totalModal = 0;
+        let totalJual = 0;
+        let totalItem = 0;
+
+        // Hanya hitung kartu transaksi yang TIDAK tersembunyi (ter-filter)
+        document.querySelectorAll('.card-tx:not(.hidden)').forEach(card => {
+            const groupEl = card.closest('.date-group');
+            if (groupEl && groupEl.style.display !== 'none') {
+                const noPem = card.getAttribute("data-nopem");
+                const nama = card.getAttribute("data-nama");
+
+                const inpM = document.getElementById(`modal-inp-${noPem}`);
+                const inpJ = document.getElementById(`jual-inp-${noPem}`);
+
+                const mVal = inpM ? cleanNumber(inpM.value) : getStoredPrice(noPem, nama, 'modal');
+                const jVal = inpJ ? cleanNumber(inpJ.value) : getStoredPrice(noPem, nama, 'jual');
+
+                totalModal += mVal;
+                totalJual += jVal;
+                totalItem++;
+            }
+        });
+
+        const totalLaba = totalJual - totalModal;
+
+        const labaEl = document.getElementById("dash-laba-hari-ini");
+        const modalEl = document.getElementById("dash-modal-hari-ini");
+        const jualEl = document.getElementById("dash-jual-hari-ini");
+        const qtyEl = document.getElementById("dash-qty-hari-ini");
+
+        if (labaEl) {
+            labaEl.innerText = formatRp(totalLaba);
+            labaEl.style.color = totalLaba >= 0 ? "var(--accent-purple)" : "var(--danger-color)";
+        }
+        if (modalEl) modalEl.innerText = formatRp(totalModal);
+        if (jualEl) jualEl.innerText = formatRp(totalJual);
+        if (qtyEl) qtyEl.innerText = `${totalItem} Pcs`;
+    };
+
+    // FUNGSI FILTER DENGAN NORMALISASI TANGGAL
     const filterUI = () => {
         const selectEl = document.getElementById("filter-tgl-select");
         const searchEl = document.getElementById("search-input");
-        if(!selectEl || !searchEl) return;
+        if (!selectEl || !searchEl) return;
 
         const filterVal = selectEl.value;
-        const keyword = searchEl.value.toLowerCase();
+        const keyword = searchEl.value.toLowerCase().trim();
 
         document.querySelectorAll(".date-group").forEach(group => {
             const groupTgl = group.getAttribute("data-tgl");
@@ -436,7 +513,7 @@
                 const monthTarget = filterVal.replace("MONTH_", "");
                 isMatchedPeriod = (getMonthKey(groupTgl) === monthTarget);
             } else {
-                isMatchedPeriod = (groupTgl === filterVal);
+                isMatchedPeriod = (extractDate(groupTgl) === extractDate(filterVal));
             }
 
             let hasVisibleCardInGroup = false;
@@ -459,51 +536,11 @@
                 group.style.display = "none";
             }
         });
+
+        // Panggil ulang kalkulasi ringkasan otomatis setiap kali filter/pencarian berubah
+        calculateFilteredSummary();
     };
 
-    // KALKULASI RINGKASAN (HANYA MENGHITUNG TRANSAKSI SUKSES)
-    const calculateTodaySummary = () => {
-        let todayModal = 0;
-        let todayJual = 0;
-        let todayItem = 0;
-        const todayStr = getTodayDateStr();
-
-        document.querySelectorAll(`.card-tx[data-tgl="${todayStr}"]`).forEach(card => {
-            const status = card.getAttribute("data-status");
-            
-            // FILTER: Hanya transaksi SUKSES / LUNAS / SELESAI yang dihitung!
-            if (['sukses', 'lunas', 'selesai'].includes(status)) {
-                const noPem = card.getAttribute("data-nopem");
-                const nama = card.getAttribute("data-nama");
-                
-                const inpM = document.getElementById(`modal-inp-${noPem}`);
-                const inpJ = document.getElementById(`jual-inp-${noPem}`);
-                
-                const mVal = inpM ? cleanNumber(inpM.value) : getStoredPrice(noPem, nama, 'modal');
-                const jVal = inpJ ? cleanNumber(inpJ.value) : getStoredPrice(noPem, nama, 'jual');
-
-                todayModal += mVal;
-                todayJual += jVal;
-                todayItem++;
-            }
-        });
-
-        const todayLaba = todayJual - todayModal;
-        const labaEl = document.getElementById("dash-laba-hari-ini");
-        const modalEl = document.getElementById("dash-modal-hari-ini");
-        const jualEl = document.getElementById("dash-jual-hari-ini");
-        const qtyEl = document.getElementById("dash-qty-hari-ini");
-
-        if(labaEl) {
-            labaEl.innerText = formatRp(todayLaba);
-            labaEl.style.color = todayLaba >= 0 ? "var(--accent-untung)" : "var(--accent-red)";
-        }
-        if(modalEl) modalEl.innerText = formatRp(todayModal);
-        if(jualEl) jualEl.innerText = formatRp(todayJual);
-        if(qtyEl) qtyEl.innerText = `${todayItem} Pcs`;
-    };
-
-    // BACA TRANSAKSI DARI SERVER VPS (/api/history)
     const loadData = async () => {
         try {
             const res = await fetch('/api/history?t=' + Date.now());
@@ -511,7 +548,6 @@
             
             allTransactions = result.data || result || [];
             
-            // FILTER UTAMA: Hanya tampilkan transaksi yang SUKSES
             const suksesTransactions = allTransactions.filter(item => {
                 const st = (item.status || '').toLowerCase();
                 return st === 'sukses' || st === 'lunas' || st === 'selesai';
@@ -551,26 +587,28 @@
         const months = Array.from(monthsSet);
 
         let html = `
+            <!-- STICKY SUMMARY BOX TOP -->
             <div class="summary-box">
                 <div class="summary-header">
-                    <span class="summary-title"><i class="fa-solid fa-wallet"></i> ESTIMASI UNTUNG HARI INI</span>
+                    <span class="summary-title"><i class="fa-solid fa-wallet"></i> RINGKASAN UNTUNG</span>
                 </div>
                 <div class="summary-value">
-                    <span id="dash-laba-hari-ini" style="color:var(--accent-untung);">Rp 0</span>
+                    <span id="dash-laba-hari-ini">Rp 0</span>
                     <span class="badge-qty" id="dash-qty-hari-ini">0 Pcs</span>
                 </div>
                 <div class="summary-grid">
                     <div class="summary-item">
-                        <div class="summary-item-label">Total Omset Hari Ini</div>
+                        <div class="summary-item-label">Total Omset</div>
                         <div class="summary-item-value" id="dash-jual-hari-ini">Rp 0</div>
                     </div>
                     <div class="summary-item">
-                        <div class="summary-item-label">Total Modal Hari Ini</div>
+                        <div class="summary-item-label">Total Modal</div>
                         <div class="summary-item-value" id="dash-modal-hari-ini">Rp 0</div>
                     </div>
                 </div>
             </div>
 
+            <!-- SEARCH & FILTER -->
             <div class="controls-wrapper">
                 <input type="text" id="search-input" class="search-input" placeholder="🔍 Cari barang / Ref ID..." onkeyup="filterUI()">
                 
@@ -603,7 +641,6 @@
                         const namaSafe = nama.replace(/'/g, "\\'");
                         const statusClean = (item.status || 'sukses').toLowerCase();
                         
-                        // Default Modal
                         const defaultJual = item.harga || item.price || 0;
                         const defaultModal = defaultJual > 1000 ? defaultJual - 1000 : defaultJual;
 
@@ -612,8 +649,8 @@
                         const laba = hJual - hModal;
 
                         return `
-                        <div class="card card-tx" data-nopem="${noPem}" data-nama="${nama}" data-tgl="${tgl}" data-status="${statusClean}">
-                            <div class="header">
+                        <div class="card-tx" data-nopem="${noPem}" data-nama="${nama}" data-tgl="${tgl}" data-status="${statusClean}">
+                            <div class="card-tx-header">
                                 <span>Ref: <b>${noPem}</b></span>
                                 <span>⏱️ ${jam}</span>
                             </div>
@@ -630,13 +667,13 @@
                                 </div>
                                 <div class="laba-col">
                                     <span class="laba-title">Untung</span>
-                                    <span class="laba-value" id="laba-${noPem}" style="color:${laba>=0?'var(--accent-untung)':'var(--accent-red)'}">${formatRp(laba)}</span>
+                                    <span class="laba-value" id="laba-${noPem}" style="color:${laba>=0?'var(--accent-purple)':'var(--danger-color)'}">${formatRp(laba)}</span>
                                 </div>
                             </div>
 
-                            <div class="footer">
-                                <span class="status ${statusClean}">${statusClean}</span>
-                                <span style="font-size: 9px; color: var(--text-muted); font-weight: 700;">Member: ${item.user_hp || item.member_name || 'Umum'}</span>
+                            <div class="card-tx-footer">
+                                <span class="status-badge ${statusClean}">${statusClean}</span>
+                                <span style="font-size: 0.7rem; color: var(--text-muted); font-weight: 700;">Member: ${item.user_hp || item.member_name || 'Umum'}</span>
                             </div>
                         </div>`;
                     }).join('')}
@@ -646,7 +683,6 @@
         container.innerHTML = html;
         
         setTimeout(() => {
-            calculateTodaySummary();
             filterUI();
         }, 50);
     };

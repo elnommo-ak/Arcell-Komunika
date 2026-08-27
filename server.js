@@ -4,7 +4,6 @@ const path = require('path');
 const cors = require('cors');
 const axios = require('axios');
 const crypto = require('crypto');
-const fs = require('fs');
 const sqlite3 = require('sqlite3').verbose();
 
 const app = express();
@@ -13,6 +12,7 @@ const PORT = process.env.PORT || 3000;
 const USERNAME_DIGI = process.env.DIGIFLAZZ_USERNAME || '';
 const API_KEY_DIGI = process.env.DIGIFLAZZ_API_KEY || '';
 const BASE_URL = process.env.BASE_URL || `http://localhost:${PORT}`;
+const LOGO_URL = "https://images.bukaolshop.com/hosting/180774/ae392f68e017469539.png";
 
 app.use(cors());
 app.use(express.json());
@@ -23,160 +23,471 @@ function generateMD5(str) {
     return crypto.createHash('md5').update(str).digest('hex');
 }
 
+// ==================== DATABASE SQLITE INITIALIZATION ====================
 const db = new sqlite3.Database('./database.db', (err) => {
     if (err) console.error('Error DB:', err.message);
-    else console.log('⚡ Connected to SQLite Database');
+    else {
+        console.log('⚡ Connected to SQLite Database');
+        initTables();
+    }
 });
 
-// Setup Tabel & Auto-Sync products.json
-db.serialize(() => {
-    db.run(`CREATE TABLE IF NOT EXISTS members (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        member_id TEXT UNIQUE,
-        phone TEXT UNIQUE,
-        name TEXT,
-        balance REAL DEFAULT 0,
-        status TEXT DEFAULT 'aktif'
-    )`);
+function initTables() {
+    db.serialize(() => {
+        // Tabel Member
+        db.run(`CREATE TABLE IF NOT EXISTS members (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            member_id TEXT UNIQUE,
+            name TEXT NOT NULL,
+            phone TEXT UNIQUE NOT NULL,
+            balance REAL DEFAULT 0,
+            status TEXT DEFAULT 'aktif',
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+        )`);
 
-    db.run(`CREATE TABLE IF NOT EXISTS products (
-        buyer_sku_code TEXT PRIMARY KEY,
-        product_name TEXT,
-        brand TEXT,
-        type TEXT DEFAULT 'Umum',
-        price REAL
-    )`);
-
-    db.run(`CREATE TABLE IF NOT EXISTS categories (
-        name TEXT PRIMARY KEY
-    )`);
-
+	    // Tabel Transaksi Presisi (SUDAH DIPERBAIKI)
     db.run(`CREATE TABLE IF NOT EXISTS transactions (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
-        date DATETIME DEFAULT CURRENT_TIMESTAMP,
         ref_id TEXT UNIQUE,
+        username TEXT,
+        user_hp TEXT,
+        no_tujuan TEXT,
         customer_no TEXT,
-        member_name TEXT,
+        produk TEXT,
         product_name TEXT,
+        harga REAL,
         price REAL,
-        status TEXT DEFAULT 'pending',
-        sn TEXT DEFAULT '-'
+        status TEXT DEFAULT 'Pending',
+        sn TEXT DEFAULT '',
+        message TEXT DEFAULT '',
+        nomor_pembayaran TEXT,
+        subscription_id TEXT,
+        waktu DATETIME DEFAULT CURRENT_TIMESTAMP
     )`);
 
-    // Inisialisasi Kategori Default
-    const defaultCats = ['Freedom Internet', 'Freedom Sensasi', 'Pulsa', 'Umum'];
-    defaultCats.forEach(cat => {
-        db.run('INSERT OR IGNORE INTO categories (name) VALUES (?)', [cat]);
+        // Tabel Produk
+        db.run(`CREATE TABLE IF NOT EXISTS products (
+            buyer_sku_code TEXT PRIMARY KEY,
+            product_name TEXT,
+            brand TEXT,
+            type TEXT DEFAULT 'Umum',
+            price REAL,
+            jual REAL
+        )`);
     });
+}
 
-    // AUTO-IMPORT PRODUK DARI products.json JIKA TABEL KOSONG
-    db.get('SELECT COUNT(*) as count FROM products', [], (err, row) => {
-        if (!err && row.count === 0) {
-            const jsonPath = path.join(__dirname, 'products.json');
-            if (fs.existsSync(jsonPath)) {
-                try {
-                    const jsonProducts = JSON.parse(fs.readFileSync(jsonPath, 'utf8'));
-                    const list = Array.isArray(jsonProducts) ? jsonProducts : (jsonProducts.data || []);
-                    
-                    const stmt = db.prepare(`
-                        INSERT OR REPLACE INTO products (buyer_sku_code, product_name, brand, type, price)
-                        VALUES (?, ?, ?, ?, ?)
-                    `);
+// 🔹 2. HELPER ONESIGNAL PUSH NOTIF (LENGKAP DENGAN LOGO ARCELL)
+async function kirimPushNotif(pesanTitle, pesanBody, targetId = null, isExternalId = false) {
+    try {
+        const ONESIGNAL_APP_ID = process.env.ONESIGNAL_APP_ID || "c7cc2a6a-84b8-4579-9c6b-f4d8077f0f65";
+        const ONESIGNAL_REST_KEY = process.env.ONESIGNAL_REST_KEY || "";
+        const LOGO_URL = "https://images.bukaolshop.com/hosting/180774/ae392f68e017469539.png";
 
-                    list.forEach(p => {
-                        const sku = p.buyer_sku_code || p.sku;
-                        const name = p.product_name || p.nama_produk || p.nama;
-                        const brand = p.brand || 'UMUM';
-                        const type = p.type || p.category || 'Umum';
-                        const price = p.price || p.jual || p.harga || 0;
+        // Mencegah ReferenceError jika BASE_URL belum didefinisikan di server.js
+        const targetUrl = (typeof BASE_URL !== 'undefined' && BASE_URL) ? BASE_URL : "/";
 
-                        if (sku && name) {
-                            stmt.run(sku, name, brand, type, price);
-                        }
-                    });
+        const payload = {
+            app_id: ONESIGNAL_APP_ID,
+            headings: { "en": pesanTitle, "id": pesanTitle },
+            contents: { "en": pesanBody, "id": pesanBody },
+            url: targetUrl,
+            
+            // 🔹 IKON RESMI ARCELL KOMUNIKA UNTUK NOTIFIKASI ANDROID
+            icon: LOGO_URL,
+            large_icon: LOGO_URL,
+            chrome_web_icon: LOGO_URL
+        };
 
-                    stmt.finalize();
-                    console.log(`✅ Berhasil mengimpor ${list.length} produk dari products.json ke Database SQLite!`);
-                } catch (e) {
-                    console.error('❌ Gagal membaca products.json:', e.message);
+        const cleanTargetId = (targetId && String(targetId).trim() !== "" && String(targetId) !== "undefined") ? String(targetId).trim() : null;
+
+        if (cleanTargetId) {
+            if (isExternalId) {
+                payload.target_channel = "push";
+                payload.include_aliases = { external_id: [cleanTargetId] };
+            } else {
+                payload.include_subscription_ids = [cleanTargetId];
+            }
+        } else {
+            // Broadcast ke seluruh pengguna terdaftar jika tidak ada targetId spesifik
+            payload.included_segments = ["Subscribed Users"];
+        }
+
+        const response = await axios.post(
+            'https://onesignal.com/api/v1/notifications',
+            payload,
+            {
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Key ${ONESIGNAL_REST_KEY}`
                 }
             }
+        );
+
+        console.log("🔔 Push Notification Status:", response.data);
+    } catch (err) {
+        console.error("❌ Gagal Kirim Push Notif:", err.response?.data || err.message);
+    }
+}
+
+// ==================== ROUTE LOGIN & HISTORY CLIENT ====================
+app.post('/api/member/login', (req, res) => {
+    const { name, phone } = req.body;
+    if (!phone) return res.status(400).json({ status: 'error', message: 'Nomor HP wajib diisi!' });
+    const cleanPhone = String(phone).trim();
+
+    db.get("SELECT * FROM members WHERE phone = ?", [cleanPhone], (err, row) => {
+        if (err) return res.status(500).json({ status: 'error', message: 'Gagal memproses login' });
+        if (!row) {
+            const memberId = 'ARC-' + Date.now().toString().slice(-6);
+            const memberName = name || 'Member-' + cleanPhone.slice(-4);
+            db.run("INSERT INTO members (member_id, name, phone, balance) VALUES (?, ?, ?, 0)",
+                [memberId, memberName, cleanPhone],
+                function (err) {
+                    if (err) return res.status(500).json({ status: 'error', message: 'Gagal buat akun' });
+                    res.json({ status: 'success', message: 'Login berhasil', data: { member_id: memberId, name: memberName, phone: cleanPhone, balance: 0, status: 'aktif' } });
+                }
+            );
+        } else {
+            if (name && row.name !== name) {
+                db.run("UPDATE members SET name = ? WHERE phone = ?", [name, cleanPhone]);
+                row.name = name;
+            }
+            res.json({ status: 'success', message: 'Login berhasil', data: row });
         }
     });
 });
 
-// ================= API ENDPOINTS =================
+app.get('/api/history', (req, res) => {
+    const phone = req.query.phone || req.query.hp || '';
+    let query = "SELECT * FROM transactions ORDER BY id DESC";
+    let params = [];
 
-// SALDO
-app.get('/api/saldo', async (req, res) => {
-    try {
-        if (!USERNAME_DIGI || !API_KEY_DIGI) return res.json({ deposit: 0 });
-        const sign = generateMD5(USERNAME_DIGI + API_KEY_DIGI + 'depo');
-        const response = await axios.post('https://api.digiflazz.com/v1/cek-saldo', {
-            cmd: 'deposit',
-            username: USERNAME_DIGI,
-            sign: sign
+    if (phone) {
+        query = "SELECT * FROM transactions WHERE user_hp = ? OR no_tujuan = ? OR customer_no = ? ORDER BY id DESC";
+        params = [phone, phone, phone];
+    }
+
+    db.all(query, params, (err, rows) => {
+        if (err) return res.status(500).json({ status: 'error', message: err.message, data: [] });
+        res.json({ status: 'success', data: rows || [] });
+    });
+});
+
+// ==================== CHECKOUT TRANSAKSI DIGIFLAZZ ====================
+app.post('/api/digiflazz/checkout', async (req, res) => {
+    const { buyer_sku_code, customer_no, user_hp, username, harga_jual, nama_produk, subscription_id } = req.body;
+    const targetNo = customer_no || user_hp;
+    const userPhone = user_hp || customer_no;
+
+    if (!buyer_sku_code || !targetNo) {
+        return res.status(400).json({ status: 'error', message: 'SKU dan No Tujuan wajib diisi!' });
+    }
+
+    const priceVal = parseFloat(harga_jual) || 0;
+
+    db.get("SELECT * FROM members WHERE phone = ?", [userPhone], async (err, member) => {
+        if (err || !member) return res.status(404).json({ status: 'error', message: 'Member tidak terdaftar!' });
+        if (member.balance < priceVal) return res.status(400).json({ status: 'error', message: 'Saldo member tidak mencukupi!' });
+
+        const refId = 'TRX_' + Date.now();
+        const memberName = username || member.name || 'Member Arcell';
+        const productName = nama_produk || buyer_sku_code;
+
+        db.run("UPDATE members SET balance = balance - ? WHERE phone = ?", [priceVal, userPhone], (err) => {
+            if (err) return res.status(500).json({ status: 'error', message: 'Gagal potong saldo' });
+
+            // ⚠️ SIMPAN JUGA subscription_id PADA TABEL TRANSAKSI AGAR WEBHOOK BISA MENGGUNA KANNYA NANTI
+            const queryInsert = `INSERT INTO transactions
+                (ref_id, username, user_hp, no_tujuan, customer_no, produk, product_name, harga, price, status, subscription_id)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'Pending', ?)`;
+
+            db.run(queryInsert, [refId, memberName, userPhone, targetNo, targetNo, productName, productName, priceVal, priceVal, subscription_id || ''], async function (err) {
+                if (err) {
+                    db.run("UPDATE members SET balance = balance + ? WHERE phone = ?", [priceVal, userPhone]);
+                    return res.status(500).json({ status: 'error', message: 'Gagal simpan transaksi' });
+                }
+
+                try {
+                    const sign = generateMD5(USERNAME_DIGI + API_KEY_DIGI + refId);
+                    const callbackUrl = `${BASE_URL}/api/digiflazz/webhook`;
+
+                    const digiRes = await axios.post('https://api.digiflazz.com/v1/transaction', {
+                        username: USERNAME_DIGI,
+                        buyer_sku_code: buyer_sku_code,
+                        customer_no: targetNo,
+                        ref_id: refId,
+                        sign: sign,
+                        cb_url: callbackUrl
+                    });
+
+                    const dataRes = digiRes.data?.data;
+                    const finalStatus = dataRes?.status || 'Pending';
+
+                    db.run("UPDATE transactions SET status = ?, sn = ?, message = ? WHERE ref_id = ?",
+                        [finalStatus, dataRes?.sn || '', dataRes?.message || '', refId]);
+
+                    if (String(finalStatus).toLowerCase() === 'gagal') {
+                        db.run("UPDATE members SET balance = balance + ? WHERE phone = ?", [priceVal, userPhone]);
+                        
+                        // Notifikasi Langsung Jika Provider Langsung Merespon Gagal
+                        const targetId = subscription_id || userPhone;
+                        const isExt = !subscription_id;
+                        await kirimPushNotif("❌ Transaksi Gagal", `${productName} ke ${targetNo} gagal: ${dataRes?.message || 'Error'}`, targetId, isExt);
+                    } else {
+                        // Notifikasi Saat Transaksi Diproses
+                        const targetId = subscription_id || userPhone;
+                        const isExt = !subscription_id;
+                        await kirimPushNotif(
+                            "Transaksi Diproses! 🛍️",
+                            `Pembelian ${productName} senilai Rp ${priceVal.toLocaleString('id-ID')} ke ${targetNo} sedang diproses.`,
+                            targetId,
+                            isExt
+                        );
+                    }
+
+                    res.json({ status: 'success', message: 'Transaksi berhasil diproses', ref_id: refId, data: dataRes });
+                } catch (apiErr) {
+                    db.run("UPDATE members SET balance = balance + ? WHERE phone = ?", [priceVal, userPhone]);
+                    db.run("UPDATE transactions SET status = 'Gagal', message = ? WHERE ref_id = ?",
+                        [apiErr.response?.data?.data?.message || 'Error Provider', refId]);
+
+                    res.status(500).json({ status: 'error', message: 'Gagal ke provider' });
+                }
+            });
         });
-        res.json({ deposit: response.data?.data?.deposit || 0 });
-    } catch (err) {
-        res.json({ deposit: 0 });
+    });
+});
+
+// ==================== WEBHOOK DIGIFLAZZ ====================
+app.post('/api/digiflazz/webhook', (req, res) => {
+    try {
+        const bodyData = req.body.data || req.body;
+        const { ref_id, status, sn, message } = bodyData;
+
+        if (ref_id) {
+            db.get("SELECT * FROM transactions WHERE ref_id = ?", [ref_id], async (err, trx) => {
+                if (err || !trx) return;
+
+                const statusClean = status || 'Gagal';
+                const cleanSn = (sn && sn !== '-') ? sn : (trx.sn || '');
+                const statusUpper = String(statusClean).toUpperCase();
+                const statusLamaUpper = String(trx.status).toUpperCase();
+
+                // 🛑 CEK IDEMPOTENSI: Jika status sama dengan di DB, abaikan agar tidak kirim notif/refund 2x
+                if (statusLamaUpper === statusUpper) {
+                    return;
+                }
+
+                // Update Status Transaksi di Database
+                db.run("UPDATE transactions SET status = ?, sn = ?, message = ? WHERE ref_id = ?",
+                    [statusClean, cleanSn, message || '', ref_id]);
+
+                // Refund Saldo jika status berubah jadi GAGAL/BATAL (dan sebelumnya belum pernah gagal)
+                if (['GAGAL', 'BATAL'].includes(statusUpper) && !['GAGAL', 'BATAL'].includes(statusLamaUpper)) {
+                    const targetHp = trx.user_hp || trx.customer_no;
+                    const refundPrice = trx.harga || trx.price || 0;
+                    db.run("UPDATE members SET balance = balance + ? WHERE phone = ?", [refundPrice, targetHp]);
+                }
+
+                // 🔔 PENENTUAN TARGET PUSH NOTIFIKASI SPESIFIK USER
+                const namaProduk = trx.produk || trx.product_name || 'Produk PPOB';
+                const noTujuan = trx.no_tujuan || trx.customer_no || '';
+                
+                // Utamakan subscription_id, jika kosong gunakan user_hp (External ID)
+                const targetId = trx.subscription_id || trx.user_hp;
+                const isExternalId = !trx.subscription_id; 
+
+                if (targetId) {
+                    if (statusUpper === 'SUKSES' || statusUpper === 'LUNAS') {
+                        await kirimPushNotif(
+                            "🎉 Transaksi Berhasil!",
+                            `${namaProduk} (${noTujuan}) SUKSES. SN: ${cleanSn}`,
+                            targetId,
+                            isExternalId
+                        );
+                    } else if (['GAGAL', 'BATAL'].includes(statusUpper)) {
+                        await kirimPushNotif(
+                            "❌ Transaksi Gagal",
+                            `${namaProduk} (${noTujuan}) Gagal: ${message || 'Gagal diproses'}. Saldo dikembalikan.`,
+                            targetId,
+                            isExternalId
+                        );
+                    }
+                }
+            });
+        }
+
+        res.status(200).json({ status: 'ok' });
+    } catch (e) {
+        console.error("❌ Webhook Error:", e);
+        res.status(500).json({ status: 'error' });
     }
 });
 
-// KATEGORI CUSTOM (PERMANEN)
-app.get('/api/admin/categories', (req, res) => {
-    db.all('SELECT name FROM categories', [], (err, rows) => {
-        if (err) return res.status(500).json([]);
-        res.json(rows.map(r => r.name));
-    });
+// ==================== API SYNC DAFTAR HARGA DIGIFLAZZ (FULL SQLITE) ====================
+app.post('/api/digiflazz/price-list', async (req, res) => {
+    try {
+        const username = (process.env.DIGIFLAZZ_USERNAME || '').trim();
+        const apiKey = (process.env.DIGIFLAZZ_API_KEY || '').trim();
+        
+        if (!username || !apiKey) {
+            return res.status(400).json({ status: 'error', message: 'Kredensial Digiflazz di .env belum diisi!' });
+        }
+
+        const sign = generateMD5(username + apiKey + "pricelist");
+
+        const response = await axios.post('https://api.digiflazz.com/v1/price-list', {
+            cmd: 'prepaid',
+            username: username,
+            sign: sign
+        }, { timeout: 20000 });
+
+        let products = response.data?.data || [];
+
+        if (products.length > 0) {
+            // Gunakan Transaction SQLite agar proses insert ribuan produk sangat cepat
+            db.serialize(() => {
+                db.run("BEGIN TRANSACTION");
+
+                const stmt = db.prepare(`
+                    INSERT INTO products (buyer_sku_code, product_name, brand, type, price, jual) 
+                    VALUES (?, ?, ?, ?, ?, ?)
+                    ON CONFLICT(buyer_sku_code) DO UPDATE SET
+                    product_name = excluded.product_name,
+                    brand = excluded.brand,
+                    price = excluded.price
+                `);
+
+                products.forEach(p => {
+                    const sku = p.buyer_sku_code;
+                    const name = p.product_name;
+                    const brand = (p.brand || 'UMUM').toUpperCase();
+                    const category = p.category || 'Umum';
+                    const modalPrice = parseFloat(p.price || 0);
+                    // Margin keuntungan default misalnya +500 dari modal, atau samakan dengan modal
+                    const jualPrice = modalPrice + 500; 
+
+                    if (sku && name) {
+                        stmt.run(sku, name, brand, category, modalPrice, jualPrice);
+                    }
+                });
+
+                stmt.finalize();
+                db.run("COMMIT", (err) => {
+                    if (err) {
+                        console.error("❌ Error Commit Sync Products:", err.message);
+                        return res.status(500).json({ status: 'error', message: 'Gagal simpan ke DB' });
+                    }
+                    console.log(`✅ Berhasil Sync ${products.length} produk dari Digiflazz ke SQLite!`);
+                    res.json({ status: 'success', message: `${products.length} produk berhasil di-sync ke SQLite`, total: products.length });
+                });
+            });
+        } else {
+            res.json({ status: 'success', message: 'Tidak ada produk dari Digiflazz', total: 0 });
+        }
+
+    } catch (error) {
+        console.error("❌ Error Price-List Digiflazz:", error.message);
+        res.status(500).json({ status: 'error', message: error.message, data: [] });
+    }
 });
 
-app.post('/api/admin/categories', (req, res) => {
-    const { name } = req.body;
-    if (!name) return res.status(400).json({ status: 'error' });
-    db.run('INSERT OR IGNORE INTO categories (name) VALUES (?)', [name], (err) => {
-        if (err) return res.status(500).json({ status: 'error' });
-        res.json({ status: 'success' });
-    });
-});
-
-app.post('/api/admin/delete-category', (req, res) => {
-    const { categoryName } = req.body;
-    db.run('DELETE FROM categories WHERE name = ?', [categoryName], () => {
-        db.run('UPDATE products SET type = "Umum" WHERE type = ?', [categoryName], () => {
-            res.json({ status: 'success' });
-        });
-    });
-});
-
-// PRODUK
+// Route Fetch Produk untuk frontend index.html & admin.html (Langsung dari SQLite)
 app.get('/api/products', (req, res) => {
-    db.all('SELECT * FROM products', [], (err, rows) => {
+    db.all("SELECT * FROM products ORDER BY brand ASC, product_name ASC", [], (err, rows) => {
+        if (err) return res.status(500).json({ status: 'error', message: err.message, data: [] });
+        res.json(rows || []);
+    });
+});
+
+app.get('/api/history', (req, res) => {
+    const rawPhone = req.query.phone || req.query.hp || '';
+    const phone = normalizePhone(rawPhone);
+
+    // Jika parameter phone kosong, langsung kembalikan array kosong (bukan query ALL)
+    if (!phone) {
+        return res.json({ status: 'success', data: [] });
+    }
+
+    const altPhone = phone.startsWith('0') ? '62' + phone.slice(1) : phone;
+
+    const sql = `SELECT * FROM transactions 
+                 WHERE user_hp = ? OR user_hp = ? OR customer_no = ? OR customer_no = ?
+                 ORDER BY id DESC`;
+
+    db.all(sql, [phone, altPhone, phone, altPhone], (err, rows) => {
         if (err) return res.status(500).json({ status: 'error', message: err.message });
         res.json({ status: 'success', data: rows });
     });
 });
 
-app.post('/api/admin/products', (req, res) => {
-    const { buyer_sku_code, product_name, brand, type, price } = req.body;
-    const query = `
-        INSERT INTO products (buyer_sku_code, product_name, brand, type, price)
-        VALUES (?, ?, ?, ?, ?)
-        ON CONFLICT(buyer_sku_code) DO UPDATE SET
-            product_name = excluded.product_name,
-            brand = excluded.brand,
-            type = excluded.type,
-            price = excluded.price
+// ==================== ADMIN ENDPOINTS ====================
+
+app.get('/api/transaction/detail', (req, res) => {
+    const trxId = (req.query.id || '').trim();
+
+    if (!trxId) {
+        return res.status(400).json({ status: 'error', message: 'ID Transaksi kosong' });
+    }
+
+    // Mencari berdasarkan ref_id, id, atau no_tujuan
+    const sql = `
+        SELECT * FROM transactions 
+        WHERE ref_id = ? OR id = ? OR no_tujuan = ? OR customer_no = ?
+        LIMIT 1
     `;
-    db.run(query, [buyer_sku_code, product_name, brand, type, price], (err) => {
+
+    db.get(sql, [trxId, trxId, trxId, trxId], (err, row) => {
+        if (err) {
+            console.error("Database Error:", err.message);
+            return res.status(500).json({ status: 'error', message: 'Gagal query database' });
+        }
+
+        if (!row) {
+            return res.status(404).json({ status: 'error', message: 'Data transaksi tidak ditemukan' });
+        }
+
+        res.json({
+            status: 'success',
+            data: row
+        });
+    });
+});
+
+
+app.get('/api/saldo', async (req, res) => {
+    try {
+        if (!USERNAME_DIGI || !API_KEY_DIGI) return res.json({ deposit: 0 });
+        const sign = generateMD5(USERNAME_DIGI + API_KEY_DIGI + 'depo');
+        const response = await axios.post('https://api.digiflazz.com/v1/cek-saldo', { cmd: 'deposit', username: USERNAME_DIGI, sign: sign });
+        res.json({ status: 'success', deposit: response.data?.data?.deposit || 0 });
+    } catch (err) { res.json({ status: 'error', deposit: 0 }); }
+});
+
+app.post('/api/admin/products', (req, res) => {
+    const { buyer_sku_code, product_name, brand, type, price, jual } = req.body;
+    if (!buyer_sku_code || !product_name) return res.status(400).json({ status: 'error', message: 'SKU Wajib' });
+
+    const priceVal = parseFloat(price || jual || 0);
+    const jualVal = parseFloat(jual || price || 0);
+
+    const query = `INSERT INTO products (buyer_sku_code, product_name, brand, type, price, jual) 
+                   VALUES (?, ?, ?, ?, ?, ?)
+                   ON CONFLICT(buyer_sku_code) DO UPDATE SET
+                   product_name = excluded.product_name, brand = excluded.brand, type = excluded.type,
+                   price = excluded.price, jual = excluded.jual`;
+
+    db.run(query, [buyer_sku_code, product_name, brand, type || 'Umum', priceVal, jualVal], function(err) {
         if (err) return res.status(500).json({ status: 'error', message: err.message });
-        res.json({ status: 'success' });
+        res.json({ status: 'success', message: 'Produk disimpan' });
     });
 });
 
 app.delete('/api/admin/products/:sku', (req, res) => {
-    db.run('DELETE FROM products WHERE buyer_sku_code = ?', [req.params.sku], (err) => {
-        res.json({ status: 'success' });
+    db.run("DELETE FROM products WHERE buyer_sku_code = ?", [req.params.sku], function(err) {
+        if (err) return res.status(500).json({ status: 'error', message: err.message });
+        res.json({ status: 'success', message: 'Produk dihapus' });
     });
 });
 
@@ -185,342 +496,95 @@ app.post('/api/admin/update-category', (req, res) => {
     if (!skus || !Array.isArray(skus) || !categoryName) return res.status(400).json({ status: 'error' });
 
     const placeholders = skus.map(() => '?').join(',');
-    db.run(`UPDATE products SET type = ? WHERE buyer_sku_code IN (${placeholders})`, [categoryName, ...skus], (err) => {
-        res.json({ status: 'success' });
+    db.run(`UPDATE products SET type = ? WHERE buyer_sku_code IN (${placeholders})`, [categoryName, ...skus], function(err) {
+        if (err) return res.status(500).json({ status: 'error', message: err.message });
+        res.json({ status: 'success', message: 'Kategori dipindah' });
     });
 });
 
-// MEMBERS & TRANSACTIONS
 app.get('/api/admin/members', (req, res) => {
-    db.all('SELECT * FROM members ORDER BY id DESC', [], (err, rows) => {
-        res.json({ status: 'success', data: rows || [] });
+    db.all("SELECT * FROM members ORDER BY id DESC", [], (err, rows) => {
+        if (err) return res.status(500).json({ status: 'error', message: err.message });
+        res.json(rows);
     });
 });
 
 app.post('/api/admin/members', (req, res) => {
     const { name, phone, balance } = req.body;
-    const memberId = 'MEM' + Math.floor(1000 + Math.random() * 9000);
-    db.run('INSERT INTO members (member_id, name, phone, balance) VALUES (?, ?, ?, ?)', [memberId, name, phone, balance || 0], (err) => {
-        if (err) return res.status(400).json({ status: 'error', message: 'No HP sudah terdaftar' });
-        res.json({ status: 'success' });
+    if (!name || !phone) return res.status(400).json({ status: 'error', message: 'Nama & No HP Wajib' });
+
+    const memberId = 'MEM-' + Date.now().toString().slice(-5);
+    db.run("INSERT INTO members (member_id, name, phone, balance) VALUES (?, ?, ?, ?)", [memberId, name, phone, parseFloat(balance) || 0], function(err) {
+        if (err) return res.status(400).json({ status: 'error', message: 'Nomor HP sudah terdaftar' });
+        res.json({ status: 'success', message: 'Member berhasil ditambahkan' });
     });
 });
 
-app.delete('/api/admin/members/:id', (req, res) => {
-    db.run('DELETE FROM members WHERE member_id = ? OR id = ?', [req.params.id, req.params.id], () => {
-        res.json({ status: 'success' });
+app.delete('/api/admin/members/:phone', (req, res) => {
+    db.run("DELETE FROM members WHERE phone = ? OR member_id = ?", [req.params.phone, req.params.phone], function(err) {
+        if (err) return res.status(500).json({ status: 'error', message: err.message });
+        res.json({ status: 'success', message: 'Member berhasil dihapus' });
     });
 });
 
 app.post('/api/admin/update-user-balance', (req, res) => {
     const { phone, action, amount } = req.body;
-    db.get('SELECT * FROM members WHERE phone = ?', [phone], (err, member) => {
-        if (!member) return res.status(404).json({ status: 'error', message: 'Member tidak ditemukan' });
-        let newBal = action === 'tambah' ? member.balance + amount : Math.max(0, member.balance - amount);
-        db.run('UPDATE members SET balance = ? WHERE phone = ?', [newBal, phone], () => {
-            res.json({ status: 'success', message: 'Saldo diperbarui' });
+    const numAmount = parseFloat(amount) || 0;
+
+    db.get("SELECT name, balance FROM members WHERE phone = ?", [phone], (err, row) => {
+        if (err || !row) return res.status(404).json({ status: 'error', message: 'Member tidak ditemukan' });
+
+        let newBalance = action === 'tambah' ? row.balance + numAmount : Math.max(0, row.balance - numAmount);
+        db.run("UPDATE members SET balance = ? WHERE phone = ?", [newBalance, phone], (err) => {
+            if (err) return res.status(500).json({ status: 'error', message: err.message });
+            res.json({ status: 'success', message: `Saldo ${row.name} diperbarui` });
         });
     });
 });
 
-app.get('/api/admin/transactions', (req, res) => {
-    db.all('SELECT * FROM transactions ORDER BY date DESC', [], (err, rows) => {
-        res.json({ status: 'success', data: rows || [] });
-    });
-});
-
-// 🔹 ROUTE CHECKOUT (AUTO SAVE KE TRANSACTIONS.JSON & DB)
-app.post('/api/digiflazz/checkout', async (req, res) => {
-    try {
-        const { buyer_sku_code, customer_no, user_hp, harga_jual, nama_produk } = req.body;
-        
-        if (!buyer_sku_code || !customer_no) {
-            return res.status(400).json({ status: 'error', message: 'SKU dan No Tujuan wajib diisi' });
-        }
-
-        const refId = `TRX_${Date.now()}`;
-        const sign = generateMD5(USERNAME_DIGI + API_KEY_DIGI + refId);
-        const callbackUrl = `${BASE_URL}/api/digiflazz/webhook`;
-
-        // 1. Tembak API Digiflazz
-        const response = await axios.post('https://api.digiflazz.com/v1/transaction', {
-            username: USERNAME_DIGI,
-            buyer_sku_code: buyer_sku_code,
-            customer_no: customer_no,
-            ref_id: refId,
-            sign: sign,
-            testing: false,
-            cb_url: callbackUrl
-        }, {
-            headers: { 'Content-Type': 'application/json' }
-        });
-
-        const dataRes = response.data?.data;
-        if (!dataRes) {
-            return res.status(400).json({ status: 'error', message: 'Respon Digiflazz kosong' });
-        }
-
-        const finalStatus = dataRes.status || 'Pending';
-        const finalSn = dataRes.sn || '-';
-        const finalHarga = harga_jual || dataRes.price || 0;
-        const finalProduk = nama_produk || dataRes.buyer_sku_code || buyer_sku_code;
-        const finalUserHp = user_hp || customer_no;
-        const waktuSekarang = new Date().toLocaleString('id-ID');
-
-        // 📝 2. SIMPAN / UPDATE KE FILE TRANSACTIONS.JSON
-        const jsonPath = path.join(__dirname, 'transactions.json');
-        let historyJson = [];
-
-        if (fs.existsSync(jsonPath)) {
-            try {
-                const rawContent = fs.readFileSync(jsonPath, 'utf8');
-                historyJson = JSON.parse(rawContent || '[]');
-            } catch (e) {
-                historyJson = [];
-            }
-        }
-
-        const recordBaru = {
-            ref_id: refId,
-            user_hp: finalUserHp,
-            no_tujuan: customer_no,
-            sku: buyer_sku_code,
-            produk: finalProduk,
-            harga: finalHarga,
-            status: finalStatus,
-            sn: finalSn,
-            message: dataRes.message || '',
-            waktu: waktuSekarang
-        };
-
-        // Masukkan transaksi terbaru ke urutan PALING ATAS
-        historyJson.unshift(recordBaru);
-
-        // Tulis ulang file transactions.json
-        fs.writeFileSync(jsonPath, JSON.stringify(historyJson, null, 2), 'utf8');
-        console.log(`✅ Transaksi baru [${refId}] berhasil ditulis ke transactions.json!`);
-
-        // 📝 3. Simpan juga ke Database SQLite (Optional/Backup)
-        db.run(
-            `INSERT INTO transactions (ref_id, customer_no, member_name, product_name, price, status, sn)
-             VALUES (?, ?, ?, ?, ?, ?, ?)`,
-            [refId, customer_no, finalUserHp, finalProduk, finalHarga, finalStatus, finalSn]
-        );
-
-        // 📝 4. Potong Saldo Member
-        db.run('UPDATE members SET balance = MAX(0, balance - ?) WHERE phone = ? OR member_id = ?', [finalHarga, finalUserHp, finalUserHp]);
-
-        res.json({ status: 'success', data: recordBaru });
-
-    } catch (error) {
-        console.error('❌ Error Checkout:', error.response ? error.response.data : error.message);
-        res.status(500).json({ 
-            status: 'error', 
-            message: error.response?.data?.data?.message || 'Gagal memproses transaksi' 
-        });
+// Helper fungsi normalisasi No HP (Mengubah 628xxx menjadi 08xxx)
+function normalizePhone(phone) {
+    if (!phone) return '';
+    let clean = String(phone).replace(/\D/g, '');
+    if (clean.startsWith('62')) {
+        clean = '0' + clean.slice(2);
     }
-});
-
-// 🔹 HELPER TEMBAK PUSH NOTIFIKASI ONESIGNAL
-async function kirimPushNotif(pesanTitle, pesanBody) {
-    try {
-        const ONESIGNAL_APP_ID = process.env.ONESIGNAL_APP_ID || "";
-        const ONESIGNAL_REST_KEY = process.env.ONESIGNAL_REST_KEY || "";
-
-        const headers = { 'Content-Type': 'application/json' };
-
-        if (ONESIGNAL_REST_KEY) {
-            headers['Authorization'] = `Basic ${ONESIGNAL_REST_KEY}`;
-        }
-
-        await axios.post('https://onesignal.com/api/v1/notifications', {
-            app_id: ONESIGNAL_APP_ID,
-            included_segments: ["All"],
-            headings: { "en": pesanTitle, "id": pesanTitle },
-            contents: { "en": pesanBody, "id": pesanBody }
-        }, { headers });
-
-        console.log("🔔 Push Notification Berhasil Terkirim ke Layar HP!");
-    } catch (err) {
-        console.error("❌ Gagal Kirim Push Notif:", err.response?.data || err.message);
-    }
+    return clean;
 }
 
-// 🔹 ROUTE WEBHOOK DIGIFLAZZ (MURNI JSON + PUSH NOTIF)
-app.post('/api/digiflazz/webhook', (req, res) => {
-    try {
-        console.log("📩 WEBHOOK CALLBACK MASUK DARI DIGIFLAZZ:", JSON.stringify(req.body));
+app.get('/api/admin/transactions', (req, res) => {
+    const phone = req.query.phone ? normalizePhone(req.query.phone) : null;
 
-        const bodyData = req.body.data || req.body;
-        const ref_id = bodyData.ref_id;
-        const status = bodyData.status; 
-        const sn = bodyData.sn || '-';
-        const msg = bodyData.message || '';
+    let sql = "SELECT * FROM transactions ORDER BY id DESC";
+    let params = [];
 
-        if (ref_id) {
-            const jsonPath = path.join(__dirname, 'transactions.json');
-
-            if (fs.existsSync(jsonPath)) {
-                const rawContent = fs.readFileSync(jsonPath, 'utf8');
-                let historyJson = JSON.parse(rawContent || '[]');
-
-                // 1. Cari indeks transaksi di file transactions.json
-                const idx = historyJson.findIndex(h => String(h.ref_id).trim() === String(ref_id).trim());
-
-                if (idx !== -1) {
-                    const trx = historyJson[idx];
-
-                    // 2. Update data transaksi di file JSON
-                    historyJson[idx].status = status;
-                    historyJson[idx].sn = (sn && sn !== '-') ? sn : historyJson[idx].sn;
-                    historyJson[idx].message = msg;
-
-                    // Simpan kembali pembaruan ke transactions.json
-                    fs.writeFileSync(jsonPath, JSON.stringify(historyJson, null, 2), 'utf8');
-                    console.log(`✅ Status [${ref_id}] DIUPDATE DI JSON VIA WEBHOOK JADI: ${status} | SN: ${sn}`);
-
-                    // 3. 🔔 Kirim Push Notif ke Layar HP User
-                    const statusUpper = String(status).toUpperCase();
-                    const namaProduk = trx.produk || trx.sku || 'Produk PPOB';
-                    const noTujuan = trx.no_tujuan || trx.user_hp || '';
-
-                    if (statusUpper === 'SUKSES' || statusUpper === 'LUNAS') {
-                        kirimPushNotif(
-                            "🎉 Transaksi Berhasil!",
-                            `${namaProduk} (${noTujuan}) SUKSES. SN: ${sn}`
-                        );
-                    } else if (statusUpper === 'GAGAL' || statusUpper === 'BATAL') {
-                        kirimPushNotif(
-                            "❌ Transaksi Gagal",
-                            `${namaProduk} (${noTujuan}) Gagal diproses: ${msg}`
-                        );
-                    }
-                } else {
-                    console.warn(`⚠️ Ref ID [${ref_id}] tidak ditemukan di file transactions.json`);
-                }
-            }
-        }
-
-        // Respon 200 OK Wajib untuk Digiflazz
-        res.status(200).json({ status: 'ok' });
-
-    } catch (e) {
-        console.error("❌ Error Webhook Processing:", e.message);
-        res.status(500).json({ status: 'error', message: e.message });
-    }
-});
-
-// 🔹 ROUTE RIWAYAT TRANSAKSI USER / PELANGGAN (DARI TRANSACTIONS.JSON)
-app.get('/api/history', (req, res) => {
-    const { hp } = req.query;
-    const jsonPath = path.join(__dirname, 'transactions.json');
-
-    if (!fs.existsSync(jsonPath)) {
-        return res.json({ status: 'success', data: [] });
+    // Jika dipanggil dengan query parameter phone (misal /api/admin/transactions?phone=081234...)
+    if (phone) {
+        // Mengantisipasi pencocokan format 08xx maupun 628xx di database
+        const altPhone = phone.startsWith('0') ? '62' + phone.slice(1) : phone;
+        sql = `SELECT * FROM transactions 
+               WHERE user_hp = ? OR user_hp = ? OR customer_no = ? OR customer_no = ?
+               ORDER BY id DESC`;
+        params = [phone, altPhone, phone, altPhone];
     }
 
-    try {
-        const rawData = fs.readFileSync(jsonPath, 'utf8');
-        let transactions = JSON.parse(rawData || '[]');
-
-        if (!Array.isArray(transactions)) {
-            transactions = [];
-        }
-
-        // Jika membawa parameter HP, filter riwayat khusus nomor HP tersebut
-        if (hp && hp.trim() !== '' && hp !== 'null') {
-            const cleanHp = hp.trim();
-            transactions = transactions.filter(t => 
-                String(t.no_tujuan).trim() === cleanHp || 
-                String(t.user_hp).trim() === cleanHp
-            );
-        }
-
-        // Format data dipastikan konsisten untuk history.html
-        const formattedData = transactions.map(r => ({
-            ref_id: r.ref_id,
-            user_hp: r.user_hp || '-',
-            no_tujuan: r.no_tujuan || r.user_hp || '-',
-            produk: r.produk || r.sku || 'Produk PPOB',
-            harga: r.harga || 0,
-            status: r.status ? String(r.status).toUpperCase() : 'PENDING',
-            waktu: r.waktu || '-'
+    db.all(sql, params, (err, rows) => {
+        if (err) return res.status(500).json({ status: 'error', message: err.message });
+        
+        // Memastikan format user_hp yang dikembalikan seragam ke format 08xxx
+        const normalizedRows = rows.map(row => ({
+            ...row,
+            user_hp: normalizePhone(row.user_hp || row.customer_no)
         }));
 
-        res.json({
-            status: 'success',
-            data: formattedData
-        });
-
-    } catch (err) {
-        console.error('❌ Error Fetch History JSON:', err.message);
-        res.status(500).json({ status: 'error', message: 'Gagal membaca riwayat transaksi' });
-    }
+        res.json(normalizedRows);
+    });
 });
 
-
-// 🔹 ROUTE FETCH DETAIL TRANSAKSI JSON
-app.get('/api/transaction/detail', (req, res) => {
-    let { id } = req.query;
-    const jsonPath = path.join(__dirname, 'transactions.json');
-
-    if (!fs.existsSync(jsonPath)) {
-        return res.status(404).json({ status: 'error', message: 'File transactions.json tidak ditemukan' });
-    }
-
-    try {
-        const rawData = fs.readFileSync(jsonPath, 'utf8');
-        const transactions = JSON.parse(rawData || '[]');
-
-        if (!Array.isArray(transactions) || transactions.length === 0) {
-            return res.status(404).json({ status: 'error', message: 'Data transaksi kosong' });
-        }
-
-        let row = null;
-
-        if (id && id.trim() !== '' && id !== 'null' && id !== 'undefined') {
-            const searchId = id.trim();
-            row = transactions.find(t => String(t.ref_id).trim() === searchId);
-        } else {
-            row = transactions[0];
-        }
-
-        if (!row) {
-            return res.status(404).json({ status: 'error', message: 'Transaksi tidak ditemukan' });
-        }
-
-        res.json({
-            status: 'success',
-            data: {
-                nomor_pembayaran: row.ref_id,
-                status_pengiriman: row.status ? row.status.toUpperCase() : 'SUKSES',
-                status_bayar: 'Lunas',
-                tanggal_buat: row.waktu || new Date().toISOString(),
-                bank_penerima: 'Saldo Member',
-                total_transaksi: row.harga || 0,
-                url_website: `${BASE_URL}/`,
-                data_transaksi: [
-                    {
-                        ekspedisi: 'Produk Digital',
-                        data_produk: [
-                            {
-                                nama_barang: row.produk || row.sku || 'Produk PPOB',
-                                total_harga: row.harga || 0,
-                                catatan: row.no_tujuan || row.user_hp || '-',
-                                nomor_resi: row.sn && row.sn !== '-' ? row.sn : ''
-                            }
-                        ]
-                    }
-                ]
-            }
-        });
-
-    } catch (err) {
-        console.error('❌ Error Read transactions.json:', err.message);
-        res.status(500).json({ status: 'error', message: 'Gagal membaca data transaksi' });
-    }
+app.get('/admin', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'admin.html'));
 });
 
-
-app.listen(PORT, () => console.log(`🚀 Server berjalan di port ${PORT}`));
-
+app.listen(PORT, () => {
+    console.log(`🚀 Server Arcell Komunika berjalan di Port ${PORT}`);
+});
