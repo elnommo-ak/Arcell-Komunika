@@ -4,32 +4,50 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Riwayat Transaksi</title>
-    <!-- Bootstrap Icons -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <!-- FontAwesome 6 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <style>
-        * { 
-            box-sizing: border-box; 
-            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; 
-        }
-        
+        /* --- CLEAN WHITE NEUMORPHISM THEME --- */
         :root {
-            --neo-bg: #e6ecf5;
-            --neo-shadow-dark: #b8c4d5;
-            --neo-shadow-light: #ffffff;
-            --brand-blue: #0088ff;
-            --text-dark: #334155;
-            --text-muted: #64748b;
+            --bg-base: #e6eaf0;
+            --neu-light: #ffffff;
+            --neu-dark: #babecc;
+            --text-main: #4a5568;
+            --text-muted: #8c98a9;
+            --accent-purple: #7052ff;
+            --border-radius-sm: 14px;
+            --border-radius-md: 22px;
+            --border-radius-pill: 50px;
+            --bottom-nav-height: 70px;
+
+            --neu-shadow-flat: 6px 6px 12px var(--neu-dark), -6px -6px 12px var(--neu-light);
+            --neu-shadow-sm: 3px 3px 6px var(--neu-dark), -3px -3px 6px var(--neu-light);
+            --neu-shadow-inset: inset 3px 3px 6px var(--neu-dark), inset -3px -3px 6px var(--neu-light);
         }
 
-        body { 
-            background-color: var(--neo-bg); 
-            margin: 0; 
-            padding: 12px; 
-            padding-bottom: 70px; /* Space untuk bottom nav */
-            color: var(--text-dark); 
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            -webkit-tap-highlight-color: transparent;
         }
-        
+
+        body {
+            background-color: var(--bg-base);
+            color: var(--text-main);
+            min-height: 100vh;
+            padding: 16px;
+            padding-bottom: calc(var(--bottom-nav-height) + 30px);
+        }
+
+        .app-container {
+            width: 100%;
+            max-width: 480px;
+            margin: 0 auto;
+        }
+
         @keyframes popupFromBottom {
             0% { opacity: 0; transform: translateY(10px); }
             100% { opacity: 1; transform: translateY(0); }
@@ -39,18 +57,18 @@
             position: sticky;
             top: 0;
             z-index: 100;
-            background-color: var(--neo-bg);
+            background-color: var(--bg-base);
             padding: 4px 0 10px 0;
-            margin-bottom: 6px;
+            margin-bottom: 10px;
         }
 
         .filter-container {
             display: flex;
             gap: 6px;
-            padding: 5px;
-            background: var(--neo-bg);
-            border-radius: 30px;
-            box-shadow: inset 3px 3px 6px var(--neo-shadow-dark), inset -3px -3px 6px var(--neo-shadow-light);
+            padding: 6px;
+            background: var(--bg-base);
+            border-radius: var(--border-radius-pill);
+            box-shadow: var(--neu-shadow-inset);
             overflow-x: auto;
             -webkit-overflow-scrolling: touch;
         }
@@ -61,21 +79,21 @@
             flex: 1;
             white-space: nowrap;
             text-align: center;
-            padding: 7px 12px;
+            padding: 8px 14px;
             font-size: 11px;
             font-weight: 700;
             color: var(--text-muted);
             background: transparent;
-            border-radius: 20px;
+            border-radius: var(--border-radius-pill);
             cursor: pointer;
             transition: all 0.2s ease;
             user-select: none;
         }
 
         .tab-filter.active {
-            color: var(--brand-blue); 
-            background: var(--neo-bg);
-            box-shadow: 3px 3px 6px var(--neo-shadow-dark), -3px -3px 6px var(--neo-shadow-light);
+            color: var(--accent-purple); 
+            background: var(--bg-base);
+            box-shadow: var(--neu-shadow-sm);
         }
 
         .date-group {
@@ -85,33 +103,31 @@
 
         .date-header {
             display: inline-block;
-            font-size: 10px;
+            font-size: 11px;
             font-weight: 800;
-            color: var(--brand-blue);
-            background: var(--neo-bg);
-            padding: 4px 12px;
+            color: var(--accent-purple);
+            background: var(--bg-base);
+            padding: 5px 14px;
             border-radius: 12px;
-            box-shadow: inset 2px 2px 4px var(--neo-shadow-dark), inset -2px -2px 4px var(--neo-shadow-light);
-            margin-bottom: 8px;
-            text-transform: uppercase;
+            box-shadow: var(--neu-shadow-inset);
+            margin-bottom: 12px;
             letter-spacing: 0.5px;
         }
 
         .card {
-            background: var(--neo-bg);
-            border-radius: 16px;
-            padding: 10px 14px;
-            margin-bottom: 10px;
-            box-shadow: 5px 5px 10px var(--neo-shadow-dark), -5px -5px 10px var(--neo-shadow-light);
+            background: var(--bg-base);
+            border-radius: var(--border-radius-sm);
+            padding: 12px 16px;
+            margin-bottom: 12px;
+            box-shadow: var(--neu-shadow-flat);
             animation: popupFromBottom 0.25s ease forwards;
             cursor: pointer;
             transition: all 0.15s ease;
-            -webkit-tap-highlight-color: transparent;
             border: none;
         }
 
         .card:active {
-            box-shadow: inset 3px 3px 6px var(--neo-shadow-dark), inset -3px -3px 6px var(--neo-shadow-light);
+            box-shadow: var(--neu-shadow-inset);
             transform: scale(0.985);
         }
 
@@ -129,17 +145,18 @@
             display: flex;
             align-items: center;
             gap: 8px;
-            font-size: 10px;
-            margin-bottom: 3px;
+            font-size: 11px;
+            margin-bottom: 4px;
         }
 
         .tx-id { color: var(--text-muted); font-weight: 600; }
-        .tx-target { color: var(--brand-blue); font-weight: 700; display: inline-flex; align-items: center; gap: 3px; }
+        .tx-jam { color: var(--text-muted); font-weight: 700; }
+        .tx-target { color: var(--accent-purple); font-weight: 700; display: inline-flex; align-items: center; gap: 4px; }
 
         .produk-title { 
-            font-weight: 700; 
-            font-size: 12px; 
-            color: var(--text-dark); 
+            font-weight: 800; 
+            font-size: 13px; 
+            color: var(--text-main); 
             line-height: 1.25;
             white-space: nowrap;
             overflow: hidden;
@@ -149,37 +166,44 @@
         .produk-status-kirim { 
             font-size: 10px; 
             color: var(--text-muted); 
-            margin-top: 3px;
+            margin-top: 4px;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            line-height: 1.3;
+            font-weight: 600;
         }
 
         .status {
             display: inline-flex;
             align-items: center;
             font-weight: 800;
-            padding: 3px 8px;
+            padding: 4px 8px;
             border-radius: 8px;
             font-size: 9px;
             text-transform: uppercase;
-            background: var(--neo-bg);
-            box-shadow: inset 2px 2px 4px var(--neo-shadow-dark), inset -2px -2px 4px var(--neo-shadow-light);
+            background: var(--bg-base);
+            box-shadow: var(--neu-shadow-inset);
             white-space: nowrap;
         }
 
         .status-lunas { color: #10b981; }
         .status-pending { color: #f59e0b; }
-        .status-batal { color: #ef4444; }
+        .status-batal { color: #dc3545; }
 
         .btn-arrow {
             width: 26px;
             height: 26px;
             border-radius: 50%;
-            background: var(--neo-bg);
+            background: var(--bg-base);
             display: flex;
             align-items: center;
             justify-content: center;
-            color: var(--brand-blue);
+            color: var(--accent-purple);
             font-size: 11px;
-            box-shadow: 3px 3px 6px var(--neo-shadow-dark), -3px -3px 6px var(--neo-shadow-light);
+            box-shadow: var(--neu-shadow-sm);
             flex-shrink: 0;
         }
         
@@ -187,28 +211,43 @@
             text-align: center; 
             color: var(--text-muted); 
             margin-top: 24px; 
-            font-size: 12px; 
+            font-size: 13px;
+            font-weight: 600;
         }
+
     </style>
 </head>
 <body>
 
-<div class="filter-wrapper">
-    <div class="filter-container">
-        <div class="tab-filter active" onclick="filterKategori('semua', this)">Semua</div>
-        <div class="tab-filter" onclick="filterKategori('sukses', this)">Sukses</div>
-        <div class="tab-filter" onclick="filterKategori('pending', this)">Pending</div>
-        <div class="tab-filter" onclick="filterKategori('batal', this)">Batal</div>
+<div class="app-container">
+    <div class="filter-wrapper">
+        <div class="filter-container">
+            <div class="tab-filter active" onclick="filterKategori('semua', this)">Semua</div>
+            <div class="tab-filter" onclick="filterKategori('sukses', this)">Sukses</div>
+            <div class="tab-filter" onclick="filterKategori('pending', this)">Pending</div>
+            <div class="tab-filter" onclick="filterKategori('batal', this)">Batal</div>
+        </div>
+    </div>
+
+    <div id="app">
+        <div class="info-text" id="status-text">Memuat riwayat transaksi...</div>
     </div>
 </div>
 
-<div id="app">
-    <div class="info-text" id="status-text">Memuat riwayat transaksi...</div>
 </div>
 
 <script>
+
     let totalData = [];
     let kategoriAktif = "semua";
+
+    // Fungsi Pembantu Normalisasi Format No HP (08xx <-> 628xx)
+    function normalizePhone(phone) {
+        if (!phone) return '';
+        let clean = String(phone).replace(/\D/g, '');
+        if (clean.startsWith('62')) clean = '0' + clean.slice(2);
+        return clean;
+    }
 
     function filterKategori(kategori, el) {
         kategoriAktif = kategori;
@@ -217,35 +256,65 @@
         renderData(totalData);
     }
 
-    async function muatTransaksiVPS() {
+        async function muatTransaksiVPS() {
         const container = document.getElementById("app");
         
         try {
-            // Ambil nomor HP user yang sedang login dari localStorage
-            const userSession = JSON.parse(localStorage.getItem('arcell_user') || '{}');
-            const hp = userSession.hp || '';
+            // 1. Cek status login dan ambil userPhone dari localStorage
+            const isLoggedIn = localStorage.getItem('isLoggedIn');
+            const rawHp = localStorage.getItem('userPhone') || '';
+            const hp = normalizePhone(rawHp);
 
-            // Panggil API Backend Server VPS kamu
-            const response = await fetch(`/api/history?hp=${encodeURIComponent(hp)}`);
+            // 2. Jika belum login atau userPhone tidak ada, tampilkan pesan lock
+            if (isLoggedIn !== 'true' || !hp) {
+                container.innerHTML = `
+                    <div class="info-text">
+                        <i class="fa-solid fa-lock" style="font-size:28px; margin-bottom:12px; color:var(--accent-purple);"></i><br>
+                        Silakan login terlebih dahulu untuk melihat riwayat transaksi.
+                    </div>`;
+                return;
+            }
+
+            // 3. Ambil riwayat dari server berdasarkan userPhone yang login
+            const response = await fetch(`/api/history?phone=${encodeURIComponent(hp)}&hp=${encodeURIComponent(hp)}`);
             const res = await response.json();
 
-            if (res.status === 'success' && res.data && res.data.length > 0) {
-                totalData = res.data;
+            const dataList = Array.isArray(res) ? res : (res.data || []);
+
+            // 4. Filter ketat khusus nomor HP ini
+            const myDataList = dataList.filter(item => {
+                const itemHp = normalizePhone(item.user_hp || item.customer_no || item.phone || '');
+                return itemHp !== '' && itemHp === hp;
+            });
+
+            if (myDataList.length > 0) {
+                totalData = myDataList;
                 renderData(totalData);
             } else {
-                container.innerHTML = '<div class="info-text">Belum ada riwayat transaksi.</div>';
+                container.innerHTML = '<div class="info-text"><i class="fa-solid fa-receipt" style="font-size:24px; margin-bottom:10px;"><br></i>Belum ada riwayat transaksi.</div>';
             }
         } catch (err) {
             console.error(err);
-            container.innerHTML = '<div class="info-text">Gagal terhubung ke Server VPS.</div>';
+            container.innerHTML = '<div class="info-text">Gagal terhubung ke Server.</div>';
         }
+    }
+
+
+    function parseWaktu(strWaktu) {
+        if (!strWaktu) return { tanggal: 'Hari Ini', jam: '' };
+        
+        const parts = strWaktu.trim().split(/[\s,T]+/);
+        const tanggal = parts[0] || 'Hari Ini';
+        const jam = parts[1] || '';
+        
+        return { tanggal, jam };
     }
 
     function renderData(list) {
         const container = document.getElementById("app");
         
         const dataFiltered = list.filter(item => {
-            const st = (item.status || "SUKSES").toLowerCase();
+            const st = (item.status || "PENDING").toLowerCase();
             if (kategoriAktif === "sukses") return st === "sukses" || st === "lunas";
             if (kategoriAktif === "pending") return st === "pending" || st === "proses";
             if (kategoriAktif === "batal") return st === "batal" || st === "gagal";
@@ -257,52 +326,159 @@
             return;
         }
 
-        // Kelompokkan berdasarkan tanggal/waktu
         const groupedData = {};
         dataFiltered.forEach(item => {
-            const dateKey = item.waktu ? item.waktu.split(',')[0] : 'Hari Ini';
-            if (!groupedData[dateKey]) groupedData[dateKey] = [];
-            groupedData[dateKey].push(item);
+            const { tanggal } = parseWaktu(item.waktu);
+            if (!groupedData[tanggal]) groupedData[tanggal] = [];
+            groupedData[tanggal].push(item);
         });
 
         let htmlList = "";
 
-        for (const dateKey in groupedData) {
+        for (const tanggal in groupedData) {
             htmlList += `
                 <div class="date-group">
-                    <div class="date-header"><i class="bi bi-calendar3 me-1"></i> ${dateKey}</div>
+                    <div class="date-header"><i class="fa-regular fa-calendar-days me-1"></i> ${tanggal}</div>
             `;
 
-            groupedData[dateKey].forEach(item => {
-                const statusStr = (item.status || "SUKSES").toUpperCase();
-                let statusClass = "status-lunas";
+            groupedData[tanggal].forEach(item => {
+                const statusStr = (item.status || "PENDING").toUpperCase();
+                let statusClass = "status-pending";
 
-                if (statusStr === "PENDING" || statusStr === "PROSES") statusClass = "status-pending";
+                if (statusStr === "SUKSES" || statusStr === "LUNAS") statusClass = "status-lunas";
                 if (statusStr === "BATAL" || statusStr === "GAGAL") statusClass = "status-batal";
 
-                const jam = item.waktu && item.waktu.includes(',') ? item.waktu.split(',')[1] : '';
+                const { jam } = parseWaktu(item.waktu);
+                const noTujuan = item.no_tujuan || item.customer_no || '';
+                const namaProduk = item.produk || item.product_name || item.sku || 'Produk PPOB';
 
-		htmlList += `
-		    <div class="card" onclick="window.location.href='detail.html?id=${encodeURIComponent(item.ref_id)}'">
-        	<div class="header-meta">
-            <span class="tx-id">#${item.ref_id || 'ARC'}</span>
-            ${jam ? `<span style="color:var(--text-muted); font-weight:600;">• ${jam}</span>` : ''}
-            ${item.no_tujuan ? `<span class="tx-target"><i class="bi bi-phone"></i>${item.no_tujuan}</span>` : ''}
-        </div>
-        <div class="card-body-content">
-            <div class="card-left">
-                <div class="produk-title">${item.produk || item.sku || 'Produk PPOB'}</div>
-		<div class="produk-status-kirim"></div>
-            </div>
-            <div class="card-right">
-                <span class="status ${statusClass}">${statusStr}</span>
-                <div class="btn-arrow"><i class="bi bi-chevron-right"></i></div>
-            </div>
-        </div>
-    </div>
-   `;
+                htmlList += `
+                    <div class="card" onclick="window.location.href='detail.html?id=${encodeURIComponent(item.ref_id)}'">
+                        <div class="header-meta">
+                            <span class="tx-id">#${item.ref_id || 'ARC'}</span>
+                            ${jam ? `<span class="tx-jam">• ${jam}</span>` : ''}
+                            ${noTujuan ? `<span class="tx-target"><i class="fa-solid fa-mobile-screen-button"></i>${noTujuan}</span>` : ''}
+                        </div>
+                        <div class="card-body-content">
+                            <div class="card-left">
+                                <div class="produk-title">${namaProduk}</div>
+                                <div class="produk-status-kirim">${item.sn ? 'SN: ' + item.sn : ''}</div>
+                            </div>
+                            <div class="card-right">
+                                <span class="status ${statusClass}">${statusStr}</span>
+                                <div class="btn-arrow"><i class="fa-solid fa-chevron-right"></i></div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+
+            htmlList += `</div>`;
+        }
+        
+        container.innerHTML = htmlList;
+    }
+
+    document.addEventListener("DOMContentLoaded", muatTransaksiVPS)
+
+    // Fungsi Konversi Waktu ke Lokasi Pengguna (WIB)
+    function parseWaktu(strWaktu) {
+        if (!strWaktu) return { tanggal: 'Hari Ini', jam: '' };
+        
+        // 1. Ubah format spasi menjadi 'T' dan tambahkan 'Z' agar dibaca sebagai UTC oleh sistem
+        let formattedStr = strWaktu.trim().replace(' ', 'T');
+        if (!formattedStr.endsWith('Z')) {
+            formattedStr += 'Z';
+        }
+
+        const d = new Date(formattedStr);
+
+        // Jika tanggal valid, ubah otomatis sesuai Timezone perangkat (WIB)
+        if (!isNaN(d.getTime())) {
+            const yyyy = d.getFullYear();
+            const mm = String(d.getMonth() + 1).padStart(2, '0');
+            const dd = String(d.getDate()).padStart(2, '0');
+
+            const hh = String(d.getHours()).padStart(2, '0');
+            const min = String(d.getMinutes()).padStart(2, '0');
+            const ss = String(d.getSeconds()).padStart(2, '0');
+
+            return {
+                tanggal: `${yyyy}-${mm}-${dd}`,
+                jam: `${hh}:${min}:${ss}`
+            };
+        }
+
+        // Fallback jika format string tanggal dari VPS tidak biasa
+        const parts = strWaktu.trim().split(/[\s,T]+/);
+        return { tanggal: parts[0] || 'Hari Ini', jam: parts[1] || '' };
+    }
 
 
+    function renderData(list) {
+        const container = document.getElementById("app");
+        
+        const dataFiltered = list.filter(item => {
+            const st = (item.status || "PENDING").toLowerCase();
+            if (kategoriAktif === "sukses") return st === "sukses" || st === "lunas";
+            if (kategoriAktif === "pending") return st === "pending" || st === "proses";
+            if (kategoriAktif === "batal") return st === "batal" || st === "gagal";
+            return true;
+        });
+
+        if (dataFiltered.length === 0) {
+            container.innerHTML = `<div class="info-text">Tidak ada transaksi untuk kategori <b>${kategoriAktif.toUpperCase()}</b>.</div>`;
+            return;
+        }
+
+        // Grouping Data Berdasarkan Tanggal
+        const groupedData = {};
+        dataFiltered.forEach(item => {
+            const { tanggal } = parseWaktu(item.waktu);
+            if (!groupedData[tanggal]) groupedData[tanggal] = [];
+            groupedData[tanggal].push(item);
+        });
+
+        let htmlList = "";
+
+        // Looping Per Kelompok Tanggal
+        for (const tanggal in groupedData) {
+            htmlList += `
+                <div class="date-group">
+                    <div class="date-header"><i class="fa-regular fa-calendar-days me-1"></i> ${tanggal}</div>
+            `;
+
+            // Looping Semua Transaksi Pada Tanggal Tersebut
+            groupedData[tanggal].forEach(item => {
+                const statusStr = (item.status || "PENDING").toUpperCase();
+                let statusClass = "status-pending";
+
+                if (statusStr === "SUKSES" || statusStr === "LUNAS") statusClass = "status-lunas";
+                if (statusStr === "BATAL" || statusStr === "GAGAL") statusClass = "status-batal";
+
+                const { jam } = parseWaktu(item.waktu);
+                const noTujuan = item.no_tujuan || item.customer_no || item.user_hp || '';
+                const namaProduk = item.produk || item.product_name || item.sku || 'Produk PPOB';
+
+                htmlList += `
+                    <div class="card" onclick="window.location.href='detail.html?id=${encodeURIComponent(item.ref_id)}'">
+                        <div class="header-meta">
+                            <span class="tx-id">#${item.ref_id || 'ARC'}</span>
+                            ${jam ? `<span class="tx-jam">• ${jam}</span>` : ''}
+                            ${noTujuan ? `<span class="tx-target"><i class="fa-solid fa-mobile-screen-button"></i>${noTujuan}</span>` : ''}
+                        </div>
+                        <div class="card-body-content">
+                            <div class="card-left">
+                                <div class="produk-title">${namaProduk}</div>
+                                <div class="produk-status-kirim">${item.sn ? 'SN: ' + item.sn : ''}</div>
+                            </div>
+                            <div class="card-right">
+                                <span class="status ${statusClass}">${statusStr}</span>
+                                <div class="btn-arrow"><i class="fa-solid fa-chevron-right"></i></div>
+                            </div>
+                        </div>
+                    </div>
+                `;
             });
 
             htmlList += `</div>`;
