@@ -23,6 +23,7 @@ function generateMD5(str) {
     return crypto.createHash('md5').update(str).digest('hex');
 }
 
+<<<<<<< HEAD
 // ==================== CONFIG OKECONNECT ====================
 const OKECONNECT_CONFIG = {
     memberId: 'OK2385636',
@@ -33,6 +34,9 @@ const OKECONNECT_CONFIG = {
 };
 
 // ==================== DATABASE INITIALIZATION ====================
+=======
+// ==================== DATABASE SQLITE INITIALIZATION ====================
+>>>>>>> abe12ee20564b24e616c2d8c2e988e91622ec13e
 const db = new sqlite3.Database('./database.db', (err) => {
     if (err) console.error('Error DB:', err.message);
     else {
@@ -43,6 +47,10 @@ const db = new sqlite3.Database('./database.db', (err) => {
 
 function initTables() {
     db.serialize(() => {
+<<<<<<< HEAD
+=======
+        // Tabel Member
+>>>>>>> abe12ee20564b24e616c2d8c2e988e91622ec13e
         db.run(`CREATE TABLE IF NOT EXISTS members (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             member_id TEXT UNIQUE,
@@ -53,6 +61,7 @@ function initTables() {
             created_at DATETIME DEFAULT CURRENT_TIMESTAMP
         )`);
 
+<<<<<<< HEAD
         db.run(`CREATE TABLE IF NOT EXISTS transactions (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             ref_id TEXT UNIQUE,
@@ -72,18 +81,46 @@ function initTables() {
             waktu DATETIME DEFAULT CURRENT_TIMESTAMP
         )`);
 
+=======
+	    // Tabel Transaksi Presisi (SUDAH DIPERBAIKI)
+    db.run(`CREATE TABLE IF NOT EXISTS transactions (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        ref_id TEXT UNIQUE,
+        username TEXT,
+        user_hp TEXT,
+        no_tujuan TEXT,
+        customer_no TEXT,
+        produk TEXT,
+        product_name TEXT,
+        harga REAL,
+        price REAL,
+        status TEXT DEFAULT 'Pending',
+        sn TEXT DEFAULT '',
+        message TEXT DEFAULT '',
+        nomor_pembayaran TEXT,
+        subscription_id TEXT,
+        waktu DATETIME DEFAULT CURRENT_TIMESTAMP
+    )`);
+
+        // Tabel Produk
+>>>>>>> abe12ee20564b24e616c2d8c2e988e91622ec13e
         db.run(`CREATE TABLE IF NOT EXISTS products (
             buyer_sku_code TEXT PRIMARY KEY,
             product_name TEXT,
             brand TEXT,
             type TEXT DEFAULT 'Umum',
             price REAL,
+<<<<<<< HEAD
             jual REAL,
             provider TEXT DEFAULT 'digiflazz'
+=======
+            jual REAL
+>>>>>>> abe12ee20564b24e616c2d8c2e988e91622ec13e
         )`);
     });
 }
 
+<<<<<<< HEAD
 // Helper Rekursif untuk meratakan (flatten) data JSON Pricelist OkeConnect
 function extractProducts(data) {
     let items = [];
@@ -236,6 +273,30 @@ async function kirimPushNotif(pesanTitle, pesanBody, targetId = null, isExternal
             chrome_web_icon: LOGO_URL
         };
 
+=======
+// 🔹 2. HELPER ONESIGNAL PUSH NOTIF (LENGKAP DENGAN LOGO ARCELL)
+async function kirimPushNotif(pesanTitle, pesanBody, targetId = null, isExternalId = false) {
+    try {
+        const ONESIGNAL_APP_ID = process.env.ONESIGNAL_APP_ID || "c7cc2a6a-84b8-4579-9c6b-f4d8077f0f65";
+        const ONESIGNAL_REST_KEY = process.env.ONESIGNAL_REST_KEY || "";
+        const LOGO_URL = "https://images.bukaolshop.com/hosting/180774/ae392f68e017469539.png";
+
+        // Mencegah ReferenceError jika BASE_URL belum didefinisikan di server.js
+        const targetUrl = (typeof BASE_URL !== 'undefined' && BASE_URL) ? BASE_URL : "/";
+
+        const payload = {
+            app_id: ONESIGNAL_APP_ID,
+            headings: { "en": pesanTitle, "id": pesanTitle },
+            contents: { "en": pesanBody, "id": pesanBody },
+            url: targetUrl,
+            
+            // 🔹 IKON RESMI ARCELL KOMUNIKA UNTUK NOTIFIKASI ANDROID
+            icon: LOGO_URL,
+            large_icon: LOGO_URL,
+            chrome_web_icon: LOGO_URL
+        };
+
+>>>>>>> abe12ee20564b24e616c2d8c2e988e91622ec13e
         const cleanTargetId = (targetId && String(targetId).trim() !== "" && String(targetId) !== "undefined") ? String(targetId).trim() : null;
 
         if (cleanTargetId) {
@@ -396,6 +457,7 @@ app.post('/api/digiflazz/checkout', async (req, res) => {
     });
 });
 
+<<<<<<< HEAD
 app.post('/api/okeconnect/checkout', async (req, res) => {
     try {
         const { buyer_sku_code, customer_no, user_hp, username, nama_produk, harga_jual } = req.body;
@@ -585,6 +647,142 @@ app.post('/api/digiflazz/price-list', async (req, res) => {
 });
 
 
+=======
+// ==================== WEBHOOK DIGIFLAZZ ====================
+app.post('/api/digiflazz/webhook', (req, res) => {
+    try {
+        const bodyData = req.body.data || req.body;
+        const { ref_id, status, sn, message } = bodyData;
+
+        if (ref_id) {
+            db.get("SELECT * FROM transactions WHERE ref_id = ?", [ref_id], async (err, trx) => {
+                if (err || !trx) return;
+
+                const statusClean = status || 'Gagal';
+                const cleanSn = (sn && sn !== '-') ? sn : (trx.sn || '');
+                const statusUpper = String(statusClean).toUpperCase();
+                const statusLamaUpper = String(trx.status).toUpperCase();
+
+                // 🛑 CEK IDEMPOTENSI: Jika status sama dengan di DB, abaikan agar tidak kirim notif/refund 2x
+                if (statusLamaUpper === statusUpper) {
+                    return;
+                }
+
+                // Update Status Transaksi di Database
+                db.run("UPDATE transactions SET status = ?, sn = ?, message = ? WHERE ref_id = ?",
+                    [statusClean, cleanSn, message || '', ref_id]);
+
+                // Refund Saldo jika status berubah jadi GAGAL/BATAL (dan sebelumnya belum pernah gagal)
+                if (['GAGAL', 'BATAL'].includes(statusUpper) && !['GAGAL', 'BATAL'].includes(statusLamaUpper)) {
+                    const targetHp = trx.user_hp || trx.customer_no;
+                    const refundPrice = trx.harga || trx.price || 0;
+                    db.run("UPDATE members SET balance = balance + ? WHERE phone = ?", [refundPrice, targetHp]);
+                }
+
+                // 🔔 PENENTUAN TARGET PUSH NOTIFIKASI SPESIFIK USER
+                const namaProduk = trx.produk || trx.product_name || 'Produk PPOB';
+                const noTujuan = trx.no_tujuan || trx.customer_no || '';
+                
+                // Utamakan subscription_id, jika kosong gunakan user_hp (External ID)
+                const targetId = trx.subscription_id || trx.user_hp;
+                const isExternalId = !trx.subscription_id; 
+
+                if (targetId) {
+                    if (statusUpper === 'SUKSES' || statusUpper === 'LUNAS') {
+                        await kirimPushNotif(
+                            "🎉 Transaksi Berhasil!",
+                            `${namaProduk} (${noTujuan}) SUKSES. SN: ${cleanSn}`,
+                            targetId,
+                            isExternalId
+                        );
+                    } else if (['GAGAL', 'BATAL'].includes(statusUpper)) {
+                        await kirimPushNotif(
+                            "❌ Transaksi Gagal",
+                            `${namaProduk} (${noTujuan}) Gagal: ${message || 'Gagal diproses'}. Saldo dikembalikan.`,
+                            targetId,
+                            isExternalId
+                        );
+                    }
+                }
+            });
+        }
+
+        res.status(200).json({ status: 'ok' });
+    } catch (e) {
+        console.error("❌ Webhook Error:", e);
+        res.status(500).json({ status: 'error' });
+    }
+});
+
+// ==================== API SYNC DAFTAR HARGA DIGIFLAZZ (FULL SQLITE) ====================
+app.post('/api/digiflazz/price-list', async (req, res) => {
+    try {
+        const username = (process.env.DIGIFLAZZ_USERNAME || '').trim();
+        const apiKey = (process.env.DIGIFLAZZ_API_KEY || '').trim();
+        
+        if (!username || !apiKey) {
+            return res.status(400).json({ status: 'error', message: 'Kredensial Digiflazz di .env belum diisi!' });
+        }
+
+        const sign = generateMD5(username + apiKey + "pricelist");
+
+        const response = await axios.post('https://api.digiflazz.com/v1/price-list', {
+            cmd: 'prepaid',
+            username: username,
+            sign: sign
+        }, { timeout: 20000 });
+
+        let products = response.data?.data || [];
+
+        if (products.length > 0) {
+            // Gunakan Transaction SQLite agar proses insert ribuan produk sangat cepat
+            db.serialize(() => {
+                db.run("BEGIN TRANSACTION");
+
+                const stmt = db.prepare(`
+                    INSERT INTO products (buyer_sku_code, product_name, brand, type, price, jual) 
+                    VALUES (?, ?, ?, ?, ?, ?)
+                    ON CONFLICT(buyer_sku_code) DO UPDATE SET
+                    product_name = excluded.product_name,
+                    brand = excluded.brand,
+                    price = excluded.price
+                `);
+
+                products.forEach(p => {
+                    const sku = p.buyer_sku_code;
+                    const name = p.product_name;
+                    const brand = (p.brand || 'UMUM').toUpperCase();
+                    const category = p.category || 'Umum';
+                    const modalPrice = parseFloat(p.price || 0);
+                    // Margin keuntungan default misalnya +500 dari modal, atau samakan dengan modal
+                    const jualPrice = modalPrice + 500; 
+
+                    if (sku && name) {
+                        stmt.run(sku, name, brand, category, modalPrice, jualPrice);
+                    }
+                });
+
+                stmt.finalize();
+                db.run("COMMIT", (err) => {
+                    if (err) {
+                        console.error("❌ Error Commit Sync Products:", err.message);
+                        return res.status(500).json({ status: 'error', message: 'Gagal simpan ke DB' });
+                    }
+                    console.log(`✅ Berhasil Sync ${products.length} produk dari Digiflazz ke SQLite!`);
+                    res.json({ status: 'success', message: `${products.length} produk berhasil di-sync ke SQLite`, total: products.length });
+                });
+            });
+        } else {
+            res.json({ status: 'success', message: 'Tidak ada produk dari Digiflazz', total: 0 });
+        }
+
+    } catch (error) {
+        console.error("❌ Error Price-List Digiflazz:", error.message);
+        res.status(500).json({ status: 'error', message: error.message, data: [] });
+    }
+});
+
+>>>>>>> abe12ee20564b24e616c2d8c2e988e91622ec13e
 // Route Fetch Produk untuk frontend index.html & admin.html (Langsung dari SQLite)
 app.get('/api/products', (req, res) => {
     db.all("SELECT * FROM products ORDER BY brand ASC, product_name ASC", [], (err, rows) => {
@@ -775,6 +973,7 @@ app.get('/api/admin/transactions', (req, res) => {
 
 app.get('/admin', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'admin.html'));
+<<<<<<< HEAD
 });
 // =========================================================
 // 📌 ENDPOINT SINKRONISASI & AMBIL PRODUK DIGIFLAZZ (SQLITE)
@@ -838,6 +1037,10 @@ app.get('/api/digiflazz/products', (req, res) => {
 });
 
 
+=======
+});
+
+>>>>>>> abe12ee20564b24e616c2d8c2e988e91622ec13e
 app.listen(PORT, () => {
     console.log(`🚀 Server Arcell Komunika berjalan di Port ${PORT}`);
 });

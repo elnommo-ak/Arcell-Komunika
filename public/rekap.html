@@ -223,53 +223,6 @@
             animation: spin 1s linear infinite; margin: 12px auto;
         }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-
-        /* --- BOTTOM NAVIGATION BAR INTEGRATED --- */
-        .bottom-nav {
-            position: fixed;
-            bottom: 0;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 100%;
-            max-width: 480px;
-            height: var(--bottom-nav-height);
-            background: var(--bg-base);
-            display: flex;
-            justify-content: space-around;
-            align-items: center;
-            box-shadow: 0 -5px 15px rgba(0,0,0,0.05);
-            border-top-left-radius: 20px;
-            border-top-right-radius: 20px;
-            padding: 0 10px;
-            z-index: 999;
-        }
-
-        .nav-item {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            text-decoration: none;
-            color: var(--text-muted);
-            font-size: 11px;
-            font-weight: 600;
-            width: 60px;
-            height: 50px;
-            border-radius: 14px;
-            transition: all 0.3s ease;
-            background: var(--bg-base);
-            box-shadow: var(--neu-shadow-sm);
-        }
-
-        .nav-item i {
-            font-size: 18px;
-            margin-bottom: 3px;
-        }
-
-        .nav-item.active {
-            color: var(--accent-purple);
-            box-shadow: var(--neu-shadow-inset);
-        }
     </style>
 </head>
 <body>
@@ -290,30 +243,6 @@
             <b>Memuat Transaksi Server VPS...</b>
         </div>
     </div>
-
-    <!-- 📌 BOTTOM NAVIGATION BAR INTEGRATED -->
-    <div class="bottom-nav">
-        <a href="index.html" class="nav-item">
-            <i class="fa-solid fa-house"></i>
-            <span>Home</span>
-        </a>
-        <a href="history.html" class="nav-item">
-            <i class="fa-solid fa-clock-rotate-left"></i>
-            <span>History</span>
-        </a>
-        <a href="rekap.html" class="nav-item active">
-            <i class="fa-solid fa-chart-line"></i>
-            <span>Rekap</span>
-	<a href="kasir.html" class="nav-item">
-            <i class="fa-solid fa-cash-register"></i>
-            <span>Kasir</span>
-        </a>
-        <a href="akun.html" class="nav-item">
-            <i class="fa-solid fa-user"></i>
-            <span>Akun</span>
-        </a>
-    </div>
-
 </div>
 
 <script>
@@ -328,10 +257,24 @@
 
     const formatRp = (angka) => `Rp ${cleanNumber(angka).toLocaleString("id-ID")}`;
 
+    // Memotong Jam: Selalu ambil YYYY-MM-DD saja dari berbagai format string tanggal
     const extractDate = (dateStr) => {
         if (!dateStr) return getTodayDateStr();
-        if (dateStr.includes('/')) {
-            const parts = dateStr.split(',')[0].split('/');
+        
+        let cleaned = dateStr.trim();
+        
+        // Jika format memuat spasi (misal: "2026-08-27 09:22:03" atau "27/08/2026 09:22:03")
+        if (cleaned.includes(' ')) {
+            cleaned = cleaned.split(' ')[0];
+        }
+        // Jika format ISO (misal: "2026-08-27T09:22:03")
+        if (cleaned.includes('T')) {
+            cleaned = cleaned.split('T')[0];
+        }
+        
+        // Jika format DD/MM/YYYY
+        if (cleaned.includes('/')) {
+            const parts = cleaned.split('/');
             if (parts.length === 3) {
                 const day = parts[0].padStart(2, '0');
                 const month = parts[1].padStart(2, '0');
@@ -339,7 +282,8 @@
                 return `${year}-${month}-${day}`;
             }
         }
-        return dateStr.split("T")[0] || dateStr.split(" ")[0];
+        
+        return cleaned;
     };
 
     const getTodayDateStr = () => {
@@ -450,13 +394,11 @@
         }, 400); 
     };
 
-    // KALKULASI RINGKASAN DINAMIS SESUAI FILTER/PENCARIAN SAAT INI
     const calculateFilteredSummary = () => {
         let totalModal = 0;
         let totalJual = 0;
         let totalItem = 0;
 
-        // Hanya hitung kartu transaksi yang TIDAK tersembunyi (ter-filter)
         document.querySelectorAll('.card-tx:not(.hidden)').forEach(card => {
             const groupEl = card.closest('.date-group');
             if (groupEl && groupEl.style.display !== 'none') {
@@ -491,7 +433,6 @@
         if (qtyEl) qtyEl.innerText = `${totalItem} Pcs`;
     };
 
-    // FUNGSI FILTER DENGAN NORMALISASI TANGGAL
     const filterUI = () => {
         const selectEl = document.getElementById("filter-tgl-select");
         const searchEl = document.getElementById("search-input");
@@ -537,7 +478,6 @@
             }
         });
 
-        // Panggil ulang kalkulasi ringkasan otomatis setiap kali filter/pencarian berubah
         calculateFilteredSummary();
     };
 
@@ -568,6 +508,7 @@
             return;
         }
 
+        // Kelompokkan HANYA berdasarkan tanggal murni (Jam sudah dipotong bersih di extractDate)
         const groups = list.reduce((acc, item) => {
             const date = extractDate(item.waktu || item.date || item.tanggal);
             acc[date] = acc[date] || [];
@@ -575,7 +516,10 @@
             return acc;
         }, {});
 
-        const dates = Object.keys(groups);
+        // Urutkan tanggal dari yang terbaru
+        const dates = Object.keys(groups).sort((a, b) => new Date(b) - new Date(a));
+        const todayStr = getTodayDateStr();
+
         const weeksSet = new Set();
         const monthsSet = new Set();
         dates.forEach(d => {
@@ -615,7 +559,10 @@
                 <select id="filter-tgl-select" class="select-filter" onchange="filterUI()">
                     <option value="ALL" selected>🏆 Semua Transaksi Sukses (${list.length})</option>
                     <optgroup label="📅 Harian">
-                        ${dates.map((tgl) => `<option value="${tgl}">${tgl}</option>`).join('')}
+                        ${dates.map((tgl) => {
+                            const label = (tgl === todayStr) ? `Hari ini (${tgl})` : tgl;
+                            return `<option value="${tgl}">${label}</option>`;
+                        }).join('')}
                     </optgroup>
                     <optgroup label="🗓️ Mingguan">
                         ${weeks.map(w => `<option value="WEEK_${w}">${w}</option>`).join('')}
@@ -628,16 +575,17 @@
         `;
 
         dates.forEach(tgl => {
+            const headerLabel = (tgl === todayStr) ? `Hari ini (${tgl})` : tgl;
+            
             html += `
                 <div class="date-group" data-tgl="${tgl}">
                     <div class="date-header">
-                        <span>📅 ${tgl}</span>
+                        <span>📅 ${headerLabel}</span>
                         <span>${groups[tgl].length} Transaksi</span>
                     </div>
                     ${groups[tgl].map(item => {
                         const noPem = item.ref_id || 'TRX-' + Date.now();
                         const nama = item.produk || item.product_name || "Produk Tanpa Nama";
-                        const jam = item.waktu ? item.waktu.split(',')[1] || item.waktu : '-';
                         const namaSafe = nama.replace(/'/g, "\\'");
                         const statusClean = (item.status || 'sukses').toLowerCase();
                         
@@ -652,7 +600,6 @@
                         <div class="card-tx" data-nopem="${noPem}" data-nama="${nama}" data-tgl="${tgl}" data-status="${statusClean}">
                             <div class="card-tx-header">
                                 <span>Ref: <b>${noPem}</b></span>
-                                <span>⏱️ ${jam}</span>
                             </div>
                             <div class="produk-title">${nama} (${item.no_tujuan || item.customer_no || '-'})</div>
                             

@@ -1,0 +1,13 @@
+{
+  "background_color": "#ffffff",
+  "dir": "ltr",
+  "display": "standalone",
+  "name": "Arcell Komunika",
+  "orientation": "any",
+  "scope": "/",
+  "short_name": "Arcell Komunika",
+  "start_url": "/",
+  "theme_color": "#ffffff",
+  "id": "Arcell",
+  "description": "Transaksi PPOB Termurah"
+}

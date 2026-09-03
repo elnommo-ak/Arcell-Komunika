@@ -7,281 +7,297 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root {
-            --bg-color: #e6eaf0;
-            --text-main: #4a5568;
-            --text-sub: #8c98a9;
-            --primary: #7052ff;
-            --pink-accent: #ff4081;
-            --badge-blue: #0088ff;
-            --shadow-light: #ffffff;
-            --shadow-dark: #babecc;
-            --shadow-flat: 6px 6px 12px var(--shadow-dark), -6px -6px 12px var(--shadow-light);
-            --shadow-sm: 3px 3px 6px var(--shadow-dark), -3px -3px 6px var(--shadow-light);
-            --shadow-inset: inset 3px 3px 6px var(--shadow-dark), inset -3px -3px 6px var(--shadow-light);
+            --glass-bg: rgba(255, 255, 255, 0.45);
+            --glass-card: rgba(255, 255, 255, 0.65);
+            --glass-border: rgba(255, 255, 255, 0.8);
+            --glass-shadow: 0 4px 20px 0 rgba(31, 38, 135, 0.06);
+            
+            --text-main: #2d3748;
+            --text-sub: #718096;
+            --primary: #6366f1;
+            --primary-hover: #4f46e5;
+            --pink-accent: #ec4899;
+            --badge-blue: #3b82f6;
             --bottom-nav-height: 70px;
         }
 
-        * { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; margin: 0; padding: 0; }
-        body { background: var(--bg-color); color: var(--text-main); padding-bottom: calc(var(--bottom-nav-height) + 30px); }
+        * { 
+            box-sizing: border-box; 
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; 
+            margin: 0; 
+            padding: 0; 
+        }
+
+        body { 
+            background: linear-gradient(135deg, #e0c3fc 0%, #8ec5fc 100%);
+            background-attachment: fixed;
+            color: var(--text-main); 
+            padding-bottom: calc(var(--bottom-nav-height) + 20px); 
+            min-height: 100vh;
+        }
 
         .header { 
-            background: var(--bg-color); 
-            padding: 20px; 
+            background: var(--glass-bg);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            padding: 14px 20px; 
             text-align: center;
+            border-bottom: 1px solid var(--glass-border);
+            margin-bottom: 12px;
         }
-        .header h2 { font-size: 1.3rem; color: var(--text-main); font-weight: 800; }
+        .header h2 { font-size: 1.15rem; color: var(--text-main); font-weight: 800; }
 
-        .container { max-width: 1000px; margin: 0 auto; padding: 0 15px; }
+        .container { max-width: 1000px; margin: 0 auto; padding: 0 10px; }
 
-        /* SALDO DIGIFLAZZ CARD */
+        .glass-card {
+            background: var(--glass-card);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--glass-border);
+            border-radius: 16px;
+            padding: 14px;
+            margin-bottom: 12px;
+            box-shadow: var(--glass-shadow);
+        }
+
         .main-balance-card {
-            background: var(--bg-color);
-            padding: 20px;
-            border-radius: 20px;
-            margin-bottom: 20px;
-            box-shadow: var(--shadow-flat);
             text-align: center;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.8), rgba(255, 255, 255, 0.5));
+            padding: 14px;
         }
-        .main-balance-card .title { font-size: 0.85rem; color: var(--text-sub); font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase; }
-        .main-balance-card .value { font-size: 2rem; font-weight: 900; color: var(--primary); margin-top: 6px; }
+        .main-balance-card .title { font-size: 0.78rem; color: var(--text-sub); font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase; }
+        .main-balance-card .value { font-size: 1.6rem; font-weight: 900; color: var(--primary); margin-top: 2px; }
 
-        /* NAV TABS */
         .nav-tabs { 
             display: grid; 
-            grid-template-columns: repeat(2, 1fr); 
-            gap: 12px; 
-            margin-bottom: 20px; 
+            grid-template-columns: repeat(4, 1fr); 
+            gap: 6px; 
+            margin-bottom: 12px; 
         }
+
         .tab-btn { 
-            background: var(--bg-color); 
-            border: none; 
-            padding: 14px 10px; 
-            border-radius: 16px; 
-            font-weight: 800; 
+            background: var(--glass-bg); 
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            border: 1px solid var(--glass-border);
+            padding: 10px 4px; 
+            border-radius: 12px; 
+            font-weight: 700; 
             color: var(--text-sub); 
             cursor: pointer; 
-            box-shadow: var(--shadow-sm); 
+            box-shadow: var(--glass-shadow); 
             display: flex; 
+            flex-direction: column;
             align-items: center; 
             justify-content: center;
-            gap: 8px; 
+            gap: 4px; 
             transition: all 0.2s ease; 
-            font-size: 0.95rem;
+            font-size: 0.72rem;
         }
+        .tab-btn i { font-size: 0.95rem; }
         .tab-btn.active { 
+            background: rgba(255, 255, 255, 0.9);
             color: var(--primary); 
-            box-shadow: var(--shadow-inset); 
+            border-color: var(--primary);
+            box-shadow: 0 2px 10px rgba(99, 102, 241, 0.2);
         }
 
         .tab-content { display: none; }
         .tab-content.active { display: block; }
 
-        .card { 
-            background: var(--bg-color); 
-            padding: 20px; 
-            border-radius: 20px; 
-            margin-bottom: 20px; 
-            box-shadow: var(--shadow-flat); 
-        }
-        h3 { margin-bottom: 16px; color: var(--primary); display: flex; align-items: center; gap: 8px; font-size: 1.05rem; font-weight: 800; }
+        h3 { margin-bottom: 10px; color: var(--primary); display: flex; align-items: center; gap: 6px; font-size: 0.92rem; font-weight: 800; }
 
-        .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin-bottom: 15px; }
+        .form-grid-inline { 
+            display: flex; 
+            flex-wrap: wrap; 
+            gap: 8px; 
+            align-items: center;
+        }
+        .form-grid-inline input, .form-grid-inline select {
+            flex: 1 1 130px;
+            padding: 8px 12px;
+            font-size: 0.8rem;
+            border-radius: 10px;
+        }
+
         input, select { 
-            padding: 12px 16px; 
-            border-radius: 14px; 
-            border: none; 
+            padding: 9px 12px; 
+            border-radius: 10px; 
+            border: 1px solid var(--glass-border); 
             outline: none; 
-            font-size: 0.88rem; 
-            font-weight: 700;
-            background: var(--bg-color);
+            font-size: 0.82rem; 
+            font-weight: 600;
+            background: rgba(255, 255, 255, 0.75);
             color: var(--text-main);
-            box-shadow: var(--shadow-inset);
+            backdrop-filter: blur(4px);
             transition: all 0.2s ease;
             width: 100%;
         }
+        input:focus, select:focus {
+            background: rgba(255, 255, 255, 0.95);
+            border-color: var(--primary);
+        }
+
         button { 
-            background: var(--bg-color); 
+            background: rgba(255, 255, 255, 0.85); 
             color: var(--primary); 
-            border: none; 
-            padding: 12px 20px;
-            border-radius: 16px;
+            border: 1px solid var(--glass-border); 
+            padding: 8px 14px;
+            border-radius: 10px;
             cursor: pointer; 
             font-weight: 800; 
+            font-size: 0.8rem;
             transition: all 0.2s ease; 
-            box-shadow: var(--shadow-sm);
+            box-shadow: var(--glass-shadow);
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            gap: 8px;
+            gap: 6px;
         }
-        button:active { box-shadow: var(--shadow-inset); transform: scale(0.98); }
+        button:hover { background: #ffffff; color: var(--primary-hover); }
+        button:active { transform: scale(0.98); }
 
         .btn-success { color: #10b981; }
         .btn-warning { color: #f59e0b; }
         .btn-danger { color: #ef4444; }
-        .btn-sm { padding: 6px 12px; font-size: 0.78rem; border-radius: 10px; }
+        .btn-sm { padding: 4px 8px; font-size: 0.72rem; border-radius: 8px; }
 
         .bulk-bar { 
-            display: flex; gap: 12px; flex-wrap: wrap; background: var(--bg-color); 
-            padding: 14px; border-radius: 16px; margin-bottom: 16px; align-items: center; 
-            box-shadow: var(--shadow-inset);
+            display: flex; gap: 8px; flex-wrap: wrap; background: rgba(255, 255, 255, 0.5); 
+            padding: 10px; border-radius: 12px; margin-bottom: 12px; align-items: center; 
+            border: 1px solid var(--glass-border);
         }
         
-        .category-wrapper { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+        .category-wrapper { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
         .cat-badge { 
-            background: var(--bg-color); color: var(--pink-accent); padding: 6px 14px; 
-            border-radius: 20px; font-weight: 800; font-size: 0.78rem; display: flex; 
-            align-items: center; gap: 8px; box-shadow: var(--shadow-sm);
+            background: rgba(255, 255, 255, 0.85); color: var(--pink-accent); padding: 4px 10px; 
+            border-radius: 16px; font-weight: 800; font-size: 0.72rem; display: flex; 
+            align-items: center; gap: 6px; border: 1px solid var(--glass-border);
         }
 
-        /* DESAIN KARTU MEMBER ACCORDION & DROPDOWN TRANSAKSI */
+        /* MEMBER COMPACT CARD DESIGN */
         .member-list-container {
             display: flex;
             flex-direction: column;
-            gap: 14px;
+            gap: 10px;
         }
         .member-card {
-            background: var(--bg-color);
-            border-radius: 18px;
-            box-shadow: var(--shadow-sm);
+            background: rgba(255, 255, 255, 0.65);
+            border-radius: 14px;
+            border: 1px solid var(--glass-border);
             overflow: hidden;
             transition: all 0.2s ease;
         }
         .member-card-header {
-            padding: 16px;
+            padding: 12px 14px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            gap: 10px;
+            gap: 8px;
         }
-        .member-info-main {
-            display: flex;
-            flex-direction: column;
+        .member-info-main { display: flex; flex-direction: column; gap: 2px; flex: 1; }
+        .member-name { font-size: 0.88rem; font-weight: 800; color: var(--text-main); display: flex; align-items: center; gap: 6px; }
+        .member-sub { font-size: 0.72rem; color: var(--text-sub); font-weight: 600; display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+        
+        .member-right-info { text-align: right; display: flex; flex-direction: column; align-items: flex-end; gap: 2px; }
+        .member-saldo { font-size: 0.92rem; font-weight: 900; color: #10b981; }
+
+        .daily-summary-badge {
+            background: rgba(99, 102, 241, 0.1);
+            color: var(--primary);
+            padding: 2px 6px;
+            border-radius: 6px;
+            font-size: 0.68rem;
+            font-weight: 800;
+            display: inline-flex;
+            align-items: center;
             gap: 4px;
         }
-        .member-name {
-            font-size: 0.95rem;
-            font-weight: 800;
-            color: var(--text-main);
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-        .member-sub {
-            font-size: 0.75rem;
-            color: var(--text-sub);
-            font-weight: 700;
-        }
-        .member-saldo {
-            font-size: 0.95rem;
-            font-weight: 900;
-            color: #10b981;
-        }
-        .member-actions {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            margin-top: 8px;
-            flex-wrap: wrap;
-        }
 
-        /* TOGGLE DROPDOWN TRANSAKSI MEMBER */
         .btn-toggle-trx {
-            background: var(--bg-color);
+            background: rgba(255, 255, 255, 0.75);
             color: var(--primary);
-            box-shadow: var(--shadow-sm);
-            border-radius: 12px;
-            padding: 8px 12px;
-            font-size: 0.78rem;
+            border-radius: 10px;
+            padding: 6px 10px;
+            font-size: 0.75rem;
             font-weight: 800;
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: space-between;
             width: 100%;
-            margin-top: 10px;
-            border: none;
+            margin-top: 6px;
+            border: 1px solid var(--glass-border);
         }
-        .btn-toggle-trx .chevron-trx {
-            transition: transform 0.2s ease;
-        }
-        .member-card.open .btn-toggle-trx .chevron-trx {
-            transform: rotate(180deg);
-        }
+        .btn-toggle-trx .chevron-trx { transition: transform 0.2s ease; font-size: 0.7rem; }
+        .member-card.open .btn-toggle-trx .chevron-trx { transform: rotate(180deg); }
 
-        /* BODY TRANSAKSI DI DALAM KARTU MEMBER */
         .member-trx-dropdown {
             display: none;
-            padding: 0 16px 16px 16px;
-            background: var(--bg-color);
-            border-top: 1px dashed var(--shadow-dark);
-            margin-top: 8px;
-            flex-direction: column;
-            gap: 10px;
-        }
-        .member-card.open .member-trx-dropdown {
-            display: flex;
-        }
-
-        /* KARTU TRANSAKSI MINIMALIS DI DALAM ACCORDION */
-        .sub-trx-card {
-            background: var(--bg-color);
-            padding: 12px 14px;
-            border-radius: 14px;
-            box-shadow: var(--shadow-inset);
-            display: flex;
+            padding: 0 12px 12px 12px;
+            background: rgba(255, 255, 255, 0.35);
+            border-top: 1px dashed rgba(0, 0, 0, 0.08);
+            margin-top: 6px;
             flex-direction: column;
             gap: 6px;
-            margin-top: 8px;
         }
-        .sub-trx-header {
+        .member-card.open .member-trx-dropdown { display: flex; }
+
+        .date-folder-card {
+            background: rgba(255, 255, 255, 0.8);
+            border-radius: 10px;
+            border: 1px solid var(--glass-border);
+            margin-top: 4px;
+            overflow: hidden;
+        }
+        .date-folder-header {
+            padding: 8px 10px;
             display: flex;
             justify-content: space-between;
-            font-size: 0.72rem;
-            font-weight: 700;
-            color: var(--text-sub);
-        }
-        .sub-trx-body {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-end;
-            gap: 10px;
-        }
-        .sub-trx-prod {
-            font-size: 0.82rem;
+            align-items: center;
+            cursor: pointer;
+            font-size: 0.75rem;
             font-weight: 800;
             color: var(--text-main);
         }
-        .sub-trx-target {
-            font-size: 0.75rem;
-            color: var(--primary);
-            font-weight: 700;
+        .date-folder-body {
+            display: none;
+            padding: 0 8px 8px 8px;
+            flex-direction: column;
+            gap: 6px;
         }
-        .sub-trx-price {
-            font-size: 0.85rem;
-            font-weight: 900;
-            color: #10b981;
-        }
-        .sub-trx-status {
-            font-size: 0.68rem;
-            font-weight: 800;
-            padding: 2px 8px;
-            border-radius: 8px;
-            box-shadow: var(--shadow-sm);
-            text-transform: uppercase;
-        }
+        .date-folder-card.open .date-folder-body { display: flex; }
+        .date-folder-card.open .date-chevron { transform: rotate(180deg); }
+        .date-chevron { transition: transform 0.2s ease; font-size: 0.7rem; color: var(--text-sub); }
 
-        /* STYLES DESAIN FOLDER KATEGORI PRODUK */
+        .sub-trx-card {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 8px 10px;
+            border-radius: 8px;
+            border: 1px solid var(--glass-border);
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+        .sub-trx-header { display: flex; justify-content: space-between; font-size: 0.68rem; font-weight: 700; color: var(--text-sub); }
+        .sub-trx-body { display: flex; justify-content: space-between; align-items: flex-end; gap: 8px; }
+        .sub-trx-prod { font-size: 0.78rem; font-weight: 800; color: var(--text-main); }
+        .sub-trx-target { font-size: 0.72rem; color: var(--primary); font-weight: 700; }
+        .sub-trx-price { font-size: 0.8rem; font-weight: 900; color: #10b981; }
+        .sub-trx-status { font-size: 0.65rem; font-weight: 800; padding: 1px 6px; border-radius: 6px; background: rgba(16, 185, 129, 0.15); color: #10b981; text-transform: uppercase; }
+
+        /* FOLDER ACCORDION PRODUK */
         .folder-card {
-            background: var(--bg-color);
-            border-radius: 18px;
-            box-shadow: var(--shadow-flat);
-            margin-bottom: 14px;
+            background: rgba(255, 255, 255, 0.65);
+            border-radius: 14px;
+            border: 1px solid var(--glass-border);
+            margin-bottom: 10px;
             overflow: hidden;
+            box-shadow: var(--glass-shadow);
         }
         
         .folder-header {
-            padding: 14px 16px;
+            padding: 10px 14px;
             display: flex;
             align-items: center;
             justify-content: space-between;
@@ -289,49 +305,59 @@
             user-select: none;
         }
 
-        .folder-left { display: flex; align-items: center; gap: 10px; font-weight: 800; font-size: 0.88rem; color: var(--pink-accent); }
-        .folder-icon { font-size: 1.1rem; color: var(--pink-accent); }
-        .drag-icon { color: var(--text-sub); font-size: 0.9rem; margin-right: 2px; }
+        .folder-left { display: flex; align-items: center; gap: 8px; font-weight: 800; font-size: 0.82rem; color: var(--pink-accent); }
+        .folder-icon { font-size: 0.95rem; color: var(--pink-accent); }
+        .drag-icon { color: var(--text-sub); font-size: 0.8rem; }
 
-        .folder-right { display: flex; align-items: center; gap: 8px; }
+        .folder-right { display: flex; align-items: center; gap: 6px; }
         .badge-count {
-            background: #dbeafe; color: var(--badge-blue); padding: 3px 10px; border-radius: 12px;
-            font-size: 0.7rem; font-weight: 800;
+            background: rgba(219, 234, 254, 0.8); color: var(--badge-blue); padding: 2px 8px; border-radius: 10px;
+            font-size: 0.68rem; font-weight: 800;
         }
 
-        .folder-body { display: none; padding: 0 14px 14px 14px; flex-direction: column; gap: 8px; }
+        .folder-body { display: none; padding: 0 10px 10px 10px; flex-direction: column; gap: 6px; }
         .folder-card.open .folder-body { display: flex; }
         .folder-card.open .chevron { transform: rotate(180deg); }
-        .chevron { transition: transform 0.2s; color: var(--text-sub); font-size: 0.8rem; }
+        .chevron { transition: transform 0.2s; color: var(--text-sub); font-size: 0.75rem; }
 
         .prod-item {
-            background: var(--bg-color);
-            padding: 12px 14px;
-            border-radius: 14px;
-            box-shadow: var(--shadow-sm);
+            background: rgba(255, 255, 255, 0.8);
+            padding: 8px 10px;
+            border-radius: 10px;
+            border: 1px solid var(--glass-border);
             display: flex;
             align-items: center;
             justify-content: space-between;
         }
-        .prod-name { font-size: 0.82rem; font-weight: 800; color: var(--text-main); }
-        .prod-sku { font-size: 0.68rem; color: var(--text-sub); font-weight: 700; margin-top: 2px; }
+        .prod-name { font-size: 0.78rem; font-weight: 800; color: var(--text-main); }
+        .prod-sku { font-size: 0.65rem; color: var(--text-sub); font-weight: 700; margin-top: 1px; }
         .prod-sku span { color: var(--primary); }
-        .prod-price { font-size: 0.85rem; font-weight: 900; color: #10b981; }
+        .prod-price { font-size: 0.8rem; font-weight: 900; color: #10b981; }
 
         /* BOTTOM NAV */
         .bottom-nav {
             position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 480px;
-            height: var(--bottom-nav-height); background: var(--bg-color); display: flex; justify-content: space-around;
-            align-items: center; box-shadow: 0 -5px 15px rgba(0,0,0,0.05); border-top-left-radius: 20px;
-            border-top-right-radius: 20px; padding: 0 10px; z-index: 999;
+            height: var(--bottom-nav-height); 
+            background: rgba(255, 255, 255, 0.75); 
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border-top: 1px solid var(--glass-border);
+            display: flex; justify-content: space-around;
+            align-items: center; border-top-left-radius: 18px;
+            border-top-right-radius: 18px; padding: 0 10px; z-index: 999;
+            box-shadow: 0 -5px 20px rgba(0,0,0,0.05);
         }
         .nav-item {
             display: flex; flex-direction: column; align-items: center; justify-content: center; text-decoration: none;
-            color: var(--text-sub); font-size: 11px; font-weight: 600; width: 60px; height: 50px;
-            border-radius: 14px; transition: all 0.3s ease; background: var(--bg-color); box-shadow: var(--shadow-sm);
+            color: var(--text-sub); font-size: 10px; font-weight: 600; width: 56px; height: 46px;
+            border-radius: 12px; transition: all 0.3s ease;
         }
-        .nav-item i { font-size: 18px; margin-bottom: 3px; }
-        .nav-item.active { color: var(--primary); box-shadow: var(--shadow-inset); }
+        .nav-item i { font-size: 16px; margin-bottom: 2px; }
+        .nav-item.active { 
+            color: var(--primary); 
+            background: rgba(255, 255, 255, 0.9);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
     </style>
 </head>
 <body>
@@ -341,67 +367,65 @@
     </div>
 
     <div class="container">
-        <!-- BODY UTAMA: SALDO DIGIFLAZZ -->
-        <div class="main-balance-card">
-            <div class="title"><i class="fa-solid fa-server"></i> Saldo Server Digiflazz</div>
-            <div class="value" id="dispSaldoDigiflazz">Rp 0</div>
-        </div>
-
-        <!-- TAB MENU UTAMA -->
         <div class="nav-tabs">
-            <button class="tab-btn active" onclick="switchTab('tab-member', event)"><i class="fa-solid fa-users"></i> Member</button>
-            <button class="tab-btn" onclick="switchTab('tab-produk', event)"><i class="fa-solid fa-box-open"></i> Daftar Produk</button>
+            <button class="tab-btn active" onclick="switchTab('tab-saldo', event)"><i class="fa-solid fa-server"></i> Saldo</button>
+            <button class="tab-btn" onclick="switchTab('tab-member', event)"><i class="fa-solid fa-users"></i> Member</button>
+            <button class="tab-btn" onclick="switchTab('tab-digiflazz', event)"><i class="fa-solid fa-box-open"></i> Digiflazz</button>
+            <button class="tab-btn" onclick="switchTab('tab-okeconnect', event)"><i class="fa-solid fa-bolt"></i> Okeconnect</button>
         </div>
 
-        <!-- TAB 1: MEMBER & TRANSAKSI INTEGRATED -->
-        <div id="tab-member" class="tab-content active">
-            <!-- Form Topup / Potong Saldo -->
-            <div class="card">
-                <h3><i class="fa-solid fa-hand-holding-dollar"></i> Topup / Potong Saldo Member</h3>
-                <div class="form-grid">
-                    <input type="text" id="saldoNoHp" placeholder="Nomor HP Member">
-                    <select id="saldoAksi">
-                        <option value="tambah">Tambah Saldo (+)</option>
-                        <option value="potong">Potong Saldo (-)</option>
+        <div id="tab-saldo" class="tab-content active">
+            <div class="glass-card main-balance-card">
+                <div class="title"><i class="fa-solid fa-wallet"></i> Saldo Server Digiflazz</div>
+                <div class="value" id="dispSaldoDigiflazz">Rp 0</div>
+                <div style="margin-top: 10px;">
+                    <button onclick="loadSaldoInfo()"><i class="fa-solid fa-rotate-right"></i> Refresh</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="tab-member" class="tab-content">
+            <div class="glass-card" style="padding: 12px;">
+                <h3><i class="fa-solid fa-hand-holding-dollar"></i> Topup / Potong Saldo</h3>
+                <div class="form-grid-inline">
+                    <input type="text" id="saldoNoHp" placeholder="No HP Member">
+                    <select id="saldoAksi" style="max-width: 140px;">
+                        <option value="tambah">Tambah (+)</option>
+                        <option value="potong">Potong (-)</option>
                     </select>
-                    <input type="number" id="saldoJumlah" placeholder="Jumlah Nominal (Rp)">
+                    <input type="number" id="saldoJumlah" placeholder="Nominal (Rp)">
+                    <button onclick="eksekusiUbahSaldo()"><i class="fa-solid fa-check"></i> Eksekusi</button>
                 </div>
-                <button onclick="eksekusiUbahSaldo()"><i class="fa-solid fa-check"></i> Eksekusi Saldo</button>
             </div>
 
-            <!-- Daftar Member dengan Card & Dropdown Transaksi -->
-            <div class="card">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; flex-wrap: wrap; gap: 10px;">
-                    <h3 style="margin:0;"><i class="fa-solid fa-user-gear"></i> Data Member (Total Saldo: <span id="dispSaldoMember" style="color: #10b981;">Rp 0</span>)</h3>
-                    <button class="btn-success" onclick="bukaModalMember()"><i class="fa-solid fa-user-plus"></i> + Member Baru</button>
+            <div class="glass-card">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; flex-wrap: wrap; gap: 6px;">
+                    <h3 style="margin:0; font-size:0.88rem;"><i class="fa-solid fa-user-gear"></i> Member (Total Saldo: <span id="dispSaldoMember" style="color: #10b981;">Rp 0</span>)</h3>
+                    <button class="btn-success btn-sm" onclick="bukaModalMember()"><i class="fa-solid fa-user-plus"></i> + Member</button>
                 </div>
 
-                <input type="text" id="searchMember" placeholder="🔍 Cari Nama / No HP Member..." oninput="filterMember()" style="width: 100%; margin-bottom: 15px;">
+                <input type="text" id="searchMember" placeholder="🔍 Cari Nama / No HP Member..." oninput="filterMember()" style="width: 100%; margin-bottom: 10px;">
                 
-                <!-- CONTAINER LIST MEMBER CARD -->
                 <div class="member-list-container" id="tabelMember">
-                    <div style="text-align:center; color: var(--text-sub); padding: 15px;">Memuat data member...</div>
+                    <div style="text-align:center; color: var(--text-sub); padding: 10px; font-size:0.8rem;">Memuat data member...</div>
                 </div>
             </div>
         </div>
 
-        <!-- TAB 2: DAFTAR PRODUK DAN FOLDER MAPPING -->
-        <div id="tab-produk" class="tab-content">
-            <!-- TAHAP 1: FORM KATEGORI -->
-            <div class="card">
-                <h3><i class="fa-solid fa-folder-plus"></i> Kelola Kategori / Folder Custom</h3>
-                <div style="display: flex; gap: 10px;">
-                    <input type="text" id="namaKategoriBaru" placeholder="Nama Kategori Baru (misal: INDOSAT - Freedom Internet)" style="flex: 1;">
+        <div id="tab-digiflazz" class="tab-content">
+            <div class="glass-card">
+                <h3><i class="fa-solid fa-folder-plus"></i> Kelola Kategori Custom</h3>
+                <div style="display: flex; gap: 6px;">
+                    <input type="text" id="namaKategoriBaru" placeholder="Kategori Baru (misal: Freedom Internet)" style="flex: 1;">
                     <button onclick="tambahKategoriBaru()"><i class="fa-solid fa-plus"></i> Buat</button>
                 </div>
                 <div class="category-wrapper" id="daftarKategoriDisplay"></div>
             </div>
 
-            <!-- TAHAP 2: FORM TAMBAH / EDIT PRODUK -->
-            <div class="card">
+            <div class="glass-card">
                 <h3 id="formTitle"><i class="fa-solid fa-pen-to-square"></i> Tambah / Edit Produk</h3>
-                <div class="form-grid">
-                    <input type="text" id="sku" placeholder="SKU Kode (misal: IFI1)">
+                <div class="form-grid-inline" style="margin-bottom: 8px;">
+                    <input type="text" id="sku" placeholder="SKU Kode">
                     <input type="text" id="nama" placeholder="Nama Produk">
                     <select id="brand">
                         <option value="INDOSAT">INDOSAT</option>
@@ -412,46 +436,64 @@
                         <option value="SMARTFREN">SMARTFREN</option>
                     </select>
                     <select id="typeSelect">
-                        <option value="Umum">-- Pilih Folder Kategori --</option>
+                        <option value="Umum">-- Pilih Kategori --</option>
                     </select>
                     <input type="number" id="harga" placeholder="Harga Jual (Rp)">
                 </div>
-                <div style="display: flex; gap: 10px;">
-                    <button onclick="simpanProduk()" style="flex: 1;"><i class="fa-solid fa-floppy-disk"></i> Simpan Produk</button>
+                <div style="display: flex; gap: 8px;">
+                    <button onclick="simpanProduk()" style="flex: 1;"><i class="fa-solid fa-floppy-disk"></i> Simpan</button>
                     <button onclick="resetForm()" class="btn-warning" id="btnReset" style="display: none;">Batal</button>
                 </div>
             </div>
 
-            <!-- TAHAP 3: MASAL / BULK MAPPING & SEARCH -->
-            <div class="card">
-                <h3><i class="fa-solid fa-layer-group"></i> Pemindah Kategori Massal & Pencarian</h3>
+            <div class="glass-card">
+                <h3><i class="fa-solid fa-layer-group"></i> Pemindah Massal & Cari</h3>
                 <div class="bulk-bar">
-                    <span style="font-size: 0.85rem; font-weight: bold; color: var(--text-sub);">Tandai & Pindahkan:</span>
-                    <select id="bulkCategorySelect" style="flex: 1; min-width: 180px;">
-                        <option value="">-- Pilih Kategori Tujuan --</option>
+                    <select id="bulkCategorySelect" style="flex: 1; min-width: 140px;">
+                        <option value="">-- Kategori Tujuan --</option>
                     </select>
-                    <button onclick="pindahkanPilihanMassal()" class="btn-success">
-                        <i class="fa-solid fa-right-left"></i> Pindahkan (<span id="selectedCount">0</span>)
+                    <button onclick="pindahkanPilihanMassal()" class="btn-success btn-sm">
+                        <i class="fa-solid fa-right-left"></i> Pindah (<span id="selectedCount">0</span>)
                     </button>
                 </div>
 
-                <input type="text" id="searchInput" placeholder="🔍 Cari SKU, Nama Produk, atau Brand..." oninput="filterFoldersAndTable()" style="width: 100%;">
+                <input type="text" id="searchInput" placeholder="🔍 Cari SKU, Nama, Brand..." oninput="filterFoldersAndTable()" style="width: 100%;">
             </div>
 
-            <!-- TAHAP 4: DISPLAY FOLDER ACCORDION PRODUK -->
             <div id="folderContainer"></div>
+        </div>
+
+        <div id="tab-okeconnect" class="tab-content">
+            <div class="glass-card" style="padding:12px;">
+                <h3><i class="fa-solid fa-network-wired"></i> Konfigurasi Okeconnect H2H</h3>
+                <div style="font-size:0.75rem; color:var(--text-sub); display:flex; flex-direction:column; gap:4px; background:rgba(255,255,255,0.6); padding:10px; border-radius:10px; border:1px solid var(--glass-border);">
+                    <div><b>IP Center H2H:</b> <span style="color:var(--primary); font-weight:800;">103.139.245.61</span></div>
+                    <div><b>URL Transaksi:</b> <span style="color:var(--primary); font-weight:700;">https://h2h.okeconnect.com/trx</span></div>
+                    <div><b>API Pricelist JSON:</b> <span style="color:var(--text-main); font-size:0.7rem; word-break:break-all;">https://www.okeconnect.com/harga/json?id=905ccd028329b0a</span></div>
+                </div>
+            </div>
+
+            <div class="glass-card">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                    <h3 style="margin:0;"><i class="fa-solid fa-bolt"></i> Produk Okeconnect</h3>
+                    <button onclick="loadOkeconnectProducts()" class="btn-sm"><i class="fa-solid fa-rotate-right"></i> Sync JSON</button>
+                </div>
+                <input type="text" id="searchOkeconnect" placeholder="🔍 Cari Kode, Produk, Kategori Okeconnect..." oninput="filterOkeconnect()" style="width: 100%; margin-bottom: 10px;">
+                <div id="okeconnectContainer">
+                    <div style="text-align:center; color: var(--text-sub); padding: 15px; font-size:0.8rem;">Memuat data produk Okeconnect...</div>
+                </div>
+            </div>
         </div>
     </div>
 
-    <!-- MODAL TAMBAH MEMBER -->
-    <div id="modalMember" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(230, 234, 240, 0.85); backdrop-filter: blur(5px); z-index: 9999; justify-content: center; align-items: center;">
-        <div class="card" style="width: 90%; max-width: 450px; padding: 25px;">
+    <div id="modalMember" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.3); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); z-index: 9999; justify-content: center; align-items: center;">
+        <div class="glass-card" style="width: 90%; max-width: 400px; padding: 20px; background: rgba(255, 255, 255, 0.95);">
             <h3><i class="fa-solid fa-user-plus"></i> Tambah Member Baru</h3>
-            <div style="display: flex; flex-direction: column; gap: 12px; margin-top: 15px;">
-                <input type="text" id="addNamaMember" placeholder="Nama Lengkap Member">
+            <div style="display: flex; flex-direction: column; gap: 10px; margin-top: 10px;">
+                <input type="text" id="addNamaMember" placeholder="Nama Member">
                 <input type="tel" id="addPhoneMember" placeholder="Nomor HP (misal: 08123456789)">
                 <input type="number" id="addSaldoMember" placeholder="Saldo Awal (Rp)" value="0">
-                <div style="display: flex; gap: 10px; margin-top: 10px;">
+                <div style="display: flex; gap: 8px; margin-top: 6px;">
                     <button onclick="simpanMemberBaru()" class="btn-success" style="flex: 1;"><i class="fa-solid fa-check"></i> Simpan</button>
                     <button onclick="tutupModalMember()" class="btn-danger"><i class="fa-solid fa-xmark"></i> Batal</button>
                 </div>
@@ -459,7 +501,6 @@
         </div>
     </div>
 
-    <!-- BOTTOM NAVIGATION BAR -->
     <div class="bottom-nav">
         <a href="index.html" class="nav-item">
             <i class="fa-solid fa-house"></i>
@@ -488,8 +529,67 @@
         let filteredData = [];
         let rawMembers = [];
         let rawTransactions = [];
+        let rawOkeconnectData = [];
+        let filteredOkeconnectData = [];
         let customCategories = new Set(['Freedom Internet', 'Freedom Sensasi', 'Pulsa', 'Umum']);
         let selectedSKUs = new Set();
+
+        /* PARSING WAKTU UTC TO WIB SAMAKAN HISTORY.HTML */
+        function parseWaktu(strWaktu) {
+            if (!strWaktu) return { tanggal: '', jam: '', full: '', dateObj: new Date() };
+            
+            let str = String(strWaktu).trim();
+
+            if (!isNaN(str) && str !== '') {
+                let num = Number(str);
+                if (String(Math.floor(num)).length === 10) num *= 1000;
+                const d = new Date(num);
+                const dd = String(d.getDate()).padStart(2, '0');
+                const mm = String(d.getMonth() + 1).padStart(2, '0');
+                const yyyy = d.getFullYear();
+                const hh = String(d.getHours()).padStart(2, '0');
+                const min = String(d.getMinutes()).padStart(2, '0');
+                const ss = String(d.getSeconds()).padStart(2, '0');
+
+                return {
+                    tanggal: `${dd}/${mm}/${yyyy}`,
+                    jam: `${hh}.${min}.${ss}`,
+                    full: `${dd}/${mm}/${yyyy} ${hh}.${min}.${ss} WIB`,
+                    dateObj: d
+                };
+            }
+
+            let formattedStr = str.replace(' ', 'T');
+            if (!formattedStr.endsWith('Z') && !formattedStr.includes('+')) {
+                formattedStr += 'Z';
+            }
+
+            const d = new Date(formattedStr);
+
+            if (!isNaN(d.getTime())) {
+                const yyyy = d.getFullYear();
+                const mm = String(d.getMonth() + 1).padStart(2, '0');
+                const dd = String(d.getDate()).padStart(2, '0');
+                const hh = String(d.getHours()).padStart(2, '0');
+                const min = String(d.getMinutes()).padStart(2, '0');
+                const ss = String(d.getSeconds()).padStart(2, '0');
+
+                return {
+                    tanggal: `${dd}/${mm}/${yyyy}`,
+                    jam: `${hh}.${min}.${ss}`,
+                    full: `${dd}/${mm}/${yyyy} ${hh}.${min}.${ss} WIB`,
+                    dateObj: d
+                };
+            }
+
+            const parts = str.split(/[\s,T]+/);
+            return { 
+                tanggal: parts[0] || '', 
+                jam: parts[1] || '', 
+                full: str + ' WIB',
+                dateObj: new Date()
+            };
+        }
 
         function switchTab(tabId, evt) {
             document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
@@ -499,7 +599,6 @@
             if (evt) evt.currentTarget.classList.add('active');
         }
 
-        /* --- SINKRONISASI SALDO DIGIFLAZZ --- */
         async function loadSaldoInfo() {
             try {
                 const res = await fetch('/api/saldo');
@@ -509,7 +608,6 @@
             } catch (err) { console.error(err); }
         }
 
-        /* --- SINKRONISASI & KELOLA MEMBER --- */
         async function loadMembers() {
             try {
                 const res = await fetch('/api/admin/members?t=' + Date.now());
@@ -521,89 +619,143 @@
 
                 renderTabelMember(rawMembers);
             } catch (err) {
-                document.getElementById('tabelMember').innerHTML = `<div style="text-align:center; color:red; padding:15px;">Gagal memuat data member.</div>`;
+                document.getElementById('tabelMember').innerHTML = `<div style="text-align:center; color:red; padding:10px;">Gagal memuat data member.</div>`;
             }
         }
 
-        /* RENDRING CARD MEMBER + DROPDOWN ACCORDION TRANSAKSI MEMBER */
+        /* RENDERING MEMBER MINIMALIS COMPACT */
         function renderTabelMember(list) {
             const el = document.getElementById('tabelMember');
             if (!list || list.length === 0) {
-                el.innerHTML = `<div style="text-align:center; color: var(--text-sub); padding:15px;">Belum ada member terdaftar.</div>`;
+                el.innerHTML = `<div style="text-align:center; color: var(--text-sub); padding:10px; font-size:0.8rem;">Belum ada member.</div>`;
                 return;
             }
 
+            const now = new Date();
+            const todayDd = String(now.getDate()).padStart(2, '0');
+            const todayMm = String(now.getMonth() + 1).padStart(2, '0');
+            const todayYyyy = now.getFullYear();
+            const todayStr = `${todayDd}/${todayMm}/${todayYyyy}`;
+
             let html = '';
+
             list.forEach(m => {
                 const idMem = m.member_id || m.id || '-';
                 const noHp = m.phone || m.nohp || '-';
                 const nama = m.name || m.nama || '-';
                 const saldo = parseFloat(m.balance || 0);
 
-                // Filter transaksi sesuai nomor HP member ini
-                const memberTrxList = rawTransactions.filter(t => 
-                    String(t.user_hp || t.customer_no || '') === String(noHp)
-                );
+                const memberTrxSukses = rawTransactions.filter(t => {
+                    const hpMatch = String(t.user_hp || t.customer_no || '') === String(noHp);
+                    const st = String(t.status || '').toLowerCase();
+                    return hpMatch && (st.includes('sukses') || st.includes('success') || st === '1' || st === 'berhasil');
+                });
+
+                const groupedByDate = {};
+                let totalHarian = 0;
+                let totalSemuaSukses = 0;
+
+                memberTrxSukses.forEach(t => {
+                    const rawWaktu = t.waktu || t.date || t.created_at || t.timestamp || '';
+                    const parsed = parseWaktu(rawWaktu);
+                    const dateKey = parsed.tanggal;
+                    const harga = parseFloat(t.harga || t.price || 0) || 0;
+
+                    if (!groupedByDate[dateKey]) {
+                        groupedByDate[dateKey] = {
+                            dateStr: dateKey,
+                            trxs: [],
+                            timestamp: parsed.dateObj.getTime()
+                        };
+                    }
+
+                    groupedByDate[dateKey].trxs.push({ ...t, parsedTime: parsed });
+                    totalSemuaSukses += harga;
+                    
+                    if (dateKey === todayStr) {
+                        totalHarian += harga;
+                    }
+                });
+
+                const sortedDateGroups = Object.values(groupedByDate).sort((a, b) => b.timestamp - a.timestamp);
 
                 html += `
                     <div class="member-card" id="member-card-${noHp}">
                         <div class="member-card-header">
                             <div class="member-info-main">
                                 <div class="member-name"><i class="fa-solid fa-user-circle" style="color:var(--primary);"></i> ${nama}</div>
-                                <div class="member-sub">ID: <b>${idMem}</b> | No. HP: <b>${noHp}</b></div>
-                                <div class="member-actions">
-                                    <button class="btn-sm btn-warning" onclick="pilihUbahSaldo('${noHp}')"><i class="fa-solid fa-wallet"></i> Isi Saldo</button>
-                                    <button class="btn-sm btn-danger" onclick="hapusMember('${noHp}')"><i class="fa-solid fa-trash"></i></button>
+                                <div class="member-sub">
+                                    <span>ID: <b>${idMem}</b> | <b>${noHp}</b></span>
+                                    <button class="btn-sm btn-warning" style="padding:2px 6px; font-size:0.65rem;" onclick="pilihUbahSaldo('${noHp}')"><i class="fa-solid fa-wallet"></i> Topup</button>
+                                    <button class="btn-sm btn-danger" style="padding:2px 6px; font-size:0.65rem;" onclick="hapusMember('${noHp}')"><i class="fa-solid fa-trash"></i></button>
                                 </div>
                             </div>
-                            <div style="text-align:right;">
+                            <div class="member-right-info">
                                 <div class="member-saldo">Rp ${saldo.toLocaleString('id-ID')}</div>
-                                <span style="box-shadow: var(--shadow-inset); color:#10b981; padding:2px 8px; border-radius:10px; font-weight:bold; font-size:0.68rem;">${m.status || 'aktif'}</span>
+                                <div class="daily-summary-badge"><i class="fa-solid fa-calendar-day"></i> Hari Ini: Rp ${totalHarian.toLocaleString('id-ID')}</div>
                             </div>
                         </div>
 
-                        <!-- TOGGLE ACCORDION TRANSAKSI -->
-                        <div style="padding: 0 16px 12px 16px;">
+                        <div style="padding: 0 12px 10px 12px;">
                             <button class="btn-toggle-trx" onclick="toggleMemberTrx('${noHp}')">
-                                <span><i class="fa-solid fa-receipt"></i> Riwayat Transaksi (${memberTrxList.length})</span>
+                                <span><i class="fa-solid fa-chart-pie"></i> Rekap Sukses: <b>${memberTrxSukses.length} Trx</b> (Rp ${totalSemuaSukses.toLocaleString('id-ID')})</span>
                                 <i class="fa-solid fa-chevron-down chevron-trx"></i>
                             </button>
                         </div>
 
-                        <!-- DROPDOWN TRANSAKSI PER MEMBER -->
                         <div class="member-trx-dropdown">
                 `;
 
-                if (memberTrxList.length === 0) {
-                    html += `<div style="font-size:0.75rem; color:var(--text-sub); padding:10px 0; text-align:center;">Belum ada riwayat transaksi untuk member ini.</div>`;
+                if (sortedDateGroups.length === 0) {
+                    html += `<div style="font-size:0.72rem; color:var(--text-sub); padding:6px 0; text-align:center;">Belum ada rekap transaksi sukses.</div>`;
                 } else {
-                    memberTrxList.forEach(t => {
-                        const tgl = t.waktu || t.date || '-';
-                        const refId = t.ref_id || '-';
-                        const noTujuan = t.no_tujuan || t.customer_no || '-';
-                        const namaProduk = t.produk || t.product_name || 'Produk PPOB';
-                        const harga = parseFloat(t.harga || t.price || 0);
-                        const statusClean = String(t.status || 'Sukses');
-
-                        let statusColor = '#10b981';
-                        if (['batal', 'gagal'].some(s => statusClean.toLowerCase().includes(s))) statusColor = '#ef4444';
-                        else if (['pending', 'proses'].some(s => statusClean.toLowerCase().includes(s))) statusColor = '#f59e0b';
+                    sortedDateGroups.forEach(group => {
+                        const trxsInDate = group.trxs;
+                        const totalDateNominal = trxsInDate.reduce((a, b) => a + parseFloat(b.harga || b.price || 0), 0);
 
                         html += `
-                            <div class="sub-trx-card">
-                                <div class="sub-trx-header">
-                                    <span>#${refId}</span>
-                                    <span>${tgl}</span>
-                                </div>
-                                <div class="sub-trx-body">
+                            <div class="date-folder-card">
+                                <div class="date-folder-header" onclick="toggleDateFolder(this)">
+                                    <span><i class="fa-regular fa-calendar-check" style="color:var(--primary); margin-right:4px;"></i> ${group.dateStr} (${trxsInDate.length})</span>
                                     <div>
-                                        <div class="sub-trx-prod">${namaProduk}</div>
-                                        <div class="sub-trx-target"><i class="fa-solid fa-mobile-screen-button"></i> ${noTujuan}</div>
+                                        <span style="color:#10b981; font-weight:900; margin-right:4px;">Rp ${totalDateNominal.toLocaleString('id-ID')}</span>
+                                        <i class="fa-solid fa-chevron-down date-chevron"></i>
                                     </div>
-                                    <div style="text-align:right;">
-                                        <div class="sub-trx-price">Rp ${harga.toLocaleString('id-ID')}</div>
-                                        <span class="sub-trx-status" style="color: ${statusColor};">${statusClean}</span>
+                                </div>
+                                <div class="date-folder-body">
+                        `;
+
+                        trxsInDate.forEach(t => {
+                            const tglWIB = t.parsedTime.full;
+                            const refId = t.ref_id || t.id || '-';
+                            const noTujuan = t.no_tujuan || t.customer_no || '-';
+                            const namaProduk = t.produk || t.product_name || 'Produk PPOB';
+                            const harga = parseFloat(t.harga || t.price || 0);
+
+                            html += `
+                                <div class="sub-trx-card">
+                                    <div class="sub-trx-header">
+                                        <span>#${refId}</span>
+                                        <span><i class="fa-regular fa-clock"></i> ${tglWIB}</span>
                                     </div>
+                                    <div class="sub-trx-body">
+                                        <div>
+                                            <div class="sub-trx-prod">${namaProduk}</div>
+                                            <div class="sub-trx-target"><i class="fa-solid fa-mobile-screen-button"></i> ${noTujuan}</div>
+                                        </div>
+                                        <div style="text-align:right;">
+                                            <div class="sub-trx-price">Rp ${harga.toLocaleString('id-ID')}</div>
+                                            <div style="display:flex; gap:4px; justify-content:flex-end; margin-top:2px;">
+                                                <span class="sub-trx-status">SUKSES</span>
+                                                <button class="btn-sm btn-warning" style="padding:1px 5px; font-size:0.62rem;" onclick="editHargaTransaksi('${refId}', ${harga})"><i class="fa-solid fa-pen"></i> Edit</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            `;
+                        });
+
+                        html += `
                                 </div>
                             </div>
                         `;
@@ -621,8 +773,46 @@
 
         function toggleMemberTrx(noHp) {
             const card = document.getElementById(`member-card-${noHp}`);
-            if(card) {
-                card.classList.toggle('open');
+            if(card) card.classList.toggle('open');
+        }
+
+        function toggleDateFolder(el) {
+            const dateCard = el.closest('.date-folder-card');
+            if(dateCard) dateCard.classList.toggle('open');
+        }
+
+        async function editHargaTransaksi(refId, hargaLama) {
+            const hargaBaru = prompt(`Ubah harga transaksi #${refId}:`, hargaLama);
+            if (hargaBaru === null || hargaBaru === "") return;
+            
+            const nominalBaru = parseInt(hargaBaru);
+            if (isNaN(nominalBaru) || nominalBaru < 0) {
+                return alert("Nominal harga tidak valid!");
+            }
+
+            try {
+                const res = await fetch('/api/admin/update-transaction-price', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ ref_id: refId, new_price: nominalBaru })
+                });
+                const result = await res.json();
+                if (result.status === 'success') {
+                    alert('✅ Harga transaksi berhasil diperbarui!');
+                    await loadTransactions();
+                } else {
+                    alert('❌ Gagal memperbarui harga: ' + (result.message || 'Terjadi kesalahan.'));
+                }
+            } catch (err) {
+                const targetTrx = rawTransactions.find(t => String(t.ref_id || t.id) === String(refId));
+                if (targetTrx) {
+                    targetTrx.harga = nominalBaru;
+                    targetTrx.price = nominalBaru;
+                    alert('✅ Harga berhasil diperbarui!');
+                    renderTabelMember(rawMembers);
+                } else {
+                    alert('❌ Error jaringan.');
+                }
             }
         }
 
@@ -707,20 +897,15 @@
             } catch (err) { alert('❌ Error jaringan'); }
         }
 
-        /* --- SINKRONISASI TRANSAKSI MEMBER --- */
         async function loadTransactions() {
             try {
                 const res = await fetch('/api/admin/transactions?t=' + Date.now());
                 const result = await res.json();
                 rawTransactions = Array.isArray(result) ? result : (result.data || []);
-                // Render ulang member card agar data transaksi terintegrasi ke dropdown-nya
                 renderTabelMember(rawMembers);
-            } catch (err) { 
-                console.error("Gagal memuat riwayat transaksi.", err);
-            }
+            } catch (err) { console.error("Gagal memuat rekap transaksi.", err); }
         }
 
-        /* --- KATEGORI TERSIMPAN PERMANEN DI LOCALSTORAGE & SERVER --- */
         function loadStoredCategories() {
             const saved = localStorage.getItem('arcell_custom_categories');
             if (saved) {
@@ -754,7 +939,7 @@
         }
 
         function renderCategoryBadges() {
-            let html = '', optionsHtml = '<option value="">-- Pilih Kategori Tujuan --</option>', selectTypeHtml = '<option value="Umum">-- Pilih Folder Kategori --</option>';
+            let html = '', optionsHtml = '<option value="">-- Pilih Kategori --</option>', selectTypeHtml = '<option value="Umum">-- Pilih Kategori --</option>';
             
             customCategories.forEach(cat => {
                 html += `<div class="cat-badge"><span>${cat}</span><i class="fa-solid fa-xmark" style="cursor:pointer;" onclick="hapusKategoriList('${cat}')"></i></div>`;
@@ -798,7 +983,6 @@
             renderFolders();
         }
 
-        /* --- DISPLAY ACCORDION FOLDER KATEGORI (MAPPING WARNA) --- */
         function renderFolders() {
             const container = document.getElementById("folderContainer");
             const grouped = {};
@@ -834,7 +1018,7 @@
                 `;
 
                 if (prods.length === 0) {
-                    html += `<div style="font-size:0.75rem; color:var(--text-sub); padding:6px 0;">Folder ini masih kosong.</div>`;
+                    html += `<div style="font-size:0.72rem; color:var(--text-sub); padding:4px 0;">Folder kosong.</div>`;
                 } else {
                     prods.forEach(p => {
                         const sku = p.buyer_sku_code || p.sku || '-';
@@ -843,7 +1027,7 @@
                         
                         html += `
                             <div class="prod-item">
-                                <div style="display:flex; align-items:center; gap:10px;">
+                                <div style="display:flex; align-items:center; gap:8px;">
                                     <input type="checkbox" value="${sku}" ${isChecked} onchange="toggleSelect('${sku}', this.checked)">
                                     <div>
                                         <div class="prod-name">${p.product_name || p.nama_produk}</div>
@@ -852,7 +1036,7 @@
                                 </div>
                                 <div style="text-align:right;">
                                     <div class="prod-price">Rp ${price.toLocaleString('id-ID')}</div>
-                                    <button class="btn-sm btn-warning" style="margin-top:4px;" onclick="editProduk('${sku}', '${(p.product_name||'').replace(/'/g, "\\'")}', '${p.brand}', '${p.type||'Umum'}', ${price})"><i class="fa-solid fa-pen-to-square"></i> Edit</button>
+                                    <button class="btn-sm btn-warning" style="margin-top:2px; padding:2px 6px; font-size:0.65rem;" onclick="editProduk('${sku}', '${(p.product_name||'').replace(/'/g, "\\'")}', '${p.brand}', '${p.type||'Umum'}', ${price})"><i class="fa-solid fa-pen-to-square"></i> Edit</button>
                                 </div>
                             </div>
                         `;
@@ -876,7 +1060,6 @@
             }
         }
 
-        /* --- BULK SELECTION & SEARCH --- */
         function toggleSelect(sku, checked) {
             if (checked) selectedSKUs.add(sku); else selectedSKUs.delete(sku);
             document.getElementById('selectedCount').innerText = selectedSKUs.size;
@@ -911,7 +1094,7 @@
             document.getElementById('harga').value = harga;
             document.getElementById('formTitle').innerHTML = '<i class="fa-solid fa-pen-to-square"></i> Edit Produk: ' + sku;
             document.getElementById('btnReset').style.display = 'inline-block';
-            window.scrollTo({ top: 300, behavior: 'smooth' });
+            window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
         function resetForm() {
@@ -919,7 +1102,7 @@
             document.getElementById('sku').readOnly = false;
             document.getElementById('nama').value = '';
             document.getElementById('harga').value = '';
-            document.getElementById('formTitle').innerHTML = '<i class="fa-solid fa-pen-to-square"></i> Tambah / Edit Produk';
+            document.getElementById('formTitle').innerHTML = '<i class="fa-solid fa-pen-to-square"></i> Tambah / Edit Produk Digiflazz';
             document.getElementById('btnReset').style.display = 'none';
         }
 
@@ -961,12 +1144,108 @@
             renderFolders();
         }
 
+        /* INTEGRASI API PRICELIST OKECONNECT */
+        async function loadOkeconnectProducts() {
+            const container = document.getElementById('okeconnectContainer');
+            container.innerHTML = `<div style="text-align:center; color: var(--text-sub); padding: 15px; font-size:0.8rem;"><i class="fa-solid fa-spinner fa-spin"></i> Menghubungkan ke API Okeconnect...</div>`;
+            
+            try {
+                const targetUrl = 'https://www.okeconnect.com/harga/json?id=905ccd028329b0a';
+                // Gunakan Proxy CORS jika diakses langsung dari Browser Client
+                const res = await fetch('https://api.allorigins.win/raw?url=' + encodeURIComponent(targetUrl));
+                const data = await res.json();
+                
+                let list = [];
+                if (Array.isArray(data)) {
+                    list = data;
+                } else if (data && typeof data === 'object') {
+                    list = data.data || data.produk || data.price_list || Object.values(data);
+                }
+
+                rawOkeconnectData = list;
+                filteredOkeconnectData = [...rawOkeconnectData];
+                renderOkeconnectFolders();
+            } catch (err) {
+                console.error(err);
+                container.innerHTML = `<div style="text-align:center; color:#ef4444; padding:15px; font-size:0.8rem;">❌ Gagal memuat JSON Okeconnect. Pastikan CORS/Koneksi Internet stabil.</div>`;
+            }
+        }
+
+        function renderOkeconnectFolders() {
+            const container = document.getElementById('okeconnectContainer');
+            if (!filteredOkeconnectData || filteredOkeconnectData.length === 0) {
+                container.innerHTML = `<div style="text-align:center; color: var(--text-sub); padding: 15px; font-size:0.8rem;">Data produk Okeconnect tidak ditemukan.</div>`;
+                return;
+            }
+
+            const grouped = {};
+            filteredOkeconnectData.forEach(item => {
+                const cat = item.kategori || item.category || item.brand || 'Umum Okeconnect';
+                if (!grouped[cat]) grouped[cat] = [];
+                grouped[cat].push(item);
+            });
+
+            let html = '';
+            for (const catName in grouped) {
+                const prods = grouped[catName];
+                html += `
+                    <div class="folder-card">
+                        <div class="folder-header" onclick="toggleFolder(this)">
+                            <div class="folder-left">
+                                <i class="fa-solid fa-bolt folder-icon" style="color:var(--primary);"></i>
+                                <span>${catName}</span>
+                            </div>
+                            <div class="folder-right">
+                                <span class="badge-count">${prods.length} Item</span>
+                                <i class="fa-solid fa-chevron-down chevron"></i>
+                            </div>
+                        </div>
+                        <div class="folder-body">
+                `;
+
+                prods.forEach(p => {
+                    const kode = p.kode || p.code || p.sku || '-';
+                    const nama = p.nama || p.product_name || p.layanan || '-';
+                    const harga = parseFloat(p.harga || p.price || 0);
+                    const status = p.status !== undefined ? (String(p.status) === '1' || String(p.status).toLowerCase() === 'gangguan' ? p.status : 'Aktif') : 'Aktif';
+
+                    html += `
+                        <div class="prod-item">
+                            <div>
+                                <div class="prod-name">${nama}</div>
+                                <div class="prod-sku">Kode: <span>${kode}</span> | Status: <b>${status}</b></div>
+                            </div>
+                            <div style="text-align:right;">
+                                <div class="prod-price">Rp ${harga.toLocaleString('id-ID')}</div>
+                            </div>
+                        </div>
+                    `;
+                });
+
+                html += `</div></div>`;
+            }
+
+            container.innerHTML = html;
+        }
+
+        function filterOkeconnect() {
+            const kw = document.getElementById('searchOkeconnect').value.toLowerCase();
+            filteredOkeconnectData = rawOkeconnectData.filter(p => {
+                const kode = String(p.kode || p.code || p.sku || '').toLowerCase();
+                const nama = String(p.nama || p.product_name || p.layanan || '').toLowerCase();
+                const cat = String(p.kategori || p.category || p.brand || '').toLowerCase();
+                return kode.includes(kw) || nama.includes(kw) || cat.includes(kw);
+            });
+            renderOkeconnectFolders();
+        }
+
         window.onload = async () => {
             loadSaldoInfo();
             await loadTransactions();
             await loadMembers();
             loadStoredCategories();
             loadProduk();
+            loadOkeconnectProducts();
         };
     </script>
 </body>

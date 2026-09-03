@@ -60,7 +60,7 @@
 
         html, body {
             width: 100%;
-            height: 100%;
+            height: 115%;
             background-color: var(--bg-base);
             color: var(--text-main);
         }
@@ -74,7 +74,7 @@
             padding-bottom: calc(var(--bottom-nav-height) + 20px);
         }
 
-        /* Lock scroll saat bottom sheet aktif */
+        /* Class pengunci scroll saat modal bottom sheet terbuka */
         body.no-scroll {
             overflow: hidden !important;
         }
@@ -306,70 +306,81 @@
 
         .extra-menu-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px 12px; }
 
-	/* --- BOTTOM SHEET SLIDE-UP (COMPACT & MODERN) --- */
-.modal-checkout-backdrop {
-    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-    background: rgba(15, 23, 42, 0.4); 
-    backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px);
-    z-index: 999 !important; display: none; opacity: 0; 
-    transition: opacity 0.25s ease;
-}
+        /* BOTTOM SHEET SLIDE-UP */
+        .modal-checkout-backdrop {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.45);
+            z-index: 999 !important; display: none; opacity: 0; transition: opacity 0.3s ease;
+        }
 
-.modal-checkout-backdrop.show { display: block; opacity: 1; }
+        .modal-checkout-backdrop.show { display: block; opacity: 1; }
 
-.bottom-sheet {
-    position: fixed; bottom: -100%; left: 50%; transform: translateX(-50%);
-    width: 100%; max-width: 480px; background: var(--bg-base);
-    border-top-left-radius: 20px; border-top-right-radius: 20px;
-    box-shadow: 0px -8px 25px rgba(0, 0, 0, 0.12); z-index: 1000 !important;
-    padding: 12px 18px 24px 18px !important;
-    transition: bottom 0.28s cubic-bezier(0.16, 1, 0.3, 1);
-    max-height: auto;
-}
+        .bottom-sheet {
+            position: fixed; bottom: -100%; left: 50%; transform: translateX(-50%);
+            width: 100%; max-width: 480px; background: var(--bg-base);
+            border-top-left-radius: 30px; border-top-right-radius: 30px;
+            box-shadow: 0px -10px 30px rgba(0, 0, 0, 0.15); z-index: 1000 !important;
+            padding: 20px 22px calc(var(--bottom-nav-height) + 20px) 22px !important;
+            transition: bottom 0.35s cubic-bezier(0.25, 1, 0.5, 1); max-height: 85vh; overflow-y: auto;
+        }
 
-.bottom-sheet.active { bottom: 0; }
+        .bottom-sheet.active { bottom: 0; }
+        .sheet-drag-handle { width: 44px; height: 5px; background: var(--neu-dark); border-radius: 10px; margin: 0 auto 16px auto; opacity: 0.6; }
 
-.sheet-drag-handle { 
-    width: 36px; height: 4px; background: var(--neu-dark); 
-    border-radius: 10px; margin: 0 auto 10px auto; opacity: 0.7; 
-}
+        .btn-bayar-now {
+            background: var(--accent-purple); color: #ffffff; font-weight: 800; border-radius: 50px;
+            padding: 16px; border: none; width: 100%;
+            box-shadow: var(--neu-shadow-sm); font-size: 16px; text-transform: uppercase; letter-spacing: 0.5px; cursor: pointer;
+            display: flex; align-items: center; justify-content: center; gap: 8px; transition: all 0.2s ease;
+        }
+        .btn-bayar-now:active { box-shadow: var(--neu-shadow-inset); }
 
-/* Ringkasan Rincian Transaksi */
-.sheet-summary-box {
-    background: var(--bg-base);
-    box-shadow: var(--neu-shadow-inset);
-    border-radius: 14px;
-    padding: 10px 14px;
-    margin-bottom: 14px;
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-}
+        /* --- BOTTOM NAV NEUMORPHISM --- */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100%;
+            max-width: 480px;
+            height: var(--bottom-nav-height);
+            background: var(--bg-base);
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            box-shadow: 0 -5px 15px rgba(0,0,0,0.05);
+            border-top-left-radius: 20px;
+            border-top-right-radius: 20px;
+            padding: 0 10px;
+            z-index: 999;
+        }
 
-.sheet-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    font-size: 0.76rem;
-}
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+            color: var(--text-muted);
+            font-size: 11px;
+            font-weight: 600;
+            width: 60px;
+            height: 50px;
+            border-radius: 14px;
+            transition: all 0.3s ease;
+            background: var(--bg-base);
+            box-shadow: var(--neu-shadow-sm);
+        }
 
-.sheet-row .label { color: var(--text-muted); font-weight: 600; }
-.sheet-row .val-title { font-weight: 700; color: var(--text-main); text-align: right; max-width: 65%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.sheet-row .val-target { font-weight: 800; color: var(--accent-purple); font-family: monospace; font-size: 0.82rem; }
+        .nav-item i {
+            font-size: 18px;
+            margin-bottom: 3px;
+        }
 
-.sheet-divider {
-    border: none; border-top: 1px dashed var(--neu-dark); opacity: 0.6; margin: 2px 0;
-}
-
-.sheet-row .val-price { font-size: 1rem; font-weight: 800; color: var(--accent-purple); }
-
-.btn-bayar-now {
-    background: var(--accent-purple); color: #ffffff; font-weight: 800; border-radius: var(--border-radius-pill);
-    padding: 12px; border: none; width: 100%;
-    box-shadow: var(--neu-shadow-sm); font-size: 0.82rem; text-transform: uppercase; letter-spacing: 0.5px; cursor: pointer;
-    display: flex; align-items: center; justify-content: center; gap: 8px; transition: all 0.2s ease;
-}
-.btn-bayar-now:active { box-shadow: var(--neu-shadow-inset); transform: scale(0.98); }
+        .nav-item.active {
+            color: var(--accent-purple);
+            box-shadow: var(--neu-shadow-inset);
+        }
 
         @media screen and (min-width: 550px) {
             .menu-grid, .extra-menu-grid { grid-template-columns: repeat(6, 1fr); gap: 20px 14px; }
@@ -544,36 +555,62 @@
             </div>
         </div>
 
-	<!-- 📌 SLIDE-UP BOTTOM SHEET (RINGKAS & SIMPEL) -->
-<div id="checkoutBackdrop" class="modal-checkout-backdrop" onclick="tutupCheckoutSheet()"></div>
-<div id="checkoutBottomSheet" class="bottom-sheet">
-    <div class="sheet-drag-handle"></div>
-    
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-        <span style="font-size: 0.85rem; font-weight: 800; color: var(--text-main);">Konfirmasi Pembelian</span>
-        <button type="button" onclick="tutupCheckoutSheet()" style="background: none; border: none; font-size: 1.1rem; color: var(--text-muted); cursor: pointer; padding: 0 4px;">&times;</button>
-    </div>
+        <!-- 📌 SLIDE-UP BOTTOM SHEET -->
+        <div id="checkoutBackdrop" class="modal-checkout-backdrop" onclick="tutupCheckoutSheet()"></div>
+        <div id="checkoutBottomSheet" class="bottom-sheet">
+            <div class="sheet-drag-handle"></div>
+            
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px;">
+                <h4 style="font-size: 1.15rem; font-weight: 800; color: var(--text-main);">Konfirmasi Pembelian</h4>
+                <button type="button" onclick="tutupCheckoutSheet()" style="background: none; border: none; font-size: 1.5rem; color: var(--text-muted); cursor: pointer; padding: 0 4px;">&times;</button>
+            </div>
 
-    <div class="sheet-summary-box">
-        <div class="sheet-row">
-            <span class="label">Produk</span>
-            <span class="val-title" id="sheet_nama_produk">-</span>
-        </div>
-        <div class="sheet-row">
-            <span class="label">No. Tujuan</span>
-            <span class="val-target" id="sheet_no_tujuan">-</span>
-        </div>
-        <div class="sheet-divider"></div>
-        <div class="sheet-row">
-            <span class="label" style="font-weight: 700; color: var(--text-main);">Total</span>
-            <span class="val-price" id="sheet_total_harga">Rp 0</span>
-        </div>
-    </div>
+            <div style="background: var(--bg-base); box-shadow: var(--neu-shadow-inset); border-radius: 18px; padding: 18px; margin-bottom: 20px;">
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; gap: 10px;">
+                    <span style="font-size: 0.9rem; color: var(--text-muted); font-weight: 600;">Produk</span>
+                    <span id="sheet_nama_produk" style="font-size: 0.95rem; font-weight: 800; color: var(--text-main); text-align: right; max-width: 65%; line-height: 1.3;"> - </span>
+                </div>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                    <span style="font-size: 0.9rem; color: var(--text-muted); font-weight: 600;">No. Tujuan</span>
+                    <span id="sheet_no_tujuan" style="font-size: 0.95rem; font-weight: 800; color: var(--accent-purple); letter-spacing: 0.5px;"> - </span>
+                </div>
+                <hr style="border: none; border-top: 2px dashed var(--neu-dark); opacity: 0.5; margin: 14px 0;">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <span style="font-size: 0.95rem; font-weight: 700; color: var(--text-main);">Total Bayar</span>
+                    <span id="sheet_total_harga" style="font-size: 1.3rem; font-weight: 800; color: var(--accent-purple);">Rp 0</span>
+                </div>
+            </div>
 
-    <button id="btnProsesBayar" onclick="eksekusiCheckoutDigiflazz()" class="btn-bayar-now">
-        <i class="fa-solid fa-shield-halved"></i> Bayar Sekarang
-    </button>
-</div>
+            <button id="btnProsesBayar" onclick="eksekusiCheckoutDigiflazz()" class="btn-bayar-now">
+                <i class="fa-solid fa-shield-halved"></i> Bayar Sekarang
+            </button>
+        </div>
+
+        <!-- 📌 BOTTOM NAVIGATION BAR INTEGRATED -->
+        <div class="bottom-nav">
+            <a href="index.html" class="nav-item active">
+                <i class="fa-solid fa-house"></i>
+                <span>Home</span>
+            </a>
+            <a href="history.html" class="nav-item">
+                <i class="fa-solid fa-clock-rotate-left"></i>
+                <span>History</span>
+            </a>
+            <a href="rekap.html" class="nav-item">
+                <i class="fa-solid fa-chart-line"></i>
+                <span>Rekap</span>
+            </a>
+            <a href="kasir.html" class="nav-item">
+                <i class="fa-solid fa-cash-register"></i>
+                <span>Kasir</span>
+            </a>
+            <a href="akun.html" class="nav-item">
+                <i class="fa-solid fa-user"></i>
+                <span>Akun</span>
+            </a>
+        </div>
+
+    </div>
 
     <!-- JavaScript System -->
     <script>
@@ -923,8 +960,7 @@
             
             if (rawDigits.length > 0) {
                 contactBtn.style.display = 'block';
-            } else {
-                contactBtn.style.display = 'none';
+            } else {                contactBtn.style.display = 'none';
             }
 
             var detectedOp = null;
