@@ -39,6 +39,7 @@
             --text-main: #4a5568;
             --text-muted: #8c98a9;
             --accent-purple: #7052ff;
+            --accent-green: #10b981;
             --border-radius-sm: 14px;
             --border-radius-md: 22px;
             --border-radius-pill: 50px;
@@ -74,10 +75,7 @@
             padding-bottom: calc(var(--bottom-nav-height) + 20px);
         }
 
-        /* Lock scroll saat bottom sheet aktif */
-        body.no-scroll {
-            overflow: hidden !important;
-        }
+        body.no-scroll { overflow: hidden !important; }
 
         .app-container {
             width: 100%;
@@ -112,7 +110,6 @@
             box-shadow: var(--neu-shadow-sm); border: none;
             cursor: pointer; font-size: 0.95rem; transition: all 0.2s ease;
         }
-        .menu-toggle-btn:active { box-shadow: var(--neu-shadow-inset); }
 
         /* --- SIDEBAR MENU --- */
         .sidebar-overlay {
@@ -134,7 +131,6 @@
             width: 34px; height: 34px; border-radius: 50%; background: var(--bg-base); border: none;
             box-shadow: var(--neu-shadow-sm); color: var(--text-muted); cursor: pointer; display: flex; align-items: center; justify-content: center; font-weight: bold;
         }
-        .sidebar-close:active { box-shadow: var(--neu-shadow-inset); }
         .sidebar-menu-list { display: flex; flex-direction: column; gap: 14px; }
         .sidebar-item {
             display: flex; align-items: center; gap: 14px; padding: 14px 18px;
@@ -142,10 +138,9 @@
             text-decoration: none; color: var(--text-main); font-size: 0.88rem; font-weight: 700;
             box-shadow: var(--neu-shadow-sm); transition: all 0.2s ease; cursor: pointer;
         }
-        .sidebar-item:active { box-shadow: var(--neu-shadow-inset); }
         .sidebar-item i { color: var(--accent-purple); font-size: 1.1rem; width: 20px; text-align: center; }
 
-        /* --- KARTU SALDO UTAMA --- */
+        /* --- KARTU SALDO --- */
         .wallet-section {
             margin: 10px 16px var(--main-gap) 16px; padding: 20px 22px; 
             background: var(--bg-base); border-radius: var(--border-radius-md); 
@@ -155,22 +150,6 @@
         .wallet-label { font-size: 0.72rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; display: flex; align-items: center; gap: 6px; letter-spacing: 0.5px; }
         .wallet-label i { color: var(--accent-purple); font-size: 0.85rem; }
         .balance { font-weight: 800; font-size: 1.5rem; color: var(--text-main); margin-top: 6px; letter-spacing: 0.2px; line-height: 1; }
-
-        /* --- AKSI SALDO --- */
-        .wallet-actions-card {
-            margin: 0 16px var(--main-gap) 16px; padding: 10px 14px; 
-            background: var(--bg-base); border-radius: var(--border-radius-md); 
-            box-shadow: var(--neu-shadow-flat); display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px;
-        }
-
-        .action-btn {
-            display: flex; flex-direction: row; align-items: center; justify-content: center; gap: 6px; padding: 10px 6px;
-            background: var(--bg-base); border-radius: var(--border-radius-pill);
-            box-shadow: var(--neu-shadow-sm); text-decoration: none; color: var(--text-main); 
-            font-size: 0.72rem; font-weight: 700; transition: all 0.2s ease;
-        }
-        .action-btn:active { box-shadow: var(--neu-shadow-inset); }
-        .action-btn i { color: var(--accent-purple); font-size: 0.85rem; }
 
         /* --- RUNNING TEXT --- */
         .ticker-container { 
@@ -185,7 +164,6 @@
         }
         .ticker-content { flex: 1; overflow: hidden; display: flex; align-items: center; }
         .ticker-content marquee { font-size: 0.75rem; font-weight: 700; color: var(--text-muted); }
-        .ticker-content span { margin-right: 40px; }
 
         /* --- DIVIDER BADGE --- */
         .section-divider { display: flex; align-items: center; justify-content: center; margin: var(--main-gap) 16px; position: relative; }
@@ -195,8 +173,9 @@
             background: var(--bg-base); border-radius: var(--border-radius-pill);
             box-shadow: var(--neu-shadow-sm); margin: 0 10px; display: flex; align-items: center; gap: 6px; text-transform: uppercase; letter-spacing: 0.5px;
         }
+        .divider-badge.okec { color: var(--accent-green); }
 
-        /* --- INPUT POPUP & LIST --- */
+        /* --- INPUT BOX & CONTAINER --- */
         .card-wrapper { position: relative; z-index: 101; padding: 0 16px; }
 
         .popup-top-container {
@@ -223,11 +202,9 @@
             background: var(--bg-base); color: var(--text-muted); font-size: 0.72rem; font-weight: 700;
             cursor: pointer; transition: all 0.2s ease; flex-shrink: 0; box-shadow: var(--neu-shadow-sm);
         }
-        .tab-item-inset.active {
-            color: var(--accent-purple); box-shadow: var(--neu-shadow-inset);
-        }
+        .tab-item-inset.active { color: var(--accent-purple); box-shadow: var(--neu-shadow-inset); }
+        .tab-item-inset.active-okec { color: var(--accent-green); box-shadow: var(--neu-shadow-inset); }
 
-        /* Input Box Clean Inset */
         .input-box {
             display: flex; align-items: center; padding: 10px 18px; gap: 12px; 
             background: var(--bg-base); border-radius: var(--border-radius-pill);
@@ -239,12 +216,12 @@
             width: 30px; height: 30px; border-radius: 50%; background: var(--bg-base);
             box-shadow: var(--neu-shadow-sm); display: flex; align-items: center; justify-content: center; flex-shrink: 0;
         }
+        .input-icon-left.okec { color: var(--accent-green); }
 
         .input-box input {
             flex: 1; border: none; background: transparent; outline: none; 
             font-size: 1.05rem; font-weight: 700; color: var(--text-main); width: 100%; letter-spacing: 0.5px;
         }
-
         .input-box input::placeholder { color: var(--text-muted); font-weight: 500; font-size: 0.85rem; opacity: 0.8; }
 
         .operator-badge {
@@ -252,8 +229,7 @@
             padding: 4px 12px; border-radius: var(--border-radius-pill); font-size: 0.65rem; font-weight: 800;
             display: none; text-transform: uppercase; flex-shrink: 0; letter-spacing: 0.5px;
         }
-
-        .input-icon-right { color: var(--accent-purple); font-size: 1rem; margin-left: 2px; cursor: pointer; flex-shrink: 0; }
+        .operator-badge.okec { color: var(--accent-green); }
 
         .filter-container { display: flex; justify-content: flex-end; margin-bottom: 8px; }
         .filter-container select {
@@ -262,7 +238,6 @@
             box-shadow: var(--neu-shadow-sm); cursor: pointer;
         }
 
-        /* Product Card Neumorphic Light */
         .product-list { display: flex; flex-direction: column; gap: 12px; }
         .product-card {
             background: var(--bg-base); border-radius: var(--border-radius-sm);
@@ -273,108 +248,56 @@
         .product-info { flex: 1; padding-right: 8px; }
         .product-title { font-size: 0.8rem; font-weight: 700; color: var(--text-main); line-height: 1.3; margin-bottom: 4px; }
         .product-price { font-size: 0.88rem; font-weight: 800; color: var(--accent-purple); }
+        .product-price.okec { color: var(--accent-green); }
         .product-action {
             display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 50%;
             color: #ffffff; background: var(--accent-purple); box-shadow: var(--neu-shadow-sm); font-size: 0.8rem;
         }
+        .product-action.okec { background: var(--accent-green); }
 
         .empty-state { display: none; flex-direction: column; align-items: center; justify-content: center; padding: 20px; color: var(--text-muted); text-align: center; }
 
-        /* MENU UTAMA */
-        .purchase-container {
-            margin: 0 16px var(--main-gap) 16px; padding: 22px 16px; 
-            background: var(--bg-base); border-radius: var(--border-radius-md); 
-            box-shadow: var(--neu-shadow-flat);
+        /* BOTTOM SHEET */
+        .modal-checkout-backdrop {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(15, 23, 42, 0.4); 
+            backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px);
+            z-index: 999 !important; display: none; opacity: 0; 
+            transition: opacity 0.25s ease;
         }
+        .modal-checkout-backdrop.show { display: block; opacity: 1; }
 
-        .menu-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px 12px; }
-        .grid-item { display: flex; flex-direction: column; align-items: center; text-align: center; cursor: pointer; text-decoration: none; }
-        .icon-wrapper {
-            width: 54px; height: 54px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
-            margin-bottom: 8px; font-size: 1.3rem; background: var(--bg-base); 
-            box-shadow: var(--neu-shadow-sm); transition: all 0.2s ease; color: var(--accent-purple);
+        .bottom-sheet {
+            position: fixed; bottom: -100%; left: 50%; transform: translateX(-50%);
+            width: 100%; max-width: 480px; background: var(--bg-base);
+            border-top-left-radius: 20px; border-top-right-radius: 20px;
+            box-shadow: 0px -8px 25px rgba(0, 0, 0, 0.12); z-index: 1000 !important;
+            padding: 12px 18px 24px 18px !important;
+            transition: bottom 0.28s cubic-bezier(0.16, 1, 0.3, 1);
         }
-        .grid-item:active .icon-wrapper { box-shadow: var(--neu-shadow-inset); transform: scale(0.95); }
-        .grid-item span { font-size: 0.72rem; font-weight: 700; color: var(--text-main); }
+        .bottom-sheet.active { bottom: 0; }
 
-        /* MENU TAMBAHAN */
-        .extra-menu-container {
-            margin: 0 16px 20px 16px; padding: 20px 16px; 
-            background: var(--bg-base); border-radius: var(--border-radius-md); 
-            box-shadow: var(--neu-shadow-flat);
+        .sheet-drag-handle { width: 36px; height: 4px; background: var(--neu-dark); border-radius: 10px; margin: 0 auto 10px auto; opacity: 0.7; }
+
+        .sheet-summary-box {
+            background: var(--bg-base); box-shadow: var(--neu-shadow-inset); border-radius: 14px;
+            padding: 10px 14px; margin-bottom: 14px; display: flex; flex-direction: column; gap: 6px;
         }
+        .sheet-row { display: flex; justify-content: space-between; align-items: center; font-size: 0.76rem; }
+        .sheet-row .label { color: var(--text-muted); font-weight: 600; }
+        .sheet-row .val-title { font-weight: 700; color: var(--text-main); text-align: right; max-width: 65%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .sheet-row .val-target { font-weight: 800; color: var(--accent-purple); font-family: monospace; font-size: 0.82rem; }
+        .sheet-divider { border: none; border-top: 1px dashed var(--neu-dark); opacity: 0.6; margin: 2px 0; }
+        .sheet-row .val-price { font-size: 1rem; font-weight: 800; color: var(--accent-purple); }
 
-        .extra-menu-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px 12px; }
-
-	/* --- BOTTOM SHEET SLIDE-UP (COMPACT & MODERN) --- */
-.modal-checkout-backdrop {
-    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-    background: rgba(15, 23, 42, 0.4); 
-    backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px);
-    z-index: 999 !important; display: none; opacity: 0; 
-    transition: opacity 0.25s ease;
-}
-
-.modal-checkout-backdrop.show { display: block; opacity: 1; }
-
-.bottom-sheet {
-    position: fixed; bottom: -100%; left: 50%; transform: translateX(-50%);
-    width: 100%; max-width: 480px; background: var(--bg-base);
-    border-top-left-radius: 20px; border-top-right-radius: 20px;
-    box-shadow: 0px -8px 25px rgba(0, 0, 0, 0.12); z-index: 1000 !important;
-    padding: 12px 18px 24px 18px !important;
-    transition: bottom 0.28s cubic-bezier(0.16, 1, 0.3, 1);
-    max-height: auto;
-}
-
-.bottom-sheet.active { bottom: 0; }
-
-.sheet-drag-handle { 
-    width: 36px; height: 4px; background: var(--neu-dark); 
-    border-radius: 10px; margin: 0 auto 10px auto; opacity: 0.7; 
-}
-
-/* Ringkasan Rincian Transaksi */
-.sheet-summary-box {
-    background: var(--bg-base);
-    box-shadow: var(--neu-shadow-inset);
-    border-radius: 14px;
-    padding: 10px 14px;
-    margin-bottom: 14px;
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-}
-
-.sheet-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    font-size: 0.76rem;
-}
-
-.sheet-row .label { color: var(--text-muted); font-weight: 600; }
-.sheet-row .val-title { font-weight: 700; color: var(--text-main); text-align: right; max-width: 65%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.sheet-row .val-target { font-weight: 800; color: var(--accent-purple); font-family: monospace; font-size: 0.82rem; }
-
-.sheet-divider {
-    border: none; border-top: 1px dashed var(--neu-dark); opacity: 0.6; margin: 2px 0;
-}
-
-.sheet-row .val-price { font-size: 1rem; font-weight: 800; color: var(--accent-purple); }
-
-.btn-bayar-now {
-    background: var(--accent-purple); color: #ffffff; font-weight: 800; border-radius: var(--border-radius-pill);
-    padding: 12px; border: none; width: 100%;
-    box-shadow: var(--neu-shadow-sm); font-size: 0.82rem; text-transform: uppercase; letter-spacing: 0.5px; cursor: pointer;
-    display: flex; align-items: center; justify-content: center; gap: 8px; transition: all 0.2s ease;
-}
-.btn-bayar-now:active { box-shadow: var(--neu-shadow-inset); transform: scale(0.98); }
-
-        @media screen and (min-width: 550px) {
-            .menu-grid, .extra-menu-grid { grid-template-columns: repeat(6, 1fr); gap: 20px 14px; }
-            .icon-wrapper { width: 56px; height: 56px; font-size: 1.35rem; }
+        .btn-bayar-now {
+            background: var(--accent-purple); color: #ffffff; font-weight: 800; border-radius: var(--border-radius-pill);
+            padding: 12px; border: none; width: 100%;
+            box-shadow: var(--neu-shadow-sm); font-size: 0.82rem; text-transform: uppercase; letter-spacing: 0.5px; cursor: pointer;
+            display: flex; align-items: center; justify-content: center; gap: 8px; transition: all 0.2s ease;
         }
+        .btn-bayar-now.okec { background: var(--accent-green); }
+        .btn-bayar-now:active { box-shadow: var(--neu-shadow-inset); transform: scale(0.98); }
     </style>
 </head>
 <body>
@@ -423,28 +346,12 @@
             </div>
         </div>
 
-        <!-- 1. KARTU SALDO UTAMA MEMBER -->
+        <!-- KARTU SALDO UTAMA MEMBER -->
         <div class="wallet-section" id="walletSection">
             <div class="wallet-info">
                 <span class="wallet-label"><i class="fa-solid fa-wallet"></i> Saldo Anda</span>
                 <div class="balance" id="user-balance">Rp 0</div>
             </div>
-        </div>
-
-        <!-- 2. AKSI SALDO RAMPING -->
-        <div class="wallet-actions-card">
-            <a href="deposit.html" class="action-btn">
-                <i class="fa-solid fa-circle-plus"></i>
-                <span>Isi Saldo</span>
-            </a>
-            <a href="javascript:void(0)" class="action-btn">
-                <i class="fa-solid fa-paper-plane"></i>
-                <span>Kirim</span>
-            </a>
-            <a href="history.html" class="action-btn">
-                <i class="fa-solid fa-clock-rotate-left"></i>
-                <span>Riwayat</span>
-            </a>
         </div>
 
         <!-- Running Text -->
@@ -453,127 +360,117 @@
             <div class="ticker-content">
                 <marquee direction="left" scrollamount="4">
                     <span>🔥 <b>INFO SERVER:</b> CUT OFF TRANSAKSI SETIAP JAM 23.30 - 00.15 WIB</span>
-                    <span>⚡ Token PLN & Produk PPOB lancar jaya 24 jam nonstop.</span>
+                    <span>⚡ Transaksi otomatis terproses 24 Jam nonstop.</span>
                 </marquee>
             </div>
         </div>
 
-        <!-- DIVIDER TRANSAKSI CEPAT -->
+        <!-- ========================================== -->
+        <!-- 1. TRANSAKSI CEPAT DIGIFLAZZ -->
+        <!-- ========================================== -->
         <div class="section-divider" id="quick-divider">
             <div class="divider-line"></div>
-            <div class="divider-badge"><i class="fa-solid fa-bolt"></i> Transaksi Cepat</div>
+            <div class="divider-badge"><i class="fa-solid fa-bolt"></i> Transaksi Cepat Digiflazz</div>
             <div class="divider-line"></div>
         </div>
 
-        <!-- DROP UP POPUP TRANSAKSI CEPAT LOKAL -->
-        <div class="card-wrapper" id="cardWrapper">
-            
-            <div class="popup-top-container" id="popupTopContainer">
+        <div class="card-wrapper" id="cardWrapperDigi">
+            <div class="popup-top-container" id="popupTopContainerDigi">
                 <div class="filter-container">
-                    <select id="sortFilter" onchange="applyPriceSort()">
+                    <select id="sortFilterDigi" onchange="applyPriceSortDigi()">
                         <option value="asc" selected>Harga: Murah ke Mahal</option>
                         <option value="desc">Harga: Mahal ke Murah</option>
                     </select>
                 </div>
-                <div class="empty-state" id="emptyState">
-                    <i class="fa-solid fa-spinner fa-spin" id="stateIcon"></i>
-                    <p id="emptyText"></p>
+                <div class="empty-state" id="emptyStateDigi">
+                    <i class="fa-solid fa-spinner fa-spin" id="stateIconDigi"></i>
+                    <p id="emptyTextDigi"></p>
                 </div>
-                <div class="product-list" id="productList"></div>
+                <div class="product-list" id="productListDigi"></div>
             </div>
 
-            <!-- INSET INPUT UTAMA -->
             <div class="card-container">
-                <div class="inset-tabs-wrapper" id="insetTabsWrapper"></div>
+                <div class="inset-tabs-wrapper" id="insetTabsWrapperDigi"></div>
 
                 <div class="input-box">
                     <div class="input-icon-left">
                         <i class="fa-solid fa-mobile-screen-button"></i>
                     </div>
-                    
-                    <input type="tel" id="phoneInput" class="bo_input_nomor" placeholder="Ketik No. HP..." maxlength="20" autocomplete="off" />
-                    
-                    <span class="operator-badge" id="operatorBadge"></span>
-
-                    <div class="input-icon-right bo_tombol_kontak" id="contact-btn" style="display: none;">
-                        <i class="fa-solid fa-address-book"></i>
-                    </div>
+                    <input type="tel" id="phoneInputDigi" placeholder="Ketik No. HP Digiflazz..." maxlength="20" autocomplete="off" />
+                    <span class="operator-badge" id="operatorBadgeDigi"></span>
                 </div>
             </div>
         </div>
 
-        <!-- DIVIDER MENU PEMBELIAN -->
-        <div class="section-divider" id="main-menu-divider">
+        <!-- ========================================== -->
+        <!-- 2. TRANSAKSI CEPAT OKECONNECT -->
+        <!-- ========================================== -->
+        <div class="section-divider" id="quick-divider-okec" style="margin-top: 25px;">
             <div class="divider-line"></div>
-            <div class="divider-badge"><i class="fa-solid fa-bag-shopping"></i> Menu Utama</div>
+            <div class="divider-badge okec"><i class="fa-solid fa-bolt-lightning"></i> Transaksi Cepat OkeConnect</div>
             <div class="divider-line"></div>
         </div>
 
-        <!-- Container Menu Utama -->
-        <div class="purchase-container" id="purchase-container">
-            <div class="menu-grid">
-                <a href="javascript:void(0)" class="grid-item"><div class="icon-wrapper"><i class="fa-solid fa-mobile-button"></i></div><span>Pulsa</span></a>
-                <a href="javascript:void(0)" class="grid-item"><div class="icon-wrapper"><i class="fa-solid fa-globe"></i></div><span>Paket Data</span></a>
-                <a href="javascript:void(0)" class="grid-item"><div class="icon-wrapper"><i class="fa-solid fa-bolt-lightning"></i></div><span>Token PLN</span></a>
-                <a href="javascript:void(0)" class="grid-item"><div class="icon-wrapper"><i class="fa-solid fa-gem"></i></div><span>Voucher</span></a>
-                <a href="javascript:void(0)" class="grid-item"><div class="icon-wrapper"><i class="fa-solid fa-gamepad"></i></div><span>Topup Game</span></a>
-                <a href="javascript:void(0)" class="grid-item"><div class="icon-wrapper"><i class="fa-solid fa-wallet"></i></div><span>E-Wallet</span></a>
-                <a href="javascript:void(0)" class="grid-item"><div class="icon-wrapper"><i class="fa-solid fa-credit-card"></i></div><span>E-Money</span></a>
-                <a href="javascript:void(0)" class="grid-item"><div class="icon-wrapper"><i class="fa-solid fa-motorcycle"></i></div><span>Ojek Online</span></a>
-                <a href="javascript:void(0)" class="grid-item"><div class="icon-wrapper"><i class="fa-solid fa-arrow-right-arrow-left"></i></div><span>Pulsa Trans</span></a>
-                <a href="javascript:void(0)" class="grid-item"><div class="icon-wrapper"><i class="fa-solid fa-comment-sms"></i></div><span>SMS & Telp</span></a>
-                <a href="javascript:void(0)" class="grid-item"><div class="icon-wrapper"><i class="fa-solid fa-fire"></i></div><span>Pertagas</span></a>
-                <a href="javascript:void(0)" class="grid-item"><div class="icon-wrapper"><i class="fa-solid fa-earth-americas"></i></div><span>International</span></a>
+        <div class="card-wrapper" id="cardWrapperOkec">
+            <div class="popup-top-container" id="popupTopContainerOkec">
+                <div class="filter-container">
+                    <select id="sortFilterOkec" onchange="applyPriceSortOkec()">
+                        <option value="asc" selected>Harga: Murah ke Mahal</option>
+                        <option value="desc">Harga: Mahal ke Murah</option>
+                    </select>
+                </div>
+                <div class="empty-state" id="emptyStateOkec">
+                    <i class="fa-solid fa-spinner fa-spin" id="stateIconOkec"></i>
+                    <p id="emptyTextOkec"></p>
+                </div>
+                <div class="product-list" id="productListOkec"></div>
+            </div>
+
+            <div class="card-container">
+                <div class="inset-tabs-wrapper" id="insetTabsWrapperOkec"></div>
+
+                <div class="input-box">
+                    <div class="input-icon-left okec">
+                        <i class="fa-solid fa-sim-card"></i>
+                    </div>
+                    <input type="tel" id="phoneInputOkec" placeholder="Ketik No. HP OkeConnect..." maxlength="20" autocomplete="off" />
+                    <span class="operator-badge okec" id="operatorBadgeOkec"></span>
+                </div>
             </div>
         </div>
 
-        <!-- DIVIDER MENU TAMBAHAN -->
-        <div class="section-divider" id="extra-menu-divider">
-            <div class="divider-line"></div>
-            <div class="divider-badge"><i class="fa-solid fa-layer-group"></i> Menu Tambahan</div>
-            <div class="divider-line"></div>
+    </div>
+
+    <!-- 📌 SLIDE-UP BOTTOM SHEET -->
+    <div id="checkoutBackdrop" class="modal-checkout-backdrop" onclick="tutupCheckoutSheet()"></div>
+    <div id="checkoutBottomSheet" class="bottom-sheet">
+        <div class="sheet-drag-handle"></div>
+        
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+            <span style="font-size: 0.85rem; font-weight: 800; color: var(--text-main);" id="sheet_provider_title">Konfirmasi Pembelian</span>
+            <button type="button" onclick="tutupCheckoutSheet()" style="background: none; border: none; font-size: 1.1rem; color: var(--text-muted); cursor: pointer; padding: 0 4px;">&times;</button>
         </div>
 
-        <!-- CONTAINER MENU TAMBAHAN -->
-        <div class="extra-menu-container" id="extra-menu-container">
-            <div class="extra-menu-grid">
-                <a href="https://quran.kemenag.go.id/" class="grid-item"><div class="icon-wrapper"><i class="fa-solid fa-book-quran"></i></div><span>Al-Quran</span></a>
-                <a href="https://www.tasbih.my.id/" class="grid-item"><div class="icon-wrapper"><i class="fa-solid fa-hand-holding-heart"></i></div><span>Tasbih</span></a>
-                <a href="https://jadwalsholat.org/" class="grid-item"><div class="icon-wrapper"><i class="fa-solid fa-mosque"></i></div><span>Jadwal Sholat</span></a>
-                <a href="javascript:void(0)" class="grid-item"><div class="icon-wrapper"><i class="fa-solid fa-calculator"></i></div><span>Kalkulator</span></a>
+        <div class="sheet-summary-box">
+            <div class="sheet-row">
+                <span class="label">Produk</span>
+                <span class="val-title" id="sheet_nama_produk">-</span>
+            </div>
+            <div class="sheet-row">
+                <span class="label">No. Tujuan</span>
+                <span class="val-target" id="sheet_no_tujuan">-</span>
+            </div>
+            <div class="sheet-divider"></div>
+            <div class="sheet-row">
+                <span class="label" style="font-weight: 700; color: var(--text-main);">Total</span>
+                <span class="val-price" id="sheet_total_harga">Rp 0</span>
             </div>
         </div>
 
-	<!-- 📌 SLIDE-UP BOTTOM SHEET (RINGKAS & SIMPEL) -->
-<div id="checkoutBackdrop" class="modal-checkout-backdrop" onclick="tutupCheckoutSheet()"></div>
-<div id="checkoutBottomSheet" class="bottom-sheet">
-    <div class="sheet-drag-handle"></div>
-    
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-        <span style="font-size: 0.85rem; font-weight: 800; color: var(--text-main);">Konfirmasi Pembelian</span>
-        <button type="button" onclick="tutupCheckoutSheet()" style="background: none; border: none; font-size: 1.1rem; color: var(--text-muted); cursor: pointer; padding: 0 4px;">&times;</button>
+        <button id="btnProsesBayar" onclick="eksekusiCheckoutTerpilih()" class="btn-bayar-now">
+            <i class="fa-solid fa-shield-halved"></i> Bayar Sekarang
+        </button>
     </div>
-
-    <div class="sheet-summary-box">
-        <div class="sheet-row">
-            <span class="label">Produk</span>
-            <span class="val-title" id="sheet_nama_produk">-</span>
-        </div>
-        <div class="sheet-row">
-            <span class="label">No. Tujuan</span>
-            <span class="val-target" id="sheet_no_tujuan">-</span>
-        </div>
-        <div class="sheet-divider"></div>
-        <div class="sheet-row">
-            <span class="label" style="font-weight: 700; color: var(--text-main);">Total</span>
-            <span class="val-price" id="sheet_total_harga">Rp 0</span>
-        </div>
-    </div>
-
-    <button id="btnProsesBayar" onclick="eksekusiCheckoutDigiflazz()" class="btn-bayar-now">
-        <i class="fa-solid fa-shield-halved"></i> Bayar Sekarang
-    </button>
-</div>
 
     <!-- JavaScript System -->
     <script>
@@ -589,10 +486,20 @@
         sidebarClose.addEventListener('click', closeSidebar);
         sidebarOverlay.addEventListener('click', closeSidebar);
 
-        let masterProduk = [];
-        let memberSaldoAktif = 0; // Penampung Saldo Member Logged In
+        let masterProdukDigi = [];
+        let masterProdukOkec = [];
+        let memberSaldoAktif = 0;
+        let providerAktif = 'digiflazz';
 
-        // 🚀 FUNGSI BACA SALDO DARI DATABASE ADMIN MEMBER (MEMBERS.JSON)
+        const prefixes = {
+            TELKOMSEL: ['0811', '0812', '0813', '0821', '0822', '0823', '0851', '0852', '0853'],
+            INDOSAT: ['0814', '0815', '0816', '0855', '0856', '0857', '0858'],
+            XL: ['0817', '0818', '0819', '0859', '0877', '0878'],
+            AXIS: ['0831', '0832', '0833', '0838'],
+            TRI: ['0895', '0896', '0897', '0898', '0899'],
+            SMARTFREN: ['0881', '0882', '0883', '0884', '0885', '0886', '0887', '0888', '0889']
+        };
+
         async function loadSaldoMemberAkun() {
             const userPhone = localStorage.getItem('userPhone') || localStorage.getItem('user_hp');
             const userName = localStorage.getItem('userName') || localStorage.getItem('username');
@@ -613,13 +520,7 @@
 
                 if (currentMember) {
                     memberSaldoAktif = parseFloat(currentMember.balance || 0);
-                    
-                    const saldoFormatted = new Intl.NumberFormat('id-ID', { 
-                        style: 'currency', 
-                        currency: 'IDR', 
-                        maximumFractionDigits: 0 
-                    }).format(memberSaldoAktif);
-                    
+                    const saldoFormatted = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(memberSaldoAktif);
                     const balanceEl = document.getElementById('user-balance');
                     if (balanceEl) balanceEl.innerText = saldoFormatted;
                 }
@@ -630,15 +531,20 @@
 
         async function fetchMasterProduk() {
             try {
-                const res = await fetch('/api/products?t=' + Date.now());
-                if (res.ok) {
-                    const data = await res.json();
-                    masterProduk = Array.isArray(data) ? data : (data.data || []);
-                    localStorage.setItem('admin_master_produk', JSON.stringify(masterProduk));
+                // Fetch Digiflazz
+                const resDigi = await fetch('/api/products?t=' + Date.now());
+                if (resDigi.ok) {
+                    const data = await resDigi.json();
+                    masterProdukDigi = Array.isArray(data) ? data : (data.data || []);
+                }
+                // Fetch OkeConnect
+                const resOkec = await fetch('/api/products/okeconnect?t=' + Date.now());
+                if (resOkec.ok) {
+                    const dataOkec = await resOkec.json();
+                    masterProdukOkec = Array.isArray(dataOkec) ? dataOkec : (dataOkec.data || []);
                 }
             } catch (err) {
-                console.warn("Menggunakan cache produk lokal:", err);
-                masterProduk = JSON.parse(localStorage.getItem('admin_master_produk') || '[]');
+                console.warn("Gagal fetch data produk:", err);
             }
         }
 
@@ -654,186 +560,333 @@
             document.getElementById('time-greeting').innerText = greet + ",";
         });
 
-        const prefixes = {
-            TELKOMSEL: ['0811', '0812', '0813', '0821', '0822', '0823', '0851', '0852', '0853'],
-            INDOSAT: ['0814', '0815', '0816', '0855', '0856', '0857', '0858'],
-            XL: ['0817', '0818', '0819', '0859', '0877', '0878'],
-            AXIS: ['0831', '0832', '0833', '0838'],
-            TRI: ['0895', '0896', '0897', '0898', '0899'],
-            SMARTFREN: ['0881', '0882', '0883', '0884', '0885', '0886', '0887', '0888', '0889']
-        };
-
-        const inputPhone = document.getElementById('phoneInput');
-        const badge = document.getElementById('operatorBadge');
-        const popupTopContainer = document.getElementById('popupTopContainer');
-        const emptyState = document.getElementById('emptyState');
-        const emptyText = document.getElementById('emptyText');
-        const stateIcon = document.getElementById('stateIcon');
-        const insetTabsWrapper = document.getElementById('insetTabsWrapper');
-        const productList = document.getElementById('productList');
-        const sortFilter = document.getElementById('sortFilter');
-        const contactBtn = document.getElementById('contact-btn');
-        const cardWrapper = document.getElementById('cardWrapper');
-        const walletSection = document.getElementById('walletSection');
-        const quickDivider = document.getElementById('quick-divider');
-
-        let currentOperator = null;
-        let groupedProducts = {};
-        let currentRawProducts = [];
-        let dataCheckoutAktif = {};
-
         function formatPhoneNumber(val) {
             let cleaned = val.replace(/[^0-9+]/g, '');
             if (cleaned.startsWith('+62')) cleaned = '0' + cleaned.substring(3);
             else if (cleaned.startsWith('62')) cleaned = '0' + cleaned.substring(2);
             else cleaned = cleaned.replace(/[^0-9]/g, '');
-
             let match = cleaned.match(/.{1,4}/g);
             return match ? match.join(' ') : cleaned;
         }
 
-        function loadKategoriLokalByOperator(operatorKey) {
-            if (!masterProduk || masterProduk.length === 0) {
-                masterProduk = JSON.parse(localStorage.getItem('admin_master_produk') || '[]');
+        // ===============================================
+        // LOGIKA TRANSAKSI CEPAT DIGIFLAZZ
+        // ===============================================
+        const inputPhoneDigi = document.getElementById('phoneInputDigi');
+        const badgeDigi = document.getElementById('operatorBadgeDigi');
+        const popupTopContainerDigi = document.getElementById('popupTopContainerDigi');
+        const emptyStateDigi = document.getElementById('emptyStateDigi');
+        const emptyTextDigi = document.getElementById('emptyTextDigi');
+        const stateIconDigi = document.getElementById('stateIconDigi');
+        const insetTabsWrapperDigi = document.getElementById('insetTabsWrapperDigi');
+        const productListDigi = document.getElementById('productListDigi');
+        const sortFilterDigi = document.getElementById('sortFilterDigi');
+
+        let currentOperatorDigi = null;
+        let groupedProductsDigi = {};
+        let currentRawProductsDigi = [];
+
+        inputPhoneDigi.addEventListener('input', (e) => {
+            let val = e.target.value;
+            let formattedVal = formatPhoneNumber(val);
+            inputPhoneDigi.value = formattedVal;
+            let rawDigits = formattedVal.replace(/[^0-9]/g, '');
+
+            let detectedOp = null;
+            if (rawDigits.length >= 4) {
+                let prefix = rawDigits.substring(0, 4);
+                for (let op in prefixes) {
+                    if (prefixes[op].indexOf(prefix) !== -1) { detectedOp = op; break; }
+                }
             }
 
-            const opKey = operatorKey.toUpperCase();
-
-            const validProducts = masterProduk.filter(p => {
-                const brandP = String(p.brand || p.operator || '').toUpperCase();
-
-                if (opKey === 'TELKOMSEL') {
-                    return brandP.includes('TELKOMSEL') || brandP.includes('TSEL') || brandP.includes('BY.U') || brandP.includes('BYU');
-                } else if (opKey === 'INDOSAT') {
-                    return brandP.includes('INDOSAT') || brandP.includes('ISAT');
-                } else if (opKey === 'XL') {
-                    return brandP === 'XL' || brandP.includes('XL ');
-                } else if (opKey === 'AXIS') {
-                    return brandP.includes('AXIS');
-                } else if (opKey === 'TRI') {
-                    return brandP.includes('THREE') || brandP.includes('TRI') || brandP === '3';
-                } else if (opKey === 'SMARTFREN') {
-                    return brandP.includes('SMART') || brandP.includes('SF');
+            if (detectedOp) {
+                badgeDigi.innerText = detectedOp;
+                badgeDigi.style.display = 'inline-block';
+                if (currentOperatorDigi !== detectedOp) {
+                    currentOperatorDigi = detectedOp;
+                    loadOperatorDigi(detectedOp);
                 }
+            } else {
+                badgeDigi.style.display = 'none';
+                insetTabsWrapperDigi.style.display = 'none';
+                popupTopContainerDigi.style.display = 'none';
+                currentOperatorDigi = null;
+            }
+        });
 
-                return brandP.includes(opKey);
+        function loadOperatorDigi(operatorKey) {
+            const opKey = operatorKey.toUpperCase();
+            const validProducts = masterProdukDigi.filter(p => {
+                const brandP = String(p.brand || p.operator || '').toUpperCase();
+                const providerP = String(p.provider || '').toLowerCase();
+                return (providerP === 'digiflazz' || providerP === '' || !p.provider) && brandP.includes(opKey);
             });
 
             if (validProducts.length === 0) {
-                emptyState.style.display = 'flex';
-                stateIcon.className = "fa-solid fa-box-open";
-                emptyText.innerHTML = `Belum ada produk tersedia untuk <b>${operatorKey}</b>.`;
-                popupTopContainer.style.display = 'block';
-                insetTabsWrapper.style.display = 'none';
-                productList.style.display = 'none';
+                emptyStateDigi.style.display = 'flex';
+                stateIconDigi.className = "fa-solid fa-box-open";
+                emptyTextDigi.innerHTML = `Belum ada produk Digiflazz untuk <b>${operatorKey}</b>.`;
+                popupTopContainerDigi.style.display = 'block';
+                insetTabsWrapperDigi.style.display = 'none';
+                productListDigi.style.display = 'none';
                 return;
             }
 
-            groupedProducts = {};
+            groupedProductsDigi = {};
             validProducts.forEach(prod => {
-                let subGroup = prod.category || prod.type || prod.subkategori || 'Umum';
-                if (!groupedProducts[subGroup]) {
-                    groupedProducts[subGroup] = [];
-                }
-                groupedProducts[subGroup].push(prod);
+                let subGroup = prod.category || prod.type || 'Umum';
+                if (!groupedProductsDigi[subGroup]) groupedProductsDigi[subGroup] = [];
+                groupedProductsDigi[subGroup].push(prod);
             });
 
-            const subCategories = Object.keys(groupedProducts);
-            renderTabs(subCategories);
+            renderTabsDigi(Object.keys(groupedProductsDigi));
         }
 
-        function renderTabs(categoriesArray) {
-            var html = "";
+        function renderTabsDigi(categoriesArray) {
+            let html = "";
             categoriesArray.forEach((cat, index) => {
-                html += `<button class="tab-item-inset ${index === 0 ? 'active' : ''}" onclick="selectCategory(this, '${cat}')">${cat}</button>`;
+                html += `<button class="tab-item-inset ${index === 0 ? 'active' : ''}" onclick="selectCategoryDigi(this, '${cat}')">${cat}</button>`;
             });
-            insetTabsWrapper.innerHTML = html;
-            insetTabsWrapper.style.display = 'flex';
-            
-            emptyState.style.display = 'none';
-            productList.style.display = 'flex';
-            popupTopContainer.style.display = 'block';
-            if (quickDivider) quickDivider.style.display = 'none';
+            insetTabsWrapperDigi.innerHTML = html;
+            insetTabsWrapperDigi.style.display = 'flex';
+            emptyStateDigi.style.display = 'none';
+            productListDigi.style.display = 'flex';
+            popupTopContainerDigi.style.display = 'block';
 
-            if (categoriesArray.length > 0) selectCategory(insetTabsWrapper.children[0], categoriesArray[0]);
+            if (categoriesArray.length > 0) selectCategoryDigi(insetTabsWrapperDigi.children[0], categoriesArray[0]);
         }
 
-        window.selectCategory = function(element, categoryName) {
-            document.querySelectorAll('.tab-item-inset').forEach(el => el.classList.remove('active'));
+        window.selectCategoryDigi = function(element, categoryName) {
+            document.querySelectorAll('#insetTabsWrapperDigi .tab-item-inset').forEach(el => el.classList.remove('active'));
             if (element) element.classList.add('active');
-            
-            if (element && element.scrollIntoView) {
-                element.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
-            }
-
-            currentRawProducts = groupedProducts[categoryName] || [];
-            applyPriceSort();
+            currentRawProductsDigi = groupedProductsDigi[categoryName] || [];
+            applyPriceSortDigi();
         }
 
-        window.applyPriceSort = function() {
-            if (!currentRawProducts || currentRawProducts.length === 0) {
-                productList.innerHTML = `<div style="text-align:center; color:var(--text-muted); padding:16px; font-size:0.75rem;">Tidak ada produk di sub-kategori ini.</div>`;
-                return;
-            }
-            
-            var sortValue = sortFilter ? sortFilter.value : 'asc';
-            var sortedProducts = [...currentRawProducts];
-            
+        window.applyPriceSortDigi = function() {
+            let sortValue = sortFilterDigi ? sortFilterDigi.value : 'asc';
+            let sortedProducts = [...currentRawProductsDigi];
             sortedProducts.sort((a, b) => {
                 let priceA = parseFloat(a.jual || a.price || a.harga || 0);
                 let priceB = parseFloat(b.jual || b.price || b.harga || 0);
                 return sortValue === 'asc' ? priceA - priceB : priceB - priceA;
             });
 
-            renderProdukCards(sortedProducts);
+            let html = "";
+            sortedProducts.forEach((prod) => {
+                let harga = prod.jual || prod.price || prod.harga || 0;
+                let hargaFormatted = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(harga);
+                let namaProduk = prod.product_name || prod.nama_produk || prod.nama || 'Produk';
+                let skuProduk = prod.buyer_sku_code || prod.code || prod.sku || '';
+
+                let namaClean = String(namaProduk).replace(/'/g, "\\'").replace(/"/g, '\\"');
+                let skuClean = String(skuProduk).replace(/'/g, "\\'").replace(/"/g, '\\"');
+
+                html += `
+                    <div class="product-card" onclick="prosesBeli('digiflazz', '${skuClean}', '${namaClean}', ${harga})">
+                        <div class="product-info">
+                            <div class="product-title">${namaProduk}</div>
+                            <div class="product-price">${hargaFormatted}</div>
+                        </div>
+                        <div class="product-action"><i class="fa-solid fa-chevron-right"></i></div>
+                    </div>
+                `;
+            });
+            productListDigi.innerHTML = html;
         }
 
-        // 🚀 PROSES BELI + CEK SALDO CUKUP ATAU TIDAK
-        window.prosesBeli = function(skuCode, productName, price) {
-            var nomorTujuan = inputPhone.value.replace(/[^0-9]/g, '');
-            if(nomorTujuan.length < 4) { 
-                alert('Silakan masukkan nomor tujuan yang valid terlebih dahulu.'); 
-                inputPhone.focus(); 
-                return; 
+        // ===============================================
+        // LOGIKA TRANSAKSI CEPAT OKECONNECT
+        // ===============================================
+        const inputPhoneOkec = document.getElementById('phoneInputOkec');
+        const badgeOkec = document.getElementById('operatorBadgeOkec');
+        const popupTopContainerOkec = document.getElementById('popupTopContainerOkec');
+        const emptyStateOkec = document.getElementById('emptyStateOkec');
+        const emptyTextOkec = document.getElementById('emptyTextOkec');
+        const stateIconOkec = document.getElementById('stateIconOkec');
+        const insetTabsWrapperOkec = document.getElementById('insetTabsWrapperOkec');
+        const productListOkec = document.getElementById('productListOkec');
+        const sortFilterOkec = document.getElementById('sortFilterOkec');
+
+        let currentOperatorOkec = null;
+        let groupedProductsOkec = {};
+        let currentRawProductsOkec = [];
+
+        inputPhoneOkec.addEventListener('input', (e) => {
+            let val = e.target.value;
+            let formattedVal = formatPhoneNumber(val);
+            inputPhoneOkec.value = formattedVal;
+            let rawDigits = formattedVal.replace(/[^0-9]/g, '');
+
+            let detectedOp = null;
+            if (rawDigits.length >= 4) {
+                let prefix = rawDigits.substring(0, 4);
+                for (let op in prefixes) {
+                    if (prefixes[op].indexOf(prefix) !== -1) { detectedOp = op; break; }
+                }
             }
 
-            // 🛑 VALIDASI CEK SALDO MEMBER
-            if (memberSaldoAktif < price) {
-                return alert(`❌ Saldo Anda Tidak Mencukupi!\n\nHarga Produk: Rp ${price.toLocaleString('id-ID')}\nSaldo Anda: Rp ${memberSaldoAktif.toLocaleString('id-ID')}\n\nSilakan lakukan isi saldo terlebih dahulu.`);
+            if (detectedOp) {
+                badgeOkec.innerText = detectedOp;
+                badgeOkec.style.display = 'inline-block';
+                if (currentOperatorOkec !== detectedOp) {
+                    currentOperatorOkec = detectedOp;
+                    loadOperatorOkec(detectedOp);
+                }
+            } else {
+                badgeOkec.style.display = 'none';
+                insetTabsWrapperOkec.style.display = 'none';
+                popupTopContainerOkec.style.display = 'none';
+                currentOperatorOkec = null;
+            }
+        });
+
+        function loadOperatorOkec(operatorKey) {
+            const opKey = operatorKey.toUpperCase();
+            
+            const validProducts = masterProdukOkec.filter(p => {
+                const brandP = String(p.brand || p.operator || p.category || '').toUpperCase();
+                const providerP = String(p.provider || '').toLowerCase();
+                return (providerP === 'okeconnect') && brandP.includes(opKey);
+            });
+
+            if (validProducts.length === 0) {
+                emptyStateOkec.style.display = 'flex';
+                stateIconOkec.className = "fa-solid fa-box-open";
+                emptyTextOkec.innerHTML = `Belum ada produk OkeConnect untuk <b>${operatorKey}</b>.`;
+                popupTopContainerOkec.style.display = 'block';
+                insetTabsWrapperOkec.style.display = 'none';
+                productListOkec.style.display = 'none';
+                return;
             }
 
-            dataCheckoutAktif = {
-                buyer_sku_code: skuCode,
-                product_name: productName,
-                customer_no: nomorTujuan,
-                price: price,
-                ref_id: 'TRX-' + Date.now()
-            };
+            groupedProductsOkec = {};
+            validProducts.forEach(prod => {
+                let subGroup = prod.category || prod.type || 'Umum';
+                if (!groupedProductsOkec[subGroup]) groupedProductsOkec[subGroup] = [];
+                groupedProductsOkec[subGroup].push(prod);
+            });
 
-            document.getElementById('sheet_nama_produk').innerText = productName;
-            document.getElementById('sheet_no_tujuan').innerText = nomorTujuan;
-            document.getElementById('sheet_total_harga').innerText = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(price);
-
-            const backdrop = document.getElementById('checkoutBackdrop');
-            const sheet = document.getElementById('checkoutBottomSheet');
-
-            document.body.classList.add('no-scroll'); // Matikan scroll background
-            backdrop.classList.add('show');
-            setTimeout(() => { sheet.classList.add('active'); }, 10);
+            renderTabsOkec(Object.keys(groupedProductsOkec));
         }
+
+        function renderTabsOkec(categoriesArray) {
+            let html = "";
+            categoriesArray.forEach((cat, index) => {
+                html += `<button class="tab-item-inset ${index === 0 ? 'active-okec' : ''}" onclick="selectCategoryOkec(this, '${cat}')">${cat}</button>`;
+            });
+            insetTabsWrapperOkec.innerHTML = html;
+            insetTabsWrapperOkec.style.display = 'flex';
+            emptyStateOkec.style.display = 'none';
+            productListOkec.style.display = 'flex';
+            popupTopContainerOkec.style.display = 'block';
+
+            if (categoriesArray.length > 0) selectCategoryOkec(insetTabsWrapperOkec.children[0], categoriesArray[0]);
+        }
+
+        window.selectCategoryOkec = function(element, categoryName) {
+            document.querySelectorAll('#insetTabsWrapperOkec .tab-item-inset').forEach(el => el.classList.remove('active-okec'));
+            if (element) element.classList.add('active-okec');
+            currentRawProductsOkec = groupedProductsOkec[categoryName] || [];
+            applyPriceSortOkec();
+        }
+
+        // 💡 PERBAIKAN PENTING: MENGAMBIL SKU TERBAIK & FALLBACK NAMA
+        window.applyPriceSortOkec = function() {
+            let sortValue = sortFilterOkec ? sortFilterOkec.value : 'asc';
+            let sortedProducts = [...currentRawProductsOkec];
+            sortedProducts.sort((a, b) => {
+                let priceA = parseFloat(a.jual || a.price || a.harga || 0);
+                let priceB = parseFloat(b.jual || b.price || b.harga || 0);
+                return sortValue === 'asc' ? priceA - priceB : priceB - priceA;
+            });
+
+            let html = "";
+            sortedProducts.forEach((prod) => {
+                let harga = prod.jual || prod.price || prod.harga || 0;
+                let hargaFormatted = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(harga);
+                let namaProduk = prod.product_name || prod.nama_produk || prod.nama || 'Produk OkeConnect';
+                
+                // Prioritaskan buyer_sku_code, lalu code, lalu sku, lalu kode
+                let skuProduk = prod.buyer_sku_code || prod.code || prod.sku || prod.kode || '';
+
+                let namaClean = String(namaProduk).replace(/'/g, "\\'").replace(/"/g, '\\"');
+                let skuClean = String(skuProduk).replace(/'/g, "\\'").replace(/"/g, '\\"');
+
+                html += `
+                    <div class="product-card" onclick="prosesBeli('okeconnect', '${skuClean}', '${namaClean}', ${harga})">
+                        <div class="product-info">
+                            <div class="product-title">${namaProduk}</div>
+                            <div class="product-price okec">${hargaFormatted}</div>
+                        </div>
+                        <div class="product-action okec"><i class="fa-solid fa-chevron-right"></i></div>
+                    </div>
+                `;
+            });
+            productListOkec.innerHTML = html;
+        }
+
+        // ===============================================
+        // GENERAL CHECKOUT PROCESS
+        // ===============================================
+	window.prosesBeli = function(provider, skuCode, productName, price) {
+    providerAktif = provider;
+    let targetInput = provider === 'okeconnect' ? inputPhoneOkec : inputPhoneDigi;
+    let nomorTujuan = targetInput.value.replace(/[^0-9]/g, '');
+
+    // Validasi panjang nomor HP
+    if (nomorTujuan.length < 10 || nomorTujuan.length > 13) {
+        alert('❌ Nomor HP tidak valid! Masukkan nomor tujuan minimal 10-13 digit.');
+        targetInput.focus();
+        return;
+    }
+
+    if (memberSaldoAktif < price) {
+        return alert(`❌ Saldo Anda Tidak Mencukupi!\n\nHarga Produk: Rp ${price.toLocaleString('id-ID')}\nSaldo Anda: Rp ${memberSaldoAktif.toLocaleString('id-ID')}`);
+    }
+
+    dataCheckoutAktif = {
+        provider: provider,
+        buyer_sku_code: skuCode,
+        product_name: productName,
+        customer_no: nomorTujuan,
+        price: price,
+        ref_id: 'TRX-' + Date.now()
+    };
+
+    const btnBayar = document.getElementById('btnProsesBayar');
+    if (provider === 'okeconnect') {
+        document.getElementById('sheet_provider_title').innerText = "Konfirmasi OkeConnect";
+        btnBayar.classList.add('okec');
+    } else {
+        document.getElementById('sheet_provider_title').innerText = "Konfirmasi Digiflazz";
+        btnBayar.classList.remove('okec');
+    }
+
+    document.getElementById('sheet_nama_produk').innerText = productName;
+    document.getElementById('sheet_no_tujuan').innerText = nomorTujuan;
+    document.getElementById('sheet_total_harga').innerText = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(price);
+
+    const backdrop = document.getElementById('checkoutBackdrop');
+    const sheet = document.getElementById('checkoutBottomSheet');
+
+    document.body.classList.add('no-scroll');
+    backdrop.classList.add('show');
+    setTimeout(() => { sheet.classList.add('active'); }, 10);
+};
 
         function tutupCheckoutSheet() {
             const backdrop = document.getElementById('checkoutBackdrop');
             const sheet = document.getElementById('checkoutBottomSheet');
-
             sheet.classList.remove('active');
             setTimeout(() => { 
                 backdrop.classList.remove('show'); 
-                document.body.classList.remove('no-scroll'); // Aktifkan kembali scroll background
+                document.body.classList.remove('no-scroll');
             }, 300);
         }
 
-        async function eksekusiCheckoutDigiflazz() {
+        async function eksekusiCheckoutTerpilih() {
             const btn = document.getElementById('btnProsesBayar');
             btn.disabled = true;
             btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Memproses...';
@@ -841,7 +894,6 @@
             const userHp = localStorage.getItem('userPhone') || localStorage.getItem('user_hp') || dataCheckoutAktif.customer_no;
             const userName = localStorage.getItem('userName') || localStorage.getItem('username') || 'Member';
 
-            // Payload disesuaikan dengan Route Checkout
             const payload = {
                 buyer_sku_code: dataCheckoutAktif.buyer_sku_code,
                 customer_no: dataCheckoutAktif.customer_no,
@@ -851,8 +903,10 @@
                 harga_jual: dataCheckoutAktif.price
             };
 
+            const endpointUrl = dataCheckoutAktif.provider === 'okeconnect' ? '/api/okeconnect/checkout' : '/api/digiflazz/checkout';
+
             try {
-                const response = await fetch('/api/digiflazz/checkout', {
+                const response = await fetch(endpointUrl, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(payload)
@@ -860,105 +914,32 @@
 
                 const res = await response.json();
 
-                if (res.status === 'success' && res.data) {
+                if (res.status === 'success' || res.status === 200) {
                     tutupCheckoutSheet();
-                    alert('✅ Transaksi Berhasil Diproses!\nRef ID: ' + res.data.ref_id + '\nStatus: ' + res.data.status);
+                    alert('✅ Transaksi Berhasil Diproses!\nRef ID: ' + (res.data ? res.data.ref_id : 'TRX-SUCCESS'));
                     
-                    loadSaldoMemberAkun(); // Update Saldo Terbaru
+                    loadSaldoMemberAkun();
                     
-                    // Reset input
-                    document.getElementById('phoneInput').value = '';
-                    document.getElementById('operatorBadge').style.display = 'none';
-                    document.getElementById('popupTopContainer').style.display = 'none';
+                    if(dataCheckoutAktif.provider === 'okeconnect') {
+                        inputPhoneOkec.value = '';
+                        badgeOkec.style.display = 'none';
+                        popupTopContainerOkec.style.display = 'none';
+                    } else {
+                        inputPhoneDigi.value = '';
+                        badgeDigi.style.display = 'none';
+                        popupTopContainerDigi.style.display = 'none';
+                    }
                 } else {
                     alert('❌ Gagal Transaksi: ' + (res.message || 'Terjadi kesalahan'));
                 }
             } catch (err) {
                 console.error(err);
-                alert('❌ Gagal terhubung ke Server VPS');
+                alert('❌ Gagal terhubung ke Server');
             } finally {
                 btn.disabled = false;
                 btn.innerHTML = '<i class="fa-solid fa-shield-halved"></i> Bayar Sekarang';
             }
         }
-
-        function renderProdukCards(produkList) {
-            var html = "";
-            produkList.forEach((prod) => {
-                let harga = prod.jual || prod.price || prod.harga || 0;
-                var hargaFormatted = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(harga);
-                
-                var namaProduk = prod.product_name || prod.nama_produk || prod.nama || 'Produk';
-                var skuProduk = prod.buyer_sku_code || prod.sku || '';
-
-                var namaClean = String(namaProduk).replace(/'/g, "\\'").replace(/"/g, '\\"');
-                var skuClean = String(skuProduk).replace(/'/g, "\\'").replace(/"/g, '\\"');
-
-                html += `
-                    <div class="product-card" onclick="prosesBeli('${skuClean}', '${namaClean}', ${harga})">
-                        <div class="product-info">
-                            <div class="product-title">${namaProduk}</div>
-                            <div class="product-price">${hargaFormatted}</div>
-                        </div>
-                        <div class="product-action"><i class="fa-solid fa-chevron-right"></i></div>
-                    </div>
-                `;
-            });
-            productList.innerHTML = html;
-        }
-
-        inputPhone.addEventListener('focus', () => {
-            document.body.style.paddingBottom = "30vh"; 
-            setTimeout(() => {
-                cardWrapper.scrollIntoView({ behavior: 'smooth', block: 'start' });
-            }, 300);
-        });
-
-        function checkOperator(e) {
-            let val = e.target.value;
-            let formattedVal = formatPhoneNumber(val);
-            inputPhone.value = formattedVal;
-
-            let rawDigits = formattedVal.replace(/[^0-9]/g, '');
-            
-            if (rawDigits.length > 0) {
-                contactBtn.style.display = 'block';
-            } else {
-                contactBtn.style.display = 'none';
-            }
-
-            var detectedOp = null;
-            if (rawDigits.length >= 4) {
-                var prefix = rawDigits.substring(0, 4);
-                for (var op in prefixes) {
-                    if (prefixes[op].indexOf(prefix) !== -1) { detectedOp = op; break; }
-                }
-            }
-
-            if (detectedOp) {
-                badge.innerText = detectedOp; 
-                badge.style.display = 'inline-block';
-
-                if (currentOperator !== detectedOp) {
-                    currentOperator = detectedOp; 
-                    loadKategoriLokalByOperator(detectedOp);
-                    
-                    setTimeout(() => {
-                        walletSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                    }, 150);
-                }
-            } else {
-                badge.style.display = 'none';
-                insetTabsWrapper.style.display = 'none';
-                emptyState.style.display = 'none'; 
-                popupTopContainer.style.display = 'none';
-                if (quickDivider) quickDivider.style.display = 'flex';
-                
-                currentOperator = null;
-            }
-        }
-
-        inputPhone.addEventListener('input', checkOperator);
     </script>
 </body>
 </html>

@@ -476,7 +476,7 @@
             <div class="glass-card">
                 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
                     <h3 style="margin:0;"><i class="fa-solid fa-bolt"></i> Produk Okeconnect</h3>
-                    <button onclick="loadOkeconnectProducts()" class="btn-sm"><i class="fa-solid fa-rotate-right"></i> Sync JSON</button>
+		    <button onclick="syncOkeconnectToDB()" class="btn-sm"><i class="fa-solid fa-rotate-right"></i> Sync JSON</button>
                 </div>
                 <input type="text" id="searchOkeconnect" placeholder="🔍 Cari Kode, Produk, Kategori Okeconnect..." oninput="filterOkeconnect()" style="width: 100%; margin-bottom: 10px;">
                 <div id="okeconnectContainer">
@@ -1144,32 +1144,64 @@
             renderFolders();
         }
 
-        /* INTEGRASI API PRICELIST OKECONNECT */
-        async function loadOkeconnectProducts() {
-            const container = document.getElementById('okeconnectContainer');
-            container.innerHTML = `<div style="text-align:center; color: var(--text-sub); padding: 15px; font-size:0.8rem;"><i class="fa-solid fa-spinner fa-spin"></i> Menghubungkan ke API Okeconnect...</div>`;
-            
-            try {
-                const targetUrl = 'https://www.okeconnect.com/harga/json?id=905ccd028329b0a';
-                // Gunakan Proxy CORS jika diakses langsung dari Browser Client
-                const res = await fetch('https://api.allorigins.win/raw?url=' + encodeURIComponent(targetUrl));
-                const data = await res.json();
-                
-                let list = [];
-                if (Array.isArray(data)) {
-                    list = data;
-                } else if (data && typeof data === 'object') {
-                    list = data.data || data.produk || data.price_list || Object.values(data);
-                }
+	/* === INTEGRASI OKECONNECT VIA BACKEND SQLITE (LOKAL & BEBAS CORS) === */
 
-                rawOkeconnectData = list;
-                filteredOkeconnectData = [...rawOkeconnectData];
-                renderOkeconnectFolders();
-            } catch (err) {
-                console.error(err);
-                container.innerHTML = `<div style="text-align:center; color:#ef4444; padding:15px; font-size:0.8rem;">❌ Gagal memuat JSON Okeconnect. Pastikan CORS/Koneksi Internet stabil.</div>`;
-            }
+// 1. Memuat produk Okeconnect dari Database SQLite Server Anda
+async function loadOkeconnectProducts() {
+    const container = document.getElementById('okeconnectContainer');
+    container.innerHTML = `<div style="text-align:center; color: var(--text-sub); padding: 15px; font-size:0.8rem;"><i class="fa-solid fa-spinner fa-spin"></i> Memuat data produk Okeconnect dari database...</div>`;
+    
+    try {
+        // Ambil data dari API backend Express Anda sendiri
+        const res = await fetch('/api/products/okeconnect?t=' + Date.now());
+        const result = await res.json();
+        
+        let list = [];
+        if (result.status === 'success' && Array.isArray(result.data)) {
+            list = result.data;
+        } else if (Array.isArray(result)) {
+            list = result;
         }
+
+        rawOkeconnectData = list;
+        filteredOkeconnectData = [...rawOkeconnectData];
+
+        if (rawOkeconnectData.length === 0) {
+            container.innerHTML = `
+                <div style="text-align:center; color: var(--text-sub); padding: 20px; font-size:0.8rem;">
+                    Belum ada data produk Okeconnect di Database SQLite.<br>
+                    Silakan klik tombol <b>"Sync JSON"</b> di atas untuk menarik data terbaru.
+                </div>`;
+        } else {
+            renderOkeconnectFolders();
+        }
+    } catch (err) {
+        console.error(err);
+        container.innerHTML = `<div style="text-align:center; color:#ef4444; padding:15px; font-size:0.8rem;">❌ Gagal memuat data Okeconnect dari Server DB Lokal.</div>`;
+    }
+}
+
+// 2. Tombol Sync: Meminta Backend Server Nembak ke Okeconnect & Menyimpan ke SQLite
+async function syncOkeconnectToDB() {
+    const container = document.getElementById('okeconnectContainer');
+    container.innerHTML = `<div style="text-align:center; color: var(--primary); padding: 15px; font-size:0.8rem;"><i class="fa-solid fa-sync fa-spin"></i> Sedang menyinkronkan data Okeconnect ke Database SQLite...</div>`;
+
+    try {
+        const res = await fetch('/api/admin/sync-okeconnect', { method: 'POST' });
+        const result = await res.json();
+
+        if (result.status === 'success') {
+            alert('✅ Sync Berhasil: ' + (result.message || 'Data disinkronkan!'));
+            loadOkeconnectProducts(); // Refresh data dari DB
+        } else {
+            alert('❌ Gagal Sync: ' + (result.message || 'Terjadi kesalahan server.'));
+            loadOkeconnectProducts();
+        }
+    } catch (err) {
+        alert('❌ Gagal menghubungi server backend untuk sync.');
+        loadOkeconnectProducts();
+    }
+}
 
         function renderOkeconnectFolders() {
             const container = document.getElementById('okeconnectContainer');

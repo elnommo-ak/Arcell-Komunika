@@ -7,24 +7,24 @@
     <!-- FontAwesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
-		<!-- 🔔 ONESIGNAL SDK v16 FINAL -->
-<script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
-<script>
-  window.OneSignalDeferred = window.OneSignalDeferred || [];
-  OneSignalDeferred.push(async function(OneSignal) {
-    await OneSignal.init({
-      appId: "c7cc2a6a-84b8-4579-9c6b-f4d8077f0f65",
-      safari_web_id: "web.onesignal.auto.58b504fd-a471-4836-bd65-020899577e4e",
-    });
+    <!-- 🔔 ONESIGNAL SDK v16 FINAL -->
+    <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
+    <script>
+      window.OneSignalDeferred = window.OneSignalDeferred || [];
+      OneSignalDeferred.push(async function(OneSignal) {
+        await OneSignal.init({
+          appId: "c7cc2a6a-84b8-4579-9c6b-f4d8077f0f65",
+          safari_web_id: "web.onesignal.auto.58b504fd-a471-4836-bd65-020899577e4e",
+        });
 
-    // 🔹 HUBUNGKAN NO HP USER SEBAGAI EXTERNAL ID
-    const userPhone = localStorage.getItem('userPhone') || localStorage.getItem('memberId');
-    if (userPhone) {
-      await OneSignal.login(String(userPhone));
-      console.log("✅ OneSignal External ID Synced:", userPhone);
-    }
-  });
-</script>
+        // 🔹 HUBUNGKAN NO HP USER SEBAGAI EXTERNAL ID
+        const userPhone = localStorage.getItem('userPhone') || localStorage.getItem('memberId');
+        if (userPhone) {
+          await OneSignal.login(String(userPhone));
+          console.log("✅ OneSignal External ID Synced:", userPhone);
+        }
+      });
+    </script>
     
     <!-- 🔒 PROTEKSI WAJIB LOGIN -->
     <script>
@@ -151,23 +151,23 @@
 
         <!-- 📌 BOTTOM NAVIGATION BAR INTEGRATED (SMART ROUTING) -->
         <div class="bottom-nav">
-            <a href="#" onclick="navigateReplace('home.html', this)" class="nav-item active">
+            <a href="javascript:void(0)" onclick="navigateReplace('home.html', this)" class="nav-item active">
                 <i class="fa-solid fa-house"></i>
                 <span>Home</span>
             </a>
-            <a href="#" onclick="navigateReplace('history.html', this)" class="nav-item">
+            <a href="javascript:void(0)" onclick="navigateReplace('history.html', this)" class="nav-item">
                 <i class="fa-solid fa-clock-rotate-left"></i>
                 <span>History</span>
             </a>
-            <a href="#" onclick="navigateReplace('rekap.html', this)" class="nav-item">
+            <a href="javascript:void(0)" onclick="navigateReplace('rekap.html', this)" class="nav-item">
                 <i class="fa-solid fa-chart-line"></i>
                 <span>Rekap</span>
             </a>
-            <a href="#" onclick="navigateReplace('kasir.html', this)" class="nav-item">
+            <a href="javascript:void(0)" onclick="navigateReplace('kasir.html', this)" class="nav-item">
                 <i class="fa-solid fa-cash-register"></i>
                 <span>Kasir</span>
             </a>
-            <a href="#" onclick="navigateReplace('akun.html', this)" class="nav-item">
+            <a href="javascript:void(0)" onclick="navigateReplace('akun.html', this)" class="nav-item">
                 <i class="fa-solid fa-user"></i>
                 <span>Akun</span>
             </a>
@@ -176,7 +176,7 @@
     </div>
 
     <!-- SMART ROUTING JAVASCRIPT -->
-		<script>
+    <script>
     // 1. Dapatkan halaman terakhir dari localStorage, jika tidak ada gunakan 'home.html'
     const lastPage = localStorage.getItem('activeTab') || 'home.html';
 
@@ -216,24 +216,7 @@
             element.classList.add('active');
         }
     }
-
-<!-- Taruh di paling bawah file HTML sebelum </body> -->
-document.addEventListener("DOMContentLoaded", function () {
-    const navItems = document.querySelectorAll(".bottom-nav a");
-    
-    navItems.forEach(item => {
-        item.addEventListener("click", function (e) {
-            e.preventDefault(); // Matikan link bawaan browser
-            const targetUrl = this.getAttribute("href");
-            
-            // Pindah halaman tanpa menumpuk riwayat di HP
-            if (targetUrl && targetUrl !== "#" && !window.location.pathname.endsWith(targetUrl)) {
-                window.location.replace(targetUrl);
-            }
-        });
-    });
-});
-</script>
+    </script>
 </body>
 </html>
 

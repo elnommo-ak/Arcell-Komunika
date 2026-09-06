@@ -3,6 +3,7 @@
   "name": "Arcell Komunika",
   "description": "Aplikasi PPOB dan Isi Saldo Terpercaya",
   "start_url": "/",
+  "scope": "/",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#4f46e5",
@@ -18,11 +19,5 @@
       "type": "image/png"
     }
   ]
-}
-
-{
-  "start_url": "/",
-  "scope": "/",
-  "display": "standalone"
 }
 
