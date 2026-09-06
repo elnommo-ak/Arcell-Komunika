@@ -301,13 +301,11 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
-            cursor: pointer;
             user-select: none;
         }
 
-        .folder-left { display: flex; align-items: center; gap: 8px; font-weight: 800; font-size: 0.82rem; color: var(--pink-accent); }
+        .folder-left { display: flex; align-items: center; gap: 8px; font-weight: 800; font-size: 0.82rem; color: var(--pink-accent); cursor: pointer; flex: 1; }
         .folder-icon { font-size: 0.95rem; color: var(--pink-accent); }
-        .drag-icon { color: var(--text-sub); font-size: 0.8rem; }
 
         .folder-right { display: flex; align-items: center; gap: 6px; }
         .badge-count {
@@ -318,7 +316,22 @@
         .folder-body { display: none; padding: 0 10px 10px 10px; flex-direction: column; gap: 6px; }
         .folder-card.open .folder-body { display: flex; }
         .folder-card.open .chevron { transform: rotate(180deg); }
-        .chevron { transition: transform 0.2s; color: var(--text-sub); font-size: 0.75rem; }
+        .chevron { transition: transform 0.2s; color: var(--text-sub); font-size: 0.75rem; cursor: pointer; }
+
+        .btn-order-nav {
+            background: rgba(255, 255, 255, 0.9);
+            border: 1px solid var(--glass-border);
+            border-radius: 6px;
+            padding: 2px 6px;
+            font-size: 0.65rem;
+            color: var(--text-main);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .btn-order-nav:hover {
+            background: var(--primary);
+            color: #ffffff;
+        }
 
         .prod-item {
             background: rgba(255, 255, 255, 0.8);
@@ -333,6 +346,16 @@
         .prod-sku { font-size: 0.65rem; color: var(--text-sub); font-weight: 700; margin-top: 1px; }
         .prod-sku span { color: var(--primary); }
         .prod-price { font-size: 0.8rem; font-weight: 900; color: #10b981; }
+
+        .status-badge {
+            font-size: 0.62rem;
+            font-weight: 800;
+            padding: 2px 6px;
+            border-radius: 6px;
+            text-transform: uppercase;
+        }
+        .status-badge.active { background: rgba(16, 185, 129, 0.15); color: #10b981; }
+        .status-badge.hidden { background: rgba(239, 68, 68, 0.15); color: #ef4444; }
 
         /* BOTTOM NAV */
         .bottom-nav {
@@ -367,6 +390,49 @@
     </div>
 
     <div class="container">
+        <!-- KELOLA KATEGORI CUSTOM BERSAMA -->
+        <div class="glass-card">
+            <h3><i class="fa-solid fa-folder-plus"></i> Kelola Kategori Custom (Global)</h3>
+            <div style="display: flex; gap: 6px;">
+                <input type="text" id="namaKategoriBaru" placeholder="Kategori Baru (misal: Freedom Internet)" style="flex: 1;">
+                <button onclick="tambahKategoriBaru()"><i class="fa-solid fa-plus"></i> Buat</button>
+            </div>
+            <div class="category-wrapper" id="daftarKategoriDisplay"></div>
+        </div>
+
+        <!-- FORM EDIT / TAMBAH PRODUK UNIFIED -->
+        <div class="glass-card">
+            <h3 id="formTitle"><i class="fa-solid fa-pen-to-square"></i> Tambah / Edit Produk</h3>
+            <div class="form-grid-inline" style="margin-bottom: 8px;">
+                <select id="providerSelect" style="max-width: 140px;">
+                    <option value="digiflazz">Digiflazz</option>
+                    <option value="okeconnect">OkeConnect</option>
+                </select>
+                <input type="text" id="sku" placeholder="SKU Kode / Kode Produk">
+                <input type="text" id="nama" placeholder="Nama Produk">
+                <select id="brand">
+                    <option value="INDOSAT">INDOSAT</option>
+                    <option value="TELKOMSEL">TELKOMSEL</option>
+                    <option value="XL">XL</option>
+                    <option value="AXIS">AXIS</option>
+                    <option value="TRI">TRI</option>
+                    <option value="SMARTFREN">SMARTFREN</option>
+                </select>
+                <select id="typeSelect">
+                    <option value="Umum">-- Pilih Kategori --</option>
+                </select>
+                <input type="number" id="harga" placeholder="Harga Jual (Rp)">
+                <select id="statusSelect" style="max-width: 150px;">
+                    <option value="1">Tampilkan (Aktif)</option>
+                    <option value="0">Sembunyikan</option>
+                </select>
+            </div>
+            <div style="display: flex; gap: 8px;">
+                <button onclick="simpanProduk()" style="flex: 1;"><i class="fa-solid fa-floppy-disk"></i> Simpan Produk</button>
+                <button onclick="resetForm()" class="btn-warning" id="btnReset" style="display: none;">Batal</button>
+            </div>
+        </div>
+
         <div class="nav-tabs">
             <button class="tab-btn active" onclick="switchTab('tab-saldo', event)"><i class="fa-solid fa-server"></i> Saldo</button>
             <button class="tab-btn" onclick="switchTab('tab-member', event)"><i class="fa-solid fa-users"></i> Member</button>
@@ -412,57 +478,26 @@
             </div>
         </div>
 
+        <!-- TAB DIGIFLAZZ -->
         <div id="tab-digiflazz" class="tab-content">
             <div class="glass-card">
-                <h3><i class="fa-solid fa-folder-plus"></i> Kelola Kategori Custom</h3>
-                <div style="display: flex; gap: 6px;">
-                    <input type="text" id="namaKategoriBaru" placeholder="Kategori Baru (misal: Freedom Internet)" style="flex: 1;">
-                    <button onclick="tambahKategoriBaru()"><i class="fa-solid fa-plus"></i> Buat</button>
-                </div>
-                <div class="category-wrapper" id="daftarKategoriDisplay"></div>
-            </div>
-
-            <div class="glass-card">
-                <h3 id="formTitle"><i class="fa-solid fa-pen-to-square"></i> Tambah / Edit Produk</h3>
-                <div class="form-grid-inline" style="margin-bottom: 8px;">
-                    <input type="text" id="sku" placeholder="SKU Kode">
-                    <input type="text" id="nama" placeholder="Nama Produk">
-                    <select id="brand">
-                        <option value="INDOSAT">INDOSAT</option>
-                        <option value="TELKOMSEL">TELKOMSEL</option>
-                        <option value="XL">XL</option>
-                        <option value="AXIS">AXIS</option>
-                        <option value="TRI">TRI</option>
-                        <option value="SMARTFREN">SMARTFREN</option>
-                    </select>
-                    <select id="typeSelect">
-                        <option value="Umum">-- Pilih Kategori --</option>
-                    </select>
-                    <input type="number" id="harga" placeholder="Harga Jual (Rp)">
-                </div>
-                <div style="display: flex; gap: 8px;">
-                    <button onclick="simpanProduk()" style="flex: 1;"><i class="fa-solid fa-floppy-disk"></i> Simpan</button>
-                    <button onclick="resetForm()" class="btn-warning" id="btnReset" style="display: none;">Batal</button>
-                </div>
-            </div>
-
-            <div class="glass-card">
-                <h3><i class="fa-solid fa-layer-group"></i> Pemindah Massal & Cari</h3>
+                <h3><i class="fa-solid fa-layer-group"></i> Pemindah Massal & Cari Digiflazz</h3>
                 <div class="bulk-bar">
-                    <select id="bulkCategorySelect" style="flex: 1; min-width: 140px;">
+                    <select id="bulkCategorySelectDigi" style="flex: 1; min-width: 140px;">
                         <option value="">-- Kategori Tujuan --</option>
                     </select>
-                    <button onclick="pindahkanPilihanMassal()" class="btn-success btn-sm">
-                        <i class="fa-solid fa-right-left"></i> Pindah (<span id="selectedCount">0</span>)
+                    <button onclick="pindahkanPilihanMassal('digiflazz')" class="btn-success btn-sm">
+                        <i class="fa-solid fa-right-left"></i> Pindah (<span id="selectedCountDigi">0</span>)
                     </button>
                 </div>
 
-                <input type="text" id="searchInput" placeholder="🔍 Cari SKU, Nama, Brand..." oninput="filterFoldersAndTable()" style="width: 100%;">
+                <input type="text" id="searchInput" placeholder="🔍 Cari SKU, Nama, Brand Digiflazz..." oninput="filterFoldersDigi()" style="width: 100%;">
             </div>
 
             <div id="folderContainer"></div>
         </div>
 
+        <!-- TAB OKECONNECT -->
         <div id="tab-okeconnect" class="tab-content">
             <div class="glass-card" style="padding:12px;">
                 <h3><i class="fa-solid fa-network-wired"></i> Konfigurasi Okeconnect H2H</h3>
@@ -476,8 +511,18 @@
             <div class="glass-card">
                 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
                     <h3 style="margin:0;"><i class="fa-solid fa-bolt"></i> Produk Okeconnect</h3>
-		    <button onclick="syncOkeconnectToDB()" class="btn-sm"><i class="fa-solid fa-rotate-right"></i> Sync JSON</button>
+                    <button onclick="syncOkeconnectToDB()" class="btn-sm"><i class="fa-solid fa-rotate-right"></i> Sync JSON</button>
                 </div>
+
+                <div class="bulk-bar">
+                    <select id="bulkCategorySelectOkec" style="flex: 1; min-width: 140px;">
+                        <option value="">-- Kategori Tujuan --</option>
+                    </select>
+                    <button onclick="pindahkanPilihanMassal('okeconnect')" class="btn-success btn-sm">
+                        <i class="fa-solid fa-right-left"></i> Pindah (<span id="selectedCountOkec">0</span>)
+                    </button>
+                </div>
+
                 <input type="text" id="searchOkeconnect" placeholder="🔍 Cari Kode, Produk, Kategori Okeconnect..." oninput="filterOkeconnect()" style="width: 100%; margin-bottom: 10px;">
                 <div id="okeconnectContainer">
                     <div style="text-align:center; color: var(--text-sub); padding: 15px; font-size:0.8rem;">Memuat data produk Okeconnect...</div>
@@ -486,6 +531,7 @@
         </div>
     </div>
 
+    <!-- MODAL MEMBER -->
     <div id="modalMember" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.3); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); z-index: 9999; justify-content: center; align-items: center;">
         <div class="glass-card" style="width: 90%; max-width: 400px; padding: 20px; background: rgba(255, 255, 255, 0.95);">
             <h3><i class="fa-solid fa-user-plus"></i> Tambah Member Baru</h3>
@@ -501,6 +547,7 @@
         </div>
     </div>
 
+    <!-- BOTTOM NAV -->
     <div class="bottom-nav">
         <a href="index.html" class="nav-item">
             <i class="fa-solid fa-house"></i>
@@ -524,20 +571,69 @@
         </a>
     </div>
 
-    <script>
+        <script>
         let rawData = [];
         let filteredData = [];
         let rawMembers = [];
         let rawTransactions = [];
         let rawOkeconnectData = [];
         let filteredOkeconnectData = [];
-        let customCategories = new Set(['Freedom Internet', 'Freedom Sensasi', 'Pulsa', 'Umum']);
-        let selectedSKUs = new Set();
+        let customCategories = ['Freedom Internet', 'Freedom Sensasi', 'Pulsa', 'Umum'];
+        let selectedSKUsDigi = new Set();
+        let selectedSKUsOkec = new Set();
 
-        /* PARSING WAKTU UTC TO WIB SAMAKAN HISTORY.HTML */
+        /* TOAST NOTIFICATION LOKAL */
+        function showToast(message, type = 'success') {
+            let toastContainer = document.getElementById('toastContainer');
+            if (!toastContainer) {
+                toastContainer = document.createElement('div');
+                toastContainer.id = 'toastContainer';
+                toastContainer.style.cssText = `
+                    position: fixed;
+                    top: 20px;
+                    right: 20px;
+                    z-index: 99999;
+                    display: flex;
+                    flex-direction: column;
+                    gap: 8px;
+                    pointer-events: none;
+                `;
+                document.body.appendChild(toastContainer);
+            }
+
+            const toast = document.createElement('div');
+            const bgColor = type === 'success' ? '#10b981' : (type === 'danger' ? '#ef4444' : '#f59e0b');
+            toast.style.cssText = `
+                background: ${bgColor};
+                color: #ffffff;
+                padding: 8px 14px;
+                border-radius: 10px;
+                font-size: 0.78rem;
+                font-weight: 800;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+                opacity: 0;
+                transform: translateY(-10px);
+                transition: all 0.25s ease;
+                pointer-events: auto;
+            `;
+            toast.innerText = message;
+            toastContainer.appendChild(toast);
+
+            setTimeout(() => {
+                toast.style.opacity = '1';
+                toast.style.transform = 'translateY(0)';
+            }, 10);
+
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                toast.style.transform = 'translateY(-10px)';
+                setTimeout(() => toast.remove(), 250);
+            }, 2000);
+        }
+
+        /* PARSING WAKTU UTC TO WIB */
         function parseWaktu(strWaktu) {
             if (!strWaktu) return { tanggal: '', jam: '', full: '', dateObj: new Date() };
-            
             let str = String(strWaktu).trim();
 
             if (!isNaN(str) && str !== '') {
@@ -623,7 +719,6 @@
             }
         }
 
-        /* RENDERING MEMBER MINIMALIS COMPACT */
         function renderTabelMember(list) {
             const el = document.getElementById('tabelMember');
             if (!list || list.length === 0) {
@@ -787,7 +882,7 @@
             
             const nominalBaru = parseInt(hargaBaru);
             if (isNaN(nominalBaru) || nominalBaru < 0) {
-                return alert("Nominal harga tidak valid!");
+                return showToast("Nominal harga tidak valid!", "danger");
             }
 
             try {
@@ -798,20 +893,20 @@
                 });
                 const result = await res.json();
                 if (result.status === 'success') {
-                    alert('✅ Harga transaksi berhasil diperbarui!');
+                    showToast('✅ Harga transaksi diperbarui!');
                     await loadTransactions();
                 } else {
-                    alert('❌ Gagal memperbarui harga: ' + (result.message || 'Terjadi kesalahan.'));
+                    showToast('❌ Gagal: ' + (result.message || 'Terjadi kesalahan.'), "danger");
                 }
             } catch (err) {
                 const targetTrx = rawTransactions.find(t => String(t.ref_id || t.id) === String(refId));
                 if (targetTrx) {
                     targetTrx.harga = nominalBaru;
                     targetTrx.price = nominalBaru;
-                    alert('✅ Harga berhasil diperbarui!');
+                    showToast('✅ Harga berhasil diperbarui!');
                     renderTabelMember(rawMembers);
                 } else {
-                    alert('❌ Error jaringan.');
+                    showToast('❌ Error jaringan.', "danger");
                 }
             }
         }
@@ -839,7 +934,7 @@
             const phone = document.getElementById('addPhoneMember').value.trim();
             const balance = parseFloat(document.getElementById('addSaldoMember').value) || 0;
 
-            if (!name || !phone) return alert('Nama dan Nomor HP Member wajib diisi!');
+            if (!name || !phone) return showToast('Nama dan Nomor HP Member wajib diisi!', 'danger');
 
             try {
                 const res = await fetch('/api/admin/members', {
@@ -850,11 +945,11 @@
 
                 const result = await res.json();
                 if (result.status === 'success') {
-                    alert('✅ Member baru berhasil ditambahkan!');
+                    showToast('✅ Member baru ditambahkan!');
                     tutupModalMember();
                     loadMembers();
-                } else alert('❌ Gagal: ' + result.message);
-            } catch (err) { alert('❌ Terjadi kesalahan jaringan'); }
+                } else showToast('❌ Gagal: ' + result.message, 'danger');
+            } catch (err) { showToast('❌ Terjadi kesalahan jaringan', 'danger'); }
         }
 
         async function hapusMember(phoneOrId) {
@@ -863,10 +958,10 @@
                 const res = await fetch('/api/admin/members/' + phoneOrId, { method: 'DELETE' });
                 const result = await res.json();
                 if (result.status === 'success') {
-                    alert('✅ Member berhasil dihapus!');
+                    showToast('✅ Member berhasil dihapus!', 'danger');
                     loadMembers();
-                } else alert('❌ Gagal: ' + result.message);
-            } catch (err) { alert('❌ Error jaringan'); }
+                } else showToast('❌ Gagal: ' + result.message, 'danger');
+            } catch (err) { showToast('❌ Error jaringan', 'danger'); }
         }
 
         function pilihUbahSaldo(phone) {
@@ -879,7 +974,7 @@
             const amount = parseInt(document.getElementById('saldoJumlah').value) || 0;
             const action = document.getElementById('saldoAksi').value;
 
-            if (!phone || amount <= 0) return alert('Input tidak valid!');
+            if (!phone || amount <= 0) return showToast('Input tidak valid!', 'danger');
 
             try {
                 const res = await fetch('/api/admin/update-user-balance', {
@@ -889,12 +984,12 @@
                 });
                 const result = await res.json();
                 if (result.status === 'success') {
-                    alert('✅ ' + result.message);
+                    showToast('✅ ' + result.message);
                     document.getElementById('saldoNoHp').value = '';
                     document.getElementById('saldoJumlah').value = '';
                     loadMembers();
-                } else alert('❌ ' + result.message);
-            } catch (err) { alert('❌ Error jaringan'); }
+                } else showToast('❌ ' + result.message, 'danger');
+            } catch (err) { showToast('❌ Error jaringan', 'danger'); }
         }
 
         async function loadTransactions() {
@@ -911,13 +1006,37 @@
             if (saved) {
                 try {
                     const parsed = JSON.parse(saved);
-                    if (Array.isArray(parsed)) parsed.forEach(c => customCategories.add(c));
+                    if (Array.isArray(parsed) && parsed.length > 0) {
+                        customCategories = parsed;
+                    }
                 } catch(e){}
             }
         }
 
         function saveCategoriesToStorage() {
-            localStorage.setItem('arcell_custom_categories', JSON.stringify(Array.from(customCategories)));
+            localStorage.setItem('arcell_custom_categories', JSON.stringify(customCategories));
+            fetch('/api/admin/categories/reorder', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ categories: customCategories })
+            }).catch(e => console.log("Reorder saved locally"));
+        }
+
+        function moveCategory(catName, direction) {
+            const index = customCategories.indexOf(catName);
+            if (index === -1) return;
+
+            const targetIndex = direction === 'up' ? index - 1 : index + 1;
+            if (targetIndex < 0 || targetIndex >= customCategories.length) return;
+
+            const temp = customCategories[index];
+            customCategories[index] = customCategories[targetIndex];
+            customCategories[targetIndex] = temp;
+
+            saveCategoriesToStorage();
+            renderCategoryBadges();
+            renderFolders();
+            renderOkeconnectFolders();
         }
 
         async function loadProduk() {
@@ -929,7 +1048,9 @@
 
                 rawData.forEach(p => {
                     const cat = p.type || p.category;
-                    if(cat) customCategories.add(cat);
+                    if(cat && !customCategories.includes(cat)) {
+                        customCategories.push(cat);
+                    }
                 });
 
                 saveCategoriesToStorage();
@@ -948,16 +1069,19 @@
             });
 
             document.getElementById('daftarKategoriDisplay').innerHTML = html || '<i>Belum ada kategori.</i>';
-            document.getElementById('bulkCategorySelect').innerHTML = optionsHtml;
+            document.getElementById('bulkCategorySelectDigi').innerHTML = optionsHtml;
+            document.getElementById('bulkCategorySelectOkec').innerHTML = optionsHtml;
             document.getElementById('typeSelect').innerHTML = selectTypeHtml;
         }
 
         function tambahKategoriBaru() {
             const input = document.getElementById('namaKategoriBaru');
             const catName = input.value.trim();
-            if(!catName) return alert('Ketik nama kategori terlebih dahulu!');
+            if(!catName) return showToast('Ketik nama kategori terlebih dahulu!', 'danger');
             
-            customCategories.add(catName);
+            if(!customCategories.includes(catName)) {
+                customCategories.push(catName);
+            }
             saveCategoriesToStorage();
             
             fetch('/api/admin/categories', {
@@ -967,22 +1091,41 @@
             }).catch(e => console.log("Category saved locally"));
 
             input.value = '';
+            showToast(`✅ Kategori "${catName}" dibuat!`);
             renderCategoryBadges();
             renderFolders();
+            renderOkeconnectFolders();
         }
 
-        function hapusKategoriList(catName) {
-            if (!confirm(`Hapus kategori "${catName}"?`)) return;
-            customCategories.delete(catName);
-            saveCategoriesToStorage();
+        async function hapusKategoriList(catName) {
+            if (!confirm(`Hapus kategori "${catName}" beserta SELURUH produk di dalamnya secara permanen?`)) return;
             
-            fetch('/api/admin/categories/' + encodeURIComponent(catName), { method: 'DELETE' })
-            .catch(e => console.log("Category deleted locally"));
+            customCategories = customCategories.filter(c => c !== catName);
+            saveCategoriesToStorage();
 
+            try {
+                await fetch('/api/admin/categories/' + encodeURIComponent(catName), { 
+                    method: 'DELETE',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ deleteProducts: true }) 
+                });
+            } catch(e) {
+                console.log("Category deleted locally");
+            }
+
+            rawData = rawData.filter(p => (p.type || p.category) !== catName);
+            filteredData = filteredData.filter(p => (p.type || p.category) !== catName);
+
+            rawOkeconnectData = rawOkeconnectData.filter(p => (p.kategori || p.category || p.type || p.brand) !== catName);
+            filteredOkeconnectData = filteredOkeconnectData.filter(p => (p.kategori || p.category || p.type || p.brand) !== catName);
+
+            showToast(`🗑️ Kategori "${catName}" dihapus!`, 'danger');
             renderCategoryBadges();
             renderFolders();
+            renderOkeconnectFolders();
         }
 
+        /* RENDER ACCORDION FOLDER DIGIFLAZZ */
         function renderFolders() {
             const container = document.getElementById("folderContainer");
             const grouped = {};
@@ -998,20 +1141,25 @@
 
             let html = '';
 
-            for (const catName in grouped) {
+            customCategories.forEach((catName, idx) => {
+                if (!(catName in grouped)) return;
                 const prods = grouped[catName];
+                const isFirst = idx === 0;
+                const isLast = idx === customCategories.length - 1;
 
                 html += `
                     <div class="folder-card">
-                        <div class="folder-header" onclick="toggleFolder(this)">
-                            <div class="folder-left">
-                                <i class="fa-solid fa-grip-vertical drag-icon"></i>
+                        <div class="folder-header">
+                            <div class="folder-left" onclick="toggleFolder(this)">
                                 <i class="fa-solid fa-folder-closed folder-icon"></i>
                                 <span>${catName}</span>
                             </div>
                             <div class="folder-right">
+                                <button class="btn-order-nav" onclick="moveCategory('${catName}', 'up')" ${isFirst ? 'disabled style="opacity:0.3;"' : ''}><i class="fa-solid fa-arrow-up"></i></button>
+                                <button class="btn-order-nav" onclick="moveCategory('${catName}', 'down')" ${isLast ? 'disabled style="opacity:0.3;"' : ''}><i class="fa-solid fa-arrow-down"></i></button>
                                 <span class="badge-count">${prods.length} Produk</span>
-                                <i class="fa-solid fa-chevron-down chevron"></i>
+                                <button class="btn-sm btn-danger" style="padding:2px 6px; font-size:0.65rem;" onclick="hapusKategoriList('${catName}')" title="Hapus Kategori Permanen"><i class="fa-solid fa-trash"></i></button>
+                                <i class="fa-solid fa-chevron-down chevron" onclick="toggleFolder(this)"></i>
                             </div>
                         </div>
                         <div class="folder-body">
@@ -1023,12 +1171,14 @@
                     prods.forEach(p => {
                         const sku = p.buyer_sku_code || p.sku || '-';
                         const price = parseFloat(p.jual || p.price || 0);
-                        const isChecked = selectedSKUs.has(sku) ? 'checked' : '';
+                        const isChecked = selectedSKUsDigi.has(sku) ? 'checked' : '';
+                        const statusVal = p.status !== undefined ? String(p.status) : '1';
+                        const isAktif = statusVal === '1' || statusVal.toLowerCase() === 'aktif' || statusVal.toLowerCase() === 'true';
                         
                         html += `
                             <div class="prod-item">
                                 <div style="display:flex; align-items:center; gap:8px;">
-                                    <input type="checkbox" value="${sku}" ${isChecked} onchange="toggleSelect('${sku}', this.checked)">
+                                    <input type="checkbox" value="${sku}" ${isChecked} onchange="toggleSelect('digiflazz', '${sku}', this.checked)">
                                     <div>
                                         <div class="prod-name">${p.product_name || p.nama_produk}</div>
                                         <div class="prod-sku">SKU: <span>${sku}</span> | Brand: <b>${p.brand}</b></div>
@@ -1036,7 +1186,12 @@
                                 </div>
                                 <div style="text-align:right;">
                                     <div class="prod-price">Rp ${price.toLocaleString('id-ID')}</div>
-                                    <button class="btn-sm btn-warning" style="margin-top:2px; padding:2px 6px; font-size:0.65rem;" onclick="editProduk('${sku}', '${(p.product_name||'').replace(/'/g, "\\'")}', '${p.brand}', '${p.type||'Umum'}', ${price})"><i class="fa-solid fa-pen-to-square"></i> Edit</button>
+                                    <div style="display:flex; gap:4px; align-items:center; justify-content:flex-end; margin-top:3px;">
+                                        <span class="status-badge ${isAktif ? 'active' : 'hidden'}">${isAktif ? 'Tampil' : 'Sembunyi'}</span>
+                                        <button class="btn-sm btn-warning" style="padding:2px 6px; font-size:0.65rem;" onclick="editProduk('digiflazz', '${sku}', '${(p.product_name||'').replace(/'/g, "\\'")}', '${p.brand}', '${p.type||'Umum'}', ${price}, '${statusVal}')"><i class="fa-solid fa-pen-to-square"></i></button>
+                                        <button class="btn-sm ${isAktif ? 'btn-danger' : 'btn-success'}" style="padding:2px 6px; font-size:0.65rem;" onclick="toggleStatusProduk('digiflazz', '${sku}', '${isAktif ? '0' : '1'}', this)"><i class="fa-solid ${isAktif ? 'fa-eye-slash' : 'fa-eye'}"></i></button>
+                                        <button class="btn-sm btn-danger" style="padding:2px 6px; font-size:0.65rem;" onclick="hapusProdukPermanen('digiflazz', '${sku}', this)"><i class="fa-solid fa-trash"></i></button>
+                                    </div>
                                 </div>
                             </div>
                         `;
@@ -1044,7 +1199,7 @@
                 }
 
                 html += `</div></div>`;
-            }
+            });
 
             container.innerHTML = html;
         }
@@ -1060,58 +1215,78 @@
             }
         }
 
-        function toggleSelect(sku, checked) {
-            if (checked) selectedSKUs.add(sku); else selectedSKUs.delete(sku);
-            document.getElementById('selectedCount').innerText = selectedSKUs.size;
+        function toggleSelect(provider, sku, checked) {
+            if (provider === 'digiflazz') {
+                if (checked) selectedSKUsDigi.add(sku); else selectedSKUsDigi.delete(sku);
+                document.getElementById('selectedCountDigi').innerText = selectedSKUsDigi.size;
+            } else {
+                if (checked) selectedSKUsOkec.add(sku); else selectedSKUsOkec.delete(sku);
+                document.getElementById('selectedCountOkec').innerText = selectedSKUsOkec.size;
+            }
         }
 
-        async function pindahkanPilihanMassal() {
-            const catName = document.getElementById('bulkCategorySelect').value;
-            if(!catName) return alert('Pilih kategori tujuan!');
-            if(selectedSKUs.size === 0) return alert('Centang minimal 1 produk!');
+        async function pindahkanPilihanMassal(provider) {
+            const isDigi = provider === 'digiflazz';
+            const catSelectEl = isDigi ? document.getElementById('bulkCategorySelectDigi') : document.getElementById('bulkCategorySelectOkec');
+            const selectedSet = isDigi ? selectedSKUsDigi : selectedSKUsOkec;
+            const catName = catSelectEl.value;
+
+            if(!catName) return showToast('Pilih kategori tujuan!', 'danger');
+            if(selectedSet.size === 0) return showToast('Centang minimal 1 produk!', 'danger');
 
             const res = await fetch('/api/admin/update-category', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ skus: Array.from(selectedSKUs), categoryName: catName })
+                body: JSON.stringify({ skus: Array.from(selectedSet), categoryName: catName, provider: provider })
             });
 
             const result = await res.json();
             if(result.status === 'success') {
-                alert(`✅ ${selectedSKUs.size} produk berhasil dipindah ke "${catName}"!`);
-                selectedSKUs.clear();
-                document.getElementById('selectedCount').innerText = 0;
-                loadProduk();
+                showToast(`✅ ${selectedSet.size} produk dipindah ke "${catName}"!`);
+                selectedSet.clear();
+                if(isDigi) {
+                    document.getElementById('selectedCountDigi').innerText = 0;
+                    loadProduk();
+                } else {
+                    document.getElementById('selectedCountOkec').innerText = 0;
+                    loadOkeconnectProducts();
+                }
             }
         }
 
-        function editProduk(sku, nama, brand, type, harga) {
+        function editProduk(provider, sku, nama, brand, type, harga, status = '1') {
+            document.getElementById('providerSelect').value = provider;
             document.getElementById('sku').value = sku;
             document.getElementById('sku').readOnly = true;
             document.getElementById('nama').value = nama;
             document.getElementById('brand').value = brand;
             document.getElementById('typeSelect').value = type;
             document.getElementById('harga').value = harga;
-            document.getElementById('formTitle').innerHTML = '<i class="fa-solid fa-pen-to-square"></i> Edit Produk: ' + sku;
+            document.getElementById('statusSelect').value = status === '0' || status === 'false' ? '0' : '1';
+            document.getElementById('formTitle').innerHTML = '<i class="fa-solid fa-pen-to-square"></i> Edit Produk (' + provider.toUpperCase() + '): ' + sku;
             document.getElementById('btnReset').style.display = 'inline-block';
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
         function resetForm() {
+            document.getElementById('providerSelect').value = 'digiflazz';
             document.getElementById('sku').value = '';
             document.getElementById('sku').readOnly = false;
             document.getElementById('nama').value = '';
             document.getElementById('harga').value = '';
-            document.getElementById('formTitle').innerHTML = '<i class="fa-solid fa-pen-to-square"></i> Tambah / Edit Produk Digiflazz';
+            document.getElementById('statusSelect').value = '1';
+            document.getElementById('formTitle').innerHTML = '<i class="fa-solid fa-pen-to-square"></i> Tambah / Edit Produk';
             document.getElementById('btnReset').style.display = 'none';
         }
 
         async function simpanProduk() {
+            const providerVal = document.getElementById('providerSelect').value;
             const skuVal = document.getElementById('sku').value.trim();
             const namaVal = document.getElementById('nama').value.trim();
             const hargaVal = parseInt(document.getElementById('harga').value) || 0;
+            const statusVal = document.getElementById('statusSelect').value;
 
-            if(!skuVal || !namaVal) return alert('SKU dan Nama Produk wajib diisi!');
+            if(!skuVal || !namaVal) return showToast('SKU Kode dan Nama Produk wajib diisi!', 'danger');
 
             const body = {
                 buyer_sku_code: skuVal,
@@ -1119,7 +1294,9 @@
                 brand: document.getElementById('brand').value,
                 type: document.getElementById('typeSelect').value || 'Umum',
                 price: hargaVal,
-                jual: hargaVal
+                jual: hargaVal,
+                status: statusVal,
+                provider: providerVal
             };
 
             await fetch('/api/admin/products', {
@@ -1128,12 +1305,12 @@
                 body: JSON.stringify(body)
             });
 
-            alert('✅ Produk berhasil disimpan!');
+            showToast('✅ Produk ' + providerVal.toUpperCase() + ' disimpan!');
             resetForm();
-            loadProduk();
+            if(providerVal === 'digiflazz') loadProduk(); else loadOkeconnectProducts();
         }
 
-        function filterFoldersAndTable() {
+        function filterFoldersDigi() {
             const kw = document.getElementById('searchInput').value.toLowerCase();
             filteredData = rawData.filter(p => {
                 const sku = String(p.buyer_sku_code || p.sku || '').toLowerCase();
@@ -1144,65 +1321,74 @@
             renderFolders();
         }
 
-	/* === INTEGRASI OKECONNECT VIA BACKEND SQLITE (LOKAL & BEBAS CORS) === */
+        /* === INTEGRASI OKECONNECT === */
 
-// 1. Memuat produk Okeconnect dari Database SQLite Server Anda
-async function loadOkeconnectProducts() {
-    const container = document.getElementById('okeconnectContainer');
-    container.innerHTML = `<div style="text-align:center; color: var(--text-sub); padding: 15px; font-size:0.8rem;"><i class="fa-solid fa-spinner fa-spin"></i> Memuat data produk Okeconnect dari database...</div>`;
-    
-    try {
-        // Ambil data dari API backend Express Anda sendiri
-        const res = await fetch('/api/products/okeconnect?t=' + Date.now());
-        const result = await res.json();
-        
-        let list = [];
-        if (result.status === 'success' && Array.isArray(result.data)) {
-            list = result.data;
-        } else if (Array.isArray(result)) {
-            list = result;
+        async function loadOkeconnectProducts() {
+            const container = document.getElementById('okeconnectContainer');
+            container.innerHTML = `<div style="text-align:center; color: var(--text-sub); padding: 15px; font-size:0.8rem;"><i class="fa-solid fa-spinner fa-spin"></i> Memuat data produk Okeconnect...</div>`;
+            
+            try {
+                const res = await fetch('/api/products/okeconnect?t=' + Date.now());
+                const result = await res.json();
+                
+                let list = [];
+                if (result.status === 'success' && Array.isArray(result.data)) {
+                    list = result.data;
+                } else if (Array.isArray(result)) {
+                    list = result;
+                }
+
+                rawOkeconnectData = list;
+                filteredOkeconnectData = [...rawOkeconnectData];
+
+                // Daftarkan kategori baru bawaan Okeconnect ke daftar kategori global
+                rawOkeconnectData.forEach(p => {
+                    const cat = p.kategori || p.category || p.type || p.brand;
+                    if(cat && !customCategories.includes(cat)) {
+                        customCategories.push(cat);
+                    }
+                });
+
+                saveCategoriesToStorage();
+                renderCategoryBadges();
+
+                if (rawOkeconnectData.length === 0) {
+                    container.innerHTML = `
+                        <div style="text-align:center; color: var(--text-sub); padding: 20px; font-size:0.8rem;">
+                            Belum ada data produk Okeconnect di Database.<br>
+                            Silakan klik tombol <b>"Sync JSON"</b> di atas untuk menarik data terbaru.
+                        </div>`;
+                } else {
+                    renderOkeconnectFolders();
+                }
+            } catch (err) {
+                console.error(err);
+                container.innerHTML = `<div style="text-align:center; color:#ef4444; padding:15px; font-size:0.8rem;">❌ Gagal memuat data Okeconnect.</div>`;
+            }
         }
 
-        rawOkeconnectData = list;
-        filteredOkeconnectData = [...rawOkeconnectData];
+        async function syncOkeconnectToDB() {
+            const container = document.getElementById('okeconnectContainer');
+            container.innerHTML = `<div style="text-align:center; color: var(--primary); padding: 15px; font-size:0.8rem;"><i class="fa-solid fa-sync fa-spin"></i> Menyinkronkan data Okeconnect ke Database...</div>`;
 
-        if (rawOkeconnectData.length === 0) {
-            container.innerHTML = `
-                <div style="text-align:center; color: var(--text-sub); padding: 20px; font-size:0.8rem;">
-                    Belum ada data produk Okeconnect di Database SQLite.<br>
-                    Silakan klik tombol <b>"Sync JSON"</b> di atas untuk menarik data terbaru.
-                </div>`;
-        } else {
-            renderOkeconnectFolders();
+            try {
+                const res = await fetch('/api/admin/sync-okeconnect', { method: 'POST' });
+                const result = await res.json();
+
+                if (result.status === 'success') {
+                    showToast('✅ Sync Berhasil: ' + (result.message || 'Data disinkronkan!'));
+                    loadOkeconnectProducts();
+                } else {
+                    showToast('❌ Gagal Sync: ' + (result.message || 'Terjadi kesalahan server.'), 'danger');
+                    loadOkeconnectProducts();
+                }
+            } catch (err) {
+                showToast('❌ Gagal menghubungi server backend untuk sync.', 'danger');
+                loadOkeconnectProducts();
+            }
         }
-    } catch (err) {
-        console.error(err);
-        container.innerHTML = `<div style="text-align:center; color:#ef4444; padding:15px; font-size:0.8rem;">❌ Gagal memuat data Okeconnect dari Server DB Lokal.</div>`;
-    }
-}
 
-// 2. Tombol Sync: Meminta Backend Server Nembak ke Okeconnect & Menyimpan ke SQLite
-async function syncOkeconnectToDB() {
-    const container = document.getElementById('okeconnectContainer');
-    container.innerHTML = `<div style="text-align:center; color: var(--primary); padding: 15px; font-size:0.8rem;"><i class="fa-solid fa-sync fa-spin"></i> Sedang menyinkronkan data Okeconnect ke Database SQLite...</div>`;
-
-    try {
-        const res = await fetch('/api/admin/sync-okeconnect', { method: 'POST' });
-        const result = await res.json();
-
-        if (result.status === 'success') {
-            alert('✅ Sync Berhasil: ' + (result.message || 'Data disinkronkan!'));
-            loadOkeconnectProducts(); // Refresh data dari DB
-        } else {
-            alert('❌ Gagal Sync: ' + (result.message || 'Terjadi kesalahan server.'));
-            loadOkeconnectProducts();
-        }
-    } catch (err) {
-        alert('❌ Gagal menghubungi server backend untuk sync.');
-        loadOkeconnectProducts();
-    }
-}
-
+        /* RENDER ACCORDION FOLDER OKECONNECT DENGAN KATEGORI OTOMATIS DINAMIS */
         function renderOkeconnectFolders() {
             const container = document.getElementById('okeconnectContainer');
             if (!filteredOkeconnectData || filteredOkeconnectData.length === 0) {
@@ -1211,61 +1397,168 @@ async function syncOkeconnectToDB() {
             }
 
             const grouped = {};
-            filteredOkeconnectData.forEach(item => {
-                const cat = item.kategori || item.category || item.brand || 'Umum Okeconnect';
-                if (!grouped[cat]) grouped[cat] = [];
-                grouped[cat].push(item);
+            
+            // Inisialisasi daftar grup berdasarkan kategori global
+            customCategories.forEach(cat => grouped[cat] = []);
+
+            // Kelompokkan produk sesuai kategori bawaannya
+            filteredOkeconnectData.forEach(p => {
+                const cat = p.kategori || p.category || p.type || p.brand || 'Umum';
+                if (!grouped[cat]) {
+                    grouped[cat] = [];
+                    if (!customCategories.includes(cat)) {
+                        customCategories.push(cat);
+                    }
+                }
+                grouped[cat].push(p);
             });
 
+            // Urutkan kategori berdasarkan urutan customCategories
+            const displayCategories = customCategories.filter(cat => grouped[cat] && grouped[cat].length > 0);
+
             let html = '';
-            for (const catName in grouped) {
+
+            displayCategories.forEach((catName, idx) => {
                 const prods = grouped[catName];
+                const isFirst = idx === 0;
+                const isLast = idx === displayCategories.length - 1;
+
                 html += `
                     <div class="folder-card">
-                        <div class="folder-header" onclick="toggleFolder(this)">
-                            <div class="folder-left">
+                        <div class="folder-header">
+                            <div class="folder-left" onclick="toggleFolder(this)">
                                 <i class="fa-solid fa-bolt folder-icon" style="color:var(--primary);"></i>
                                 <span>${catName}</span>
                             </div>
                             <div class="folder-right">
+                                <button class="btn-order-nav" onclick="moveCategory('${catName}', 'up')" ${isFirst ? 'disabled style="opacity:0.3;"' : ''}><i class="fa-solid fa-arrow-up"></i></button>
+                                <button class="btn-order-nav" onclick="moveCategory('${catName}', 'down')" ${isLast ? 'disabled style="opacity:0.3;"' : ''}><i class="fa-solid fa-arrow-down"></i></button>
                                 <span class="badge-count">${prods.length} Item</span>
-                                <i class="fa-solid fa-chevron-down chevron"></i>
+                                <button class="btn-sm btn-danger" style="padding:2px 6px; font-size:0.65rem;" onclick="hapusKategoriList('${catName}')" title="Hapus Kategori Permanen"><i class="fa-solid fa-trash"></i></button>
+                                <i class="fa-solid fa-chevron-down chevron" onclick="toggleFolder(this)"></i>
                             </div>
                         </div>
                         <div class="folder-body">
                 `;
 
                 prods.forEach(p => {
-                    const kode = p.kode || p.code || p.sku || '-';
-                    const nama = p.nama || p.product_name || p.layanan || '-';
-                    const harga = parseFloat(p.harga || p.price || 0);
-                    const status = p.status !== undefined ? (String(p.status) === '1' || String(p.status).toLowerCase() === 'gangguan' ? p.status : 'Aktif') : 'Aktif';
+                    const kode = p.buyer_sku_code || p.kode || p.code || p.sku || '-';
+                    const nama = p.product_name || p.nama || p.layanan || '-';
+                    const price = parseFloat(p.jual || p.price || p.harga || 0);
+                    const isChecked = selectedSKUsOkec.has(kode) ? 'checked' : '';
+                    const statusVal = p.status !== undefined ? String(p.status) : '1';
+                    const isAktif = statusVal === '1' || statusVal.toLowerCase() === 'aktif' || statusVal.toLowerCase() === 'true';
 
                     html += `
                         <div class="prod-item">
-                            <div>
-                                <div class="prod-name">${nama}</div>
-                                <div class="prod-sku">Kode: <span>${kode}</span> | Status: <b>${status}</b></div>
+                            <div style="display:flex; align-items:center; gap:8px;">
+                                <input type="checkbox" value="${kode}" ${isChecked} onchange="toggleSelect('okeconnect', '${kode}', this.checked)">
+                                <div>
+                                    <div class="prod-name">${nama}</div>
+                                    <div class="prod-sku">Kode: <span>${kode}</span> | Brand: <b>${p.brand || 'OKECONNECT'}</b></div>
+                                </div>
                             </div>
                             <div style="text-align:right;">
-                                <div class="prod-price">Rp ${harga.toLocaleString('id-ID')}</div>
+                                <div class="prod-price">Rp ${price.toLocaleString('id-ID')}</div>
+                                <div style="display:flex; gap:4px; align-items:center; justify-content:flex-end; margin-top:3px;">
+                                    <span class="status-badge ${isAktif ? 'active' : 'hidden'}">${isAktif ? 'Tampil' : 'Sembunyi'}</span>
+                                    <button class="btn-sm btn-warning" style="padding:2px 6px; font-size:0.65rem;" onclick="editProduk('okeconnect', '${kode}', '${nama.replace(/'/g, "\\'")}', '${p.brand || 'OKECONNECT'}', '${p.kategori || p.category || p.type || 'Umum'}', ${price}, '${statusVal}')"><i class="fa-solid fa-pen-to-square"></i></button>
+                                    <button class="btn-sm ${isAktif ? 'btn-danger' : 'btn-success'}" style="padding:2px 6px; font-size:0.65rem;" onclick="toggleStatusProduk('okeconnect', '${kode}', '${isAktif ? '0' : '1'}', this)"><i class="fa-solid ${isAktif ? 'fa-eye-slash' : 'fa-eye'}"></i></button>
+                                    <button class="btn-sm btn-danger" style="padding:2px 6px; font-size:0.65rem;" onclick="hapusProdukPermanen('okeconnect', '${kode}', this)"><i class="fa-solid fa-trash"></i></button>
+                                </div>
                             </div>
                         </div>
                     `;
                 });
 
                 html += `</div></div>`;
-            }
+            });
 
             container.innerHTML = html;
+        }
+
+        /* TOGGLE STATUS TANPA TUTUP DROPDOWN */
+        async function toggleStatusProduk(provider, kodeSku, statusBaru, btnEl) {
+            const prodItemEl = btnEl ? btnEl.closest('.prod-item') : null;
+            const badgeEl = prodItemEl ? prodItemEl.querySelector('.status-badge') : null;
+
+            const isAktifBaru = statusBaru === '1';
+            if (badgeEl) {
+                badgeEl.className = `status-badge ${isAktifBaru ? 'active' : 'hidden'}`;
+                badgeEl.innerText = isAktifBaru ? 'Tampil' : 'Sembunyi';
+            }
+            if (btnEl) {
+                btnEl.className = `btn-sm ${isAktifBaru ? 'btn-danger' : 'btn-success'}`;
+                btnEl.setAttribute('onclick', `toggleStatusProduk('${provider}', '${kodeSku}', '${isAktifBaru ? '0' : '1'}', this)`);
+                btnEl.innerHTML = `<i class="fa-solid ${isAktifBaru ? 'fa-eye-slash' : 'fa-eye'}"></i>`;
+            }
+
+            const targetArr = provider === 'digiflazz' ? rawData : rawOkeconnectData;
+            const item = targetArr.find(p => (p.buyer_sku_code || p.kode || p.code || p.sku) === kodeSku);
+            if (item) item.status = statusBaru;
+
+            showToast(`Status ${kodeSku}: ${isAktifBaru ? 'Tampil' : 'Sembunyi'}`);
+
+            try {
+                const endpoint = provider === 'digiflazz' 
+                    ? '/api/admin/products/status' 
+                    : '/api/admin/products/okeconnect/status';
+
+                await fetch(endpoint, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ sku: kodeSku, code: kodeSku, status: statusBaru })
+                });
+            } catch (err) {
+                console.warn("Status tersimpan di lokal");
+            }
+        }
+
+        /* HAPUS PRODUK TANPA TUTUP DROPDOWN */
+        async function hapusProdukPermanen(provider, kodeSku, btnEl) {
+            if (!confirm(`Hapus produk (${kodeSku}) secara permanen?`)) return;
+
+            const prodItemEl = btnEl ? btnEl.closest('.prod-item') : null;
+            if (prodItemEl) {
+                prodItemEl.style.transition = 'all 0.2s ease';
+                prodItemEl.style.opacity = '0';
+                prodItemEl.style.transform = 'scale(0.95)';
+                setTimeout(() => prodItemEl.remove(), 200);
+            }
+
+            if (provider === 'digiflazz') {
+                rawData = rawData.filter(p => (p.buyer_sku_code || p.sku) !== kodeSku);
+                filteredData = filteredData.filter(p => (p.buyer_sku_code || p.sku) !== kodeSku);
+            } else {
+                rawOkeconnectData = rawOkeconnectData.filter(p => {
+                    const idProd = p.buyer_sku_code || p.kode || p.code || p.sku || '';
+                    return String(idProd).toLowerCase() !== String(kodeSku).toLowerCase();
+                });
+                filteredOkeconnectData = filteredOkeconnectData.filter(p => {
+                    const idProd = p.buyer_sku_code || p.kode || p.code || p.sku || '';
+                    return String(idProd).toLowerCase() !== String(kodeSku).toLowerCase();
+                });
+            }
+
+            showToast(`🗑️ Produk ${kodeSku} dihapus`, 'danger');
+
+            try {
+                const endpoint = provider === 'digiflazz' 
+                    ? '/api/admin/products/' + encodeURIComponent(kodeSku)
+                    : '/api/admin/products/okeconnect/' + encodeURIComponent(kodeSku);
+
+                await fetch(endpoint, { method: 'DELETE' });
+            } catch (err) {
+                console.warn("Produk dihapus dari lokal");
+            }
         }
 
         function filterOkeconnect() {
             const kw = document.getElementById('searchOkeconnect').value.toLowerCase();
             filteredOkeconnectData = rawOkeconnectData.filter(p => {
-                const kode = String(p.kode || p.code || p.sku || '').toLowerCase();
-                const nama = String(p.nama || p.product_name || p.layanan || '').toLowerCase();
-                const cat = String(p.kategori || p.category || p.brand || '').toLowerCase();
+                const kode = String(p.buyer_sku_code || p.kode || p.code || p.sku || '').toLowerCase();
+                const nama = String(p.product_name || p.nama || p.layanan || '').toLowerCase();
+                const cat = String(p.kategori || p.category || p.type || p.brand || '').toLowerCase();
                 return kode.includes(kw) || nama.includes(kw) || cat.includes(kw);
             });
             renderOkeconnectFolders();
@@ -1280,6 +1573,7 @@ async function syncOkeconnectToDB() {
             loadOkeconnectProducts();
         };
     </script>
+
 </body>
 </html>
 

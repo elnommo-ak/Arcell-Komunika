@@ -224,6 +224,30 @@
         }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
+        /* BOTTOM NAV */
+        .bottom-nav {
+            position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 480px;
+            height: var(--bottom-nav-height); 
+            background: rgba(255, 255, 255, 0.75); 
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border-top: 1px solid rgba(255, 255, 255, 0.8);
+            display: flex; justify-content: space-around;
+            align-items: center; border-top-left-radius: 18px;
+            border-top-right-radius: 18px; padding: 0 10px; z-index: 999;
+            box-shadow: 0 -5px 20px rgba(0,0,0,0.05);
+        }
+        .nav-item {
+            display: flex; flex-direction: column; align-items: center; justify-content: center; text-decoration: none;
+            color: var(--text-muted); font-size: 10px; font-weight: 600; width: 56px; height: 46px;
+            border-radius: 12px; transition: all 0.3s ease;
+        }
+        .nav-item i { font-size: 16px; margin-bottom: 2px; }
+        .nav-item.active { 
+            color: var(--accent-purple); 
+            background: rgba(255, 255, 255, 0.9);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
     </style>
 </head>
 <body>
@@ -247,6 +271,30 @@
 
 </div>
 
+<!-- BOTTOM NAV -->
+<div class="bottom-nav">
+    <a href="index.html" class="nav-item">
+        <i class="fa-solid fa-house"></i>
+        <span>Home</span>
+    </a>
+    <a href="history.html" class="nav-item">
+        <i class="fa-solid fa-clock-rotate-left"></i>
+        <span>History</span>
+    </a>
+    <a href="rekap.html" class="nav-item active">
+        <i class="fa-solid fa-chart-line"></i>
+        <span>Rekap</span>
+    </a>
+    <a href="kasir.html" class="nav-item">
+        <i class="fa-solid fa-cash-register"></i>
+        <span>Kasir</span>
+    </a>
+    <a href="akun.html" class="nav-item">
+        <i class="fa-solid fa-user"></i>
+        <span>Akun</span>
+    </a>
+</div>
+
 <script>
     let allTransactions = []; 
     let debounceTimer;
@@ -259,22 +307,12 @@
 
     const formatRp = (angka) => `Rp ${cleanNumber(angka).toLocaleString("id-ID")}`;
 
-    // Memotong Jam: Selalu ambil YYYY-MM-DD saja dari berbagai format string tanggal
     const extractDate = (dateStr) => {
         if (!dateStr) return getTodayDateStr();
+        let cleaned = String(dateStr).trim();
+        if (cleaned.includes(' ')) cleaned = cleaned.split(' ')[0];
+        if (cleaned.includes('T')) cleaned = cleaned.split('T')[0];
         
-        let cleaned = dateStr.trim();
-        
-        // Jika format memuat spasi (misal: "2026-08-27 09:22:03" atau "27/08/2026 09:22:03")
-        if (cleaned.includes(' ')) {
-            cleaned = cleaned.split(' ')[0];
-        }
-        // Jika format ISO (misal: "2026-08-27T09:22:03")
-        if (cleaned.includes('T')) {
-            cleaned = cleaned.split('T')[0];
-        }
-        
-        // Jika format DD/MM/YYYY
         if (cleaned.includes('/')) {
             const parts = cleaned.split('/');
             if (parts.length === 3) {
@@ -284,7 +322,6 @@
                 return `${year}-${month}-${day}`;
             }
         }
-        
         return cleaned;
     };
 
@@ -485,17 +522,31 @@
 
     const loadData = async () => {
         try {
-            const res = await fetch('/api/history?t=' + Date.now());
-            const result = await res.json();
+            let res = await fetch('/api/history?t=' + Date.now());
+            let result = await res.json();
             
             allTransactions = result.data || result || [];
+
+            // Jika API history kosong, coba panggil API admin transactions
+            if (!Array.isArray(allTransactions) || allTransactions.length === 0) {
+                const resAdmin = await fetch('/api/admin/transactions?t=' + Date.now());
+                const resAdminJson = await resAdmin.json();
+                allTransactions = resAdminJson.data || resAdminJson || [];
+            }
             
-            const suksesTransactions = allTransactions.filter(item => {
-                const st = (item.status || '').toLowerCase();
-                return st === 'sukses' || st === 'lunas' || st === 'selesai';
+            // PENGECEKAN STATUS LEBIH FLEKSIBEL (SUKSES / PROSES / LUNAS / SELESAI / 1)
+            const validTransactions = allTransactions.filter(item => {
+                const st = String(item.status || '').toLowerCase();
+                return st.includes('sukses') || 
+                       st.includes('proses') || 
+                       st.includes('success') || 
+                       st.includes('lunas') || 
+                       st.includes('selesai') || 
+                       st === '1' || 
+                       st === 'berhasil';
             });
 
-            renderUI(suksesTransactions);
+            renderUI(validTransactions);
         } catch (err) {
             console.error("Gagal memuat transaksi:", err);
             document.getElementById("app").innerHTML = `<div class="info-text">Gagal terhubung ke server VPS.</div>`;
@@ -506,19 +557,17 @@
         const container = document.getElementById("app");
 
         if (!list || list.length === 0) {
-            container.innerHTML = '<div class="info-text">Belum ada riwayat transaksi sukses.</div>';
+            container.innerHTML = '<div class="info-text">Belum ada riwayat transaksi terdeteksi.</div>';
             return;
         }
 
-        // Kelompokkan HANYA berdasarkan tanggal murni (Jam sudah dipotong bersih di extractDate)
         const groups = list.reduce((acc, item) => {
-            const date = extractDate(item.waktu || item.date || item.tanggal);
+            const date = extractDate(item.waktu || item.created_at || item.date || item.tanggal);
             acc[date] = acc[date] || [];
             acc[date].push(item);
             return acc;
         }, {});
 
-        // Urutkan tanggal dari yang terbaru
         const dates = Object.keys(groups).sort((a, b) => new Date(b) - new Date(a));
         const todayStr = getTodayDateStr();
 
@@ -559,7 +608,7 @@
                 <input type="text" id="search-input" class="search-input" placeholder="🔍 Cari barang / Ref ID..." onkeyup="filterUI()">
                 
                 <select id="filter-tgl-select" class="select-filter" onchange="filterUI()">
-                    <option value="ALL" selected>🏆 Semua Transaksi Sukses (${list.length})</option>
+                    <option value="ALL" selected>🏆 Semua Transaksi (${list.length})</option>
                     <optgroup label="📅 Harian">
                         ${dates.map((tgl) => {
                             const label = (tgl === todayStr) ? `Hari ini (${tgl})` : tgl;
@@ -622,7 +671,7 @@
 
                             <div class="card-tx-footer">
                                 <span class="status-badge ${statusClean}">${statusClean}</span>
-                                <span style="font-size: 0.7rem; color: var(--text-muted); font-weight: 700;">Member: ${item.user_hp || item.member_name || 'Umum'}</span>
+                                <span style="font-size: 0.7rem; color: var(--text-muted); font-weight: 700;">Member: ${item.user_hp || item.username || 'Umum'}</span>
                             </div>
                         </div>`;
                     }).join('')}
