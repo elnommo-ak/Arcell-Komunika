@@ -173,13 +173,12 @@
             background: var(--bg-base); border-radius: var(--border-radius-pill);
             box-shadow: var(--neu-shadow-sm); margin: 0 10px; display: flex; align-items: center; gap: 6px; text-transform: uppercase; letter-spacing: 0.5px;
         }
-        .divider-badge.okec { color: var(--accent-green); }
 
         /* --- INPUT BOX & CONTAINER --- */
         .card-wrapper { position: relative; z-index: 101; padding: 0 16px; }
 
         .popup-top-container {
-            display: none; height: 210px; overflow-y: auto; margin-bottom: var(--main-gap); padding: 14px;
+            display: none; height: 250px; overflow-y: auto; margin-bottom: var(--main-gap); padding: 14px;
             background: var(--bg-base); border-radius: var(--border-radius-md);
             box-shadow: var(--neu-shadow-inset); animation: dropUpAnimation 0.3s ease-out forwards;
         }
@@ -190,6 +189,20 @@
         }
 
         .card-container { display: flex; flex-direction: column; gap: var(--main-gap); }
+
+        /* Provider Toggle Switcher */
+        .provider-switch-container {
+            display: flex; gap: 8px; margin-bottom: 8px; justify-content: center;
+        }
+        .provider-btn {
+            flex: 1; padding: 8px; border: none; border-radius: var(--border-radius-pill);
+            background: var(--bg-base); box-shadow: var(--neu-shadow-sm);
+            color: var(--text-muted); font-size: 0.72rem; font-weight: 800;
+            cursor: pointer; transition: all 0.2s ease; text-align: center;
+        }
+        .provider-btn.active {
+            color: var(--accent-purple); box-shadow: var(--neu-shadow-inset);
+        }
 
         .inset-tabs-wrapper {
             display: none; overflow-x: auto; white-space: nowrap; gap: 10px; padding: 4px 2px 8px 2px;
@@ -203,7 +216,6 @@
             cursor: pointer; transition: all 0.2s ease; flex-shrink: 0; box-shadow: var(--neu-shadow-sm);
         }
         .tab-item-inset.active { color: var(--accent-purple); box-shadow: var(--neu-shadow-inset); }
-        .tab-item-inset.active-okec { color: var(--accent-green); box-shadow: var(--neu-shadow-inset); }
 
         .input-box {
             display: flex; align-items: center; padding: 10px 18px; gap: 12px; 
@@ -216,7 +228,6 @@
             width: 30px; height: 30px; border-radius: 50%; background: var(--bg-base);
             box-shadow: var(--neu-shadow-sm); display: flex; align-items: center; justify-content: center; flex-shrink: 0;
         }
-        .input-icon-left.okec { color: var(--accent-green); }
 
         .input-box input {
             flex: 1; border: none; background: transparent; outline: none; 
@@ -229,7 +240,6 @@
             padding: 4px 12px; border-radius: var(--border-radius-pill); font-size: 0.65rem; font-weight: 800;
             display: none; text-transform: uppercase; flex-shrink: 0; letter-spacing: 0.5px;
         }
-        .operator-badge.okec { color: var(--accent-green); }
 
         .filter-container { display: flex; justify-content: flex-end; margin-bottom: 8px; }
         .filter-container select {
@@ -242,18 +252,24 @@
         .product-card {
             background: var(--bg-base); border-radius: var(--border-radius-sm);
             padding: 14px 18px; display: flex; justify-content: space-between; align-items: center; cursor: pointer;
-            box-shadow: var(--neu-shadow-sm); transition: all 0.2s ease;
+            box-shadow: var(--neu-shadow-sm); transition: all 0.2s ease; position: relative;
         }
         .product-card:active { box-shadow: var(--neu-shadow-inset); transform: scale(0.98); }
         .product-info { flex: 1; padding-right: 8px; }
         .product-title { font-size: 0.8rem; font-weight: 700; color: var(--text-main); line-height: 1.3; margin-bottom: 4px; }
         .product-price { font-size: 0.88rem; font-weight: 800; color: var(--accent-purple); }
-        .product-price.okec { color: var(--accent-green); }
+        
+        .provider-tag {
+            font-size: 0.6rem; font-weight: 800; padding: 2px 6px; border-radius: 6px;
+            margin-left: 6px; text-transform: uppercase; vertical-align: middle;
+        }
+        .tag-digi { background: #e0e7ff; color: #4338ca; }
+        .tag-okec { background: #d1fae5; color: #047857; }
+
         .product-action {
             display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 50%;
             color: #ffffff; background: var(--accent-purple); box-shadow: var(--neu-shadow-sm); font-size: 0.8rem;
         }
-        .product-action.okec { background: var(--accent-green); }
 
         .empty-state { display: none; flex-direction: column; align-items: center; justify-content: center; padding: 20px; color: var(--text-muted); text-align: center; }
 
@@ -296,7 +312,6 @@
             box-shadow: var(--neu-shadow-sm); font-size: 0.82rem; text-transform: uppercase; letter-spacing: 0.5px; cursor: pointer;
             display: flex; align-items: center; justify-content: center; gap: 8px; transition: all 0.2s ease;
         }
-        .btn-bayar-now.okec { background: var(--accent-green); }
         .btn-bayar-now:active { box-shadow: var(--neu-shadow-inset); transform: scale(0.98); }
     </style>
 </head>
@@ -366,75 +381,47 @@
         </div>
 
         <!-- ========================================== -->
-        <!-- 1. TRANSAKSI CEPAT DIGIFLAZZ -->
+        <!-- TRANSAKSI CEPAT GABUNGAN -->
         <!-- ========================================== -->
-        <div class="section-divider" id="quick-divider">
+        <div class="section-divider">
             <div class="divider-line"></div>
-            <div class="divider-badge"><i class="fa-solid fa-bolt"></i> Transaksi Cepat Digiflazz</div>
+            <div class="divider-badge"><i class="fa-solid fa-bolt"></i> Transaksi Cepat</div>
             <div class="divider-line"></div>
         </div>
 
-        <div class="card-wrapper" id="cardWrapperDigi">
-            <div class="popup-top-container" id="popupTopContainerDigi">
+        <div class="card-wrapper">
+            <div class="popup-top-container" id="popupTopContainer">
                 <div class="filter-container">
-                    <select id="sortFilterDigi" onchange="applyPriceSortDigi()">
+                    <select id="sortFilter" onchange="applyPriceSort()">
                         <option value="asc" selected>Harga: Murah ke Mahal</option>
                         <option value="desc">Harga: Mahal ke Murah</option>
                     </select>
                 </div>
-                <div class="empty-state" id="emptyStateDigi">
-                    <i class="fa-solid fa-spinner fa-spin" id="stateIconDigi"></i>
-                    <p id="emptyTextDigi"></p>
+                <div class="empty-state" id="emptyState">
+                    <i class="fa-solid fa-spinner fa-spin" id="stateIcon"></i>
+                    <p id="emptyText"></p>
                 </div>
-                <div class="product-list" id="productListDigi"></div>
+                <div class="product-list" id="productList"></div>
             </div>
 
             <div class="card-container">
-                <div class="inset-tabs-wrapper" id="insetTabsWrapperDigi"></div>
+                <!-- Filter Server/Provider -->
+                <div class="provider-switch-container" id="providerSwitch" style="display:none;">
+                    <button class="provider-btn active" onclick="switchProviderFilter('all', this)">Semua</button>
+                    <button class="provider-btn" onclick="switchProviderFilter('digiflazz', this)">Digiflazz</button>
+                    <button class="provider-btn" onclick="switchProviderFilter('okeconnect', this)">OkeConnect</button>
+                </div>
 
+                <!-- Tabs Kategori -->
+                <div class="inset-tabs-wrapper" id="insetTabsWrapper"></div>
+
+                <!-- Single Input Box -->
                 <div class="input-box">
                     <div class="input-icon-left">
                         <i class="fa-solid fa-mobile-screen-button"></i>
                     </div>
-                    <input type="tel" id="phoneInputDigi" placeholder="Ketik No. HP Digiflazz..." maxlength="20" autocomplete="off" />
-                    <span class="operator-badge" id="operatorBadgeDigi"></span>
-                </div>
-            </div>
-        </div>
-
-        <!-- ========================================== -->
-        <!-- 2. TRANSAKSI CEPAT OKECONNECT -->
-        <!-- ========================================== -->
-        <div class="section-divider" id="quick-divider-okec" style="margin-top: 25px;">
-            <div class="divider-line"></div>
-            <div class="divider-badge okec"><i class="fa-solid fa-bolt-lightning"></i> Transaksi Cepat OkeConnect</div>
-            <div class="divider-line"></div>
-        </div>
-
-        <div class="card-wrapper" id="cardWrapperOkec">
-            <div class="popup-top-container" id="popupTopContainerOkec">
-                <div class="filter-container">
-                    <select id="sortFilterOkec" onchange="applyPriceSortOkec()">
-                        <option value="asc" selected>Harga: Murah ke Mahal</option>
-                        <option value="desc">Harga: Mahal ke Murah</option>
-                    </select>
-                </div>
-                <div class="empty-state" id="emptyStateOkec">
-                    <i class="fa-solid fa-spinner fa-spin" id="stateIconOkec"></i>
-                    <p id="emptyTextOkec"></p>
-                </div>
-                <div class="product-list" id="productListOkec"></div>
-            </div>
-
-            <div class="card-container">
-                <div class="inset-tabs-wrapper" id="insetTabsWrapperOkec"></div>
-
-                <div class="input-box">
-                    <div class="input-icon-left okec">
-                        <i class="fa-solid fa-sim-card"></i>
-                    </div>
-                    <input type="tel" id="phoneInputOkec" placeholder="Ketik No. HP OkeConnect..." maxlength="20" autocomplete="off" />
-                    <span class="operator-badge okec" id="operatorBadgeOkec"></span>
+                    <input type="tel" id="phoneInput" placeholder="Ketik No. HP / Tujuan..." maxlength="20" autocomplete="off" />
+                    <span class="operator-badge" id="operatorBadge"></span>
                 </div>
             </div>
         </div>
@@ -455,6 +442,10 @@
             <div class="sheet-row">
                 <span class="label">Produk</span>
                 <span class="val-title" id="sheet_nama_produk">-</span>
+            </div>
+            <div class="sheet-row">
+                <span class="label">Jalur Server</span>
+                <span class="val-title" id="sheet_provider_label" style="text-transform: uppercase;">-</span>
             </div>
             <div class="sheet-row">
                 <span class="label">No. Tujuan</span>
@@ -486,10 +477,10 @@
         sidebarClose.addEventListener('click', closeSidebar);
         sidebarOverlay.addEventListener('click', closeSidebar);
 
-        let masterProdukDigi = [];
-        let masterProdukOkec = [];
         let memberSaldoAktif = 0;
-        let providerAktif = 'digiflazz';
+        let selectedCategory = '';
+        let activeProviderFilter = 'all';
+        let dataCheckoutAktif = {};
 
         const prefixes = {
             TELKOMSEL: ['0811', '0812', '0813', '0821', '0822', '0823', '0851', '0852', '0853'],
@@ -529,28 +520,8 @@
             }
         }
 
-        async function fetchMasterProduk() {
-            try {
-                // Fetch Digiflazz
-                const resDigi = await fetch('/api/products?t=' + Date.now());
-                if (resDigi.ok) {
-                    const data = await resDigi.json();
-                    masterProdukDigi = Array.isArray(data) ? data : (data.data || []);
-                }
-                // Fetch OkeConnect
-                const resOkec = await fetch('/api/products/okeconnect?t=' + Date.now());
-                if (resOkec.ok) {
-                    const dataOkec = await resOkec.json();
-                    masterProdukOkec = Array.isArray(dataOkec) ? dataOkec : (dataOkec.data || []);
-                }
-            } catch (err) {
-                console.warn("Gagal fetch data produk:", err);
-            }
-        }
-
         window.addEventListener('DOMContentLoaded', () => {
             loadSaldoMemberAkun();
-            fetchMasterProduk();
 
             const hour = new Date().getHours();
             let greet = "Selamat Malam";
@@ -570,26 +541,26 @@
         }
 
         // ===============================================
-        // LOGIKA TRANSAKSI CEPAT DIGIFLAZZ
+        // LOGIKA SINGLE INPUT BERDASARKAN KATEGORI SQLITE
         // ===============================================
-        const inputPhoneDigi = document.getElementById('phoneInputDigi');
-        const badgeDigi = document.getElementById('operatorBadgeDigi');
-        const popupTopContainerDigi = document.getElementById('popupTopContainerDigi');
-        const emptyStateDigi = document.getElementById('emptyStateDigi');
-        const emptyTextDigi = document.getElementById('emptyTextDigi');
-        const stateIconDigi = document.getElementById('stateIconDigi');
-        const insetTabsWrapperDigi = document.getElementById('insetTabsWrapperDigi');
-        const productListDigi = document.getElementById('productListDigi');
-        const sortFilterDigi = document.getElementById('sortFilterDigi');
+        const phoneInput = document.getElementById('phoneInput');
+        const badge = document.getElementById('operatorBadge');
+        const popupTopContainer = document.getElementById('popupTopContainer');
+        const emptyState = document.getElementById('emptyState');
+        const emptyText = document.getElementById('emptyText');
+        const stateIcon = document.getElementById('stateIcon');
+        const insetTabsWrapper = document.getElementById('insetTabsWrapper');
+        const productList = document.getElementById('productList');
+        const sortFilter = document.getElementById('sortFilter');
+        const providerSwitch = document.getElementById('providerSwitch');
 
-        let currentOperatorDigi = null;
-        let groupedProductsDigi = {};
-        let currentRawProductsDigi = [];
+        let currentOperator = null;
+        let groupedProducts = {};
 
-        inputPhoneDigi.addEventListener('input', (e) => {
+        phoneInput.addEventListener('input', (e) => {
             let val = e.target.value;
             let formattedVal = formatPhoneNumber(val);
-            inputPhoneDigi.value = formattedVal;
+            phoneInput.value = formattedVal;
             let rawDigits = formattedVal.replace(/[^0-9]/g, '');
 
             let detectedOp = null;
@@ -601,72 +572,99 @@
             }
 
             if (detectedOp) {
-                badgeDigi.innerText = detectedOp;
-                badgeDigi.style.display = 'inline-block';
-                if (currentOperatorDigi !== detectedOp) {
-                    currentOperatorDigi = detectedOp;
-                    loadOperatorDigi(detectedOp);
+                badge.innerText = detectedOp;
+                badge.style.display = 'inline-block';
+                if (currentOperator !== detectedOp) {
+                    currentOperator = detectedOp;
+                    loadCustomCategoryProducts(detectedOp);
                 }
             } else {
-                badgeDigi.style.display = 'none';
-                insetTabsWrapperDigi.style.display = 'none';
-                popupTopContainerDigi.style.display = 'none';
-                currentOperatorDigi = null;
+                badge.style.display = 'none';
+                insetTabsWrapper.style.display = 'none';
+                providerSwitch.style.display = 'none';
+                popupTopContainer.style.display = 'none';
+                currentOperator = null;
             }
         });
 
-        function loadOperatorDigi(operatorKey) {
-            const opKey = operatorKey.toUpperCase();
-            const validProducts = masterProdukDigi.filter(p => {
-                const brandP = String(p.brand || p.operator || '').toUpperCase();
-                const providerP = String(p.provider || '').toLowerCase();
-                return (providerP === 'digiflazz' || providerP === '' || !p.provider) && brandP.includes(opKey);
-            });
+        async function loadCustomCategoryProducts(brand) {
+            emptyState.style.display = 'flex';
+            stateIcon.className = "fa-solid fa-spinner fa-spin";
+            emptyText.innerText = "Memuat paket kustom...";
+            popupTopContainer.style.display = 'block';
+            insetTabsWrapper.style.display = 'none';
+            providerSwitch.style.display = 'none';
+            productList.style.display = 'none';
 
-            if (validProducts.length === 0) {
-                emptyStateDigi.style.display = 'flex';
-                stateIconDigi.className = "fa-solid fa-box-open";
-                emptyTextDigi.innerHTML = `Belum ada produk Digiflazz untuk <b>${operatorKey}</b>.`;
-                popupTopContainerDigi.style.display = 'block';
-                insetTabsWrapperDigi.style.display = 'none';
-                productListDigi.style.display = 'none';
+            try {
+                // Ambil data langsung dari SQLite yang sudah ter-join rapi
+                const res = await fetch(`/api/user/products-by-prefix?brand=${brand}&t=` + Date.now());
+                const result = await res.json();
+
+                if (result.status === 'success' && result.data && Object.keys(result.data).length > 0) {
+                    groupedProducts = result.data;
+                    renderTabs(Object.keys(groupedProducts));
+                } else {
+                    emptyState.style.display = 'flex';
+                    stateIcon.className = "fa-solid fa-box-open";
+                    emptyText.innerHTML = `Belum ada folder kustom untuk <b>${brand}</b>.`;
+                    popupTopContainer.style.display = 'block';
+                    insetTabsWrapper.style.display = 'none';
+                    providerSwitch.style.display = 'none';
+                    productList.style.display = 'none';
+                }
+            } catch (err) {
+                console.error("Gagal load custom categories:", err);
+                emptyState.style.display = 'flex';
+                stateIcon.className = "fa-solid fa-triangle-exclamation";
+                emptyText.innerText = "Gagal terhubung ke server.";
+            }
+        }
+
+        function renderTabs(categoriesArray) {
+            let html = "";
+            categoriesArray.forEach((cat, index) => {
+                html += `<button class="tab-item-inset ${index === 0 ? 'active' : ''}" onclick="selectCategory(this, '${cat}')">${cat}</button>`;
+            });
+            insetTabsWrapper.innerHTML = html;
+            insetTabsWrapper.style.display = 'flex';
+            providerSwitch.style.display = 'flex';
+            emptyState.style.display = 'none';
+            productList.style.display = 'flex';
+            popupTopContainer.style.display = 'block';
+
+            if (categoriesArray.length > 0) selectCategory(insetTabsWrapper.children[0], categoriesArray[0]);
+        }
+
+        window.selectCategory = function(element, categoryName) {
+            document.querySelectorAll('#insetTabsWrapper .tab-item-inset').forEach(el => el.classList.remove('active'));
+            if (element) element.classList.add('active');
+            selectedCategory = categoryName;
+            applyPriceSort();
+        }
+
+        window.switchProviderFilter = function(provider, el) {
+            activeProviderFilter = provider;
+            document.querySelectorAll('#providerSwitch .provider-btn').forEach(b => b.classList.remove('active'));
+            if(el) el.classList.add('active');
+            applyPriceSort();
+        }
+
+        window.applyPriceSort = function() {
+            let rawList = groupedProducts[selectedCategory] || [];
+            
+            // Filter Berdasarkan Tab Provider Internal
+            if (activeProviderFilter !== 'all') {
+                rawList = rawList.filter(p => (p._provider || p.provider) === activeProviderFilter);
+            }
+
+            if (rawList.length === 0) {
+                productList.innerHTML = `<div style="text-align:center; padding: 20px; font-size: 0.8rem; color: var(--text-muted);">Tidak ada produk pada kategori ini.</div>`;
                 return;
             }
 
-            groupedProductsDigi = {};
-            validProducts.forEach(prod => {
-                let subGroup = prod.category || prod.type || 'Umum';
-                if (!groupedProductsDigi[subGroup]) groupedProductsDigi[subGroup] = [];
-                groupedProductsDigi[subGroup].push(prod);
-            });
-
-            renderTabsDigi(Object.keys(groupedProductsDigi));
-        }
-
-        function renderTabsDigi(categoriesArray) {
-            let html = "";
-            categoriesArray.forEach((cat, index) => {
-                html += `<button class="tab-item-inset ${index === 0 ? 'active' : ''}" onclick="selectCategoryDigi(this, '${cat}')">${cat}</button>`;
-            });
-            insetTabsWrapperDigi.innerHTML = html;
-            insetTabsWrapperDigi.style.display = 'flex';
-            emptyStateDigi.style.display = 'none';
-            productListDigi.style.display = 'flex';
-            popupTopContainerDigi.style.display = 'block';
-
-            if (categoriesArray.length > 0) selectCategoryDigi(insetTabsWrapperDigi.children[0], categoriesArray[0]);
-        }
-
-        window.selectCategoryDigi = function(element, categoryName) {
-            document.querySelectorAll('#insetTabsWrapperDigi .tab-item-inset').forEach(el => el.classList.remove('active'));
-            if (element) element.classList.add('active');
-            currentRawProductsDigi = groupedProductsDigi[categoryName] || [];
-            applyPriceSortDigi();
-        }
-
-        window.applyPriceSortDigi = function() {
-            let sortValue = sortFilterDigi ? sortFilterDigi.value : 'asc';
-            let sortedProducts = [...currentRawProductsDigi];
+            let sortValue = sortFilter ? sortFilter.value : 'asc';
+            let sortedProducts = [...rawList];
             sortedProducts.sort((a, b) => {
                 let priceA = parseFloat(a.jual || a.price || a.harga || 0);
                 let priceB = parseFloat(b.jual || b.price || b.harga || 0);
@@ -678,203 +676,67 @@
                 let harga = prod.jual || prod.price || prod.harga || 0;
                 let hargaFormatted = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(harga);
                 let namaProduk = prod.product_name || prod.nama_produk || prod.nama || 'Produk';
-                let skuProduk = prod.buyer_sku_code || prod.code || prod.sku || '';
+                let skuProduk = prod.buyer_sku_code || prod.code || prod.sku || prod.kode || '';
+                let prov = prod._provider || prod.provider || 'digiflazz';
+
+                let tagHtml = prov === 'okeconnect' 
+                    ? `<span class="provider-tag tag-okec">OkeConnect</span>`
+                    : `<span class="provider-tag tag-digi">Digiflazz</span>`;
 
                 let namaClean = String(namaProduk).replace(/'/g, "\\'").replace(/"/g, '\\"');
                 let skuClean = String(skuProduk).replace(/'/g, "\\'").replace(/"/g, '\\"');
 
                 html += `
-                    <div class="product-card" onclick="prosesBeli('digiflazz', '${skuClean}', '${namaClean}', ${harga})">
+                    <div class="product-card" onclick="prosesBeli('${prov}', '${skuClean}', '${namaClean}', ${harga})">
                         <div class="product-info">
-                            <div class="product-title">${namaProduk}</div>
+                            <div class="product-title">${namaProduk} ${tagHtml}</div>
                             <div class="product-price">${hargaFormatted}</div>
                         </div>
                         <div class="product-action"><i class="fa-solid fa-chevron-right"></i></div>
                     </div>
                 `;
             });
-            productListDigi.innerHTML = html;
-        }
-
-        // ===============================================
-        // LOGIKA TRANSAKSI CEPAT OKECONNECT
-        // ===============================================
-        const inputPhoneOkec = document.getElementById('phoneInputOkec');
-        const badgeOkec = document.getElementById('operatorBadgeOkec');
-        const popupTopContainerOkec = document.getElementById('popupTopContainerOkec');
-        const emptyStateOkec = document.getElementById('emptyStateOkec');
-        const emptyTextOkec = document.getElementById('emptyTextOkec');
-        const stateIconOkec = document.getElementById('stateIconOkec');
-        const insetTabsWrapperOkec = document.getElementById('insetTabsWrapperOkec');
-        const productListOkec = document.getElementById('productListOkec');
-        const sortFilterOkec = document.getElementById('sortFilterOkec');
-
-        let currentOperatorOkec = null;
-        let groupedProductsOkec = {};
-        let currentRawProductsOkec = [];
-
-        inputPhoneOkec.addEventListener('input', (e) => {
-            let val = e.target.value;
-            let formattedVal = formatPhoneNumber(val);
-            inputPhoneOkec.value = formattedVal;
-            let rawDigits = formattedVal.replace(/[^0-9]/g, '');
-
-            let detectedOp = null;
-            if (rawDigits.length >= 4) {
-                let prefix = rawDigits.substring(0, 4);
-                for (let op in prefixes) {
-                    if (prefixes[op].indexOf(prefix) !== -1) { detectedOp = op; break; }
-                }
-            }
-
-            if (detectedOp) {
-                badgeOkec.innerText = detectedOp;
-                badgeOkec.style.display = 'inline-block';
-                if (currentOperatorOkec !== detectedOp) {
-                    currentOperatorOkec = detectedOp;
-                    loadOperatorOkec(detectedOp);
-                }
-            } else {
-                badgeOkec.style.display = 'none';
-                insetTabsWrapperOkec.style.display = 'none';
-                popupTopContainerOkec.style.display = 'none';
-                currentOperatorOkec = null;
-            }
-        });
-
-        function loadOperatorOkec(operatorKey) {
-            const opKey = operatorKey.toUpperCase();
-            
-            const validProducts = masterProdukOkec.filter(p => {
-                const brandP = String(p.brand || p.operator || p.category || '').toUpperCase();
-                const providerP = String(p.provider || '').toLowerCase();
-                return (providerP === 'okeconnect') && brandP.includes(opKey);
-            });
-
-            if (validProducts.length === 0) {
-                emptyStateOkec.style.display = 'flex';
-                stateIconOkec.className = "fa-solid fa-box-open";
-                emptyTextOkec.innerHTML = `Belum ada produk OkeConnect untuk <b>${operatorKey}</b>.`;
-                popupTopContainerOkec.style.display = 'block';
-                insetTabsWrapperOkec.style.display = 'none';
-                productListOkec.style.display = 'none';
-                return;
-            }
-
-            groupedProductsOkec = {};
-            validProducts.forEach(prod => {
-                let subGroup = prod.category || prod.type || 'Umum';
-                if (!groupedProductsOkec[subGroup]) groupedProductsOkec[subGroup] = [];
-                groupedProductsOkec[subGroup].push(prod);
-            });
-
-            renderTabsOkec(Object.keys(groupedProductsOkec));
-        }
-
-        function renderTabsOkec(categoriesArray) {
-            let html = "";
-            categoriesArray.forEach((cat, index) => {
-                html += `<button class="tab-item-inset ${index === 0 ? 'active-okec' : ''}" onclick="selectCategoryOkec(this, '${cat}')">${cat}</button>`;
-            });
-            insetTabsWrapperOkec.innerHTML = html;
-            insetTabsWrapperOkec.style.display = 'flex';
-            emptyStateOkec.style.display = 'none';
-            productListOkec.style.display = 'flex';
-            popupTopContainerOkec.style.display = 'block';
-
-            if (categoriesArray.length > 0) selectCategoryOkec(insetTabsWrapperOkec.children[0], categoriesArray[0]);
-        }
-
-        window.selectCategoryOkec = function(element, categoryName) {
-            document.querySelectorAll('#insetTabsWrapperOkec .tab-item-inset').forEach(el => el.classList.remove('active-okec'));
-            if (element) element.classList.add('active-okec');
-            currentRawProductsOkec = groupedProductsOkec[categoryName] || [];
-            applyPriceSortOkec();
-        }
-
-        // 💡 PERBAIKAN PENTING: MENGAMBIL SKU TERBAIK & FALLBACK NAMA
-        window.applyPriceSortOkec = function() {
-            let sortValue = sortFilterOkec ? sortFilterOkec.value : 'asc';
-            let sortedProducts = [...currentRawProductsOkec];
-            sortedProducts.sort((a, b) => {
-                let priceA = parseFloat(a.jual || a.price || a.harga || 0);
-                let priceB = parseFloat(b.jual || b.price || b.harga || 0);
-                return sortValue === 'asc' ? priceA - priceB : priceB - priceA;
-            });
-
-            let html = "";
-            sortedProducts.forEach((prod) => {
-                let harga = prod.jual || prod.price || prod.harga || 0;
-                let hargaFormatted = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(harga);
-                let namaProduk = prod.product_name || prod.nama_produk || prod.nama || 'Produk OkeConnect';
-                
-                // Prioritaskan buyer_sku_code, lalu code, lalu sku, lalu kode
-                let skuProduk = prod.buyer_sku_code || prod.code || prod.sku || prod.kode || '';
-
-                let namaClean = String(namaProduk).replace(/'/g, "\\'").replace(/"/g, '\\"');
-                let skuClean = String(skuProduk).replace(/'/g, "\\'").replace(/"/g, '\\"');
-
-                html += `
-                    <div class="product-card" onclick="prosesBeli('okeconnect', '${skuClean}', '${namaClean}', ${harga})">
-                        <div class="product-info">
-                            <div class="product-title">${namaProduk}</div>
-                            <div class="product-price okec">${hargaFormatted}</div>
-                        </div>
-                        <div class="product-action okec"><i class="fa-solid fa-chevron-right"></i></div>
-                    </div>
-                `;
-            });
-            productListOkec.innerHTML = html;
+            productList.innerHTML = html;
         }
 
         // ===============================================
         // GENERAL CHECKOUT PROCESS
         // ===============================================
-	window.prosesBeli = function(provider, skuCode, productName, price) {
-    providerAktif = provider;
-    let targetInput = provider === 'okeconnect' ? inputPhoneOkec : inputPhoneDigi;
-    let nomorTujuan = targetInput.value.replace(/[^0-9]/g, '');
+        window.prosesBeli = function(provider, skuCode, productName, price) {
+            let nomorTujuan = phoneInput.value.replace(/[^0-9]/g, '');
 
-    // Validasi panjang nomor HP
-    if (nomorTujuan.length < 10 || nomorTujuan.length > 13) {
-        alert('❌ Nomor HP tidak valid! Masukkan nomor tujuan minimal 10-13 digit.');
-        targetInput.focus();
-        return;
-    }
+            if (nomorTujuan.length < 10 || nomorTujuan.length > 13) {
+                alert('❌ Nomor HP tidak valid! Masukkan nomor tujuan minimal 10-13 digit.');
+                phoneInput.focus();
+                return;
+            }
 
-    if (memberSaldoAktif < price) {
-        return alert(`❌ Saldo Anda Tidak Mencukupi!\n\nHarga Produk: Rp ${price.toLocaleString('id-ID')}\nSaldo Anda: Rp ${memberSaldoAktif.toLocaleString('id-ID')}`);
-    }
+            if (memberSaldoAktif < price) {
+                return alert(`❌ Saldo Anda Tidak Mencukupi!\n\nHarga Produk: Rp ${price.toLocaleString('id-ID')}\nSaldo Anda: Rp ${memberSaldoAktif.toLocaleString('id-ID')}`);
+            }
 
-    dataCheckoutAktif = {
-        provider: provider,
-        buyer_sku_code: skuCode,
-        product_name: productName,
-        customer_no: nomorTujuan,
-        price: price,
-        ref_id: 'TRX-' + Date.now()
-    };
+            dataCheckoutAktif = {
+                provider: provider,
+                buyer_sku_code: skuCode,
+                product_name: productName,
+                customer_no: nomorTujuan,
+                price: price,
+                ref_id: 'TRX-' + Date.now()
+            };
 
-    const btnBayar = document.getElementById('btnProsesBayar');
-    if (provider === 'okeconnect') {
-        document.getElementById('sheet_provider_title').innerText = "Konfirmasi OkeConnect";
-        btnBayar.classList.add('okec');
-    } else {
-        document.getElementById('sheet_provider_title').innerText = "Konfirmasi Digiflazz";
-        btnBayar.classList.remove('okec');
-    }
+            document.getElementById('sheet_provider_title').innerText = "Konfirmasi Pembelian";
+            document.getElementById('sheet_provider_label').innerText = provider;
+            document.getElementById('sheet_nama_produk').innerText = productName;
+            document.getElementById('sheet_no_tujuan').innerText = nomorTujuan;
+            document.getElementById('sheet_total_harga').innerText = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(price);
 
-    document.getElementById('sheet_nama_produk').innerText = productName;
-    document.getElementById('sheet_no_tujuan').innerText = nomorTujuan;
-    document.getElementById('sheet_total_harga').innerText = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(price);
+            const backdrop = document.getElementById('checkoutBackdrop');
+            const sheet = document.getElementById('checkoutBottomSheet');
 
-    const backdrop = document.getElementById('checkoutBackdrop');
-    const sheet = document.getElementById('checkoutBottomSheet');
-
-    document.body.classList.add('no-scroll');
-    backdrop.classList.add('show');
-    setTimeout(() => { sheet.classList.add('active'); }, 10);
-};
+            document.body.classList.add('no-scroll');
+            backdrop.classList.add('show');
+            setTimeout(() => { sheet.classList.add('active'); }, 10);
+        };
 
         function tutupCheckoutSheet() {
             const backdrop = document.getElementById('checkoutBackdrop');
@@ -919,16 +781,10 @@
                     alert('✅ Transaksi Berhasil Diproses!\nRef ID: ' + (res.data ? res.data.ref_id : 'TRX-SUCCESS'));
                     
                     loadSaldoMemberAkun();
-                    
-                    if(dataCheckoutAktif.provider === 'okeconnect') {
-                        inputPhoneOkec.value = '';
-                        badgeOkec.style.display = 'none';
-                        popupTopContainerOkec.style.display = 'none';
-                    } else {
-                        inputPhoneDigi.value = '';
-                        badgeDigi.style.display = 'none';
-                        popupTopContainerDigi.style.display = 'none';
-                    }
+                    phoneInput.value = '';
+                    badge.style.display = 'none';
+                    popupTopContainer.style.display = 'none';
+                    providerSwitch.style.display = 'none';
                 } else {
                     alert('❌ Gagal Transaksi: ' + (res.message || 'Terjadi kesalahan'));
                 }
