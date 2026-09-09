@@ -436,6 +436,35 @@
         </div>
     </div>
 
+    <!-- MODAL EDIT PRODUK CUSTOM (SQLITE) -->
+    <div id="modalEditCustomProduct" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.3); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); z-index: 9999; justify-content: center; align-items: center;">
+        <div class="glass-card" style="width: 90%; max-width: 420px; padding: 20px; background: rgba(255, 255, 255, 0.95);">
+            <h3><i class="fa-solid fa-pen-to-square"></i> Edit Produk Custom</h3>
+            <div style="display: flex; flex-direction: column; gap: 10px; margin-top: 10px;">
+                <input type="hidden" id="editCustomCatId">
+                <input type="hidden" id="editCustomProvider">
+                
+                <div>
+                    <label style="font-size: 0.7rem; font-weight: 800; color: var(--text-sub);">SKU / KODE PRODUK</label>
+                    <input type="text" id="editCustomSku" readonly style="background: rgba(0,0,0,0.05); color: var(--text-sub);">
+                </div>
+                <div>
+                    <label style="font-size: 0.7rem; font-weight: 800; color: var(--text-sub);">NAMA PRODUK</label>
+                    <input type="text" id="editCustomName" placeholder="Nama Produk">
+                </div>
+                <div>
+                    <label style="font-size: 0.7rem; font-weight: 800; color: var(--text-sub);">HARGA JUAL (RP)</label>
+                    <input type="number" id="editCustomPrice" placeholder="Harga Jual (Rp)">
+                </div>
+                
+                <div style="display: flex; gap: 8px; margin-top: 6px;">
+                    <button onclick="simpanEditCustomProduct()" class="btn-success" style="flex: 1;"><i class="fa-solid fa-check"></i> Simpan</button>
+                    <button onclick="tutupModalEditCustomProduct()" class="btn-danger"><i class="fa-solid fa-xmark"></i> Batal</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script>
         let rawData = [];
         let filteredData = [];
@@ -822,6 +851,7 @@
                         prods.forEach(p => {
                             const isOkec = p.provider === 'okeconnect';
                             const dotClass = isOkec ? 'dot-okeconnect' : 'dot-digiflazz';
+                            const safeName = (p.product_name || '').replace(/'/g, "\\'");
 
                             html += `
                                 <div class="prod-item" id="prod-item-${cat.id}-${p.buyer_sku_code}">
@@ -831,7 +861,10 @@
                                     </div>
                                     <div style="text-align:right;">
                                         <div class="prod-price">Rp ${parseFloat(p.jual || p.price || 0).toLocaleString('id-ID')}</div>
-                                        <button class="btn-sm btn-danger" style="margin-top:2px;" onclick="hapusMappingProduk(${cat.id}, '${p.buyer_sku_code}', '${p.provider}', this)"><i class="fa-solid fa-xmark"></i> Lepas</button>
+                                        <div style="display:flex; gap:4px; justify-content:flex-end; margin-top:2px;">
+                                            <button class="btn-sm btn-warning" style="padding:2px 6px;" onclick="bukaModalEditCustomProduct(${cat.id}, '${p.buyer_sku_code}', '${safeName}', ${parseFloat(p.jual || p.price || 0)}, '${p.provider}')" title="Edit Produk Custom"><i class="fa-solid fa-pen"></i> Edit</button>
+                                            <button class="btn-sm btn-danger" style="padding:2px 6px;" onclick="hapusMappingProduk(${cat.id}, '${p.buyer_sku_code}', '${p.provider}', this)" title="Lepas dari Kategori"><i class="fa-solid fa-xmark"></i> Lepas</button>
+                                        </div>
                                     </div>
                                 </div>
                             `;
@@ -844,6 +877,75 @@
             });
 
             container.innerHTML = html;
+        }
+
+        /* MODAL & FUNGSI EDIT PRODUK CUSTOM (SQLITE) */
+        function bukaModalEditCustomProduct(catId, sku, name, price, provider) {
+            document.getElementById('editCustomCatId').value = catId;
+            document.getElementById('editCustomSku').value = sku;
+            document.getElementById('editCustomName').value = name;
+            document.getElementById('editCustomPrice').value = price;
+            document.getElementById('editCustomProvider').value = provider;
+            document.getElementById('modalEditCustomProduct').style.display = 'flex';
+        }
+
+        function tutupModalEditCustomProduct() {
+            document.getElementById('modalEditCustomProduct').style.display = 'none';
+        }
+
+        async function simpanEditCustomProduct() {
+            const catId = document.getElementById('editCustomCatId').value;
+            const sku = document.getElementById('editCustomSku').value;
+            const name = document.getElementById('editCustomName').value.trim();
+            const price = parseInt(document.getElementById('editCustomPrice').value) || 0;
+            const provider = document.getElementById('editCustomProvider').value;
+
+            if(!name || price < 0) return showToast('Nama produk dan harga tidak valid!', 'danger');
+
+            try {
+                const res = await fetch('/api/admin/update-custom-product', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        category_id: catId,
+                        buyer_sku_code: sku,
+                        product_name: name,
+                        price: price,
+                        provider: provider
+                    })
+                });
+                const result = await res.json();
+                if(result.status === 'success') {
+                    showToast('✅ Produk custom berhasil diperbarui!');
+                    tutupModalEditCustomProduct();
+                    
+                    // Update state internal lokal
+                    const catObj = dbCustomCategories.find(c => c.id == catId);
+                    if(catObj && catObj.products) {
+                        const pObj = catObj.products.find(p => p.buyer_sku_code === sku);
+                        if(pObj) {
+                            pObj.product_name = name;
+                            pObj.jual = price;
+                            pObj.price = price;
+                        }
+                    }
+
+                    // Update DOM lokal tanpa menutup accordion
+                    const prodCard = document.getElementById(`prod-item-${catId}-${sku}`);
+                    if(prodCard) {
+                        const nameEl = prodCard.querySelector('.prod-name');
+                        const priceEl = prodCard.querySelector('.prod-price');
+                        const dotClass = provider === 'okeconnect' ? 'dot-okeconnect' : 'dot-digiflazz';
+                        
+                        if(nameEl) nameEl.innerHTML = `${name} <span class="dot-indicator ${dotClass}"></span>`;
+                        if(priceEl) priceEl.innerText = `Rp ${price.toLocaleString('id-ID')}`;
+                    }
+                } else {
+                    showToast('❌ Gagal: ' + (result.message || ''), 'danger');
+                }
+            } catch(e) {
+                showToast('❌ Error jaringan saat memperbarui produk', 'danger');
+            }
         }
 
         function toggleBrandAccordion(el) {
@@ -1275,4 +1377,3 @@
     </script>
 </body>
 </html>
-

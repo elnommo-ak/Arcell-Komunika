@@ -240,12 +240,11 @@
         // 🔹 CEK JIKA USER SUDAH LOGIN SEBELUMNYA (Auto-Sync saat page refresh)
         const isLoggedIn = localStorage.getItem('isLoggedIn');
         const memberId = localStorage.getItem('memberId');
-        
-        if (isLoggedIn === 'true' && memberId) {
-            await OneSignal.login(memberId);
-            console.log("🔔 OneSignal External ID Auto-Synced:", memberId);
-        }
-    });
+
+	if (isLoggedIn === 'true' && userPhone) {
+    await OneSignal.login(userPhone);
+    console.log("🔔 OneSignal External ID Auto-Synced (Phone):", userPhone);
+}        
 </script>
 
 <script>
@@ -290,11 +289,10 @@
                 localStorage.setItem('memberId', result.data.member_id);
 
                 // 2. 🔔 DAFTARKAN MEMBER ID KE ONESIGNAL
-                window.OneSignalDeferred.push(async function(OneSignal) {
-                    await OneSignal.login(result.data.member_id);
-                    console.log("🔔 OneSignal External ID Set:", result.data.member_id);
-                });
-
+		window.OneSignalDeferred.push(async function(OneSignal) {
+   		await OneSignal.login(result.data.phone); // Gunakan phone, bukan member_id
+    		console.log("🔔 OneSignal External ID Set (Phone):", result.data.phone);
+});
                 alert('✅ Login Berhasil! Selamat datang, ' + result.data.name);
                 window.location.href = 'index.html';
             } else {

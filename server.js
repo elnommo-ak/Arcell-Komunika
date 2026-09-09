@@ -5,9 +5,11 @@ const cors = require('cors');
 const axios = require('axios');
 const crypto = require('crypto');
 const sqlite3 = require('sqlite3').verbose();
+const multer = require('multer'); // <--- 1. IMPORT MULTER
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+const upload = multer(); // <--- 2. INISIALISASI MULTER
 
 // ==================== CONFIGURATION ====================
 const USERNAME_DIGI = process.env.DIGIFLAZZ_USERNAME || '';
@@ -26,6 +28,7 @@ const OKECONNECT_CONFIG = {
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(express.text({ type: 'text/plain' })); // <--- 3. PERBAIKAN: Batasi text parser khusus text/plain saja
 app.use(express.static(path.join(__dirname, 'public')));
 
 // Helper Utility
@@ -104,15 +107,6 @@ function initTables() {
             name TEXT UNIQUE NOT NULL
         )`);
 
-        db.run(`ALTER TABLE products ADD COLUMN category TEXT DEFAULT 'Umum'`, () => {});
-        db.run(`ALTER TABLE products ADD COLUMN status TEXT DEFAULT '1'`, () => {});
-    });
-}
-function initTables() {
-    db.serialize(() => {
-        // ... tabel members, transactions, products, categories yang sudah ada ...
-
-        // 1. Tabel Kategori Custom Manual
         db.run(`CREATE TABLE IF NOT EXISTS custom_categories (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             name TEXT NOT NULL,
@@ -120,14 +114,16 @@ function initTables() {
             sort_order INTEGER DEFAULT 0
         )`);
 
-        // 2. Tabel Mapping Produk ke Kategori Custom
         db.run(`CREATE TABLE IF NOT EXISTS category_products (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             category_id INTEGER NOT NULL,
             buyer_sku_code TEXT NOT NULL,
-            provider TEXT NOT NULL, -- 'digiflazz' atau 'okeconnect'
+            provider TEXT NOT NULL,
             FOREIGN KEY (category_id) REFERENCES custom_categories(id) ON DELETE CASCADE
         )`);
+
+        db.run(`ALTER TABLE products ADD COLUMN category TEXT DEFAULT 'Umum'`, () => {});
+        db.run(`ALTER TABLE products ADD COLUMN status TEXT DEFAULT '1'`, () => {});
     });
 }
 
@@ -166,7 +162,7 @@ function extractProducts(data) {
     }).filter(item => item.sku && String(item.sku).trim() !== '-' && String(item.sku).trim() !== '');
 }
 
-// ==================== HELPER PUSH NOTIFICATION (ASLI/NORMAL) ====================
+// ==================== HELPER PUSH NOTIFICATION (PERBAIKAN ONESIGNAL) ====================
 async function kirimPushNotif(pesanTitle, pesanBody, targetId = null, isExternalId = false) {
     try {
         const ONESIGNAL_APP_ID = process.env.ONESIGNAL_APP_ID || "c7cc2a6a-84b8-4579-9c6b-f4d8077f0f65";
@@ -187,7 +183,11 @@ async function kirimPushNotif(pesanTitle, pesanBody, targetId = null, isExternal
 
         if (cleanTargetId) {
             if (isExternalId) {
-                payload.include_external_user_ids = [cleanTargetId];
+                // Gunakan include_aliases (Standard API v9+)
+                payload.include_aliases = {
+                    external_id: [cleanTargetId]
+                };
+                payload.target_channel = "push";
             } else {
                 payload.include_subscription_ids = [cleanTargetId];
             }
@@ -205,14 +205,19 @@ async function kirimPushNotif(pesanTitle, pesanBody, targetId = null, isExternal
                 }
             }
         );
-        console.log("🔔 Push Notification Status:", response.data);
+
+        // Filter log warning agar terminal tetap bersih
+        if (response.data?.warnings?.invalid_external_user_ids) {
+            console.log(`ℹ️ [Push Notif] User ${cleanTargetId} menerima notifikasi (beberapa perangkat lama/unsubscribed diabaikan).`);
+        } else {
+            console.log("🔔 Push Notification Status:", response.data?.id || "OK");
+        }
     } catch (err) {
         console.warn("⚠️ Warning Push Notif:", err.response?.data || err.message);
     }
 }
 
 // ==================== ENDPOINT OKECONNECT ====================
-
 app.post('/api/okeconnect/checkout', async (req, res) => {
     try {
         const { buyer_sku_code, customer_no, user_hp, username, harga_jual, nama_produk, subscription_id } = req.body;
@@ -276,7 +281,7 @@ app.post('/api/okeconnect/checkout', async (req, res) => {
 
                         const response = await axios.get(okeConnectUrl, {
                             headers: {
-                                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+                                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
                             },
                             timeout: 15000
                         });
@@ -285,10 +290,15 @@ app.post('/api/okeconnect/checkout', async (req, res) => {
                         console.log("--> [RESPONSE OKECONNECT]:", resultText);
 
                         const resUpper = resultText.toUpperCase();
-                        const isSuccess = resUpper.includes("PROSES") || 
-                                          resUpper.includes("SUKSES") || 
-                                          resUpper.includes("PENDING") ||
-                                          resUpper.includes("AKAN DIPROSES");
+                        
+                        const isExplicitFailed = resUpper.includes("GAGAL") || 
+                                                 resUpper.includes("SALDO TIDAK CUKUP") || 
+                                                 resUpper.includes("SALDO KURANG");
+
+                        const isSuccess = (resUpper.includes("PROSES") || 
+                                           resUpper.includes("SUKSES") || 
+                                           resUpper.includes("PENDING") ||
+                                           resUpper.includes("AKAN DIPROSES")) && !isExplicitFailed;
 
                         if (isSuccess) {
                             db.run("UPDATE transactions SET status = 'Proses', message = ? WHERE ref_id = ?", [resultText, refId]);
@@ -330,28 +340,95 @@ app.post('/api/okeconnect/checkout', async (req, res) => {
     }
 });
 
-app.all('/api/okeconnect/callback', async (req, res) => {
+// ==================== CALLBACK / WEBHOOK OKECONNECT (DENGAN MULTER) ====================
+app.all(['/callback/okeconnect/event', '/api/okeconnect/callback'], upload.none(), async (req, res) => {
     try {
-        const data = Object.keys(req.body).length > 0 ? req.body : req.query;
-        console.log("🔔 [CALLBACK DITERIMA] Payload dari OkeConnect:", JSON.stringify(data));
+        let data = req.body;
 
-        const refID  = data.refID || data.refid || data.trxid;
-        const status = data.status || data.st;
+        if (typeof data === 'string') {
+            try {
+                data = JSON.parse(data);
+            } catch (e) {
+                const searchParams = new URLSearchParams(data);
+                data = Object.fromEntries(searchParams.entries());
+            }
+        } else if (!data || Object.keys(data).length === 0) {
+            data = req.query || {};
+        }
+
+        console.log("🔔 [CALLBACK OKECONNECT DITERIMA]:", JSON.stringify(data));
+
+        const refID  = data.refid || data.ref_id || data.refID || data.trxid;
+        const message = data.message || data.msg || '';
         const sn     = data.sn || data.sn_response || '-';
 
+        let rawStatus = data.status || data.st || '';
+        if (!rawStatus && message) {
+            rawStatus = message;
+        }
+
+        const statusUpper = String(rawStatus).toUpperCase();
+
         if (refID) {
-            console.log(`⚡ Updating Transaksi ID: ${refID} | Status: ${status} | SN: ${sn}`);
-            db.run(`UPDATE transactions SET status = ?, sn = ? WHERE ref_id = ?`, [status, sn, refID]);
+            db.get("SELECT * FROM transactions WHERE ref_id = ?", [refID], async (err, trx) => {
+                if (err || !trx) {
+                    console.error(`❌ Transaksi ref_id ${refID} tidak ditemukan di database.`);
+                    return res.status(200).send("OK");
+                }
+
+                let finalStatus = 'Pending';
+                if (statusUpper.includes('SUKSES') || statusUpper.includes('LUNAS')) {
+                    finalStatus = 'Sukses';
+                } else if (statusUpper.includes('GAGAL') || statusUpper.includes('BATAL') || statusUpper.includes('REJECT')) {
+                    finalStatus = 'Gagal';
+                } else if (statusUpper.includes('PROSES') || statusUpper.includes('DIPROSES')) {
+                    finalStatus = 'Proses';
+                }
+
+                const statusLamaUpper = String(trx.status).toUpperCase();
+                const statusBaruUpper = finalStatus.toUpperCase();
+
+                if (statusLamaUpper === statusBaruUpper) {
+                    return res.status(200).send("OK");
+                }
+
+                db.run(
+                    `UPDATE transactions SET status = ?, sn = ?, message = ? WHERE ref_id = ?`,
+                    [finalStatus, (sn !== '-' ? sn : trx.sn), message, refID]
+                );
+
+                const userPhone = normalizePhone(trx.user_hp || trx.customer_no);
+                const refundPrice = parseFloat(trx.harga || trx.price || 0);
+                const targetId = trx.subscription_id || userPhone;
+                const isExternalId = !trx.subscription_id;
+
+                if (['GAGAL', 'BATAL'].includes(statusBaruUpper) && !['GAGAL', 'BATAL'].includes(statusLamaUpper)) {
+                    db.run("UPDATE members SET balance = balance + ? WHERE phone = ?", [refundPrice, userPhone]);
+                    await kirimPushNotif(
+                        "❌ Transaksi Gagal",
+                        `${trx.product_name || 'Produk'} ke ${trx.no_tujuan} GAGAL. Saldo Rp ${refundPrice.toLocaleString('id-ID')} dikembalikan.`,
+                        targetId,
+                        isExternalId
+                    );
+                } else if (['SUKSES', 'LUNAS'].includes(statusBaruUpper) && !['SUKSES', 'LUNAS'].includes(statusLamaUpper)) {
+                    await kirimPushNotif(
+                        "🎉 Transaksi Berhasil!",
+                        `${trx.product_name || 'Produk'} ke ${trx.no_tujuan} SUKSES. SN: ${sn}`,
+                        targetId,
+                        isExternalId
+                    );
+                }
+            });
         }
 
         return res.status(200).send("OK");
     } catch (error) {
         console.error("❌ Error Callback OkeConnect:", error);
-        return res.status(500).send("ERROR");
+        return res.status(200).send("OK");
     }
 });
 
-// SINKRONISASI PRODUK OKECONNECT (HARGA JUAL = HARGA MODAL / TANPA MARKUP)
+// SINKRONISASI PRODUK OKECONNECT
 app.post('/api/admin/sync-okeconnect', async (req, res) => {
     try {
         console.log('🔄 Downloading Okeconnect Pricelist...');
@@ -391,7 +468,7 @@ app.post('/api/admin/sync-okeconnect', async (req, res) => {
 
             productsList.forEach(item => {
                 const hargaModal = item.harga;
-                const hargaJualAwal = hargaModal; // TANPA MARGIN MARKUP
+                const hargaJualAwal = hargaModal;
 
                 stmt.run(
                     String(item.sku).trim(),
@@ -570,7 +647,7 @@ app.post('/api/digiflazz/webhook', (req, res) => {
     }
 });
 
-// SINKRONISASI PRODUK DIGIFLAZZ (HARGA JUAL = HARGA MODAL / TANPA MARKUP)
+// SINKRONISASI PRODUK DIGIFLAZZ
 app.post('/api/digiflazz/price-list', async (req, res) => {
     try {
         const username = USERNAME_DIGI.trim();
@@ -611,7 +688,7 @@ app.post('/api/digiflazz/price-list', async (req, res) => {
                     const brand = (p.brand || 'UMUM').toUpperCase();
                     const category = p.category || 'Umum';
                     const modalPrice = parseFloat(p.price || 0);
-                    const jualPrice = modalPrice; // TANPA MARGIN MARKUP
+                    const jualPrice = modalPrice;
 
                     if (sku && name) {
                         stmt.run(sku, name, brand, category, category, modalPrice, jualPrice);
@@ -916,9 +993,8 @@ app.get('/api/transaction/detail', (req, res) => {
     });
 });
 
-// =========================================================================
-// 1. ENDPOINT UNTUK INDEX.HTML (PEMBELI)
-// =========================================================================
+// ==================== ENDPOINT USER / CATEGORIES ====================
+
 app.get('/api/user/products-by-prefix', (req, res) => {
     const { brand } = req.query;
 
@@ -948,7 +1024,6 @@ app.get('/api/user/products-by-prefix', (req, res) => {
             return res.status(500).json({ status: 'error', message: err.message });
         }
 
-        // Kelompokkan data per nama kategori
         const grouped = {};
         rows.forEach(row => {
             if (!grouped[row.category_name]) {
@@ -966,11 +1041,6 @@ app.get('/api/user/products-by-prefix', (req, res) => {
     });
 });
 
-// =========================================================================
-// 2. ENDPOINT UNTUK ADMIN.HTML (MANAJEMEN KATEGORI SQLITE)
-// =========================================================================
-
-// Get All Custom Categories + Products mapped
 app.get('/api/admin/custom-categories', (req, res) => {
     db.all(`SELECT * FROM custom_categories ORDER BY sort_order ASC, id DESC`, [], (err, categories) => {
         if (err) return res.status(500).json({ status: 'error', message: err.message });
@@ -991,7 +1061,6 @@ app.get('/api/admin/custom-categories', (req, res) => {
     });
 });
 
-// Tambah Kategori Manual
 app.post('/api/admin/custom-categories', (req, res) => {
     const { name, brand } = req.body;
     db.run(`INSERT INTO custom_categories (name, brand) VALUES (?, ?)`, [name, brand], function(err) {
@@ -1000,7 +1069,6 @@ app.post('/api/admin/custom-categories', (req, res) => {
     });
 });
 
-// Hapus Kategori Manual
 app.delete('/api/admin/custom-categories/:id', (req, res) => {
     const id = req.params.id;
     db.run(`DELETE FROM custom_categories WHERE id = ?`, [id], function(err) {
@@ -1009,7 +1077,6 @@ app.delete('/api/admin/custom-categories/:id', (req, res) => {
     });
 });
 
-// Pemindahan Produk Massal ke Kategori SQLite
 app.post('/api/admin/map-category-product-bulk', (req, res) => {
     const { category_id, skus, provider } = req.body;
     if (!skus || skus.length === 0) return res.json({ status: 'success' });
@@ -1022,13 +1089,59 @@ app.post('/api/admin/map-category-product-bulk', (req, res) => {
     });
 });
 
-// Lepas Produk dari Kategori
 app.post('/api/admin/unmap-category-product', (req, res) => {
     const { category_id, buyer_sku_code, provider } = req.body;
     db.run(`DELETE FROM category_products WHERE category_id = ? AND buyer_sku_code = ? AND provider = ?`, 
         [category_id, buyer_sku_code, provider], function(err) {
         if (err) return res.status(500).json({ status: 'error', message: err.message });
         res.json({ status: 'success' });
+    });
+});
+
+// ==================== ENDPOINT FIX EDIT PRODUK CUSTOM (SQLITE) ====================
+app.post('/api/admin/update-custom-product', (req, res) => {
+    const { buyer_sku_code, product_name, price, provider } = req.body;
+
+    if (!buyer_sku_code || !product_name || price === undefined) {
+        return res.status(400).json({ 
+            status: 'error', 
+            message: 'SKU Kode, Nama Produk, dan Harga wajib diisi!' 
+        });
+    }
+
+    const priceVal = parseFloat(price) || 0;
+    const cleanProvider = (provider || 'digiflazz').toLowerCase();
+
+    const queryMaster = `
+        UPDATE products 
+        SET product_name = ?, price = ?, jual = ? 
+        WHERE buyer_sku_code = ? AND LOWER(provider) = ?
+    `;
+
+    db.run(queryMaster, [product_name, priceVal, priceVal, buyer_sku_code, cleanProvider], function(err) {
+        if (err) {
+            console.error("❌ DB Error Update Master:", err.message);
+            return res.status(500).json({ status: 'error', message: 'Gagal update database: ' + err.message });
+        }
+
+        if (this.changes > 0) {
+            console.log(`✅ Success Update Product [${buyer_sku_code}]: ${product_name} - Rp ${priceVal}`);
+            return res.json({ status: 'success', message: 'Produk berhasil diperbarui!' });
+        }
+
+        const queryFallback = `
+            UPDATE products 
+            SET product_name = ?, price = ?, jual = ? 
+            WHERE buyer_sku_code = ?
+        `;
+
+        db.run(queryFallback, [product_name, priceVal, priceVal, buyer_sku_code], function(err2) {
+            if (err2) {
+                return res.status(500).json({ status: 'error', message: 'Gagal update fallback: ' + err2.message });
+            }
+
+            return res.json({ status: 'success', message: 'Produk berhasil diperbarui!' });
+        });
     });
 });
 
