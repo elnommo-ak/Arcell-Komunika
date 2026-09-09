@@ -18,7 +18,6 @@
             --primary-hover: #4f46e5;
             --pink-accent: #ec4899;
             --badge-blue: #3b82f6;
-            --bottom-nav-height: 70px;
         }
 
         * { 
@@ -32,7 +31,7 @@
             background: linear-gradient(135deg, #e0c3fc 0%, #8ec5fc 100%);
             background-attachment: fixed;
             color: var(--text-main); 
-            padding-bottom: calc(var(--bottom-nav-height) + 20px); 
+            padding-bottom: 30px; 
             min-height: 100vh;
         }
 
@@ -229,25 +228,28 @@
         .sub-cat-card.open .sub-chevron { transform: rotate(180deg); }
         .sub-chevron { transition: transform 0.2s; font-size: 0.7rem; color: var(--text-sub); }
 
-        .prod-item { background: rgba(255, 255, 255, 0.8); padding: 8px 10px; border-radius: 10px; border: 1px solid var(--glass-border); display: flex; align-items: center; justify-content: space-between; }
-        .prod-name { font-size: 0.78rem; font-weight: 800; color: var(--text-main); }
+        .prod-item { background: rgba(255, 255, 255, 0.8); padding: 8px 10px; border-radius: 10px; border: 1px solid var(--glass-border); display: flex; align-items: center; justify-content: space-between; transition: all 0.25s ease; }
+        .prod-name { font-size: 0.78rem; font-weight: 800; color: var(--text-main); display: inline-flex; align-items: center; gap: 4px; }
         .prod-sku { font-size: 0.65rem; color: var(--text-sub); font-weight: 700; margin-top: 1px; }
         .prod-sku span { color: var(--primary); }
         .prod-price { font-size: 0.8rem; font-weight: 900; color: #10b981; }
 
-        .provider-tag { font-size: 0.6rem; font-weight: 800; padding: 2px 6px; border-radius: 6px; text-transform: uppercase; margin-left: 4px; }
-        .tag-digi { background: #e0e7ff; color: #4338ca; }
-        .tag-okec { background: #d1fae5; color: #047857; }
+        /* BULATAN INDIKATOR PROVIDER (DOT) */
+        .dot-indicator {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            margin-left: 4px;
+            vertical-align: middle;
+            flex-shrink: 0;
+        }
+        .dot-digiflazz { background-color: #6366f1; box-shadow: 0 0 6px rgba(99, 102, 241, 0.5); }
+        .dot-okeconnect { background-color: #10b981; box-shadow: 0 0 6px rgba(16, 185, 129, 0.5); }
 
         .status-badge { font-size: 0.62rem; font-weight: 800; padding: 2px 6px; border-radius: 6px; text-transform: uppercase; }
         .status-badge.active { background: rgba(16, 185, 129, 0.15); color: #10b981; }
         .status-badge.hidden { background: rgba(239, 68, 68, 0.15); color: #ef4444; }
-
-        /* BOTTOM NAV */
-        .bottom-nav { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 480px; height: var(--bottom-nav-height); background: rgba(255, 255, 255, 0.75); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border-top: 1px solid var(--glass-border); display: flex; justify-content: space-around; align-items: center; border-top-left-radius: 18px; border-top-right-radius: 18px; padding: 0 10px; z-index: 999; box-shadow: 0 -5px 20px rgba(0,0,0,0.05); }
-        .nav-item { display: flex; flex-direction: column; align-items: center; justify-content: center; text-decoration: none; color: var(--text-sub); font-size: 10px; font-weight: 600; width: 56px; height: 46px; border-radius: 12px; transition: all 0.3s ease; }
-        .nav-item i { font-size: 16px; margin-bottom: 2px; }
-        .nav-item.active { color: var(--primary); background: rgba(255, 255, 255, 0.9); box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
     </style>
 </head>
 <body>
@@ -369,7 +371,10 @@
         <!-- TAB DIGIFLAZZ -->
         <div id="tab-digiflazz" class="tab-content">
             <div class="glass-card">
-                <h3><i class="fa-solid fa-layer-group"></i> Pemindah Massal & Cari Digiflazz</h3>
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                    <h3 style="margin:0;"><i class="fa-solid fa-layer-group"></i> Produk Digiflazz</h3>
+                    <button onclick="syncDigiflazzToDB()" class="btn-sm"><i class="fa-solid fa-rotate-right"></i> Sync API</button>
+                </div>
                 <div class="bulk-bar">
                     <select id="bulkCategorySelectDigi" style="flex: 1; min-width: 140px;">
                         <option value="">-- Kategori Tujuan (DB) --</option>
@@ -429,30 +434,6 @@
                 </div>
             </div>
         </div>
-    </div>
-
-    <!-- BOTTOM NAV -->
-    <div class="bottom-nav">
-        <a href="index.html" class="nav-item">
-            <i class="fa-solid fa-house"></i>
-            <span>Home</span>
-        </a>
-        <a href="history.html" class="nav-item">
-            <i class="fa-solid fa-clock-rotate-left"></i>
-            <span>History</span>
-        </a>
-        <a href="rekap.html" class="nav-item">
-            <i class="fa-solid fa-chart-line"></i>
-            <span>Rekap</span>
-        </a>
-        <a href="kasir.html" class="nav-item">
-            <i class="fa-solid fa-cash-register"></i>
-            <span>Kasir</span>
-        </a>
-        <a href="akun.html" class="nav-item active">
-            <i class="fa-solid fa-user"></i>
-            <span>Akun</span>
-        </a>
     </div>
 
     <script>
@@ -807,8 +788,6 @@
             let html = '';
             Object.keys(groupedByBrand).forEach(brand => {
                 const categories = groupedByBrand[brand];
-                let totalItemsBrand = 0;
-                categories.forEach(c => totalItemsBrand += (c.products ? c.products.length : 0));
 
                 html += `
                     <div class="brand-block">
@@ -825,11 +804,11 @@
                 categories.forEach(cat => {
                     const prods = cat.products || [];
                     html += `
-                        <div class="sub-cat-card">
+                        <div class="sub-cat-card" id="sub-cat-${cat.id}">
                             <div class="sub-cat-header" onclick="toggleSubCatAccordion(this)">
                                 <span><i class="fa-solid fa-folder-open" style="margin-right: 4px;"></i> ${cat.name}</span>
                                 <div style="display: flex; align-items: center; gap: 6px;">
-                                    <span class="badge-count" style="font-size: 0.62rem;">${prods.length} Item</span>
+                                    <span class="badge-count item-count-badge" style="font-size: 0.62rem;">${prods.length} Item</span>
                                     <button class="btn-sm btn-danger" style="padding: 2px 6px;" onclick="event.stopPropagation(); hapusCustomCategoryDB(${cat.id}, '${cat.name}')" title="Hapus Kategori"><i class="fa-solid fa-trash"></i></button>
                                     <i class="fa-solid fa-chevron-down sub-chevron"></i>
                                 </div>
@@ -838,22 +817,21 @@
                     `;
 
                     if(prods.length === 0) {
-                        html += `<div style="font-size:0.72rem; color:var(--text-sub); padding:6px; text-align:center;">Belum ada produk dipetakan ke folder ini. Pindahkan dari Tab Digiflazz/OkeConnect!</div>`;
+                        html += `<div class="empty-msg" style="font-size:0.72rem; color:var(--text-sub); padding:6px; text-align:center;">Belum ada produk dipetakan ke folder ini. Pindahkan dari Tab Digiflazz/OkeConnect!</div>`;
                     } else {
                         prods.forEach(p => {
                             const isOkec = p.provider === 'okeconnect';
-                            const tagClass = isOkec ? 'tag-okec' : 'tag-digi';
-                            const provLabel = isOkec ? 'OKECONNECT' : 'DIGIFLAZZ';
+                            const dotClass = isOkec ? 'dot-okeconnect' : 'dot-digiflazz';
 
                             html += `
-                                <div class="prod-item">
+                                <div class="prod-item" id="prod-item-${cat.id}-${p.buyer_sku_code}">
                                     <div>
-                                        <div class="prod-name">${p.product_name} <span class="provider-tag ${tagClass}">${provLabel}</span></div>
+                                        <div class="prod-name">${p.product_name} <span class="dot-indicator ${dotClass}"></span></div>
                                         <div class="prod-sku">SKU: <span>${p.buyer_sku_code}</span></div>
                                     </div>
                                     <div style="text-align:right;">
                                         <div class="prod-price">Rp ${parseFloat(p.jual || p.price || 0).toLocaleString('id-ID')}</div>
-                                        <button class="btn-sm btn-danger" style="margin-top:2px;" onclick="hapusMappingProduk(${cat.id}, '${p.buyer_sku_code}', '${p.provider}')"><i class="fa-solid fa-xmark"></i> Lepas</button>
+                                        <button class="btn-sm btn-danger" style="margin-top:2px;" onclick="hapusMappingProduk(${cat.id}, '${p.buyer_sku_code}', '${p.provider}', this)"><i class="fa-solid fa-xmark"></i> Lepas</button>
                                     </div>
                                 </div>
                             `;
@@ -878,7 +856,8 @@
             card.classList.toggle('open');
         }
 
-        async function hapusMappingProduk(categoryId, buyerSkuCode, provider) {
+        /* MANIPULASI DOM LOKAL SAAT LEPAS PRODUK AGAR TIDAK TERJADI REFRESH UI MEMBAGONGKAN */
+        async function hapusMappingProduk(categoryId, buyerSkuCode, provider, btnEl) {
             try {
                 const res = await fetch('/api/admin/unmap-category-product', {
                     method: 'POST',
@@ -888,9 +867,45 @@
                 const result = await res.json();
                 if(result.status === 'success') {
                     showToast('✅ Produk dilepas dari kategori!');
-                    loadCustomCategoriesFromDB();
+                    
+                    // Update state internal array secara pasif
+                    const targetCat = dbCustomCategories.find(c => c.id == categoryId);
+                    if (targetCat && targetCat.products) {
+                        targetCat.products = targetCat.products.filter(p => p.buyer_sku_code !== buyerSkuCode);
+                    }
+
+                    // Manipulasi DOM secara langsung agar accordion tidak tertutup/refresh
+                    const prodCard = btnEl ? btnEl.closest('.prod-item') : document.getElementById(`prod-item-${categoryId}-${buyerSkuCode}`);
+                    if (prodCard) {
+                        const subCatBody = prodCard.closest('.sub-cat-body');
+                        const subCatCard = prodCard.closest('.sub-cat-card');
+                        
+                        // FX Animasi hilang
+                        prodCard.style.opacity = '0';
+                        prodCard.style.transform = 'scale(0.9)';
+                        
+                        setTimeout(() => {
+                            prodCard.remove();
+                            
+                            // Perbarui indikator angka item di badge
+                            if (subCatCard) {
+                                const badge = subCatCard.querySelector('.item-count-badge');
+                                const remainingCount = subCatBody.querySelectorAll('.prod-item').length;
+                                if (badge) badge.innerText = `${remainingCount} Item`;
+
+                                // Jika kosong, tampilkan pesan folder kosong secara kontekstual
+                                if (remainingCount === 0 && subCatBody && !subCatBody.querySelector('.empty-msg')) {
+                                    subCatBody.innerHTML = `<div class="empty-msg" style="font-size:0.72rem; color:var(--text-sub); padding:6px; text-align:center;">Belum ada produk dipetakan ke folder ini. Pindahkan dari Tab Digiflazz/OkeConnect!</div>`;
+                                }
+                            }
+                        }, 200);
+                    }
+                } else {
+                    showToast('❌ Gagal melepas produk: ' + (result.message || ''), 'danger');
                 }
-            } catch(e) {}
+            } catch(e) {
+                showToast('❌ Error jaringan saat melepas produk', 'danger');
+            }
         }
 
         /* RENDER DIGIFLAZZ */
@@ -902,6 +917,18 @@
                 filteredData = [...rawData];
                 renderFolders();
             } catch (err) {}
+        }
+
+        /* SINKRONISASI DIGIFLAZZ KE DATABASE */
+        async function syncDigiflazzToDB() {
+            const container = document.getElementById('folderContainer');
+            container.innerHTML = `<div style="text-align:center; color: var(--primary); padding: 15px; font-size:0.8rem;"><i class="fa-solid fa-sync fa-spin"></i> Menyinkronkan data Digiflazz...</div>`;
+            try {
+                const res = await fetch('/api/digiflazz/price-list', { method: 'POST' });
+                const result = await res.json();
+                if (result.status === 'success') { showToast('✅ Sync Digiflazz Berhasil!'); loadProduk(); } 
+                else { showToast('❌ Gagal Sync: ' + (result.message || ''), 'danger'); loadProduk(); }
+            } catch (err) { showToast('❌ Gagal menghubungi server.', 'danger'); loadProduk(); }
         }
 
         function renderFolders() {
@@ -947,7 +974,7 @@
                                 <div style="display:flex; align-items:center; gap:8px;">
                                     <input type="checkbox" value="${sku}" ${isChecked} onchange="toggleSelect('digiflazz', '${sku}', this.checked)">
                                     <div>
-                                        <div class="prod-name">${p.product_name || p.nama_produk} <span class="provider-tag tag-digi">DIGIFLAZZ</span></div>
+                                        <div class="prod-name">${p.product_name || p.nama_produk} <span class="dot-indicator dot-digiflazz"></span></div>
                                         <div class="prod-sku">SKU: <span>${sku}</span> | Brand: <b>${p.brand}</b></div>
                                     </div>
                                 </div>
@@ -1086,7 +1113,7 @@
 
         async function syncOkeconnectToDB() {
             const container = document.getElementById('okeconnectContainer');
-            container.innerHTML = `<div style="text-align:center; color: var(--primary); padding: 15px; font-size:0.8rem;"><i class="fa-solid fa-sync fa-spin"></i> Menyinkronkan data...</div>`;
+            container.innerHTML = `<div style="text-align:center; color: var(--primary); padding: 15px; font-size:0.8rem;"><i class="fa-solid fa-sync fa-spin"></i> Menyinkronkan data Okeconnect...</div>`;
             try {
                 const res = await fetch('/api/admin/sync-okeconnect', { method: 'POST' });
                 const result = await res.json();
@@ -1152,7 +1179,7 @@
                         <div style="display:flex; align-items:center; gap:8px;">
                             <input type="checkbox" value="${kode}" ${isChecked} onchange="toggleSelect('okeconnect', '${kode}', this.checked)">
                             <div>
-                                <div class="prod-name">${nama} <span class="provider-tag tag-okec">OKECONNECT</span></div>
+                                <div class="prod-name">${nama} <span class="dot-indicator dot-okeconnect"></span></div>
                                 <div class="prod-sku">Kode: <span>${kode}</span> | Brand: <b>${p.brand || 'OKECONNECT'}</b></div>
                             </div>
                         </div>

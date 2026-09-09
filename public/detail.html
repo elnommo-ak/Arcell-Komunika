@@ -322,6 +322,49 @@
   <script type="text/javascript">
     var globalData = {};
 
+    // SAMA PERSIS DENGAN Halaman history.html
+    function parseWaktu(strWaktu) {
+        if (!strWaktu) return { tanggal: 'Hari Ini', jam: '', formatted: 'Hari Ini' };
+        
+        // 1. Ubah format spasi menjadi 'T' dan tambahkan 'Z' agar dibaca sebagai UTC oleh sistem
+        let formattedStr = strWaktu.trim().replace(' ', 'T');
+        if (!formattedStr.endsWith('Z')) {
+            formattedStr += 'Z';
+        }
+
+        const d = new Date(formattedStr);
+
+        // Jika tanggal valid, ubah otomatis sesuai Timezone perangkat (WIB)
+        if (!isNaN(d.getTime())) {
+            const yyyy = d.getFullYear();
+            const mm = String(d.getMonth() + 1).padStart(2, '0');
+            const dd = String(d.getDate()).padStart(2, '0');
+
+            const hh = String(d.getHours()).padStart(2, '0');
+            const min = String(d.getMinutes()).padStart(2, '0');
+            const ss = String(d.getSeconds()).padStart(2, '0');
+
+            const tgl = `${yyyy}-${mm}-${dd}`;
+            const jm = `${hh}:${min}:${ss}`;
+
+            return {
+                tanggal: tgl,
+                jam: jm,
+                formatted: `${tgl} ${jm} WIB`
+            };
+        }
+
+        // Fallback jika format string tanggal tidak standar
+        const parts = strWaktu.trim().split(/[\s,T]+/);
+        const tgl = parts[0] || 'Hari Ini';
+        const jm = parts[1] || '';
+        return { 
+            tanggal: tgl, 
+            jam: jm, 
+            formatted: (tgl + ' ' + jm).trim() + ' WIB' 
+        };
+    }
+
     $(document).ready(function(){
       var urlParams = new URLSearchParams(window.location.search);
       var refId = urlParams.get('id') || '';
@@ -387,9 +430,11 @@
         $('#status_icon').attr('class', 'fa-solid fa-clock').css('color', '#f59e0b');
       }
 
-      var waktu = row.waktu || row.created_at || row.tanggal_buat || row.date || '-';
-      $('#info_dibuat_pada').text(waktu);
-      $('#s_waktu').text(waktu);
+      var waktuRaw = row.waktu || row.created_at || row.tanggal_buat || row.date || '';
+      var waktuParsed = parseWaktu(waktuRaw);
+
+      $('#info_dibuat_pada').text(waktuParsed.formatted);
+      $('#s_waktu').text(waktuParsed.formatted);
 
       var namaProduk = row.produk || row.product_name || row.nama_produk || 'Produk Digital';
       var noTujuan = row.no_tujuan || row.customer_no || row.target || row.catatan || '-';

@@ -299,6 +299,14 @@
     let allTransactions = []; 
     let debounceTimer;
 
+    // --- FUNGSI UTILITAS & NORMALISASI ---
+    const normalizePhone = (phone) => {
+        if (!phone) return '';
+        let clean = String(phone).replace(/\D/g, '');
+        if (clean.startsWith('62')) clean = '0' + clean.slice(2);
+        return clean;
+    };
+
     const cleanNumber = (val) => {
         if (!val) return 0;
         if (typeof val === 'number') return val;
@@ -520,36 +528,53 @@
         calculateFilteredSummary();
     };
 
+    // --- PROSES MEMUAT DATA DISESUAIKAN DENGAN LOGIKA HISTORY.HTML ---
     const loadData = async () => {
+        const container = document.getElementById("app");
         try {
-            let res = await fetch('/api/history?t=' + Date.now());
+            // 1. Cek Autentikasi Login dan Nomor HP User dari LocalStorage
+            const isLoggedIn = localStorage.getItem('isLoggedIn');
+            const rawHp = localStorage.getItem('userPhone') || '';
+            const hp = normalizePhone(rawHp);
+
+            // 2. Jika belum login / tidak ada nomor HP, tampilkan instruksi login
+            if (isLoggedIn !== 'true' || !hp) {
+                container.innerHTML = `
+                    <div class="info-text">
+                        <i class="fa-solid fa-lock" style="font-size:28px; margin-bottom:12px; color:var(--accent-purple);"></i><br>
+                        Silakan login terlebih dahulu untuk melihat rekap transaksi.
+                    </div>`;
+                return;
+            }
+
+            // 3. Request ke API Backend dengan parameter nomor HP member
+            let res = await fetch(`/api/history?phone=${encodeURIComponent(hp)}&hp=${encodeURIComponent(hp)}&t=` + Date.now());
             let result = await res.json();
             
-            allTransactions = result.data || result || [];
+            allTransactions = Array.isArray(result) ? result : (result.data || []);
 
-            // Jika API history kosong, coba panggil API admin transactions
-            if (!Array.isArray(allTransactions) || allTransactions.length === 0) {
-                const resAdmin = await fetch('/api/admin/transactions?t=' + Date.now());
-                const resAdminJson = await resAdmin.json();
-                allTransactions = resAdminJson.data || resAdminJson || [];
-            }
-            
-            // PENGECEKAN STATUS LEBIH FLEKSIBEL (SUKSES / PROSES / LUNAS / SELESAI / 1)
+            // 4. FILTER KETAT: HANYA STATUS "SUKSES" / "LUNAS" / "SUCCESS" & MILIK AKUN INI
             const validTransactions = allTransactions.filter(item => {
-                const st = String(item.status || '').toLowerCase();
-                return st.includes('sukses') || 
-                       st.includes('proses') || 
-                       st.includes('success') || 
-                       st.includes('lunas') || 
-                       st.includes('selesai') || 
-                       st === '1' || 
-                       st === 'berhasil';
+                const st = String(item.status || '').toLowerCase().trim();
+                
+                // HANYA MEMPERBOLEHKAN STATUS SUKSES/LUNAS (PROSES, PENDING, BATAL AKAN DIBUANG)
+                const isSukses = st === 'sukses' || 
+                                  st === 'success' || 
+                                  st === 'lunas' || 
+                                  st === 'selesai' || 
+                                  st === '1' || 
+                                  st === 'berhasil';
+
+                const itemHp = normalizePhone(item.user_hp || item.customer_no || item.phone || '');
+                const isMyTransaction = itemHp !== '' && itemHp === hp;
+
+                return isSukses && isMyTransaction;
             });
 
             renderUI(validTransactions);
         } catch (err) {
-            console.error("Gagal memuat transaksi:", err);
-            document.getElementById("app").innerHTML = `<div class="info-text">Gagal terhubung ke server VPS.</div>`;
+            console.error("Gagal memuat rekap transaksi:", err);
+            container.innerHTML = `<div class="info-text">Gagal terhubung ke server VPS.</div>`;
         }
     };
 
@@ -557,7 +582,7 @@
         const container = document.getElementById("app");
 
         if (!list || list.length === 0) {
-            container.innerHTML = '<div class="info-text">Belum ada riwayat transaksi terdeteksi.</div>';
+            container.innerHTML = '<div class="info-text">Belum ada riwayat transaksi terdeteksi untuk akun Anda.</div>';
             return;
         }
 
