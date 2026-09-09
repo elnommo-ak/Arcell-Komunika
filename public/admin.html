@@ -199,7 +199,11 @@
         .sub-trx-prod { font-size: 0.78rem; font-weight: 800; color: var(--text-main); }
         .sub-trx-target { font-size: 0.72rem; color: var(--primary); font-weight: 700; }
         .sub-trx-price { font-size: 0.8rem; font-weight: 900; color: #10b981; }
-        .sub-trx-status { font-size: 0.65rem; font-weight: 800; padding: 1px 6px; border-radius: 6px; background: rgba(16, 185, 129, 0.15); color: #10b981; text-transform: uppercase; }
+        
+        .sub-trx-status { font-size: 0.65rem; font-weight: 800; padding: 1px 6px; border-radius: 6px; text-transform: uppercase; }
+        .sub-trx-status.sukses { background: rgba(16, 185, 129, 0.15); color: #10b981; }
+        .sub-trx-status.proses { background: rgba(245, 158, 11, 0.15); color: #f59e0b; }
+        .sub-trx-status.gagal { background: rgba(239, 68, 68, 0.15); color: #ef4444; }
 
         /* FOLDER ACCORDION PRODUK & PROVIDER */
         .folder-card { background: rgba(255, 255, 255, 0.65); border-radius: 14px; border: 1px solid var(--glass-border); margin-bottom: 10px; overflow: hidden; box-shadow: var(--glass-shadow); }
@@ -300,12 +304,25 @@
             <button class="tab-btn" onclick="switchTab('tab-okeconnect', event)"><i class="fa-solid fa-bolt"></i> Okeconnect</button>
         </div>
 
+        <!-- TAB SALDO & RIWAYAT TRANSAKSI SEMUA MEMBER -->
         <div id="tab-saldo" class="tab-content active">
             <div class="glass-card main-balance-card">
                 <div class="title"><i class="fa-solid fa-wallet"></i> Saldo Server Digiflazz</div>
                 <div class="value" id="dispSaldoDigiflazz">Rp 0</div>
                 <div style="margin-top: 10px;">
                     <button onclick="loadSaldoInfo()"><i class="fa-solid fa-rotate-right"></i> Refresh</button>
+                </div>
+            </div>
+
+            <!-- CARD RIWAYAT TRANSAKSI SEMUA MEMBER -->
+            <div class="glass-card">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; flex-wrap: wrap; gap: 6px;">
+                    <h3 style="margin:0;"><i class="fa-solid fa-receipt"></i> Riwayat Transaksi Semua Member</h3>
+                    <button class="btn-sm" onclick="loadTransactions(true)"><i class="fa-solid fa-rotate-right"></i> Refresh</button>
+                </div>
+                <input type="text" id="searchAllTrx" placeholder="🔍 Cari Ref ID, No HP, Produk..." oninput="filterAllTransactions()" style="width: 100%; margin-bottom: 10px;">
+                <div id="allTrxContainer" style="display: flex; flex-direction: column; gap: 8px;">
+                    <div style="text-align:center; color: var(--text-sub); padding:15px; font-size:0.8rem;">Memuat riwayat transaksi...</div>
                 </div>
             </div>
         </div>
@@ -473,11 +490,33 @@
         let rawOkeconnectData = [];
         let filteredOkeconnectData = [];
         
+        // Tracking ID Transaksi untuk Notifikasi Real-time
+        let knownTrxIds = new Set();
+        let isFirstLoadTrx = true;
+        
         // Data Kategori Custom SQLite
         let dbCustomCategories = [];
         
         let selectedSKUsDigi = new Set();
         let selectedSKUsOkec = new Set();
+
+        /* BEEP AUDIO UNTUK NOTIFIKASI TRANSAKSI MASUK */
+        function playNotifSound() {
+            try {
+                const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(587.33, audioCtx.currentTime); // High D5 tone
+                osc.frequency.exponentialRampToValueAtTime(880, audioCtx.currentTime + 0.15); // A5
+                gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start();
+                osc.stop(audioCtx.currentTime + 0.3);
+            } catch(e){}
+        }
 
         /* TOAST NOTIFICATION LOKAL */
         function showToast(message, type = 'success') {
@@ -490,11 +529,11 @@
             }
             const toast = document.createElement('div');
             const bgColor = type === 'success' ? '#10b981' : (type === 'danger' ? '#ef4444' : '#f59e0b');
-            toast.style.cssText = `background: ${bgColor}; color: #ffffff; padding: 8px 14px; border-radius: 10px; font-size: 0.78rem; font-weight: 800; box-shadow: 0 4px 12px rgba(0,0,0,0.15); opacity: 0; transform: translateY(-10px); transition: all 0.25s ease; pointer-events: auto;`;
-            toast.innerText = message;
+            toast.style.cssText = `background: ${bgColor}; color: #ffffff; padding: 10px 16px; border-radius: 12px; font-size: 0.8rem; font-weight: 800; box-shadow: 0 4px 16px rgba(0,0,0,0.2); opacity: 0; transform: translateY(-10px); transition: all 0.25s ease; pointer-events: auto;`;
+            toast.innerHTML = message;
             toastContainer.appendChild(toast);
             setTimeout(() => { toast.style.opacity = '1'; toast.style.transform = 'translateY(0)'; }, 10);
-            setTimeout(() => { toast.style.opacity = '0'; toast.style.transform = 'translateY(-10px)'; setTimeout(() => toast.remove(), 250); }, 2000);
+            setTimeout(() => { toast.style.opacity = '0'; toast.style.transform = 'translateY(-10px)'; setTimeout(() => toast.remove(), 250); }, 3500);
         }
 
         /* PARSER WAKTU */
@@ -559,6 +598,77 @@
             } catch (err) {
                 document.getElementById('tabelMember').innerHTML = `<div style="text-align:center; color:red; padding:10px;">Gagal memuat data member.</div>`;
             }
+        }
+
+        // ==========================================
+        // RENDER RIWAYAT TRANSAKSI TERPUSAT (TAB SALDO)
+        // ==========================================
+        function renderAllTransactions(list) {
+            const container = document.getElementById('allTrxContainer');
+            if (!list || list.length === 0) {
+                container.innerHTML = `<div style="text-align:center; color: var(--text-sub); padding:15px; font-size:0.8rem;">Belum ada riwayat transaksi.</div>`;
+                return;
+            }
+
+            // Urutkan transaksi terbaru ke terlama
+            const sorted = [...list].sort((a, b) => {
+                const tA = parseWaktu(a.waktu || a.date || a.created_at || a.timestamp || '').dateObj.getTime();
+                const tB = parseWaktu(b.waktu || b.date || b.created_at || b.timestamp || '').dateObj.getTime();
+                return tB - tA;
+            });
+
+            let html = '';
+            sorted.forEach(t => {
+                const refId = t.ref_id || t.id || '-';
+                const parsedTime = parseWaktu(t.waktu || t.date || t.created_at || t.timestamp || '');
+                const userHp = t.user_hp || t.customer_no || '-';
+                const userName = t.username || t.nama_member || '-';
+                const produk = t.produk || t.product_name || 'Produk PPOB';
+                const targetNo = t.no_tujuan || t.customer_no || '-';
+                const harga = parseFloat(t.harga || t.price || 0);
+                const statusStr = String(t.status || 'PROSES').toUpperCase();
+
+                let statusClass = 'proses';
+                if (['SUKSES', 'SUCCESS', 'SELESAI', 'LUNAS', '1'].includes(statusStr)) statusClass = 'sukses';
+                else if (['GAGAL', 'FAILED', 'BATAL', '0'].includes(statusStr)) statusClass = 'gagal';
+
+                html += `
+                    <div class="sub-trx-card">
+                        <div class="sub-trx-header">
+                            <span><b>#${refId}</b> | Member: <b>${userName}</b> (${userHp})</span>
+                            <span><i class="fa-regular fa-clock"></i> ${parsedTime.full}</span>
+                        </div>
+                        <div class="sub-trx-body">
+                            <div>
+                                <div class="sub-trx-prod">${produk}</div>
+                                <div class="sub-trx-target"><i class="fa-solid fa-mobile-screen-button"></i> ${targetNo}</div>
+                            </div>
+                            <div style="text-align:right;">
+                                <div class="sub-trx-price">Rp ${harga.toLocaleString('id-ID')}</div>
+                                <div style="display:flex; gap:4px; justify-content:flex-end; margin-top:2px;">
+                                    <span class="sub-trx-status ${statusClass}">${statusStr}</span>
+                                    <button class="btn-sm btn-warning" style="padding:1px 5px; font-size:0.62rem;" onclick="editHargaTransaksi('${refId}', ${harga})"><i class="fa-solid fa-pen"></i> Edit</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+
+            container.innerHTML = html;
+        }
+
+        function filterAllTransactions() {
+            const kw = document.getElementById('searchAllTrx').value.toLowerCase();
+            const filtered = rawTransactions.filter(t => {
+                const refId = String(t.ref_id || t.id || '').toLowerCase();
+                const hp = String(t.user_hp || t.customer_no || '').toLowerCase();
+                const user = String(t.username || t.nama_member || '').toLowerCase();
+                const prod = String(t.produk || t.product_name || '').toLowerCase();
+                const target = String(t.no_tujuan || t.customer_no || '').toLowerCase();
+                return refId.includes(kw) || hp.includes(kw) || user.includes(kw) || prod.includes(kw) || target.includes(kw);
+            });
+            renderAllTransactions(filtered);
         }
 
         function renderTabelMember(list) {
@@ -643,7 +753,7 @@
                                         <div><div class="sub-trx-prod">${t.produk || t.product_name || 'Produk PPOB'}</div><div class="sub-trx-target"><i class="fa-solid fa-mobile-screen-button"></i> ${t.no_tujuan || t.customer_no || '-'}</div></div>
                                         <div style="text-align:right;"><div class="sub-trx-price">Rp ${parseFloat(t.harga || t.price || 0).toLocaleString('id-ID')}</div>
                                             <div style="display:flex; gap:4px; justify-content:flex-end; margin-top:2px;">
-                                                <span class="sub-trx-status">SUKSES</span>
+                                                <span class="sub-trx-status sukses">SUKSES</span>
                                                 <button class="btn-sm btn-warning" style="padding:1px 5px; font-size:0.62rem;" onclick="editHargaTransaksi('${t.ref_id || t.id || '-'}', ${parseFloat(t.harga || t.price || 0)})"><i class="fa-solid fa-pen"></i> Edit</button>
                                             </div>
                                         </div>
@@ -674,7 +784,7 @@
                 else showToast('❌ Gagal: ' + (result.message || 'Terjadi kesalahan.'), "danger");
             } catch (err) {
                 const targetTrx = rawTransactions.find(t => String(t.ref_id || t.id) === String(refId));
-                if (targetTrx) { targetTrx.harga = nominalBaru; targetTrx.price = nominalBaru; showToast('✅ Harga berhasil diperbarui!'); renderTabelMember(rawMembers); } 
+                if (targetTrx) { targetTrx.harga = nominalBaru; targetTrx.price = nominalBaru; showToast('✅ Harga berhasil diperbarui!'); renderTabelMember(rawMembers); renderAllTransactions(rawTransactions); } 
                 else showToast('❌ Error jaringan.', "danger");
             }
         }
@@ -722,12 +832,41 @@
             } catch (err) { showToast('❌ Error jaringan', 'danger'); }
         }
 
-        async function loadTransactions() {
+        // ==========================================
+        // FETCH TRANSAKSI & DETEKSI TRANSAKSI BARU
+        // ==========================================
+        async function loadTransactions(manualRefresh = false) {
             try {
                 const res = await fetch('/api/admin/transactions?t=' + Date.now());
                 const result = await res.json();
-                rawTransactions = Array.isArray(result) ? result : (result.data || []);
+                const fetchedList = Array.isArray(result) ? result : (result.data || []);
+                
+                // Deteksi Transaksi Baru untuk Notifikasi
+                if (!isFirstLoadTrx) {
+                    fetchedList.forEach(t => {
+                        const refId = String(t.ref_id || t.id || '');
+                        if (refId && !knownTrxIds.has(refId)) {
+                            playNotifSound();
+                            const prodName = t.produk || t.product_name || 'Produk PPOB';
+                            const memName = t.username || t.user_hp || 'Member';
+                            const statusStr = String(t.status || 'PROSES').toUpperCase();
+                            showToast(`🔔 <b>Transaksi Baru!</b><br>${memName}: <b>${prodName}</b> [${statusStr}]`);
+                        }
+                    });
+                }
+
+                // Catat semua ID transaksi yang telah diproses
+                fetchedList.forEach(t => {
+                    const refId = String(t.ref_id || t.id || '');
+                    if (refId) knownTrxIds.add(refId);
+                });
+                isFirstLoadTrx = false;
+
+                rawTransactions = fetchedList;
+                renderAllTransactions(rawTransactions);
                 renderTabelMember(rawMembers);
+                
+                if (manualRefresh) showToast('✅ Data transaksi diperbarui');
             } catch (err) {}
         }
 
@@ -958,7 +1097,7 @@
             card.classList.toggle('open');
         }
 
-        /* MANIPULASI DOM LOKAL SAAT LEPAS PRODUK AGAR TIDAK TERJADI REFRESH UI MEMBAGONGKAN */
+        /* MANIPULASI DOM LOKAL SAAT LEPAS PRODUK */
         async function hapusMappingProduk(categoryId, buyerSkuCode, provider, btnEl) {
             try {
                 const res = await fetch('/api/admin/unmap-category-product', {
@@ -970,32 +1109,27 @@
                 if(result.status === 'success') {
                     showToast('✅ Produk dilepas dari kategori!');
                     
-                    // Update state internal array secara pasif
                     const targetCat = dbCustomCategories.find(c => c.id == categoryId);
                     if (targetCat && targetCat.products) {
                         targetCat.products = targetCat.products.filter(p => p.buyer_sku_code !== buyerSkuCode);
                     }
 
-                    // Manipulasi DOM secara langsung agar accordion tidak tertutup/refresh
                     const prodCard = btnEl ? btnEl.closest('.prod-item') : document.getElementById(`prod-item-${categoryId}-${buyerSkuCode}`);
                     if (prodCard) {
                         const subCatBody = prodCard.closest('.sub-cat-body');
                         const subCatCard = prodCard.closest('.sub-cat-card');
                         
-                        // FX Animasi hilang
                         prodCard.style.opacity = '0';
                         prodCard.style.transform = 'scale(0.9)';
                         
                         setTimeout(() => {
                             prodCard.remove();
                             
-                            // Perbarui indikator angka item di badge
                             if (subCatCard) {
                                 const badge = subCatCard.querySelector('.item-count-badge');
                                 const remainingCount = subCatBody.querySelectorAll('.prod-item').length;
                                 if (badge) badge.innerText = `${remainingCount} Item`;
 
-                                // Jika kosong, tampilkan pesan folder kosong secara kontekstual
                                 if (remainingCount === 0 && subCatBody && !subCatBody.querySelector('.empty-msg')) {
                                     subCatBody.innerHTML = `<div class="empty-msg" style="font-size:0.72rem; color:var(--text-sub); padding:6px; text-align:center;">Belum ada produk dipetakan ke folder ini. Pindahkan dari Tab Digiflazz/OkeConnect!</div>`;
                                 }
@@ -1183,7 +1317,7 @@
             renderFolders();
         }
 
-        /* === INTEGRASI OKECONNECT DENGAN LAZY LOADING === */
+        /* INTEGRASI OKECONNECT DENGAN LAZY LOADING */
         async function loadOkeconnectProducts(force = false) {
             const container = document.getElementById('okeconnectContainer');
 
@@ -1373,7 +1507,13 @@
             await loadCustomCategoriesFromDB();
             loadProduk();
             loadOkeconnectProducts();
+
+            // AUTO-POLLING TIAP 3 DETIK UNTUK MEMANTAU TRANSAKSI MASUK REAL-TIME
+            setInterval(() => {
+                loadTransactions();
+            }, 3000);
         };
     </script>
 </body>
 </html>
+

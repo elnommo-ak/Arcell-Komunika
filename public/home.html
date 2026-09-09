@@ -11,17 +11,17 @@
     <!-- 🔔 ONESIGNAL SDK v16 FINAL -->
     <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
     <script>
-  window.OneSignalDeferred = window.OneSignalDeferred || [];
-  OneSignalDeferred.push(async function(OneSignal) {
-    await OneSignal.init({
-      appId: "c7cc2a6a-84b8-4579-9c6b-f4d8077f0f65",
-      safari_web_id: "web.onesignal.auto.58b504fd-a471-4836-bd65-020899577e4e",
-      notifyButton: {
-        enable: true,
-      },
-    });
-  });
-</script>
+      window.OneSignalDeferred = window.OneSignalDeferred || [];
+      OneSignalDeferred.push(async function(OneSignal) {
+        await OneSignal.init({
+          appId: "c7cc2a6a-84b8-4579-9c6b-f4d8077f0f65",
+          safari_web_id: "web.onesignal.auto.58b504fd-a471-4836-bd65-020899577e4e",
+          notifyButton: {
+            enable: true,
+          },
+        });
+      });
+    </script>
 
     <!-- 🔒 PROTEKSI WAJIB LOGIN -->
     <script>
@@ -705,6 +705,7 @@
             }, 300);
         }
 
+        // 🚀 EKSEKUSI CHECKOUT & REDIRECT KELUAR/MASUK KE DETAIL.HTML
         async function eksekusiCheckoutTerpilih() {
             const btn = document.getElementById('btnProsesBayar');
             btn.disabled = true;
@@ -737,19 +738,22 @@
 
                 if (res.status === 'success' || res.status === 200) {
                     tutupCheckoutSheet();
-                    alert('✅ Transaksi Berhasil Diproses!\nRef ID: ' + (res.data ? res.data.ref_id : 'TRX-SUCCESS'));
                     
-                    loadSaldoMemberAkun();
-                    phoneInput.value = '';
-                    badge.style.display = 'none';
-                    popupTopContainer.style.display = 'none';
+                    // Ambil Ref ID hasil transaksi dari respon backend (atau fallback ke local ref_id)
+                    var refIdResult = (res.data && (res.data.ref_id || res.data.id || res.data.trx_id)) 
+                                      ? (res.data.ref_id || res.data.id || res.data.trx_id) 
+                                      : (res.ref_id || dataCheckoutAktif.ref_id);
+
+                    // LANGSUNG REDIRECT KE DETAIL.HTML DENGAN PARAMETER REF_ID
+                    window.location.href = 'detail.html?id=' + encodeURIComponent(refIdResult);
                 } else {
                     alert('❌ Gagal Transaksi: ' + (res.message || 'Terjadi kesalahan'));
+                    btn.disabled = false;
+                    btn.innerHTML = '<i class="fa-solid fa-shield-halved"></i> Bayar Sekarang';
                 }
             } catch (err) {
                 console.error(err);
                 alert('❌ Gagal terhubung ke Server');
-            } finally {
                 btn.disabled = false;
                 btn.innerHTML = '<i class="fa-solid fa-shield-halved"></i> Bayar Sekarang';
             }

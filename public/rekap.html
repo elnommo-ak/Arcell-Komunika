@@ -10,7 +10,7 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 
     <style>
-        /* --- CLEAN WHITE NEUMORPHISM THEME (INDEX/HOME MATCH) --- */
+        /* --- CLEAN COMPACT NEUMORPHISM THEME --- */
         :root {
             --bg-base: #e6eaf0;
             --neu-light: #ffffff;
@@ -21,15 +21,14 @@
             --success-color: #2e7d32;
             --warning-color: #ed6c02;
             --danger-color: #d32f2f;
-            --border-radius-sm: 14px;
-            --border-radius-md: 22px;
+            --border-radius-sm: 10px;
+            --border-radius-md: 16px;
             --border-radius-pill: 50px;
-            --main-gap: 16px;
             
             /* Clean Neumorphism Shadows */
-            --neu-shadow-flat: 6px 6px 12px var(--neu-dark), -6px -6px 12px var(--neu-light);
-            --neu-shadow-sm: 3px 3px 6px var(--neu-dark), -3px -3px 6px var(--neu-light);
-            --neu-shadow-inset: inset 3px 3px 6px var(--neu-dark), inset -3px -3px 6px var(--neu-light);
+            --neu-shadow-flat: 4px 4px 8px var(--neu-dark), -4px -4px 8px var(--neu-light);
+            --neu-shadow-sm: 2px 2px 5px var(--neu-dark), -2px -2px 5px var(--neu-light);
+            --neu-shadow-inset: inset 2px 2px 4px var(--neu-dark), inset -2px -2px 4px var(--neu-light);
         }
 
         * {
@@ -53,7 +52,7 @@
             align-items: flex-start;
             overflow-x: hidden;
             overflow-y: auto;
-            padding-bottom: 30px;
+            padding-bottom: 20px;
         }
 
         .app-container {
@@ -63,76 +62,76 @@
             background-color: var(--bg-base);
             position: relative;
             margin: 0 auto;
-            padding: 16px;
+            padding: 12px;
         }
 
         ::-webkit-scrollbar { display: none !important; width: 0 !important; height: 0 !important; }
         * { -ms-overflow-style: none !important; scrollbar-width: none !important; }
 
-        /* HEADER */
+        /* HEADER RAMPING */
         .nav-header {
             display: flex;
             align-items: center;
             justify-content: space-between;
-            margin-bottom: 16px;
+            margin-bottom: 10px;
         }
 
         .header-title {
-            font-size: 1rem; font-weight: 800; color: var(--text-main);
-            display: flex; align-items: center; gap: 8px;
+            font-size: 0.9rem; font-weight: 800; color: var(--text-main);
+            display: flex; align-items: center; gap: 6px;
         }
         .header-title i { color: var(--accent-purple); }
 
-        /* STICKY SUMMARY CARD (TOP) */
+        /* STICKY SUMMARY CARD (MINIMALIS) */
         .summary-box {
             background: var(--bg-base);
             border-radius: var(--border-radius-md);
-            padding: 18px;
-            margin-bottom: 16px;
+            padding: 12px 14px;
+            margin-bottom: 10px;
             position: sticky;
-            top: 10px;
+            top: 6px;
             z-index: 100;
             box-shadow: var(--neu-shadow-flat);
         }
 
         .summary-header { 
-            display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;
+            display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;
         }
 
         .summary-title { 
-            font-size: 0.72rem; text-transform: uppercase; color: var(--text-muted);
-            letter-spacing: 0.5px; font-weight: 800; display: flex; align-items: center; gap: 6px;
+            font-size: 0.65rem; text-transform: uppercase; color: var(--text-muted);
+            letter-spacing: 0.5px; font-weight: 800; display: flex; align-items: center; gap: 4px;
         }
         .summary-title i { color: var(--accent-purple); }
 
         .summary-value { 
-            font-size: 1.4rem; font-weight: 800; color: var(--accent-purple); 
-            display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;
+            font-size: 1.2rem; font-weight: 800; color: var(--accent-purple); 
+            display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;
         }
 
         .badge-qty {
-            font-size: 0.7rem; background: var(--bg-base); color: var(--accent-purple);
-            padding: 4px 12px; border-radius: var(--border-radius-pill);
+            font-size: 0.65rem; background: var(--bg-base); color: var(--accent-purple);
+            padding: 2px 8px; border-radius: var(--border-radius-pill);
             box-shadow: var(--neu-shadow-inset); font-weight: 800;
         }
 
         .summary-grid { 
-            display: flex; gap: 12px; border-top: 1px dashed var(--neu-dark); padding-top: 10px;
+            display: flex; gap: 8px; border-top: 1px dashed var(--neu-dark); padding-top: 6px;
         }
 
         .summary-item { flex: 1; }
-        .summary-item-label { font-size: 0.65rem; color: var(--text-muted); font-weight: 700; text-transform: uppercase; }
-        .summary-item-value { font-size: 0.85rem; font-weight: 800; margin-top: 2px; color: var(--text-main); }
+        .summary-item-label { font-size: 0.6rem; color: var(--text-muted); font-weight: 700; text-transform: uppercase; }
+        .summary-item-value { font-size: 0.78rem; font-weight: 800; margin-top: 1px; color: var(--text-main); }
 
-        /* CONTROLS */
+        /* CONTROLS (MINIMALIS) */
         .controls-wrapper {
-            display: flex; flex-direction: column; gap: 10px; margin-bottom: 16px;
+            display: flex; gap: 8px; margin-bottom: 12px;
         }
 
-        .search-input, .select-filter {
-            width: 100%;
-            padding: 10px 18px;
-            font-size: 0.8rem;
+        .search-input {
+            flex: 1;
+            padding: 7px 12px;
+            font-size: 0.75rem;
             font-weight: 700;
             color: var(--text-main); 
             background: var(--bg-base);
@@ -141,52 +140,65 @@
             box-shadow: var(--neu-shadow-inset);
         }
 
-        /* CARD NEUMORPHIC GROUP */
-        .date-group { margin-bottom: 18px; }
+        .select-filter {
+            flex: 1;
+            padding: 7px 10px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: var(--text-main); 
+            background: var(--bg-base);
+            border: none; outline: none;
+            border-radius: var(--border-radius-pill);
+            box-shadow: var(--neu-shadow-inset);
+        }
+
+        /* CARD TRANSACTION (RAMPING & COMPACT) */
+        .date-group { margin-bottom: 12px; }
 
         .date-header {
             display: flex; justify-content: space-between; align-items: center;
-            padding: 4px 8px; font-size: 0.75rem; font-weight: 800; color: var(--text-muted);
-            margin-bottom: 8px;
+            padding: 2px 4px; font-size: 0.7rem; font-weight: 800; color: var(--text-muted);
+            margin-bottom: 6px;
         }
 
         .card-tx {
             background: var(--bg-base);
             border-radius: var(--border-radius-sm);
-            padding: 14px 16px; margin-bottom: 12px;
+            padding: 8px 10px; margin-bottom: 8px;
             box-shadow: var(--neu-shadow-sm);
             transition: all 0.2s ease;
         }
         .card-tx.hidden { display: none !important; }
 
         .card-tx-header {
-            display: flex; justify-content: space-between; font-size: 0.7rem;
-            color: var(--text-muted); margin-bottom: 6px; font-weight: 700;
+            display: flex; justify-content: space-between; font-size: 0.65rem;
+            color: var(--text-muted); margin-bottom: 4px; font-weight: 700;
         }
 
         .produk-title { 
-            font-weight: 800; font-size: 0.85rem; color: var(--text-main); 
-            margin-bottom: 10px; line-height: 1.3; 
+            font-weight: 800; font-size: 0.78rem; color: var(--text-main); 
+            margin-bottom: 6px; line-height: 1.2; 
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
         }
 
         .price-row {
-            display: flex; align-items: center; gap: 8px; margin-bottom: 10px;
+            display: flex; align-items: center; gap: 6px; margin-bottom: 6px;
         }
 
         .inset-box {
             flex: 1; display: flex; align-items: center;
-            background: var(--bg-base); padding: 4px 10px;
+            background: var(--bg-base); padding: 2px 8px;
             border-radius: var(--border-radius-pill);
             box-shadow: var(--neu-shadow-inset); gap: 4px;
         }
 
         .price-label { 
-            color: var(--text-muted); font-size: 0.65rem; font-weight: 800; 
+            color: var(--text-muted); font-size: 0.58rem; font-weight: 800; 
             text-transform: uppercase; white-space: nowrap;
         }
 
         .input-harga {
-            width: 100%; padding: 4px 0; font-size: 0.8rem; font-weight: 800;
+            width: 100%; padding: 2px 0; font-size: 0.75rem; font-weight: 800;
             border: none; outline: none; background: transparent; text-align: right;
         }
         .input-modal { color: var(--danger-color); }
@@ -194,32 +206,32 @@
 
         .laba-col {
             display: flex; flex-direction: column; align-items: flex-end; justify-content: center;
-            padding-left: 4px; min-width: 75px;
+            padding-left: 2px; min-width: 65px;
         }
-        .laba-title { font-weight: 700; color: var(--text-muted); font-size: 0.65rem; text-transform: uppercase; }
-        .laba-value { font-weight: 800; font-size: 0.85rem; color: var(--accent-purple); }
+        .laba-title { font-weight: 700; color: var(--text-muted); font-size: 0.58rem; text-transform: uppercase; }
+        .laba-value { font-weight: 800; font-size: 0.75rem; color: var(--accent-purple); }
 
         .card-tx-footer {
             display: flex; justify-content: space-between; align-items: center;
-            padding-top: 8px; border-top: 1px dashed var(--neu-dark);
+            padding-top: 4px; border-top: 1px dashed var(--neu-dark);
         }
 
         .status-badge {
-            font-weight: 800; font-size: 0.65rem; text-transform: uppercase;
-            padding: 3px 10px; border-radius: var(--border-radius-pill);
+            font-weight: 800; font-size: 0.58rem; text-transform: uppercase;
+            padding: 2px 8px; border-radius: var(--border-radius-pill);
             box-shadow: var(--neu-shadow-sm); background: var(--bg-base);
         }
         .status-badge.sukses { color: var(--success-color); }
         .status-badge.gagal { color: var(--danger-color); }
         .status-badge.pending { color: var(--warning-color); }
 
-        .info-text { text-align: center; color: var(--text-muted); margin-top: 40px; font-size: 0.8rem; font-weight: 700; }
+        .info-text { text-align: center; color: var(--text-muted); margin-top: 30px; font-size: 0.75rem; font-weight: 700; }
 
         .loader {
-            border: 3px solid var(--neu-dark);
-            border-top: 3px solid var(--accent-purple);
-            border-radius: 50%; width: 26px; height: 26px;
-            animation: spin 1s linear infinite; margin: 12px auto;
+            border: 2px solid var(--neu-dark);
+            border-top: 2px solid var(--accent-purple);
+            border-radius: 50%; width: 22px; height: 22px;
+            animation: spin 1s linear infinite; margin: 10px auto;
         }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     </style>
@@ -515,7 +527,7 @@
             if (isLoggedIn !== 'true' || !hp) {
                 container.innerHTML = `
                     <div class="info-text">
-                        <i class="fa-solid fa-lock" style="font-size:28px; margin-bottom:12px; color:var(--accent-purple);"></i><br>
+                        <i class="fa-solid fa-lock" style="font-size:24px; margin-bottom:8px; color:var(--accent-purple);"></i><br>
                         Silakan login terlebih dahulu untuk melihat rekap transaksi.
                     </div>`;
                 return;
@@ -577,6 +589,10 @@
         const weeks = Array.from(weeksSet);
         const months = Array.from(monthsSet);
 
+        // PENENTUAN DEFAULT FILTER TERPILIH (Hari Ini vs Semua)
+        const hasTodayData = dates.includes(todayStr);
+        const defaultSelected = hasTodayData ? todayStr : "ALL";
+
         let html = `
             <!-- STICKY SUMMARY BOX TOP -->
             <div class="summary-box">
@@ -601,14 +617,16 @@
 
             <!-- SEARCH & FILTER -->
             <div class="controls-wrapper">
-                <input type="text" id="search-input" class="search-input" placeholder="🔍 Cari barang / Ref ID..." onkeyup="filterUI()">
+                <input type="text" id="search-input" class="search-input" placeholder="🔍 Cari barang / Ref..." onkeyup="filterUI()">
                 
                 <select id="filter-tgl-select" class="select-filter" onchange="filterUI()">
-                    <option value="ALL" selected>🏆 Semua Transaksi (${list.length})</option>
+                    <option value="ALL" ${defaultSelected === "ALL" ? "selected" : ""}>Semua (${list.length})</option>
                     <optgroup label="📅 Harian">
                         ${dates.map((tgl) => {
-                            const label = (tgl === todayStr) ? `Hari ini (${tgl})` : tgl;
-                            return `<option value="${tgl}">${label}</option>`;
+                            const isToday = (tgl === todayStr);
+                            const label = isToday ? `Hari ini (${tgl})` : tgl;
+                            const isSelected = (defaultSelected === tgl) ? "selected" : "";
+                            return `<option value="${tgl}" ${isSelected}>${label}</option>`;
                         }).join('')}
                     </optgroup>
                     <optgroup label="🗓️ Mingguan">
@@ -628,7 +646,7 @@
                 <div class="date-group" data-tgl="${tgl}">
                     <div class="date-header">
                         <span>📅 ${headerLabel}</span>
-                        <span>${groups[tgl].length} Transaksi</span>
+                        <span>${groups[tgl].length} Trx</span>
                     </div>
                     ${groups[tgl].map(item => {
                         const noPem = item.ref_id || 'TRX-' + Date.now();
@@ -636,12 +654,10 @@
                         const namaSafe = nama.replace(/'/g, "\\'");
                         const statusClean = (item.status || 'sukses').toLowerCase();
                         
-                        // PEMROSESAN JAM WIB SESUAI HISTORY.HTML
                         const { jam } = parseWaktu(item.waktu || item.created_at || item.date || item.tanggal);
 
-                        // MENGAMBIL HARGA TRANSAKSI ASLI TANPA PEMOTONGAN MINUS 1000
                         const defaultJual = item.harga || item.price || 0;
-                        const defaultModal = defaultJual; // <--- DIUBAH SAMA PERSIS DENGAN HARGA ASLI TRANSAKSI
+                        const defaultModal = defaultJual; 
 
                         const hModal = getStoredPrice(noPem, nama, 'modal', defaultModal);
                         const hJual = getStoredPrice(noPem, nama, 'jual', defaultJual);
@@ -653,7 +669,7 @@
                                 <span>Ref: <b>${noPem}</b></span>
                                 ${jam ? `<span>• ${jam} WIB</span>` : ''}
                             </div>
-                            <div class="produk-title">${nama} (${item.no_tujuan || item.customer_no || '-'})</div>
+                            <div class="produk-title" title="${nama}">${nama} (${item.no_tujuan || item.customer_no || '-'})</div>
                             
                             <div class="price-row">
                                 <div class="inset-box">
@@ -672,7 +688,7 @@
 
                             <div class="card-tx-footer">
                                 <span class="status-badge ${statusClean}">${statusClean}</span>
-                                <span style="font-size: 0.7rem; color: var(--text-muted); font-weight: 700;">Member: ${item.user_hp || item.username || 'Umum'}</span>
+                                <span style="font-size: 0.62rem; color: var(--text-muted); font-weight: 700;">Member: ${item.user_hp || item.username || 'Umum'}</span>
                             </div>
                         </div>`;
                     }).join('')}

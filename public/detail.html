@@ -10,7 +10,7 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
   <style media="screen">
-    /* --- EXACT MATCH NEUMORPHISM THEME (SERASI INDEX.HTML) --- */
+    /* --- EXACT MATCH NEUMORPHISM THEME --- */
     :root {
       --bg-base: #e6eaf0;
       --neu-light: #ffffff;
@@ -321,12 +321,11 @@
 
   <script type="text/javascript">
     var globalData = {};
+    var autoRefreshInterval = null; // Variable timer polling
 
-    // SAMA PERSIS DENGAN Halaman history.html
     function parseWaktu(strWaktu) {
         if (!strWaktu) return { tanggal: 'Hari Ini', jam: '', formatted: 'Hari Ini' };
         
-        // 1. Ubah format spasi menjadi 'T' dan tambahkan 'Z' agar dibaca sebagai UTC oleh sistem
         let formattedStr = strWaktu.trim().replace(' ', 'T');
         if (!formattedStr.endsWith('Z')) {
             formattedStr += 'Z';
@@ -334,7 +333,6 @@
 
         const d = new Date(formattedStr);
 
-        // Jika tanggal valid, ubah otomatis sesuai Timezone perangkat (WIB)
         if (!isNaN(d.getTime())) {
             const yyyy = d.getFullYear();
             const mm = String(d.getMonth() + 1).padStart(2, '0');
@@ -354,7 +352,6 @@
             };
         }
 
-        // Fallback jika format string tanggal tidak standar
         const parts = strWaktu.trim().split(/[\s,T]+/);
         const tgl = parts[0] || 'Hari Ini';
         const jm = parts[1] || '';
@@ -365,9 +362,8 @@
         };
     }
 
-    $(document).ready(function(){
-      var urlParams = new URLSearchParams(window.location.search);
-      var refId = urlParams.get('id') || '';
+    // FUNGSI UTAMA FETCH DETAIL TRANSAKSI
+    function fetchTransactionDetail(refId) {
       var targetUrl = window.location.origin + '/api/transaction/detail?id=' + encodeURIComponent(refId) + '&t=' + Date.now();
 
       $.ajax({
@@ -385,8 +381,19 @@
           if (rowData) {
             globalData = rowData;
             renderSQLiteDataDetail(rowData);
+
+            var status = String(rowData.status || rowData.status_pengiriman || "PROSES").toLowerCase();
+            
+            // HENTIKAN POLLING JIKA STATUS SUDAH FINAL (SUKSES ATAU GAGAL)
+            if (['selesai', 'sukses', 'lunas', 'success', 'batal', 'gagal', 'failed'].indexOf(status) !== -1) {
+              if (autoRefreshInterval) {
+                clearInterval(autoRefreshInterval);
+                autoRefreshInterval = null;
+              }
+            }
           } else {
             showErrorState("Data Tidak Ditemukan", "Transaksi tidak ditemukan.");
+            if (autoRefreshInterval) clearInterval(autoRefreshInterval);
           }
         },
         error: function(xhr, status, error) {
@@ -394,6 +401,23 @@
           showErrorState("Gagal Memuat Data", "Terjadi kesalahan koneksi.");
         }
       });
+    }
+
+    $(document).ready(function(){
+      var urlParams = new URLSearchParams(window.location.search);
+      var refId = urlParams.get('id') || '';
+
+      if (refId) {
+        // 1. Panggil Pertama Kali
+        fetchTransactionDetail(refId);
+
+        // 2. AUTO-POLLING TERUS MENERUS TIAP 3 DETIK UNTUK MEMANTAU CALLBACK SERVER
+        autoRefreshInterval = setInterval(function() {
+          fetchTransactionDetail(refId);
+        }, 3000); 
+      } else {
+        showErrorState("Data Tidak Ditemukan", "ID Transaksi tidak valid.");
+      }
 
       // Event listener edit harga jual
       $('#edit_harga_jual').on('input', function() {
@@ -401,6 +425,11 @@
         $('#total_transaksi').text(formatRupiah(val));
         $('#s_total').text(formatRupiah(val));
       });
+    });
+
+    // MEMBERSIHKAN INTERVAL APABILA PENGGUNA PINDAH HALAMAN
+    $(window).on('beforeunload', function(){
+      if (autoRefreshInterval) clearInterval(autoRefreshInterval);
     });
 
     function showErrorState(title, message) {
@@ -427,7 +456,7 @@
         $('#status_icon').attr('class', 'fa-solid fa-circle-xmark').css('color', '#dc3545');
       } else {
         $('#status_kirim').attr('class', 'status-value pending');
-        $('#status_icon').attr('class', 'fa-solid fa-clock').css('color', '#f59e0b');
+        $('#status_icon').attr('class', 'fa-solid fa-clock-rotate-left fa-spin').css('color', '#f59e0b');
       }
 
       var waktuRaw = row.waktu || row.created_at || row.tanggal_buat || row.date || '';
@@ -471,6 +500,7 @@
             '<button onclick="copyText(\'' + snResi + '\', this)" class="copy-btn" title="Salin SN"><i class="fa-regular fa-copy"></i></button>' +
           '</span></div>';
         $('#s_sn').text(snResi);
+        $('#s_sn_row').show();
       } else {
         $('#s_sn_row').hide();
       }
@@ -478,15 +508,20 @@
       htmlProduk += '</div>';
       $('#keranjang_transaksi').html(htmlProduk);
 
-      // Default Edit Harga
-      $('#edit_harga_jual').val(hargaAwal);
-      $('#total_transaksi').text(formatRupiah(hargaAwal));
-      $('#s_total').text(formatRupiah(hargaAwal));
+      // Default Edit Harga jika belum diedit manual
+      if (!$('#edit_harga_jual').is(':focus') && parseFloat($('#edit_harga_jual').val()) === 0) {
+        $('#edit_harga_jual').val(hargaAwal);
+        $('#total_transaksi').text(formatRupiah(hargaAwal));
+        $('#s_total').text(formatRupiah(hargaAwal));
+      }
 
+      // Tampilkan Tombol Cetak / Simpan hanya jika Sukses
       if (['selesai', 'sukses', 'lunas', 'success'].indexOf(statusLower) !== -1) {
         var actionBtns = '<button onclick="simpanStrukPNG()" class="btn-action"><i class="fa-solid fa-download" style="margin-right:6px;"></i> Simpan PNG</button>' +
                          '<button onclick="cetakThermalWeb()" class="btn-action"><i class="fa-solid fa-print" style="margin-right:6px;"></i> Cetak Thermal</button>';
         $('#cetak-struk').html(actionBtns);
+      } else {
+        $('#cetak-struk').html('');
       }
     }
 
