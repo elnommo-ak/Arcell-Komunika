@@ -498,6 +498,10 @@
         let rawOkeconnectData = [];
         let filteredOkeconnectData = [];
         
+        // State Penjaga Accordion Member & Tanggal Terbuka agar tidak tertutup saat auto refresh
+        let openMemberCards = new Set();
+        let openDateFolders = new Set();
+
         // Tracking ID Transaksi untuk Notifikasi Real-time
         let knownTrxIds = new Set();
         let isFirstLoadTrx = true;
@@ -713,9 +717,10 @@
                 });
 
                 const sortedDateGroups = Object.values(groupedByDate).sort((a, b) => b.timestamp - a.timestamp);
+                const isMemberOpen = openMemberCards.has(String(noHp));
 
                 html += `
-                    <div class="member-card" id="member-card-${noHp}">
+                    <div class="member-card ${isMemberOpen ? 'open' : ''}" id="member-card-${noHp}">
                         <div class="member-card-header">
                             <div class="member-info-main">
                                 <div class="member-name"><i class="fa-solid fa-user-circle" style="color:var(--primary);"></i> ${m.name || m.nama || '-'}</div>
@@ -745,9 +750,12 @@
                     sortedDateGroups.forEach(group => {
                         const trxsInDate = group.trxs;
                         const totalDateNominal = trxsInDate.reduce((a, b) => a + parseFloat(b.harga || b.price || 0), 0);
+                        const dateFolderKey = `${noHp}_${group.dateStr}`;
+                        const isDateOpen = openDateFolders.has(dateFolderKey);
+
                         html += `
-                            <div class="date-folder-card">
-                                <div class="date-folder-header" onclick="toggleDateFolder(this)">
+                            <div class="date-folder-card ${isDateOpen ? 'open' : ''}" data-key="${dateFolderKey}">
+                                <div class="date-folder-header" onclick="toggleDateFolder(this, '${dateFolderKey}')">
                                     <span><i class="fa-regular fa-calendar-check" style="color:var(--primary); margin-right:4px;"></i> ${group.dateStr} (${trxsInDate.length})</span>
                                     <div><span style="color:#10b981; font-weight:900; margin-right:4px;">Rp ${totalDateNominal.toLocaleString('id-ID')}</span><i class="fa-solid fa-chevron-down date-chevron"></i></div>
                                 </div>
@@ -776,8 +784,31 @@
             el.innerHTML = html;
         }
 
-        function toggleMemberTrx(noHp) { const card = document.getElementById(`member-card-${noHp}`); if(card) card.classList.toggle('open'); }
-        function toggleDateFolder(el) { const dateCard = el.closest('.date-folder-card'); if(dateCard) dateCard.classList.toggle('open'); }
+        // FUNGSI TOGGLE MEMBER TERPERBAIKI AGAR STATE TERJAGA SAAT RE-RENDER
+        function toggleMemberTrx(noHp) { 
+            const card = document.getElementById(`member-card-${noHp}`); 
+            if(card) {
+                card.classList.toggle('open');
+                if (card.classList.contains('open')) {
+                    openMemberCards.add(String(noHp));
+                } else {
+                    openMemberCards.delete(String(noHp));
+                }
+            } 
+        }
+
+        // FUNGSI TOGGLE TANGGAL TERPERBAIKI
+        function toggleDateFolder(el, dateFolderKey) { 
+            const dateCard = el.closest('.date-folder-card'); 
+            if(dateCard) {
+                dateCard.classList.toggle('open');
+                if (dateCard.classList.contains('open')) {
+                    openDateFolders.add(dateFolderKey);
+                } else {
+                    openDateFolders.delete(dateFolderKey);
+                }
+            } 
+        }
 
         async function editHargaTransaksi(refId, hargaLama) {
             const hargaBaru = prompt(`Ubah harga transaksi #${refId}:`, hargaLama);
@@ -849,11 +880,13 @@
                 const result = await res.json();
                 const fetchedList = Array.isArray(result) ? result : (result.data || []);
                 
+                let hasNewTrx = false;
                 // Deteksi Transaksi Baru untuk Notifikasi
                 if (!isFirstLoadTrx) {
                     fetchedList.forEach(t => {
                         const refId = String(t.ref_id || t.id || '');
                         if (refId && !knownTrxIds.has(refId)) {
+                            hasNewTrx = true;
                             playNotifSound();
                             const prodName = t.produk || t.product_name || 'Produk PPOB';
                             const memName = t.username || t.user_hp || 'Member';
@@ -868,12 +901,17 @@
                     const refId = String(t.ref_id || t.id || '');
                     if (refId) knownTrxIds.add(refId);
                 });
-                isFirstLoadTrx = false;
 
-                rawTransactions = fetchedList;
-                renderAllTransactions(rawTransactions);
-                renderTabelMember(rawMembers);
+                // Hanya render ulang DOM jika pertama kali load, refresh manual, atau ada transaksi baru
+                if (isFirstLoadTrx || manualRefresh || hasNewTrx || fetchedList.length !== rawTransactions.length) {
+                    rawTransactions = fetchedList;
+                    renderAllTransactions(rawTransactions);
+                    renderTabelMember(rawMembers);
+                } else {
+                    rawTransactions = fetchedList;
+                }
                 
+                isFirstLoadTrx = false;
                 if (manualRefresh) showToast('✅ Data transaksi diperbarui');
             } catch (err) {}
         }
