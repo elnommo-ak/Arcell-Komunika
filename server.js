@@ -166,7 +166,7 @@ function extractProducts(data) {
 async function kirimPushNotif(pesanTitle, pesanBody, targetId = null, isExternalId = false) {
     try {
         const ONESIGNAL_APP_ID = process.env.ONESIGNAL_APP_ID || "8370e207-3701-48a6-82d0-45d76f860691";
-        const ONESIGNAL_REST_KEY = process.env.ONESIGNAL_REST_KEY || "os_v2_app_qnyoebzxafeknawqixlw7bqgsg4qdtxh32hepyetm5b6vejyjxf2ytzjhhlkdesylzwvziwyzdzri6coxophimlamlqqsyjwcybhh3q";
+        const ONESIGNAL_REST_KEY = process.env.ONESIGNAL_REST_KEY || "";
         const targetUrl = (typeof BASE_URL !== 'undefined' && BASE_URL) ? BASE_URL : "https://arcellkomunika.site/";
 
         const payload = {
