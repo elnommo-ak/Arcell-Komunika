@@ -374,7 +374,7 @@
           var rowData = null;
           if (res && res.status === 'success' && res.data) {
             rowData = res.data;
-          } else if (res && (res.ref_id || res.id || res.nomor_pembayaran)) {
+          } else if (res && (res.ref_id || res.refid || res.id || res.nomor_pembayaran)) {
             rowData = res;
           }
 
@@ -440,7 +440,7 @@
     }
 
     function renderSQLiteDataDetail(row) {
-      var refId = row.ref_id || row.nomor_pembayaran || row.trx_id || row.id || '-';
+      var refId = row.ref_id || row.refid || row.nomor_pembayaran || row.trx_id || row.id || '-';
       $('#info_ref_id').text(refId);
       $('#s_ref').text(refId);
       
@@ -459,15 +459,32 @@
         $('#status_icon').attr('class', 'fa-solid fa-clock-rotate-left fa-spin').css('color', '#f59e0b');
       }
 
-      var waktuRaw = row.waktu || row.created_at || row.tanggal_buat || row.date || '';
+      var waktuRaw = row.waktu || row.time || row.created_at || row.tanggal_buat || row.date || '';
       var waktuParsed = parseWaktu(waktuRaw);
 
       $('#info_dibuat_pada').text(waktuParsed.formatted);
       $('#s_waktu').text(waktuParsed.formatted);
 
-      var namaProduk = row.produk || row.product_name || row.nama_produk || 'Produk Digital';
-      var noTujuan = row.no_tujuan || row.customer_no || row.target || row.catatan || '-';
-      var snResi = row.sn || row.nomor_resi || row.resi || '-';
+      var namaProduk = row.produk || row.product_name || row.nama_produk || row.code || 'Produk Digital';
+      var noTujuan = row.no_tujuan || row.dest || row.customer_no || row.target || row.catatan || '-';
+      
+      // ==========================================
+      // EMBEDDED UPDATE: LOGIKA EKSTRAKSI SN OKECONNECT
+      // ==========================================
+      var rawSn = row.sn || row.serial_number || row.serialNumber || row.nomor_resi || row.resi || row.sn_resi || '';
+      
+      // Jika key 'sn' kosong, ekstrak otomatis dari pesan/message balasan OkeConnect
+      if (!rawSn && (row.message || row.keterangan || row.catatan || row.note || row.pesan)) {
+        var teksPesan = row.message || row.keterangan || row.catatan || row.note || row.pesan;
+        var matchSn = teksPesan.match(/SN[\/\:\s]+([A-Za-z0-9\.\/\-]+)/i);
+        if (matchSn && matchSn[1]) {
+          rawSn = matchSn[1].trim();
+        }
+      }
+
+      var snResi = (rawSn && rawSn !== '' && rawSn !== '-') ? rawSn : '-';
+      // ==========================================
+
       var hargaAwal = parseFloat(row.harga || row.price || row.total_transaksi || 0);
 
       $('#s_produk').text(namaProduk);

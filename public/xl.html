@@ -3,25 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Arcell Komunika - Home PPOB</title>
+    <title>Pembelian Pulsa - Arcell Komunika</title>
     <!-- FontAwesome & Bootstrap Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 
-    <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
-<script>
-  window.OneSignalDeferred = window.OneSignalDeferred || [];
-  OneSignalDeferred.push(async function(OneSignal) {
-    await OneSignal.init({
-      appId: "8370e207-3701-48a6-82d0-45d76f860691",
-      safari_web_id: "web.onesignal.auto.19aac151-6a52-4f31-b603-0bf7908b06b4",
-      notifyButton: {
-        enable: true,
-      },
-    });
-  });
-</script>
-    
     <!-- 🔒 PROTEKSI WAJIB LOGIN -->
     <script>
       (function() {
@@ -33,7 +19,7 @@
     </script>
 
     <style>
-        /* --- CLEAN WHITE NEUMORPHISM THEME --- */
+        /* --- CLEAN WHITE NEUMORPHISM THEME (PERSIS HOME.HTML) --- */
         :root {
             --bg-base: #e6eaf0;
             --neu-light: #ffffff;
@@ -97,75 +83,21 @@
             background: var(--bg-base);
         }
         .header-top { display: flex; justify-content: space-between; align-items: center; }
-        .user-profile { display: flex; align-items: center; gap: 12px; }
-        .profile-img {
-            width: 44px; height: 44px; border-radius: 50%;
-            background: var(--bg-base); box-shadow: var(--neu-shadow-sm);
-            object-fit: cover; padding: 3px;
-        }
-        .user-info .greeting { font-size: 0.72rem; color: var(--text-muted); font-weight: 600; }
-        .user-info .username { font-size: 0.98rem; font-weight: 800; color: var(--text-main); }
         
-        .menu-toggle-btn {
-            width: 42px; height: 42px; display: flex; align-items: center; justify-content: center;
-            background: var(--bg-base); border-radius: 50%; color: var(--text-main);
-            box-shadow: var(--neu-shadow-sm); border: none;
-            cursor: pointer; font-size: 0.95rem; transition: all 0.2s ease;
+        .btn-back {
+            width: 42px; height: 42px; border-radius: 50%;
+            background: var(--bg-base); box-shadow: var(--neu-shadow-sm);
+            display: flex; align-items: center; justify-content: center;
+            color: var(--text-main); border: none; cursor: pointer; text-decoration: none;
+            font-size: 0.95rem; transition: all 0.2s ease;
         }
+        .btn-back:active { box-shadow: var(--neu-shadow-inset); transform: scale(0.95); }
 
-        /* --- SIDEBAR MENU --- */
-        .sidebar-overlay {
-            position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(74, 85, 104, 0.2);
-            backdrop-filter: blur(4px); display: none; z-index: 998; opacity: 0; transition: opacity 0.3s ease;
+        .page-title {
+            font-size: 1rem; font-weight: 800; color: var(--text-main);
+            display: flex; align-items: center; gap: 8px;
         }
-        .sidebar-overlay.show { display: block; opacity: 1; }
-        .sidebar {
-            position: fixed; top: 0; left: -290px; width: 290px; height: 100%;
-            background: var(--bg-base); z-index: 999;
-            box-shadow: 10px 0 30px rgba(0,0,0,0.08); transition: left 0.3s ease;
-            display: flex; flex-direction: column; padding: 24px; overflow-y: auto;
-        }
-        .sidebar.show { left: 0; }
-        .sidebar-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; padding-bottom: 15px; }
-        .sidebar-title { font-size: 1rem; font-weight: 800; color: var(--text-main); display: flex; align-items: center; gap: 10px; }
-        .sidebar-title i { color: var(--accent-purple); }
-        .sidebar-close {
-            width: 34px; height: 34px; border-radius: 50%; background: var(--bg-base); border: none;
-            box-shadow: var(--neu-shadow-sm); color: var(--text-muted); cursor: pointer; display: flex; align-items: center; justify-content: center; font-weight: bold;
-        }
-        .sidebar-menu-list { display: flex; flex-direction: column; gap: 14px; }
-        .sidebar-item {
-            display: flex; align-items: center; gap: 14px; padding: 14px 18px;
-            background: var(--bg-base); border-radius: var(--border-radius-md);
-            text-decoration: none; color: var(--text-main); font-size: 0.88rem; font-weight: 700;
-            box-shadow: var(--neu-shadow-sm); transition: all 0.2s ease; cursor: pointer;
-        }
-        .sidebar-item i { color: var(--accent-purple); font-size: 1.1rem; width: 20px; text-align: center; }
-
-        /* --- KARTU SALDO --- */
-        .wallet-section {
-            margin: 10px 16px var(--main-gap) 16px; padding: 20px 22px; 
-            background: var(--bg-base); border-radius: var(--border-radius-md); 
-            box-shadow: var(--neu-shadow-flat); display: flex; align-items: center; justify-content: space-between;
-        }
-        .wallet-info { display: flex; flex-direction: column; justify-content: center; }
-        .wallet-label { font-size: 0.72rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; display: flex; align-items: center; gap: 6px; letter-spacing: 0.5px; }
-        .wallet-label i { color: var(--accent-purple); font-size: 0.85rem; }
-        .balance { font-weight: 800; font-size: 1.5rem; color: var(--text-main); margin-top: 6px; letter-spacing: 0.2px; line-height: 1; }
-
-        /* --- RUNNING TEXT --- */
-        .ticker-container { 
-            margin: 0 16px var(--main-gap) 16px; display: flex; align-items: center; 
-            background: var(--bg-base); border-radius: var(--border-radius-pill); padding: 8px 16px;
-            box-shadow: var(--neu-shadow-inset);
-        }
-        .ticker-icon { 
-            color: #ffffff; margin-right: 10px; display: flex; align-items: center; justify-content: center; 
-            width: 26px; height: 26px; border-radius: 50%; background: var(--accent-purple);
-            box-shadow: var(--neu-shadow-sm); flex-shrink: 0; font-size: 0.7rem;
-        }
-        .ticker-content { flex: 1; overflow: hidden; display: flex; align-items: center; }
-        .ticker-content marquee { font-size: 0.75rem; font-weight: 700; color: var(--text-muted); }
+        .page-title i { color: var(--accent-purple); }
 
         /* --- DIVIDER BADGE --- */
         .section-divider { display: flex; align-items: center; justify-content: center; margin: var(--main-gap) 16px; position: relative; }
@@ -176,7 +108,7 @@
             box-shadow: var(--neu-shadow-sm); margin: 0 10px; display: flex; align-items: center; gap: 6px; text-transform: uppercase; letter-spacing: 0.5px;
         }
 
-        /* --- INPUT BOX & CONTAINER --- */
+        /* --- INPUT BOX & CONTAINER (PERSIS HOME.HTML) --- */
         .card-wrapper { position: relative; z-index: 101; padding: 0 16px; }
 
         .popup-top-container {
@@ -229,50 +161,9 @@
             display: none; text-transform: uppercase; flex-shrink: 0; letter-spacing: 0.5px;
         }
 
-        /* --- GRID MENU UTAMA --- */
-        .main-menu-grid {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 16px 12px;
-            padding: 4px 16px 16px 16px;
-        }
-        .main-menu-item {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            text-align: center;
-            text-decoration: none;
-            user-select: none;
-        }
-        .main-menu-icon {
-            width: 52px;
-            height: 52px;
-            border-radius: var(--border-radius-md);
-            background: var(--bg-base);
-            box-shadow: var(--neu-shadow-sm);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.25rem;
-            color: var(--accent-purple);
-            margin-bottom: 8px;
-            transition: all 0.2s ease;
-        }
-        .main-menu-item:active .main-menu-icon {
-            box-shadow: var(--neu-shadow-inset);
-            transform: scale(0.95);
-        }
-        .main-menu-label {
-            font-size: 0.7rem;
-            font-weight: 700;
-            color: var(--text-main);
-            line-height: 1.2;
-        }
-
         .filter-container { display: none !important; }
 
+        /* --- PRODUCT LIST --- */
         .product-list { display: flex; flex-direction: column; gap: 12px; }
         .product-card {
             background: var(--bg-base); border-radius: var(--border-radius-sm);
@@ -283,18 +174,6 @@
         .product-info { flex: 1; padding-right: 8px; }
         .product-title { font-size: 0.8rem; font-weight: 700; color: var(--text-main); line-height: 1.3; margin-bottom: 4px; display: flex; align-items: center; gap: 4px; }
         .product-price { font-size: 0.88rem; font-weight: 800; color: var(--accent-purple); }
-        
-        .dot-indicator {
-            display: inline-block;
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            margin-left: 4px;
-            vertical-align: middle;
-            flex-shrink: 0;
-        }
-        .dot-digiflazz { background-color: #7052ff; box-shadow: 0 0 6px rgba(112, 82, 255, 0.5); }
-        .dot-okeconnect { background-color: #10b981; box-shadow: 0 0 6px rgba(16, 185, 129, 0.5); }
 
         .product-action {
             display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 50%;
@@ -303,7 +182,7 @@
 
         .empty-state { display: none; flex-direction: column; align-items: center; justify-content: center; padding: 20px; color: var(--text-muted); text-align: center; }
 
-        /* BOTTOM SHEET */
+        /* --- BOTTOM SHEET --- */
         .modal-checkout-backdrop {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(15, 23, 42, 0.4); 
@@ -349,74 +228,27 @@
 
     <div class="app-container" id="app-canvas">
 
-        <!-- Sidebar Overlay & Menu -->
-        <div class="sidebar-overlay" id="sidebar-overlay"></div>
-        <div class="sidebar" id="sidebar">
-            <div class="sidebar-header">
-                <div class="sidebar-title"><i class="fa-solid fa-bars-staggered"></i> Menu Lainnya</div>
-                <button class="sidebar-close" id="sidebar-close">&times;</button>
-            </div>
-            <div class="sidebar-menu-list">
-                <a href="javascript:void(0)" class="sidebar-item" onclick="alert('Menu Keuangan akan segera hadir.')">
-                    <i class="fa-solid fa-wallet"></i> Keuangan
-                </a>
-                <a href="javascript:void(0)" class="sidebar-item" onclick="alert('Menu Catatan Hutang akan segera hadir.')">
-                    <i class="fa-solid fa-tags"></i> Catatan Hutang
-                </a>
-                <a href="admin.html" class="sidebar-item">
-                    <i class="fa-solid fa-list-check"></i> Kelola Produk Admin
-                </a>
-                <a href="history.html" class="sidebar-item">
-                    <i class="fa-solid fa-file-invoice-dollar"></i> Riwayat Transaksi
-                </a>
-            </div>
-        </div>
-
-        <!-- Sticky Header Section -->
-        <div class="header" id="main-header">
+        <!-- Header Navigation -->
+        <div class="header">
             <div class="header-top">
-                <div class="user-profile">
-                    <img src="https://images.bukaolshop.com/hosting/180774/3b0c09d4696e527913.png" class="profile-img" alt="Logo">
-                    <div class="user-info">
-                        <div class="greeting" id="time-greeting">Selamat Datang,</div>
-                        <div class="username" id="dispUserName">Member</div>
-                    </div>
+                <a href="home.html" class="btn-back">
+                    <i class="fa-solid fa-arrow-left"></i>
+                </a>
+                <div class="page-title">
+                    <i class="fa-solid fa-mobile-screen-button"></i> Pembelian Pulsa
                 </div>
-                
-                <div class="header-actions">
-                    <button class="menu-toggle-btn" id="menu-toggle" title="Menu Lainnya">
-                        <i class="fa-solid fa-bars"></i>
-                    </button>
-                </div>
+                <div style="width: 42px;"></div>
             </div>
         </div>
 
-        <!-- KARTU SALDO UTAMA MEMBER -->
-        <div class="wallet-section" id="walletSection">
-            <div class="wallet-info">
-                <span class="wallet-label"><i class="fa-solid fa-wallet"></i> Saldo Anda</span>
-                <div class="balance" id="user-balance">Rp 0</div>
-            </div>
-        </div>
-
-        <!-- Running Text -->
-        <div class="ticker-container">
-            <div class="ticker-icon"><i class="fa-solid fa-bullhorn"></i></div>
-            <div class="ticker-content">
-                <marquee direction="left" scrollamount="4">
-                    <span>🔥 <b>INFO SERVER:</b> CUT OFF TRANSAKSI SETIAP JAM 23.30 - 00.15 WIB</span>
-                    <span>⚡ Transaksi otomatis terproses 24 Jam nonstop.</span>
-                </marquee>
-            </div>
-        </div>
-
-        <!-- TRANSAKSI CEPAT GABUNGAN -->
+        <!-- Section Divider -->
         <div class="section-divider">
             <div class="divider-line"></div>
-            <div class="divider-badge"><i class="fa-solid fa-bolt"></i> Transaksi Cepat</div>
+            <div class="divider-badge"><i class="fa-solid fa-bolt"></i> Isi Pulsa Regular / Transfer</div>
             <div class="divider-line"></div>
         </div>
 
+        <!-- Input Box & Top Popup Container (Persis Home.html) -->
         <div class="card-wrapper">
             <div class="popup-top-container" id="popupTopContainer">
                 <div class="filter-container">
@@ -433,7 +265,7 @@
             </div>
 
             <div class="card-container">
-                <!-- Tabs Kategori -->
+                <!-- Tabs Subkategori -->
                 <div class="inset-tabs-wrapper" id="insetTabsWrapper"></div>
 
                 <!-- Single Input Box -->
@@ -444,48 +276,6 @@
                     <input type="tel" id="phoneInput" placeholder="Ketik No. HP / Tujuan..." maxlength="20" autocomplete="off" />
                     <span class="operator-badge" id="operatorBadge"></span>
                 </div>
-            </div>
-        </div>
-
-        <!-- MENU UTAMA SECTION -->
-        <div class="section-divider">
-            <div class="divider-line"></div>
-            <div class="divider-badge"><i class="fa-solid fa-grid-2"></i> Menu Utama</div>
-            <div class="divider-line"></div>
-        </div>
-
-        <div class="main-menu-grid">
-            <div class="main-menu-item" onclick="navigasiKeMenu('xl.html')">
-                <div class="main-menu-icon"><i class="fa-solid fa-signal"></i></div>
-                <span class="main-menu-label">XL Axiata</span>
-            </div>
-            <div class="main-menu-item" onclick="navigasiKeMenu('indosat.html')">
-                <div class="main-menu-icon"><i class="fa-solid fa-tower-cell"></i></div>
-                <span class="main-menu-label">Indosat Ooredoo</span>
-            </div>
-            <div class="main-menu-item" onclick="navigasiKeMenu('telkomsel.html')">
-                <div class="main-menu-icon"><i class="fa-solid fa-sim-card"></i></div>
-                <span class="main-menu-label">Telkomsel</span>
-            </div>
-            <div class="main-menu-item" onclick="navigasiKeMenu('ewallet.html')">
-                <div class="main-menu-icon"><i class="fa-solid fa-wallet"></i></div>
-                <span class="main-menu-label">E-Wallet</span>
-            </div>
-            <div class="main-menu-item" onclick="navigasiKeMenu('token.html')">
-                <div class="main-menu-icon"><i class="fa-solid fa-bolt"></i></div>
-                <span class="main-menu-label">Token PLN</span>
-            </div>
-            <div class="main-menu-item" onclick="navigasiKeMenu('pln.html')">
-                <div class="main-menu-icon"><i class="fa-solid fa-file-invoice"></i></div>
-                <span class="main-menu-label">Tagihan PLN</span>
-            </div>
-            <div class="main-menu-item" onclick="navigasiKeMenu('gaming.html')">
-                <div class="main-menu-icon"><i class="fa-solid fa-gamepad"></i></div>
-                <span class="main-menu-label">Top Up Gaming</span>
-            </div>
-            <div class="main-menu-item" onclick="navigasiKeMenu('cek.html')">
-                <div class="main-menu-icon"><i class="fa-solid fa-magnifying-glass-chart"></i></div>
-                <span class="main-menu-label">Cek Kuota</span>
             </div>
         </div>
 
@@ -507,10 +297,6 @@
                 <span class="val-title" id="sheet_nama_produk">-</span>
             </div>
             <div class="sheet-row">
-                <span class="label">Jalur Server</span>
-                <span class="val-title" id="sheet_provider_label" style="text-transform: uppercase;">-</span>
-            </div>
-            <div class="sheet-row">
                 <span class="label">No. Tujuan</span>
                 <span class="val-target" id="sheet_no_tujuan">-</span>
             </div>
@@ -528,23 +314,6 @@
 
     <!-- JavaScript System -->
     <script>
-        const menuToggleBtn = document.getElementById('menu-toggle');
-        const sidebar = document.getElementById('sidebar');
-        const sidebarOverlay = document.getElementById('sidebar-overlay');
-        const sidebarClose = document.getElementById('sidebar-close');
-
-        function openSidebar() { sidebar.classList.add('show'); sidebarOverlay.classList.add('show'); }
-        function closeSidebar() { sidebar.classList.remove('show'); sidebarOverlay.classList.remove('show'); }
-
-        menuToggleBtn.addEventListener('click', openSidebar);
-        sidebarClose.addEventListener('click', closeSidebar);
-        sidebarOverlay.addEventListener('click', closeSidebar);
-
-        // FUNGSI NAVIGASI MENU UTAMA (TERPISAH)
-        function navigasiKeMenu(targetUrl) {
-            window.location.href = targetUrl;
-        }
-
         let memberSaldoAktif = 0;
         let selectedCategory = '';
         let dataCheckoutAktif = {};
@@ -560,13 +329,6 @@
 
         async function loadSaldoMemberAkun() {
             const userPhone = localStorage.getItem('userPhone') || localStorage.getItem('user_hp');
-            const userName = localStorage.getItem('userName') || localStorage.getItem('username');
-
-            if (userName) {
-                const nameEl = document.getElementById('dispUserName');
-                if (nameEl) nameEl.innerText = userName;
-            }
-
             if (!userPhone) return;
 
             try {
@@ -578,9 +340,6 @@
 
                 if (currentMember) {
                     memberSaldoAktif = parseFloat(currentMember.balance || 0);
-                    const saldoFormatted = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(memberSaldoAktif);
-                    const balanceEl = document.getElementById('user-balance');
-                    if (balanceEl) balanceEl.innerText = saldoFormatted;
                 }
             } catch (err) {
                 console.error("Gagal sinkron saldo member:", err);
@@ -589,13 +348,6 @@
 
         window.addEventListener('DOMContentLoaded', () => {
             loadSaldoMemberAkun();
-
-            const hour = new Date().getHours();
-            let greet = "Selamat Malam";
-            if(hour < 11) greet = "Selamat Pagi";
-            else if(hour < 15) greet = "Selamat Siang";
-            else if(hour < 18) greet = "Selamat Sore";
-            document.getElementById('time-greeting').innerText = greet + ",";
         });
 
         function formatPhoneNumber(val) {
@@ -607,7 +359,7 @@
             return match ? match.join(' ') : cleaned;
         }
 
-        // LOGIKA SINGLE INPUT BERDASARKAN KATEGORI SQLITE
+        // ELEMENT INPUT & POPUP
         const phoneInput = document.getElementById('phoneInput');
         const badge = document.getElementById('operatorBadge');
         const popupTopContainer = document.getElementById('popupTopContainer');
@@ -640,7 +392,7 @@
                 badge.style.display = 'inline-block';
                 if (currentOperator !== detectedOp) {
                     currentOperator = detectedOp;
-                    loadCustomCategoryProducts(detectedOp);
+                    loadKategoriByOperator(detectedOp);
                 }
             } else {
                 badge.style.display = 'none';
@@ -650,34 +402,83 @@
             }
         });
 
-        async function loadCustomCategoryProducts(brand) {
+        // LOAD PRODUK DIGIFLAZZ DENGAN POPUP DI ATAS INPUT (PERSIS HOME.HTML)
+        async function loadKategoriByOperator(operatorKey) {
             emptyState.style.display = 'flex';
             stateIcon.className = "fa-solid fa-spinner fa-spin";
-            emptyText.innerText = "Memuat paket kustom...";
+            emptyText.innerText = `Memuat pulsa ${operatorKey}...`;
             popupTopContainer.style.display = 'block';
             insetTabsWrapper.style.display = 'none';
             productList.style.display = 'none';
 
             try {
-                const res = await fetch(`/api/user/products-by-prefix?brand=${brand}&t=` + Date.now());
-                const result = await res.json();
+                const response = await fetch('/api/digiflazz/price-list', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ brand: operatorKey.toLowerCase() })
+                });
+                
+                const res = await response.json();
 
-                if (result.status === 'success' && result.data && Object.keys(result.data).length > 0) {
-                    groupedProducts = result.data;
+                if (res.status === 'success' && res.data && res.data.length > 0) {
+                    // Filter khusus Pulsa Reguler / Transfer (Memblokir Data/PLN/SMS)
+                    const pulsaProducts = res.data.filter(p => {
+                        if (!p.buyer_product_status || !p.seller_product_status) return false;
+                        
+                        const categoryLower = (p.category || "").toLowerCase();
+                        const nameLower = (p.product_name || "").toLowerCase();
+
+                        const isPulsa = categoryLower.includes("pulsa") || nameLower.includes("pulsa");
+                        const isBlocked = nameLower.includes("data") || 
+                                          nameLower.includes("kuota") || 
+                                          nameLower.includes("masa aktif") || 
+                                          nameLower.includes("sms") || 
+                                          nameLower.includes("telepon");
+
+                        return isPulsa && !isBlocked;
+                    });
+
+                    if (pulsaProducts.length === 0) {
+                        emptyState.style.display = 'flex';
+                        stateIcon.className = "fa-solid fa-box-open";
+                        emptyText.innerText = "Produk Pulsa " + operatorKey + " sedang tidak tersedia.";
+                        popupTopContainer.style.display = 'block';
+                        insetTabsWrapper.style.display = 'none';
+                        productList.style.display = 'none';
+                        return;
+                    }
+
+                    // Kelompokkan Sub-kategori
+                    groupedProducts = {};
+                    pulsaProducts.forEach(prod => {
+                        let tabGroup = "Pulsa Reguler";
+                        const nameLower = prod.product_name.toLowerCase();
+                        if (nameLower.includes("transfer") || nameLower.includes("tp")) {
+                            tabGroup = "Pulsa Transfer";
+                        }
+
+                        if (!groupedProducts[tabGroup]) groupedProducts[tabGroup] = [];
+                        groupedProducts[tabGroup].push(prod);
+                    });
+
                     renderTabs(Object.keys(groupedProducts));
+
                 } else {
                     emptyState.style.display = 'flex';
-                    stateIcon.className = "fa-solid fa-box-open";
-                    emptyText.innerHTML = `Belum ada folder kustom untuk <b>${brand}</b>.`;
+                    stateIcon.className = "fa-solid fa-triangle-exclamation";
+                    emptyText.innerText = res.message || "Gagal memuat produk dari server.";
                     popupTopContainer.style.display = 'block';
                     insetTabsWrapper.style.display = 'none';
                     productList.style.display = 'none';
                 }
             } catch (err) {
-                console.error("Gagal load custom categories:", err);
+                console.error("Error load products:", err);
                 emptyState.style.display = 'flex';
                 stateIcon.className = "fa-solid fa-triangle-exclamation";
                 emptyText.innerText = "Gagal terhubung ke server.";
+                popupTopContainer.style.display = 'block';
+                insetTabsWrapper.style.display = 'none';
+                productList.style.display = 'none';
             }
         }
 
@@ -713,30 +514,25 @@
             let sortValue = sortFilter ? sortFilter.value : 'asc';
             let sortedProducts = [...rawList];
             sortedProducts.sort((a, b) => {
-                let priceA = parseFloat(a.jual || a.price || a.harga || 0);
-                let priceB = parseFloat(b.jual || b.price || b.harga || 0);
+                let priceA = parseFloat(a.price || 0);
+                let priceB = parseFloat(b.price || 0);
                 return sortValue === 'asc' ? priceA - priceB : priceB - priceA;
             });
 
             let html = "";
             sortedProducts.forEach((prod) => {
-                let harga = prod.jual || prod.price || prod.harga || 0;
+                let harga = prod.price || 0;
                 let hargaFormatted = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(harga);
-                let namaProduk = prod.product_name || prod.nama_produk || prod.nama || 'Produk';
-                let skuProduk = prod.buyer_sku_code || prod.code || prod.sku || prod.kode || '';
-                let prov = prod._provider || prod.provider || 'digiflazz';
-
-                let dotHtml = prov === 'okeconnect' 
-                    ? `<span class="dot-indicator dot-okeconnect"></span>`
-                    : `<span class="dot-indicator dot-digiflazz"></span>`;
+                let namaProduk = prod.product_name || 'Produk';
+                let skuProduk = prod.buyer_sku_code || '';
 
                 let namaClean = String(namaProduk).replace(/'/g, "\\'").replace(/"/g, '\\"');
                 let skuClean = String(skuProduk).replace(/'/g, "\\'").replace(/"/g, '\\"');
 
                 html += `
-                    <div class="product-card" onclick="prosesBeli('${prov}', '${skuClean}', '${namaClean}', ${harga})">
+                    <div class="product-card" onclick="prosesBeli('${skuClean}', '${namaClean}', ${harga})">
                         <div class="product-info">
-                            <div class="product-title">${namaProduk} ${dotHtml}</div>
+                            <div class="product-title">${namaProduk}</div>
                             <div class="product-price">${hargaFormatted}</div>
                         </div>
                         <div class="product-action"><i class="fa-solid fa-chevron-right"></i></div>
@@ -746,8 +542,8 @@
             productList.innerHTML = html;
         }
 
-        // PROSES CHECKOUT DENGAN SINKRONISASI ONESIGNAL
-        window.prosesBeli = function(provider, skuCode, productName, price) {
+        // PROSES CHECKOUT & BOTTOM SHEET
+        window.prosesBeli = function(skuCode, productName, price) {
             let nomorTujuan = phoneInput.value.replace(/[^0-9]/g, '');
 
             if (nomorTujuan.length < 10 || nomorTujuan.length > 13) {
@@ -756,12 +552,11 @@
                 return;
             }
 
-            if (memberSaldoAktif < price) {
+            if (memberSaldoAktif > 0 && memberSaldoAktif < price) {
                 return alert(`❌ Saldo Anda Tidak Mencukupi!\n\nHarga Produk: Rp ${price.toLocaleString('id-ID')}\nSaldo Anda: Rp ${memberSaldoAktif.toLocaleString('id-ID')}`);
             }
 
             dataCheckoutAktif = {
-                provider: provider,
                 buyer_sku_code: skuCode,
                 product_name: productName,
                 customer_no: nomorTujuan,
@@ -769,8 +564,6 @@
                 ref_id: 'TRX-' + Date.now()
             };
 
-            document.getElementById('sheet_provider_title').innerText = "Konfirmasi Pembelian";
-            document.getElementById('sheet_provider_label').innerText = provider;
             document.getElementById('sheet_nama_produk').innerText = productName;
             document.getElementById('sheet_no_tujuan').innerText = nomorTujuan;
             document.getElementById('sheet_total_harga').innerText = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(price);
@@ -793,7 +586,6 @@
             }, 300);
         }
 
-        // 🚀 EKSEKUSI CHECKOUT & REDIRECT KELUAR/MASUK KE DETAIL.HTML
         async function eksekusiCheckoutTerpilih() {
             const btn = document.getElementById('btnProsesBayar');
             btn.disabled = true;
@@ -813,10 +605,8 @@
                 subscription_id: subId
             };
 
-            const endpointUrl = dataCheckoutAktif.provider === 'okeconnect' ? '/api/okeconnect/checkout' : '/api/digiflazz/checkout';
-
             try {
-                const response = await fetch(endpointUrl, {
+                const response = await fetch('/api/digiflazz/checkout', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(payload)
@@ -827,12 +617,10 @@
                 if (res.status === 'success' || res.status === 200) {
                     tutupCheckoutSheet();
                     
-                    // Ambil Ref ID hasil transaksi dari respon backend (atau fallback ke local ref_id)
                     var refIdResult = (res.data && (res.data.ref_id || res.data.id || res.data.trx_id)) 
                                       ? (res.data.ref_id || res.data.id || res.data.trx_id) 
                                       : (res.ref_id || dataCheckoutAktif.ref_id);
 
-                    // LANGSUNG REDIRECT KE DETAIL.HTML DENGAN PARAMETER REF_ID
                     window.location.href = 'detail.html?id=' + encodeURIComponent(refIdResult);
                 } else {
                     alert('❌ Gagal Transaksi: ' + (res.message || 'Terjadi kesalahan'));

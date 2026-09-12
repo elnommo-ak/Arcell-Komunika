@@ -363,6 +363,23 @@
                 const noTujuan = item.no_tujuan || item.customer_no || item.user_hp || '';
                 const namaProduk = item.produk || item.product_name || item.sku || 'Produk PPOB';
 
+                // ==========================================
+                // EKSTRAKSI SN OKECONNECT SAMA SEPERTI detail.html
+                // ==========================================
+                var rawSn = item.sn || item.serial_number || item.serialNumber || item.nomor_resi || item.resi || item.sn_resi || '';
+                
+                // Jika key 'sn' kosong, ekstrak otomatis dari pesan/message balasan OkeConnect
+                if (!rawSn && (item.message || item.keterangan || item.catatan || item.note || item.pesan)) {
+                    var teksPesan = item.message || item.keterangan || item.catatan || item.note || item.pesan;
+                    var matchSn = teksPesan.match(/SN[\/\:\s]+([A-Za-z0-9\.\/\-]+)/i);
+                    if (matchSn && matchSn[1]) {
+                        rawSn = matchSn[1].trim();
+                    }
+                }
+
+                var displaySn = (rawSn && rawSn !== '' && rawSn !== '-') ? 'SN: ' + rawSn : '';
+                // ==========================================
+
                 htmlList += `
                     <div class="card" onclick="window.location.href='detail.html?id=${encodeURIComponent(item.ref_id)}'">
                         <div class="header-meta">
@@ -373,7 +390,7 @@
                         <div class="card-body-content">
                             <div class="card-left">
                                 <div class="produk-title">${namaProduk}</div>
-                                <div class="produk-status-kirim">${item.sn ? 'SN: ' + item.sn : ''}</div>
+                                <div class="produk-status-kirim">${displaySn}</div>
                             </div>
                             <div class="card-right">
                                 <span class="status ${statusClass}">${statusStr}</span>
