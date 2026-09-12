@@ -385,7 +385,7 @@
                     <button onclick="loadCustomCategoriesFromDB()" class="btn-sm"><i class="fa-solid fa-rotate-right"></i> Refresh DB</button>
                 </div>
                 <div style="font-size: 0.72rem; color: var(--text-sub); margin-bottom: 12px; background: rgba(255,255,255,0.5); padding: 8px; border-radius: 8px;">
-                    💡 Folder dikelompokkan berdasarkan <b>Provider</b>. Anda dapat menghapus kategori melalui tombol hapus pada masing-masing sub-kategori. Masukkan produk dari tab Digiflazz / OkeConnect.
+                    💡 Folder dikelompokkan berdasarkan <b>Provider</b>. Produk pada kategori custom bersifat <b>terisolasi</b> (tidak akan berubah/reset saat Sync Digiflazz atau OkeConnect).
                 </div>
                 <div id="customCategoryContainer">
                     <div style="text-align: center; color: var(--text-sub); padding: 15px; font-size: 0.8rem;">Memuat daftar kategori kustom...</div>
@@ -506,7 +506,7 @@
         let knownTrxIds = new Set();
         let isFirstLoadTrx = true;
         
-        // Data Kategori Custom SQLite
+        // Data Kategori Custom SQLite (ISOLATED DARI SYNC)
         let dbCustomCategories = [];
         
         let selectedSKUsDigi = new Set();
@@ -622,7 +622,6 @@
                 return;
             }
 
-            // Urutkan transaksi terbaru ke terlama
             const sorted = [...list].sort((a, b) => {
                 const tA = parseWaktu(a.waktu || a.date || a.created_at || a.timestamp || '').dateObj.getTime();
                 const tB = parseWaktu(b.waktu || b.date || b.created_at || b.timestamp || '').dateObj.getTime();
@@ -784,7 +783,6 @@
             el.innerHTML = html;
         }
 
-        // FUNGSI TOGGLE MEMBER TERPERBAIKI AGAR STATE TERJAGA SAAT RE-RENDER
         function toggleMemberTrx(noHp) { 
             const card = document.getElementById(`member-card-${noHp}`); 
             if(card) {
@@ -797,7 +795,6 @@
             } 
         }
 
-        // FUNGSI TOGGLE TANGGAL TERPERBAIKI
         function toggleDateFolder(el, dateFolderKey) { 
             const dateCard = el.closest('.date-folder-card'); 
             if(dateCard) {
@@ -881,7 +878,6 @@
                 const fetchedList = Array.isArray(result) ? result : (result.data || []);
                 
                 let hasNewTrx = false;
-                // Deteksi Transaksi Baru untuk Notifikasi
                 if (!isFirstLoadTrx) {
                     fetchedList.forEach(t => {
                         const refId = String(t.ref_id || t.id || '');
@@ -896,13 +892,11 @@
                     });
                 }
 
-                // Catat semua ID transaksi yang telah diproses
                 fetchedList.forEach(t => {
                     const refId = String(t.ref_id || t.id || '');
                     if (refId) knownTrxIds.add(refId);
                 });
 
-                // Hanya render ulang DOM jika pertama kali load, refresh manual, atau ada transaksi baru
                 if (isFirstLoadTrx || manualRefresh || hasNewTrx || fetchedList.length !== rawTransactions.length) {
                     rawTransactions = fetchedList;
                     renderAllTransactions(rawTransactions);
@@ -991,7 +985,6 @@
                 return;
             }
 
-            // Kelompokkan Kategori berdasarkan Brand
             const groupedByBrand = {};
             dbCustomCategories.forEach(cat => {
                 const brand = cat.brand || 'LAINNYA';
@@ -1104,7 +1097,6 @@
                     showToast('✅ Produk custom berhasil diperbarui!');
                     tutupModalEditCustomProduct();
                     
-                    // Update state internal lokal
                     const catObj = dbCustomCategories.find(c => c.id == catId);
                     if(catObj && catObj.products) {
                         const pObj = catObj.products.find(p => p.buyer_sku_code === sku);
@@ -1115,7 +1107,6 @@
                         }
                     }
 
-                    // Update DOM lokal tanpa menutup accordion
                     const prodCard = document.getElementById(`prod-item-${catId}-${sku}`);
                     if(prodCard) {
                         const nameEl = prodCard.querySelector('.prod-name');
@@ -1143,7 +1134,6 @@
             card.classList.toggle('open');
         }
 
-        /* MANIPULASI DOM LOKAL SAAT LEPAS PRODUK */
         async function hapusMappingProduk(categoryId, buyerSkuCode, provider, btnEl) {
             try {
                 const res = await fetch('/api/admin/unmap-category-product', {
@@ -1201,14 +1191,19 @@
             } catch (err) {}
         }
 
-        /* SINKRONISASI DIGIFLAZZ KE DATABASE */
+        /* SINKRONISASI DIGIFLAZZ KE DATABASE - DENGAN PROTEKSI ISOLASI CUSTOM CATEGORY */
         async function syncDigiflazzToDB() {
             const container = document.getElementById('folderContainer');
             container.innerHTML = `<div style="text-align:center; color: var(--primary); padding: 15px; font-size:0.8rem;"><i class="fa-solid fa-sync fa-spin"></i> Menyinkronkan data Digiflazz...</div>`;
             try {
                 const res = await fetch('/api/digiflazz/price-list', { method: 'POST' });
                 const result = await res.json();
-                if (result.status === 'success') { showToast('✅ Sync Digiflazz Berhasil!'); loadProduk(); } 
+                if (result.status === 'success') { 
+                    showToast('✅ Sync Digiflazz Berhasil!'); 
+                    await loadProduk(); 
+                    // Muat ulang custom kategori agar pemetaan terlindungi dan diperbarui jika ada penyesuaian modal
+                    await loadCustomCategoriesFromDB(); 
+                } 
                 else { showToast('❌ Gagal Sync: ' + (result.message || ''), 'danger'); loadProduk(); }
             } catch (err) { showToast('❌ Gagal menghubungi server.', 'danger'); loadProduk(); }
         }
@@ -1393,13 +1388,19 @@
             }
         }
 
+        /* SINKRONISASI OKECONNECT KE DATABASE - DENGAN PROTEKSI ISOLASI CUSTOM CATEGORY */
         async function syncOkeconnectToDB() {
             const container = document.getElementById('okeconnectContainer');
             container.innerHTML = `<div style="text-align:center; color: var(--primary); padding: 15px; font-size:0.8rem;"><i class="fa-solid fa-sync fa-spin"></i> Menyinkronkan data Okeconnect...</div>`;
             try {
                 const res = await fetch('/api/admin/sync-okeconnect', { method: 'POST' });
                 const result = await res.json();
-                if (result.status === 'success') { showToast('✅ Sync Berhasil!'); loadOkeconnectProducts(true); } 
+                if (result.status === 'success') { 
+                    showToast('✅ Sync Berhasil!'); 
+                    await loadOkeconnectProducts(true);
+                    // Refresh data custom category dari SQLite agar tidak terpengaruh sync
+                    await loadCustomCategoriesFromDB(); 
+                } 
                 else { showToast('❌ Gagal Sync.', 'danger'); loadOkeconnectProducts(true); }
             } catch (err) { showToast('❌ Gagal menghubungi server.', 'danger'); loadOkeconnectProducts(true); }
         }
@@ -1412,36 +1413,99 @@
                 return;
             }
 
-            const grouped = {};
+            const groupedByCategory = {};
             filteredOkeconnectData.forEach(p => {
-                const cat = dapatkanNamaKategoriOkeconnect(p);
-                if (!grouped[cat]) grouped[cat] = [];
-                grouped[cat].push(p);
+                const mainCat = String(p.category || p.type || 'LAINNYA').trim();
+                if (!groupedByCategory[mainCat]) groupedByCategory[mainCat] = [];
+                groupedByCategory[mainCat].push(p);
             });
 
             let html = '';
-            const isSearching = document.getElementById('searchOkeconnect').value.trim() !== '';
+            Object.keys(groupedByCategory).forEach(mainCat => {
+                const prodsInCat = groupedByCategory[mainCat];
 
-            Object.keys(grouped).forEach((catName) => {
-                const prods = grouped[catName];
+                const groupedBySubCat = {};
+                prodsInCat.forEach(p => {
+                    const nama = String(p.product_name || p.nama || '').toUpperCase();
+                    let subCat = 'REGULER';
+
+                    if (nama.includes('REGULER')) subCat = 'REGULER';
+                    else if (nama.includes('COMBO') || nama.includes('XTRA COMBO')) subCat = 'COMBO';
+                    else if (nama.includes('AIGO')) subCat = 'AIGO';
+                    else if (nama.includes('FREDOM SPECIAL')) subCat = 'FREEDOM SPECIAL';
+                    else if (nama.includes('FREEDOM INTERNET')) subCat = 'FREEDOM INTERNET';
+                    else if (nama.includes('FLEXMAX')) subCat = 'FLEX MAX';
+                    
+                    else if (nama.includes('UNLIMITED')) subCat = 'UNLIMITED';
+                    else if (nama.includes('XTRA ON') || nama.includes('XTRA')) subCat = 'XTRA ON';
+                    else if (nama.includes('MINI')) subCat = 'MINI DATA';
+                    else if (nama.includes('VOUCHER') || nama.includes('VCR')) subCat = 'VOUCHER FISIK';
+                    else if (nama.includes('FLEX')) subCat = 'FLEX';
+                    else {
+                        const words = nama.split(' ');
+                        subCat = words[0] ? words[0] : 'LAINNYA';
+                    }
+
+                    if (!groupedBySubCat[subCat]) groupedBySubCat[subCat] = [];
+                    groupedBySubCat[subCat].push(p);
+                });
 
                 html += `
-                    <div class="folder-card ${isSearching ? 'open' : ''}" data-category="${catName}">
+                    <div class="folder-card">
                         <div class="folder-header">
-                            <div class="folder-left" onclick="toggleFolderOkeconnect(this, '${catName}')">
-                                <i class="fa-solid ${isSearching ? 'fa-folder-open' : 'fa-bolt'} folder-icon" style="color:var(--primary);"></i>
-                                <span>${catName}</span>
+                            <div class="folder-left" onclick="toggleFolderOkeconnect(this)">
+                                <i class="fa-solid fa-folder-closed folder-icon" style="color:var(--primary);"></i>
+                                <span>${mainCat}</span>
                             </div>
                             <div class="folder-right">
-                                <span class="badge-count">${prods.length} Item</span>
-                                <i class="fa-solid fa-chevron-down chevron" onclick="toggleFolderOkeconnect(this, '${catName}')"></i>
+                                <span class="badge-count">${prodsInCat.length} Item</span>
+                                <i class="fa-solid fa-chevron-down chevron" onclick="toggleFolderOkeconnect(this)"></i>
                             </div>
                         </div>
-                        <div class="folder-body" id="folder-body-okec-${catName.replace(/[^a-zA-Z0-9]/g, '')}">
-                            ${isSearching ? renderProdsHTML(prods, catName) : ''}
-                        </div>
-                    </div>
+                        <div class="folder-body">
                 `;
+
+                Object.keys(groupedBySubCat).forEach(subCat => {
+                    const subProds = groupedBySubCat[subCat];
+                    html += `
+                        <div class="sub-cat-card">
+                            <div class="sub-cat-header" onclick="toggleSubCatAccordion(this)">
+                                <span><i class="fa-solid fa-tag"></i> ${subCat}</span>
+                                <div style="display:flex; align-items:center; gap:6px;">
+                                    <span class="badge-count">${subProds.length} Item</span>
+                                    <i class="fa-solid fa-chevron-down sub-chevron"></i>
+                                </div>
+                            </div>
+                            <div class="sub-cat-body">
+                    `;
+
+                    subProds.forEach(p => {
+                        const sku = p.buyer_sku_code || p.sku || '-';
+                        const nama = p.product_name || p.nama || '-';
+                        const price = parseFloat(p.jual || p.price || 0);
+                        const isChecked = selectedSKUsOkec.has(sku) ? 'checked' : '';
+
+                        html += `
+                            <div class="prod-item">
+                                <div style="display:flex; align-items:center; gap:8px;">
+                                    <input type="checkbox" value="${sku}" ${isChecked} onchange="toggleSelect('okeconnect', '${sku}', this.checked)">
+                                    <div>
+                                        <div class="prod-name">${nama} <span class="dot-indicator dot-okeconnect"></span></div>
+                                        <div class="prod-sku">SKU: <span>${sku}</span></div>
+                                    </div>
+                                </div>
+                                <div style="text-align:right;">
+                                    <div class="prod-price">Rp ${price.toLocaleString('id-ID')}</div>
+                                    <div style="display:flex; gap:4px; justify-content:flex-end; margin-top:2px;">
+                                        <button class="btn-sm btn-warning" onclick="editProduk('okeconnect', '${sku}', '${nama.replace(/'/g, "\\'")}', '${p.brand}', '${mainCat}', ${price}, '${p.status}')"><i class="fa-solid fa-pen"></i></button>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                    });
+                    html += `</div></div>`;
+                });
+                html += `</div></div>`;
             });
             container.innerHTML = html;
         }
@@ -1479,7 +1543,6 @@
             return htmlProds;
         }
 
-        /* TOGGLE & LAZY RENDER FOLDER OKECONNECT */
         function toggleFolderOkeconnect(el, catName) {
             const card = el.closest('.folder-card');
             const folderBody = card.querySelector('.folder-body');
@@ -1554,7 +1617,6 @@
             loadProduk();
             loadOkeconnectProducts();
 
-            // AUTO-POLLING TIAP 3 DETIK UNTUK MEMANTAU TRANSAKSI MASUK REAL-TIME
             setInterval(() => {
                 loadTransactions();
             }, 3000);
