@@ -21,7 +21,7 @@ const OKECONNECT_CONFIG = {
     memberId: process.env.OKECONNECT_MEMBER_ID || 'OK2385636',
     password: process.env.OKECONNECT_PASSWORD || '@noMmo123',
     pin: process.env.OKECONNECT_PIN || '1122',
-    pricelistUrl: 'https://www.okeconnect.com/harga/json?id=905ccd028329b0a',
+    pricelistUrl: 'https://www.okeconnect.com/harga/json?id=905ccd028329b0a&produk=pulsa,sms_telepon,kuota_nasional,kuota_telkomsel,kuota_byu,kuota_indosat,kuota_tri,kuota_xl,kuota_axis,kuota_smartfren,token_pln,saldo_gojek,ecommerce,digital,pascabayar',
     trxUrl: 'https://h2h.okeconnect.com/trx'
 };
 
@@ -60,6 +60,7 @@ const db = new sqlite3.Database('./database.db', (err) => {
 
 function initTables() {
     db.serialize(() => {
+        // 1. Tabel Members
         db.run(`CREATE TABLE IF NOT EXISTS members (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             member_id TEXT UNIQUE,
@@ -70,6 +71,7 @@ function initTables() {
             created_at DATETIME DEFAULT CURRENT_TIMESTAMP
         )`);
 
+        // 2. Tabel Transactions
         db.run(`CREATE TABLE IF NOT EXISTS transactions (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             ref_id TEXT UNIQUE,
@@ -90,6 +92,7 @@ function initTables() {
             FOREIGN KEY (user_hp) REFERENCES members(phone) ON DELETE CASCADE ON UPDATE CASCADE
         )`);
 
+        // 3. Tabel Master Products
         db.run(`CREATE TABLE IF NOT EXISTS products (
             buyer_sku_code TEXT PRIMARY KEY,
             product_name TEXT,
@@ -103,11 +106,7 @@ function initTables() {
             provider TEXT DEFAULT 'digiflazz'
         )`);
 
-        db.run(`CREATE TABLE IF NOT EXISTS categories (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            name TEXT UNIQUE NOT NULL
-        )`);
-
+        // 4. Tabel Kategori Custom
         db.run(`CREATE TABLE IF NOT EXISTS custom_categories (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             name TEXT NOT NULL,
@@ -115,23 +114,24 @@ function initTables() {
             sort_order INTEGER DEFAULT 0
         )`);
 
-        // TABEL MAPPING PRODUK CUSTOM (Kamera Penyimpan Nama Custom & Harga Jual Custom Terisolasi)
+        // 5. Tabel Mapping Produk Custom (Isolasi Nama & Harga Jual Custom)
         db.run(`CREATE TABLE IF NOT EXISTS category_products (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             category_id INTEGER NOT NULL,
             buyer_sku_code TEXT NOT NULL,
             provider TEXT NOT NULL,
             custom_name TEXT,
-            custom_price REAL,
+            custom_jual REAL,
             UNIQUE(category_id, buyer_sku_code, provider),
             FOREIGN KEY (category_id) REFERENCES custom_categories(id) ON DELETE CASCADE
         )`);
 
+        // Safe Migrations (Cegah error saat menambahkan kolom pada database lama)
         db.run(`ALTER TABLE products ADD COLUMN category TEXT DEFAULT 'Umum'`, () => {});
         db.run(`ALTER TABLE products ADD COLUMN sub_category TEXT DEFAULT 'REGULER'`, () => {});
         db.run(`ALTER TABLE products ADD COLUMN status TEXT DEFAULT '1'`, () => {});
         db.run(`ALTER TABLE category_products ADD COLUMN custom_name TEXT`, () => {});
-        db.run(`ALTER TABLE category_products ADD COLUMN custom_price REAL`, () => {});
+        db.run(`ALTER TABLE category_products ADD COLUMN custom_jual REAL`, () => {});
     });
 }
 
@@ -261,7 +261,7 @@ app.post('/api/okeconnect/checkout', async (req, res) => {
                 return res.status(400).json({ status: 'failed', message: 'Saldo member tidak mencukupi!' });
             }
 
-            const refId = "180774-" + Date.now();
+            const refId = "ARC_" + Date.now();
             const memberName = username || member.name || 'Member Arcell';
             const productName = nama_produk || cleanSku;
 
@@ -355,10 +355,17 @@ app.all(['/callback/okeconnect/event', '/api/okeconnect/callback'], express.urle
 
         if (!refID) return res.status(200).send("OK");
 
-        if ((!sn || sn === '-') && message.includes('SN:')) {
-            const snMatch = message.match(/SN:\s*([A-Za-z0-9]+)/i);
-            if (snMatch && snMatch[1]) sn = snMatch[1];
+	if ((!sn || sn === '-') && message.includes('SN:')) {
+        // 1. Ambil teks setelah "SN:" sampai sebelum kata Saldo, Sisa Pulsa, atau akhir teks
+        const snMatch = message.match(/SN:\s*([^]*?)(?=\s*(?:\.|\*|\b)\s*(?:Saldo|Sisa Pulsa|@\d{2}\/\d{2})|$)/i);
+    
+        if (snMatch && snMatch[1]) {
+        sn = snMatch[1]
+            // 2. Bersihkan tanda titik atau karakter pemisah sisa di ujung kalimat
+            .replace(/\s*\.?\s*$/, '')
+            .trim();
         }
+    }
 
         const trx = await new Promise((resolve, reject) => {
             db.get("SELECT * FROM transactions WHERE ref_id = ?", [refID], (err, row) => {
@@ -973,7 +980,6 @@ app.get('/api/transaction/detail', (req, res) => {
 });
 
 // ==================== ENDPOINT USER / CATEGORIES (CUSTOM ISOLATED) ====================
-
 app.get('/api/user/products-by-prefix', (req, res) => {
     const { brand } = req.query;
 
@@ -981,26 +987,26 @@ app.get('/api/user/products-by-prefix', (req, res) => {
         return res.json({ status: 'success', data: {} });
     }
 
-    // MENGAMBIL DATA KUSTOM TERISOLATED (PRIORITAS HARGA/NAMA CUSTOM JIKA ADA)
+    // QUERY MULTI-LAYER: MENGAMBIL HARGA JUAL CUSTOM TERKUNCI JIKA ADA, ATAU HARGA JUAL MASTER
     const sql = `
         SELECT 
             cc.name as category_name,
             cp.provider,
             p.buyer_sku_code,
             COALESCE(cp.custom_name, p.product_name) as product_name,
-            COALESCE(cp.custom_price, p.jual, p.price) as jual,
+            COALESCE(cp.custom_jual, p.jual, p.price) as jual,
             p.price as modal_price,
             p.status
         FROM custom_categories cc
         JOIN category_products cp ON cc.id = cp.category_id
-        JOIN products p ON cp.buyer_sku_code = p.buyer_sku_code AND cp.provider = p.provider
+        JOIN products p ON cp.buyer_sku_code = p.buyer_sku_code AND LOWER(cp.provider) = LOWER(p.provider)
         WHERE UPPER(cc.brand) = UPPER(?) AND p.status = '1'
         ORDER BY cc.sort_order ASC, jual ASC
     `;
 
     db.all(sql, [brand], (err, rows) => {
         if (err) {
-            console.error("Error SQL Products Prefix:", err.message);
+            console.error("❌ Error SQL Products Prefix:", err.message);
             return res.status(500).json({ status: 'error', message: err.message });
         }
 
@@ -1012,7 +1018,8 @@ app.get('/api/user/products-by-prefix', (req, res) => {
             grouped[row.category_name].push({
                 buyer_sku_code: row.buyer_sku_code,
                 product_name: row.product_name,
-                price: row.jual,
+                jual: parseFloat(row.jual || 0), // HARGA JUAL DIKIRIM KE CLIENT
+                price: parseFloat(row.modal_price || 0),
                 _provider: row.provider
             });
         });
@@ -1021,6 +1028,8 @@ app.get('/api/user/products-by-prefix', (req, res) => {
     });
 });
 
+// ==================== ENDPOINT FETCH CUSTOM CATEGORIES ====================
+// Mengambil Harga Modal dari master 'products' dan Harga Jual dari 'category_products'
 app.get('/api/admin/custom-categories', (req, res) => {
     db.all(`SELECT * FROM custom_categories ORDER BY sort_order ASC, id DESC`, [], (err, categories) => {
         if (err) return res.status(500).json({ status: 'error', message: err.message });
@@ -1031,10 +1040,10 @@ app.get('/api/admin/custom-categories', (req, res) => {
                 cp.buyer_sku_code, 
                 cp.provider, 
                 COALESCE(cp.custom_name, p.product_name) as product_name, 
-                COALESCE(cp.custom_price, p.jual, p.price) as jual, 
-                p.price 
+                COALESCE(cp.custom_jual, p.jual, p.price) as jual, 
+                p.price as harga_modal
             FROM category_products cp
-            JOIN products p ON cp.buyer_sku_code = p.buyer_sku_code AND cp.provider = p.provider
+            JOIN products p ON cp.buyer_sku_code = p.buyer_sku_code AND LOWER(cp.provider) = LOWER(p.provider)
         `, [], (err2, products) => {
             if (err2) return res.status(500).json({ status: 'error', message: err2.message });
 
@@ -1092,49 +1101,34 @@ app.post('/api/admin/unmap-category-product', (req, res) => {
     });
 });
 
-// ==================== EDIT PRODUK CUSTOM (KUNCI NAMA & HARGA DI TABEL CATEGORY_PRODUCTS) ====================
+// ==================== ENDPOINT UPDATE EDIT PRODUK CUSTOM ====================
+// Mengunci Nama Custom dan Harga Jual tanpa mengubah Harga Modal Provider
 app.post('/api/admin/update-custom-product', (req, res) => {
     const { category_id, buyer_sku_code, product_name, price, provider } = req.body;
 
     if (!buyer_sku_code || !product_name || price === undefined) {
         return res.status(400).json({ 
             status: 'error', 
-            message: 'SKU Kode, Nama Produk, dan Harga wajib diisi!' 
+            message: 'SKU Kode, Nama Produk, dan Harga Jual wajib diisi!' 
         });
     }
 
-    const priceVal = parseFloat(price) || 0;
+    const hargaJual = parseFloat(price) || 0;
     const cleanProvider = (provider || 'digiflazz').toLowerCase();
 
-    // UPDATE DUA LAYER: UPDATE DATA ISOLASI CUSTOM DAHULU
     const queryCustom = `
         UPDATE category_products 
-        SET custom_name = ?, custom_price = ? 
-        WHERE buyer_sku_code = ? AND provider = ?
+        SET custom_name = ?, custom_jual = ? 
+        WHERE category_id = ? AND buyer_sku_code = ? AND LOWER(provider) = ?
     `;
 
-    db.run(queryCustom, [product_name, priceVal, buyer_sku_code, cleanProvider], function(err) {
+    db.run(queryCustom, [product_name, hargaJual, category_id, buyer_sku_code, cleanProvider], function(err) {
         if (err) {
-            console.error("❌ DB Error Update Custom:", err.message);
+            return res.status(500).json({ status: 'error', message: 'Gagal update produk custom: ' + err.message });
         }
-
-        // UPDATE JUGA DI MASTER KALO DIPERLUKAN
-        const queryMaster = `
-            UPDATE products 
-            SET product_name = ?, price = ?, jual = ? 
-            WHERE buyer_sku_code = ? AND LOWER(provider) = ?
-        `;
-
-        db.run(queryMaster, [product_name, priceVal, priceVal, buyer_sku_code, cleanProvider], function(err2) {
-            if (err2) {
-                return res.status(500).json({ status: 'error', message: 'Gagal update database: ' + err2.message });
-            }
-
-            return res.json({ status: 'success', message: 'Produk custom berhasil diperbarui dan dikunci!' });
-        });
+        return res.json({ status: 'success', message: 'Harga Jual berhasil diperbarui dan dikunci!' });
     });
 });
-
 // ==================== START SERVER ====================
 app.listen(PORT, () => {
     console.log(`🚀 Server Arcell Komunika berjalan di Port ${PORT}`);

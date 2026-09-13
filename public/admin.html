@@ -217,7 +217,7 @@
         .folder-card.open .chevron { transform: rotate(180deg); }
         .chevron { transition: transform 0.2s; color: var(--text-sub); font-size: 0.75rem; cursor: pointer; }
 
-        /* BRAND PROVIDER ACCORDION (BERTINGKAT) */
+        /* BRAND PROVIDER ACCORDION */
         .brand-block { background: rgba(255, 255, 255, 0.75); border-radius: 12px; border: 1px solid var(--glass-border); margin-bottom: 8px; overflow: hidden; }
         .brand-header { padding: 10px 12px; background: rgba(255, 255, 255, 0.85); display: flex; align-items: center; justify-content: space-between; cursor: pointer; font-weight: 800; font-size: 0.85rem; color: var(--primary); }
         .brand-body { display: none; padding: 8px; flex-direction: column; gap: 6px; }
@@ -237,8 +237,8 @@
         .prod-sku { font-size: 0.65rem; color: var(--text-sub); font-weight: 700; margin-top: 1px; }
         .prod-sku span { color: var(--primary); }
         .prod-price { font-size: 0.8rem; font-weight: 900; color: #10b981; }
+        .prod-modal { font-size: 0.68rem; color: var(--text-sub); font-weight: 700; }
 
-        /* BULATAN INDIKATOR PROVIDER (DOT) */
         .dot-indicator {
             display: inline-block;
             width: 8px;
@@ -385,7 +385,7 @@
                     <button onclick="loadCustomCategoriesFromDB()" class="btn-sm"><i class="fa-solid fa-rotate-right"></i> Refresh DB</button>
                 </div>
                 <div style="font-size: 0.72rem; color: var(--text-sub); margin-bottom: 12px; background: rgba(255,255,255,0.5); padding: 8px; border-radius: 8px;">
-                    💡 Folder dikelompokkan berdasarkan <b>Provider</b>. Produk pada kategori custom bersifat <b>terisolasi</b> (tidak akan berubah/reset saat Sync Digiflazz atau OkeConnect).
+                    💡 <b>Harga Modal</b> akan terus otomatis diperbarui saat Sync API Provider, sedangkan <b>Harga Jual & Nama Custom</b> pada kategori ini tetap aman terkunci.
                 </div>
                 <div id="customCategoryContainer">
                     <div style="text-align: center; color: var(--text-sub); padding: 15px; font-size: 0.8rem;">Memuat daftar kategori kustom...</div>
@@ -474,11 +474,11 @@
                     <input type="text" id="editCustomSku" readonly style="background: rgba(0,0,0,0.05); color: var(--text-sub);">
                 </div>
                 <div>
-                    <label style="font-size: 0.7rem; font-weight: 800; color: var(--text-sub);">NAMA PRODUK</label>
+                    <label style="font-size: 0.7rem; font-weight: 800; color: var(--text-sub);">NAMA PRODUK CUSTOM</label>
                     <input type="text" id="editCustomName" placeholder="Nama Produk">
                 </div>
                 <div>
-                    <label style="font-size: 0.7rem; font-weight: 800; color: var(--text-sub);">HARGA JUAL (RP)</label>
+                    <label style="font-size: 0.7rem; font-weight: 800; color: var(--text-sub);">HARGA JUAL CUSTOM (RP)</label>
                     <input type="number" id="editCustomPrice" placeholder="Harga Jual (Rp)">
                 </div>
                 
@@ -498,29 +498,25 @@
         let rawOkeconnectData = [];
         let filteredOkeconnectData = [];
         
-        // State Penjaga Accordion Member & Tanggal Terbuka agar tidak tertutup saat auto refresh
         let openMemberCards = new Set();
         let openDateFolders = new Set();
 
-        // Tracking ID Transaksi untuk Notifikasi Real-time
         let knownTrxIds = new Set();
         let isFirstLoadTrx = true;
         
-        // Data Kategori Custom SQLite (ISOLATED DARI SYNC)
         let dbCustomCategories = [];
         
         let selectedSKUsDigi = new Set();
         let selectedSKUsOkec = new Set();
 
-        /* BEEP AUDIO UNTUK NOTIFIKASI TRANSAKSI MASUK */
         function playNotifSound() {
             try {
                 const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
                 const osc = audioCtx.createOscillator();
                 const gain = audioCtx.createGain();
                 osc.type = 'sine';
-                osc.frequency.setValueAtTime(587.33, audioCtx.currentTime); // High D5 tone
-                osc.frequency.exponentialRampToValueAtTime(880, audioCtx.currentTime + 0.15); // A5
+                osc.frequency.setValueAtTime(587.33, audioCtx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(880, audioCtx.currentTime + 0.15);
                 gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
                 gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
                 osc.connect(gain);
@@ -530,7 +526,6 @@
             } catch(e){}
         }
 
-        /* TOAST NOTIFICATION LOKAL */
         function showToast(message, type = 'success') {
             let toastContainer = document.getElementById('toastContainer');
             if (!toastContainer) {
@@ -548,7 +543,6 @@
             setTimeout(() => { toast.style.opacity = '0'; toast.style.transform = 'translateY(-10px)'; setTimeout(() => toast.remove(), 250); }, 3500);
         }
 
-        /* PARSER WAKTU */
         function parseWaktu(strWaktu) {
             if (!strWaktu) return { tanggal: '', jam: '', full: '', dateObj: new Date() };
             let str = String(strWaktu).trim();
@@ -572,7 +566,6 @@
             return { tanggal: parts[0] || '', jam: parts[1] || '', full: str + ' WIB', dateObj: new Date() };
         }
 
-        /* HELPER KATEGORI OKECONNECT */
         function dapatkanNamaKategoriOkeconnect(p) {
             const kandidat = [p.category, p.type, p.kategori, p.category_name, p.brand, p.operator, p.group];
             for (let val of kandidat) {
@@ -612,9 +605,6 @@
             }
         }
 
-        // ==========================================
-        // RENDER RIWAYAT TRANSAKSI TERPUSAT (TAB SALDO)
-        // ==========================================
         function renderAllTransactions(list) {
             const container = document.getElementById('allTrxContainer');
             if (!list || list.length === 0) {
@@ -868,9 +858,6 @@
             } catch (err) { showToast('❌ Error jaringan', 'danger'); }
         }
 
-        // ==========================================
-        // FETCH TRANSAKSI & DETEKSI TRANSAKSI BARU
-        // ==========================================
         async function loadTransactions(manualRefresh = false) {
             try {
                 const res = await fetch('/api/admin/transactions?t=' + Date.now());
@@ -911,7 +898,7 @@
         }
 
         // ==========================================
-        // FITUR KATEGORI CUSTOM SQLITE & DROPDOWN BRAND
+        // FITUR KATEGORI CUSTOM SQLITE
         // ==========================================
         async function loadCustomCategoriesFromDB() {
             try {
@@ -1030,6 +1017,8 @@
                             const isOkec = p.provider === 'okeconnect';
                             const dotClass = isOkec ? 'dot-okeconnect' : 'dot-digiflazz';
                             const safeName = (p.product_name || '').replace(/'/g, "\\'");
+                            const hargaModal = parseFloat(p.harga_modal || 0);
+                            const hargaJual = parseFloat(p.jual || 0);
 
                             html += `
                                 <div class="prod-item" id="prod-item-${cat.id}-${p.buyer_sku_code}">
@@ -1038,9 +1027,10 @@
                                         <div class="prod-sku">SKU: <span>${p.buyer_sku_code}</span></div>
                                     </div>
                                     <div style="text-align:right;">
-                                        <div class="prod-price">Rp ${parseFloat(p.jual || p.price || 0).toLocaleString('id-ID')}</div>
+                                        <div class="prod-price">Rp ${hargaJual.toLocaleString('id-ID')}</div>
+                                        <div class="prod-modal">Modal: Rp ${hargaModal.toLocaleString('id-ID')}</div>
                                         <div style="display:flex; gap:4px; justify-content:flex-end; margin-top:2px;">
-                                            <button class="btn-sm btn-warning" style="padding:2px 6px;" onclick="bukaModalEditCustomProduct(${cat.id}, '${p.buyer_sku_code}', '${safeName}', ${parseFloat(p.jual || p.price || 0)}, '${p.provider}')" title="Edit Produk Custom"><i class="fa-solid fa-pen"></i> Edit</button>
+                                            <button class="btn-sm btn-warning" style="padding:2px 6px;" onclick="bukaModalEditCustomProduct(${cat.id}, '${p.buyer_sku_code}', '${safeName}', ${hargaJual}, '${p.provider}')" title="Edit Harga Jual Custom"><i class="fa-solid fa-pen"></i> Edit</button>
                                             <button class="btn-sm btn-danger" style="padding:2px 6px;" onclick="hapusMappingProduk(${cat.id}, '${p.buyer_sku_code}', '${p.provider}', this)" title="Lepas dari Kategori"><i class="fa-solid fa-xmark"></i> Lepas</button>
                                         </div>
                                     </div>
@@ -1094,28 +1084,9 @@
                 });
                 const result = await res.json();
                 if(result.status === 'success') {
-                    showToast('✅ Produk custom berhasil diperbarui!');
+                    showToast('✅ Harga jual & nama produk berhasil dikunci!');
                     tutupModalEditCustomProduct();
-                    
-                    const catObj = dbCustomCategories.find(c => c.id == catId);
-                    if(catObj && catObj.products) {
-                        const pObj = catObj.products.find(p => p.buyer_sku_code === sku);
-                        if(pObj) {
-                            pObj.product_name = name;
-                            pObj.jual = price;
-                            pObj.price = price;
-                        }
-                    }
-
-                    const prodCard = document.getElementById(`prod-item-${catId}-${sku}`);
-                    if(prodCard) {
-                        const nameEl = prodCard.querySelector('.prod-name');
-                        const priceEl = prodCard.querySelector('.prod-price');
-                        const dotClass = provider === 'okeconnect' ? 'dot-okeconnect' : 'dot-digiflazz';
-                        
-                        if(nameEl) nameEl.innerHTML = `${name} <span class="dot-indicator ${dotClass}"></span>`;
-                        if(priceEl) priceEl.innerText = `Rp ${price.toLocaleString('id-ID')}`;
-                    }
+                    loadCustomCategoriesFromDB();
                 } else {
                     showToast('❌ Gagal: ' + (result.message || ''), 'danger');
                 }
@@ -1191,7 +1162,6 @@
             } catch (err) {}
         }
 
-        /* SINKRONISASI DIGIFLAZZ KE DATABASE - DENGAN PROTEKSI ISOLASI CUSTOM CATEGORY */
         async function syncDigiflazzToDB() {
             const container = document.getElementById('folderContainer');
             container.innerHTML = `<div style="text-align:center; color: var(--primary); padding: 15px; font-size:0.8rem;"><i class="fa-solid fa-sync fa-spin"></i> Menyinkronkan data Digiflazz...</div>`;
@@ -1201,7 +1171,6 @@
                 if (result.status === 'success') { 
                     showToast('✅ Sync Digiflazz Berhasil!'); 
                     await loadProduk(); 
-                    // Muat ulang custom kategori agar pemetaan terlindungi dan diperbarui jika ada penyesuaian modal
                     await loadCustomCategoriesFromDB(); 
                 } 
                 else { showToast('❌ Gagal Sync: ' + (result.message || ''), 'danger'); loadProduk(); }
@@ -1358,7 +1327,6 @@
             renderFolders();
         }
 
-        /* INTEGRASI OKECONNECT DENGAN LAZY LOADING */
         async function loadOkeconnectProducts(force = false) {
             const container = document.getElementById('okeconnectContainer');
 
@@ -1388,7 +1356,6 @@
             }
         }
 
-        /* SINKRONISASI OKECONNECT KE DATABASE - DENGAN PROTEKSI ISOLASI CUSTOM CATEGORY */
         async function syncOkeconnectToDB() {
             const container = document.getElementById('okeconnectContainer');
             container.innerHTML = `<div style="text-align:center; color: var(--primary); padding: 15px; font-size:0.8rem;"><i class="fa-solid fa-sync fa-spin"></i> Menyinkronkan data Okeconnect...</div>`;
@@ -1398,14 +1365,12 @@
                 if (result.status === 'success') { 
                     showToast('✅ Sync Berhasil!'); 
                     await loadOkeconnectProducts(true);
-                    // Refresh data custom category dari SQLite agar tidak terpengaruh sync
                     await loadCustomCategoriesFromDB(); 
                 } 
                 else { showToast('❌ Gagal Sync.', 'danger'); loadOkeconnectProducts(true); }
             } catch (err) { showToast('❌ Gagal menghubungi server.', 'danger'); loadOkeconnectProducts(true); }
         }
 
-        /* LAZY RENDER OKECONNECT FOLDERS */
         function renderOkeconnectFolders() {
             const container = document.getElementById('okeconnectContainer');
             if (!filteredOkeconnectData || filteredOkeconnectData.length === 0) {
