@@ -28,6 +28,7 @@
             --text-muted: #8c98a9;
             --accent-purple: #7052ff;
             --accent-green: #10b981;
+            --accent-red: #ef4444;
             --border-radius-sm: 14px;
             --border-radius-md: 22px;
             --border-radius-pill: 50px;
@@ -213,6 +214,137 @@
             background: var(--bg-base); color: var(--accent-purple); box-shadow: var(--neu-shadow-sm);
             padding: 4px 12px; border-radius: var(--border-radius-pill); font-size: 0.65rem; font-weight: 800;
             display: none; text-transform: uppercase; flex-shrink: 0; letter-spacing: 0.5px;
+        }
+
+        /* --- STYLE DROPDOWN TRANSAKSI OTOMATIS --- */
+        .scheduled-dropdown-wrapper {
+            display: none;
+            flex-direction: column;
+            width: 100%;
+            margin-top: 4px;
+        }
+        .scheduled-dropdown-btn {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 18px;
+            background: var(--bg-base);
+            border-radius: var(--border-radius-pill);
+            box-shadow: var(--neu-shadow-sm);
+            border: none;
+            cursor: pointer;
+            width: 100%;
+            transition: all 0.2s ease;
+        }
+        .scheduled-dropdown-btn:active {
+            box-shadow: var(--neu-shadow-inset);
+        }
+        .scheduled-btn-title {
+            font-size: 0.78rem;
+            font-weight: 800;
+            color: var(--accent-purple);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .scheduled-badge-count {
+            background: var(--accent-purple);
+            color: #ffffff;
+            font-size: 0.65rem;
+            font-weight: 800;
+            padding: 2px 8px;
+            border-radius: var(--border-radius-pill);
+        }
+        .scheduled-dropdown-icon {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            transition: transform 0.3s ease;
+        }
+        .scheduled-dropdown-icon.open {
+            transform: rotate(180deg);
+        }
+        .scheduled-dropdown-content {
+            display: none;
+            flex-direction: column;
+            gap: 10px;
+            margin-top: 10px;
+            margin-bottom: 12px;
+            padding: 12px;
+            background: var(--bg-base);
+            border-radius: var(--border-radius-md);
+            box-shadow: var(--neu-shadow-inset);
+            animation: dropUpAnimation 0.25s ease-out forwards;
+            
+            /* Max 3 item & Scrollable */
+            max-height: 225px;
+            overflow-y: auto !important;
+            -webkit-overflow-scrolling: touch;
+        }
+        .scheduled-dropdown-content::-webkit-scrollbar {
+            display: block !important;
+            width: 4px !important;
+        }
+        .scheduled-dropdown-content::-webkit-scrollbar-thumb {
+            background: var(--neu-dark);
+            border-radius: 10px;
+        }
+        .scheduled-dropdown-content.show {
+            display: flex;
+        }
+        .scheduled-card {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: var(--bg-base);
+            padding: 10px 14px;
+            border-radius: var(--border-radius-sm);
+            box-shadow: var(--neu-shadow-sm);
+            flex-shrink: 0;
+        }
+        .scheduled-info {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+            flex: 1;
+            padding-right: 8px;
+        }
+        .scheduled-prod {
+            font-size: 0.78rem;
+            font-weight: 800;
+            color: var(--text-main);
+        }
+        .scheduled-target {
+            font-size: 0.7rem;
+            font-weight: 700;
+            color: var(--accent-purple);
+        }
+        .scheduled-time {
+            font-size: 0.68rem;
+            font-weight: 700;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .btn-delete-schedule {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            border: none;
+            background: var(--bg-base);
+            color: var(--accent-red);
+            box-shadow: var(--neu-shadow-sm);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            transition: all 0.2s ease;
+            flex-shrink: 0;
+        }
+        .btn-delete-schedule:active {
+            box-shadow: var(--neu-shadow-inset);
+            transform: scale(0.92);
         }
 
         /* --- GRID MENU UTAMA --- */
@@ -432,6 +564,29 @@
                     <input type="tel" id="phoneInput" placeholder="Ketik No. HP / Tujuan..." maxlength="20" autocomplete="off" />
                     <span class="operator-badge" id="operatorBadge"></span>
                 </div>
+
+                <!-- DIVIDER TRANSAKSI OTOMATIS -->
+                <div class="section-divider" id="scheduledDivider" style="display: none; margin: 12px 0 6px 0;">
+                    <div class="divider-line"></div>
+                    <div class="divider-badge"><i class="fa-solid fa-robot"></i> Transaksi Otomatis</div>
+                    <div class="divider-line"></div>
+                </div>
+
+                <!-- DROPDOWN TRANSAKSI OTOMATIS -->
+                <div class="scheduled-dropdown-wrapper" id="scheduledDropdownWrapper">
+                    <button class="scheduled-dropdown-btn" id="scheduledDropdownBtn" onclick="toggleScheduledDropdown()">
+                        <div class="scheduled-btn-title">
+                            <i class="fa-solid fa-clock-rotate-left"></i>
+                            <span>Daftar Transaksi Terjadwal</span>
+                            <span class="scheduled-badge-count" id="scheduledBadgeCount">0</span>
+                        </div>
+                        <i class="fa-solid fa-chevron-down scheduled-dropdown-icon" id="scheduledDropdownIcon"></i>
+                    </button>
+
+                    <div class="scheduled-dropdown-content" id="scheduledDropdownContent">
+                        <!-- Item transaksi disuntikkan secara dinamis di sini -->
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -502,6 +657,11 @@
                 <span class="label">No. Tujuan</span>
                 <span class="val-target" id="sheet_no_tujuan">-</span>
             </div>
+            <!-- INPUT PILIHAN WAKTU TERJADWAL -->
+            <div class="sheet-row" style="margin-top: 6px;">
+                <span class="label">Jadwalkan (Opsional)</span>
+                <input type="datetime-local" id="sheet_schedule_time" style="background: var(--bg-base); border: 1px solid var(--neu-dark); border-radius: 8px; padding: 4px 8px; font-size: 0.75rem; color: var(--text-main); outline: none;">
+            </div>
             <div class="sheet-divider"></div>
             <div class="sheet-row">
                 <span class="label" style="font-weight: 700; color: var(--text-main);">Total</span>
@@ -528,7 +688,6 @@
         sidebarClose.addEventListener('click', closeSidebar);
         sidebarOverlay.addEventListener('click', closeSidebar);
 
-        // FUNGSI NAVIGASI MENU UTAMA (TERPISAH)
         function navigasiKeMenu(targetUrl) {
             window.location.href = targetUrl;
         }
@@ -575,8 +734,89 @@
             }
         }
 
+        function toggleScheduledDropdown() {
+            const content = document.getElementById('scheduledDropdownContent');
+            const icon = document.getElementById('scheduledDropdownIcon');
+            content.classList.toggle('show');
+            icon.classList.toggle('open');
+        }
+
+        async function loadScheduledTransactions(targetNo = null) {
+            const userPhone = localStorage.getItem('userPhone') || localStorage.getItem('user_hp') || '';
+            const searchNo = targetNo && targetNo.length >= 10 ? targetNo : userPhone;
+
+            const dropdownWrapper = document.getElementById('scheduledDropdownWrapper');
+            const divider = document.getElementById('scheduledDivider');
+            const badgeCount = document.getElementById('scheduledBadgeCount');
+            const content = document.getElementById('scheduledDropdownContent');
+
+            if (!searchNo) {
+                dropdownWrapper.style.display = 'none';
+                divider.style.display = 'none';
+                return;
+            }
+
+            try {
+                const res = await fetch(`/api/user/scheduled-transactions?customer_no=${encodeURIComponent(searchNo)}&t=` + Date.now());
+                const result = await res.json();
+
+                if (result.status === 'success' && result.data && result.data.length > 0) {
+                    badgeCount.innerText = result.data.length;
+                    let html = '';
+                    result.data.forEach(item => {
+                        let priceFormatted = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(item.harga_jual || 0);
+                        html += `
+                            <div class="scheduled-card">
+                                <div class="scheduled-info">
+                                    <div class="scheduled-prod">${item.nama_produk}</div>
+                                    <div class="scheduled-target"><i class="fa-solid fa-mobile-screen-button"></i> ${item.customer_no}</div>
+                                    <div class="scheduled-time"><i class="fa-regular fa-clock"></i> ${item.schedule_time} • ${priceFormatted}</div>
+                                </div>
+                                <button class="btn-delete-schedule" onclick="hapusJadwalTransaksi(${item.id})" title="Batal Jadwal">
+                                    <i class="fa-solid fa-trash-can"></i>
+                                </button>
+                            </div>
+                        `;
+                    });
+                    content.innerHTML = html;
+                    dropdownWrapper.style.display = 'flex';
+                    divider.style.display = 'flex';
+                } else {
+                    dropdownWrapper.style.display = 'none';
+                    divider.style.display = 'none';
+                }
+            } catch (err) {
+                console.error("Gagal load transaksi terjadwal:", err);
+                dropdownWrapper.style.display = 'none';
+                divider.style.display = 'none';
+            }
+        }
+
+        async function hapusJadwalTransaksi(id) {
+            if (!confirm('Apakah Anda yakin ingin membatalkan jadwal transaksi ini?')) return;
+
+            try {
+                const res = await fetch(`/api/user/scheduled-transactions/${id}`, {
+                    method: 'DELETE'
+                });
+                const result = await res.json();
+
+                if (result.status === 'success') {
+                    alert('✅ Transaksi terjadwal berhasil dibatalkan.');
+                    let rawDigits = phoneInput.value.replace(/[^0-9]/g, '');
+                    loadScheduledTransactions(rawDigits);
+                } else {
+                    alert('❌ Gagal membatalkan: ' + (result.message || 'Terjadi kesalahan'));
+                }
+            } catch (err) {
+                console.error(err);
+                alert('❌ Gagal terhubung ke Server');
+            }
+        }
+
         window.addEventListener('DOMContentLoaded', () => {
             loadSaldoMemberAkun();
+            loadScheduledTransactions();
 
             const hour = new Date().getHours();
             let greet = "Selamat Malam";
@@ -595,7 +835,6 @@
             return match ? match.join(' ') : cleaned;
         }
 
-        // LOGIKA SINGLE INPUT BERDASARKAN KATEGORI SQLITE
         const phoneInput = document.getElementById('phoneInput');
         const badge = document.getElementById('operatorBadge');
         const popupTopContainer = document.getElementById('popupTopContainer');
@@ -610,62 +849,58 @@
         let groupedProducts = {};
 
         phoneInput.addEventListener('input', (e) => {
-        let inputEl = e.target;
-        let originalValue = inputEl.value;
-        let cursorPos = inputEl.selectionStart;
-      
-        // Hitung berapa banyak angka (digit) sebelum posisi kursor saat ini
-        let digitsBeforeCursor = originalValue.substring(0, cursorPos).replace(/[^0-9]/g,    '').length;
+            let inputEl = e.target;
+            let originalValue = inputEl.value;
+            let cursorPos = inputEl.selectionStart;
+        
+            let digitsBeforeCursor = originalValue.substring(0, cursorPos).replace(/[^0-9]/g, '').length;
+            let formattedVal = formatPhoneNumber(originalValue);
+            inputEl.value = formattedVal;
 
-        // Jalankan pemformatan
-        let formattedVal = formatPhoneNumber(originalValue);
-        inputEl.value = formattedVal;
+            let newCursorPos = 0;
+            let digitCount = 0;
 
-        // Hitung ulang posisi kursor yang baru agar tetap berada di posisi angka yang sedang diketik
-        let newCursorPos = 0;
-        let digitCount = 0;
-
-        for (let i = 0; i < formattedVal.length; i++) {
-        if (/[0-9]/.test(formattedVal[i])) {
-            digitCount++;
-        }
-        if (digitCount === digitsBeforeCursor) {
-            newCursorPos = i + 1;
-            break;
-        }
-    }
-
-        // Kembalikan kursor ke posisi yang tepat
-        if (digitsBeforeCursor === 0) newCursorPos = 0;
-        inputEl.setSelectionRange(newCursorPos, newCursorPos);
-
-        // --- Logika Deteksi Operator (Tetap Sama) ---
-        let rawDigits = formattedVal.replace(/[^0-9]/g, '');
-        let detectedOp = null;
-
-        if (rawDigits.length >= 4) {
-        let prefix = rawDigits.substring(0, 4);
-        for (let op in prefixes) {
-            if (prefixes[op].indexOf(prefix) !== -1) { 
-                detectedOp = op; 
-                break; 
+            for (let i = 0; i < formattedVal.length; i++) {
+                if (/[0-9]/.test(formattedVal[i])) {
+                    digitCount++;
+                }
+                if (digitCount === digitsBeforeCursor) {
+                    newCursorPos = i + 1;
+                    break;
+                }
             }
-        }
-    }
 
-        if (detectedOp) {
-        badge.innerText = detectedOp;
-        badge.style.display = 'inline-block';
-        if (currentOperator !== detectedOp) {
-            currentOperator = detectedOp;
-            loadCustomCategoryProducts(detectedOp);
-        }
-    } else {
-        badge.style.display = 'none';
-        insetTabsWrapper.style.display = 'none';
-        popupTopContainer.style.display = 'none';
-        currentOperator = null;
-        }
+            if (digitsBeforeCursor === 0) newCursorPos = 0;
+            inputEl.setSelectionRange(newCursorPos, newCursorPos);
+
+            let rawDigits = formattedVal.replace(/[^0-9]/g, '');
+            let detectedOp = null;
+
+            if (rawDigits.length >= 4) {
+                let prefix = rawDigits.substring(0, 4);
+                for (let op in prefixes) {
+                    if (prefixes[op].indexOf(prefix) !== -1) { 
+                        detectedOp = op; 
+                        break; 
+                    }
+                }
+            }
+
+            if (detectedOp) {
+                badge.innerText = detectedOp;
+                badge.style.display = 'inline-block';
+                if (currentOperator !== detectedOp) {
+                    currentOperator = detectedOp;
+                    loadCustomCategoryProducts(detectedOp);
+                }
+            } else {
+                badge.style.display = 'none';
+                insetTabsWrapper.style.display = 'none';
+                popupTopContainer.style.display = 'none';
+                currentOperator = null;
+            }
+
+            loadScheduledTransactions(rawDigits);
         });
 
         async function loadCustomCategoryProducts(brand) {
@@ -764,7 +999,6 @@
             productList.innerHTML = html;
         }
 
-        // PROSES CHECKOUT DENGAN SINKRONISASI ONESIGNAL
         window.prosesBeli = function(provider, skuCode, productName, price) {
             let nomorTujuan = phoneInput.value.replace(/[^0-9]/g, '');
 
@@ -792,6 +1026,7 @@
             document.getElementById('sheet_nama_produk').innerText = productName;
             document.getElementById('sheet_no_tujuan').innerText = nomorTujuan;
             document.getElementById('sheet_total_harga').innerText = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(price);
+            document.getElementById('sheet_schedule_time').value = "";
 
             const backdrop = document.getElementById('checkoutBackdrop');
             const sheet = document.getElementById('checkoutBottomSheet');
@@ -811,15 +1046,55 @@
             }, 300);
         }
 
-        // 🚀 EKSEKUSI CHECKOUT & REDIRECT KELUAR/MASUK KE DETAIL.HTML
         async function eksekusiCheckoutTerpilih() {
             const btn = document.getElementById('btnProsesBayar');
+            const scheduleTime = document.getElementById('sheet_schedule_time').value;
+
             btn.disabled = true;
             btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Memproses...';
 
             const userHp = localStorage.getItem('userPhone') || localStorage.getItem('user_hp') || dataCheckoutAktif.customer_no;
             const userName = localStorage.getItem('userName') || localStorage.getItem('username') || 'Member';
             const subId = localStorage.getItem('onesignal_subscription_id') || '';
+
+            if (scheduleTime) {
+                const formattedSchedule = scheduleTime.replace('T', ' ') + ':00';
+
+                const schedulePayload = {
+                    user_hp: userHp,
+                    username: userName,
+                    buyer_sku_code: dataCheckoutAktif.buyer_sku_code,
+                    customer_no: dataCheckoutAktif.customer_no,
+                    nama_produk: dataCheckoutAktif.product_name,
+                    harga_jual: dataCheckoutAktif.price,
+                    provider: dataCheckoutAktif.provider,
+                    schedule_time: formattedSchedule
+                };
+
+                try {
+                    const response = await fetch('/api/user/schedule-transaction', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(schedulePayload)
+                    });
+                    const res = await response.json();
+
+                    if (res.status === 'success') {
+                        tutupCheckoutSheet();
+                        alert('⏰ Transaksi berhasil dijadwalkan untuk: ' + formattedSchedule);
+                        loadScheduledTransactions();
+                    } else {
+                        alert('❌ Gagal menjadwalkan: ' + (res.message || 'Terjadi kesalahan'));
+                    }
+                } catch (err) {
+                    console.error(err);
+                    alert('❌ Gagal terhubung ke Server');
+                } finally {
+                    btn.disabled = false;
+                    btn.innerHTML = '<i class="fa-solid fa-shield-halved"></i> Bayar Sekarang';
+                }
+                return;
+            }
 
             const payload = {
                 buyer_sku_code: dataCheckoutAktif.buyer_sku_code,
@@ -845,12 +1120,10 @@
                 if (res.status === 'success' || res.status === 200) {
                     tutupCheckoutSheet();
                     
-                    // Ambil Ref ID hasil transaksi dari respon backend (atau fallback ke local ref_id)
                     var refIdResult = (res.data && (res.data.ref_id || res.data.id || res.data.trx_id)) 
                                       ? (res.data.ref_id || res.data.id || res.data.trx_id) 
                                       : (res.ref_id || dataCheckoutAktif.ref_id);
 
-                    // LANGSUNG REDIRECT KE DETAIL.HTML DENGAN PARAMETER REF_ID
                     window.location.href = 'detail.html?id=' + encodeURIComponent(refIdResult);
                 } else {
                     alert('❌ Gagal Transaksi: ' + (res.message || 'Terjadi kesalahan'));

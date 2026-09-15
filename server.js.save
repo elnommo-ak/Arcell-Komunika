@@ -22,7 +22,7 @@ const OKECONNECT_CONFIG = {
     memberId: process.env.OKECONNECT_MEMBER_ID || 'OK2385636',
     password: process.env.OKECONNECT_PASSWORD || '@noMmo123',
     pin: process.env.OKECONNECT_PIN || '1122',
-    pricelistUrl: 'https://www.okeconnect.com/harga/json?id=905ccd028329b0a&produk=pulsa,kuota_telkomsel,kuota_byu,kuota_indosat,kuota_tri,kuota_xl,kuota_axis,kuota_smartfren,token_pln,saldo_gojek,cetak_voucher,digital,pascabayar',
+    pricelistUrl: 'https://www.okeconnect.com/harga/json?id=905ccd028329b0a&produk=pulsa,sms_telepon,kuota_nasional,kuota_telkomsel,kuota_byu,kuota_indosat,kuota_tri,kuota_xl,kuota_axis,kuota_smartfren,token_pln,saldo_gojek,ecommerce,digital,pascabayar',
     trxUrl: 'https://h2h.okeconnect.com/trx'
 };
 
@@ -50,19 +50,6 @@ function cleanNumber(val) {
     if (!val) return 0;
     if (typeof val === 'number') return val;
     return parseInt(String(val).replace(/[^0-9]/g, '')) || 0;
-}
-
-// HELPER KONSISTENSI TIMEZONE WIB (UTC+7)
-function getWibDateTimeString(dateObj = new Date()) {
-    const wibDate = new Date(dateObj.getTime() + (7 * 60 * 60 * 1000));
-    const yyyy = wibDate.getUTCFullYear();
-    const mm = String(wibDate.getUTCMonth() + 1).padStart(2, '0');
-    const dd = String(wibDate.getUTCDate()).padStart(2, '0');
-    const hh = String(wibDate.getUTCHours()).padStart(2, '0');
-    const min = String(wibDate.getUTCMinutes()).padStart(2, '0');
-    const ss = String(wibDate.getUTCSeconds()).padStart(2, '0');
-
-    return `${yyyy}-${mm}-${dd} ${hh}:${min}:${ss}`;
 }
 
 // ==================== DATABASE INITIALIZATION ====================
@@ -178,23 +165,15 @@ function initTables() {
 // ==================== CRON JOB SCHEDULER ====================
 function initScheduler() {
     cron.schedule('* * * * *', () => {
-        // Gunakan Waktu WIB Presisi
-        const localNowStr = getWibDateTimeString();
+        const nowISO = new Date().toISOString().replace('T', ' ').substring(0, 16);
 
         db.all(
-            `SELECT * FROM scheduled_transactions WHERE status = 'PENDING' AND schedule_time <= ?`,
-            [localNowStr],
+            `SELECT * FROM scheduled_transactions WHERE status = 'PENDING' AND datetime(schedule_time) <= datetime(?)`,
+            [nowISO],
             async (err, rows) => {
-                if (err) {
-                    console.error("❌ Cron Query Error:", err.message);
-                    return;
-                }
-                if (!rows || rows.length === 0) return;
-
-                console.log(`⏰ [CRON] Diproses ${rows.length} transaksi terjadwal pada: ${localNowStr}`);
+                if (err || !rows || rows.length === 0) return;
 
                 for (const item of rows) {
-                    // Lock status agar tidak dieksekusi ganda
                     db.run(`UPDATE scheduled_transactions SET status = 'PROCESSING' WHERE id = ?`, [item.id]);
 
                     const payload = {
@@ -207,21 +186,18 @@ function initScheduler() {
                         subscription_id: ''
                     };
 
-                    // Gunakan IP 127.0.0.1 lokal server untuk menghindari error resolution DNS
-                    const localEndpoint = (item.provider || '').toLowerCase() === 'okeconnect'
-                        ? `http://127.0.0.1:${PORT}/api/okeconnect/checkout`
-                        : `http://127.0.0.1:${PORT}/api/digiflazz/checkout`;
+                    const endpoint = (item.provider || '').toLowerCase() === 'okeconnect'
+                        ? `${BASE_URL}/api/okeconnect/checkout`
+                        : `${BASE_URL}/api/digiflazz/checkout`;
 
                     try {
-                        const response = await axios.post(localEndpoint, payload, { timeout: 30000 });
+                        const response = await axios.post(endpoint, payload, { timeout: 30000 });
                         const resData = response.data;
 
                         if (resData.status === 'success' || resData.status === 200) {
                             db.run(`UPDATE scheduled_transactions SET status = 'SUCCESS' WHERE id = ?`, [item.id]);
-                            console.log(`✅ [CRON SUCCESS] ID ${item.id} (${item.nama_produk})`);
                         } else {
                             db.run(`UPDATE scheduled_transactions SET status = 'FAILED' WHERE id = ?`, [item.id]);
-                            console.log(`❌ [CRON FAILED] ID ${item.id}:`, resData.message);
                         }
                     } catch (e) {
                         console.error(`❌ Gagal Eksekusi Transaksi Terjadwal ID ${item.id}:`, e.message);
@@ -292,9 +268,6 @@ async function kirimPushNotif(pesanTitle, pesanBody, targetId = null, isExternal
         const ONESIGNAL_REST_KEY = process.env.ONESIGNAL_REST_KEY || "os_v2_app_qnyoebzxafeknawqixlw7bqgse42u2bozijersn3ayftdeieijqe4gbb7wvjqqgyp3d5g4ncbdfxuiniszddmjdy43xh63xrmsmigui";
         const targetUrl = (typeof BASE_URL !== 'undefined' && BASE_URL) ? BASE_URL : "https://arcellkomunika.site/";
 
-        // ⚡ ID Unik per notifikasi agar tidak saling menimpa
-        const uniqueNotificationId = "notif_" + Date.now() + "_" + Math.floor(Math.random() * 1000);
-
         const payload = {
             app_id: ONESIGNAL_APP_ID,
             headings: { "en": pesanTitle, "id": pesanTitle },
@@ -302,14 +275,10 @@ async function kirimPushNotif(pesanTitle, pesanBody, targetId = null, isExternal
             url: targetUrl,
             icon: LOGO_URL,
             large_icon: LOGO_URL,
-            chrome_web_icon: LOGO_URL,
-
-            // ⚡ MENCEGAH MENIMPA NOTIFIKASI LAMA:
-            collapse_id: uniqueNotificationId,    // Mengatur ID unik untuk Web Push
-            web_push_topic: uniqueNotificationId  // Mencegah browser mengganti banner notifikasi sebelumnya
+            chrome_web_icon: LOGO_URL
         };
 
-        const cleanTargetId = (targetId && String(targetId).trim() !== "" && String(targetId) !== "undefined" && String(targetId) !== "null") ? String(targetId).trim() : null;
+        const cleanTargetId = (targetId && String(targetId).trim() !== "" && String(targetId) !== "undefined") ? String(targetId).trim() : null;
 
         if (cleanTargetId) {
             if (isExternalId) {
@@ -319,7 +288,6 @@ async function kirimPushNotif(pesanTitle, pesanBody, targetId = null, isExternal
                 payload.include_subscription_ids = [cleanTargetId];
             }
         } else {
-            // Jika targetId kosong/invalid, fallback broadcast agar tidak No Recipients
             payload.included_segments = ["Subscribed Users"];
         }
 
@@ -350,19 +318,13 @@ app.post('/api/user/schedule-transaction', (req, res) => {
 
     const cleanUserHp = normalizePhone(user_hp || customer_no);
 
-    // Format schedule_time dipastikan ke bentuk YYYY-MM-DD HH:mm:ss
-    let cleanScheduleTime = String(schedule_time).replace('T', ' ');
-    if (cleanScheduleTime.length === 16) {
-        cleanScheduleTime += ':00';
-    }
-
     const query = `
         INSERT INTO scheduled_transactions 
         (user_hp, username, buyer_sku_code, customer_no, nama_produk, harga_jual, provider, schedule_time) 
         VALUES (?, ?, ?, ?, ?, ?, ?, ?)
     `;
 
-    db.run(query, [cleanUserHp, username || 'Member', buyer_sku_code, customer_no, nama_produk, parseFloat(harga_jual) || 0, provider || 'digiflazz', cleanScheduleTime], function(err) {
+    db.run(query, [cleanUserHp, username || 'Member', buyer_sku_code, customer_no, nama_produk, parseFloat(harga_jual) || 0, provider || 'digiflazz', schedule_time], function(err) {
         if (err) {
             return res.status(500).json({ status: 'failed', message: err.message });
         }
@@ -388,7 +350,7 @@ app.post('/api/okeconnect/checkout', async (req, res) => {
             return res.status(400).json({ status: 'failed', message: 'Nomor HP tidak valid (10-13 digit).' });
         }
 
-        // AMBIL HARGA DARI DATABASE.DB
+        // AMBIL HARGA DARI DATABASE.DB (UTAMAKAN DARI DATABASE BUKAN CLIENT/API OKECONNECT)
         const sqlDbProduct = `
             SELECT 
                 p.price AS modal_db, 
@@ -488,7 +450,7 @@ app.post('/api/okeconnect/checkout', async (req, res) => {
     }
 });
 
-// CALLBACK / WEBHOOK OKECONNECT
+// CALLBACK / WEBHOOK OKECONNECT (HANYA UPDATE STATUS & SN, HARGA DB TIDAK DITIMPA)
 app.all(['/callback/okeconnect/event', '/api/okeconnect/callback', '/api/webhook/okeconnect'], express.urlencoded({ extended: true }), express.json(), async (req, res) => {
     try {
         let data = req.body;
@@ -551,6 +513,7 @@ app.all(['/callback/okeconnect/event', '/api/okeconnect/callback', '/api/webhook
         const statusLamaUpper = String(trx.status).toUpperCase();
         const statusBaruUpper = finalStatus.toUpperCase();
 
+        // KUNCI HARGA DB: HANYA UPDATE STATUS, SN DAN MESSAGE
         await new Promise((resolve, reject) => {
             db.run(
                 `UPDATE transactions SET status = ?, sn = ?, message = ? WHERE ref_id = ?`,
@@ -593,7 +556,7 @@ app.all(['/callback/okeconnect/event', '/api/okeconnect/callback', '/api/webhook
     }
 });
 
-// SINKRONISASI PRODUK OKECONNECT
+// SINKRONISASI PRODUK OKECONNECT (MODAL DIPERBARUI, DENGAN OPTIONAL LOCK JIKA PERLU)
 app.post('/api/admin/sync-okeconnect', async (req, res) => {
     try {
         console.log('🔄 Downloading Okeconnect Pricelist...');
@@ -969,6 +932,7 @@ app.get('/api/transaction/detail', (req, res) => {
         if (err) return res.status(500).json({ status: 'error', message: 'Gagal query database' });
         if (!row) return res.status(404).json({ status: 'error', message: 'Data transaksi tidak ditemukan' });
 
+        // SAMAKAN STRUKTUR HARGA DENGAN HISTORY (UTAMAKAN HARGA JUAL)
         const finalHargaJual = parseFloat(row.harga_jual || row.price || row.harga || 0);
         const dataFormatted = {
             ...row,
@@ -995,14 +959,15 @@ app.get('/api/history', (req, res) => {
     db.all(sql, [phone, altPhone, phone, altPhone], (err, rows) => {
         if (err) return res.status(500).json({ status: 'error', message: err.message });
         
+        // PASTIKAN PROPERTI HARGA UNTUK CUSTOMER ADALAH HARGA_JUAL
         const normalizedRows = (rows || []).map(row => {
             const finalHargaJual = parseFloat(row.harga_jual || row.price || row.harga || 0);
             return {
                 ...row,
-                harga: finalHargaJual,
-                harga_jual: finalHargaJual,
-                price: finalHargaJual,
-                modal: parseFloat(row.harga || 0)
+                harga: finalHargaJual,       // Mengunci 'harga' menjadi harga jual toko kamu
+                harga_jual: finalHargaJual,  // Properti eksplisit harga jual
+                price: finalHargaJual,       // Properti fallback price
+                modal: parseFloat(row.harga || 0) // Modal asli dipisah (hanya jika butuh)
             };
         });
 
@@ -1344,32 +1309,6 @@ app.post('/api/admin/update-custom-product', (req, res) => {
             return res.status(500).json({ status: 'error', message: 'Gagal update produk custom: ' + err.message });
         }
         return res.json({ status: 'success', message: 'Harga Jual berhasil diperbarui dan dikunci!' });
-    });
-});
-
-// GET: Ambil daftar transaksi terjadwal berdasarkan nomor tujuan
-app.get('/api/user/scheduled-transactions', (req, res) => {
-    const customerNo = req.query.customer_no;
-    if (!customerNo) return res.json({ status: 'success', data: [] });
-
-    const cleanNo = normalizePhone(customerNo);
-
-    db.all(
-        `SELECT * FROM scheduled_transactions WHERE (customer_no = ? OR user_hp = ?) AND status = 'PENDING' ORDER BY schedule_time ASC`,
-        [cleanNo, cleanNo],
-        (err, rows) => {
-            if (err) return res.status(500).json({ status: 'error', message: err.message });
-            res.json({ status: 'success', data: rows || [] });
-        }
-    );
-});
-
-// DELETE: Hapus / Batal transaksi terjadwal
-app.delete('/api/user/scheduled-transactions/:id', (req, res) => {
-    const id = req.params.id;
-    db.run(`DELETE FROM scheduled_transactions WHERE id = ? AND status = 'PENDING'`, [id], function(err) {
-        if (err) return res.status(500).json({ status: 'error', message: err.message });
-        res.json({ status: 'success', message: 'Transaksi terjadwal berhasil dibatalkan' });
     });
 });
 
