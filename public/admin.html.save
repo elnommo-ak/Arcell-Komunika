@@ -167,76 +167,45 @@
             border: 1px solid var(--glass-border);
         }
 
-        /* --- DESAIN STRUCTURAL MEMBER RAMPING --- */
-        .member-list-container { display: flex; flex-direction: column; gap: 8px; }
-        .member-card { 
-            background: rgba(255, 255, 255, 0.75); 
-            border-radius: 14px; 
-            border: 1px solid var(--glass-border); 
-            padding: 10px 12px;
-            box-shadow: var(--glass-shadow);
-            transition: all 0.2s ease; 
-        }
+        .member-list-container { display: flex; flex-direction: column; gap: 10px; }
+        .member-card { background: rgba(255, 255, 255, 0.65); border-radius: 14px; border: 1px solid var(--glass-border); overflow: hidden; transition: all 0.2s ease; }
+        .member-card-header { padding: 12px 14px; display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+        .member-info-main { display: flex; flex-direction: column; gap: 2px; flex: 1; }
+        .member-name { font-size: 0.88rem; font-weight: 800; color: var(--text-main); display: flex; align-items: center; gap: 6px; }
+        .member-sub { font-size: 0.72rem; color: var(--text-sub); font-weight: 600; display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+        
+        .member-right-info { text-align: right; display: flex; flex-direction: column; align-items: flex-end; gap: 2px; }
+        .member-saldo { font-size: 0.92rem; font-weight: 900; color: #10b981; }
 
-        /* BARIS 1: NAMA - NO HP - ID */
-        .member-header-row {
-            display: flex; justify-content: space-between; align-items: center;
-            border-bottom: 1px dashed rgba(0,0,0,0.08); padding-bottom: 6px; margin-bottom: 8px;
-        }
-        .member-title-info {
-            font-size: 0.82rem; font-weight: 800; color: var(--text-main);
-            display: flex; align-items: center; gap: 6px; flex-wrap: wrap;
-        }
-        .member-title-info span.hp { color: var(--primary); font-weight: 700; }
-        .member-title-info span.id { color: var(--text-sub); font-size: 0.72rem; font-weight: 600; }
+        .daily-summary-badge { background: rgba(99, 102, 241, 0.1); color: var(--primary); padding: 2px 6px; border-radius: 6px; font-size: 0.68rem; font-weight: 800; display: inline-flex; align-items: center; gap: 4px; }
 
-        /* BARIS 2: GRID STATS RAMPING (TOPUP - HARI INI - PROFIT HARI INI) */
-        .member-stats-grid {
-            display: flex; gap: 6px; align-items: center; justify-content: space-between; margin-bottom: 8px;
-        }
-        .stat-box {
-            flex: 1; background: rgba(255, 255, 255, 0.6); border: 1px solid var(--glass-border);
-            padding: 5px 8px; border-radius: 8px; text-align: center; display: flex; flex-direction: column; justify-content: center;
-        }
-        .stat-label { font-size: 0.58rem; color: var(--text-sub); font-weight: 800; text-transform: uppercase; }
-        .stat-val { font-size: 0.78rem; font-weight: 900; }
-        .stat-val.saldo { color: #10b981; }
-        .stat-val.omset { color: var(--text-main); }
-        .stat-val.profit { color: var(--primary); }
-
-        /* BARIS 3: REKAP DROPDOWN BUTTON */
-        .btn-toggle-trx { 
-            background: rgba(255, 255, 255, 0.9); color: var(--text-main); 
-            border-radius: 8px; padding: 5px 10px; font-size: 0.72rem; font-weight: 800; 
-            cursor: pointer; display: flex; align-items: center; justify-content: space-between; 
-            width: 100%; border: 1px solid var(--glass-border); 
-        }
-        .btn-toggle-trx .chevron-trx { transition: transform 0.2s ease; font-size: 0.68rem; color: var(--text-sub); }
+        .btn-toggle-trx { background: rgba(255, 255, 255, 0.75); color: var(--primary); border-radius: 10px; padding: 6px 10px; font-size: 0.75rem; font-weight: 800; cursor: pointer; display: flex; align-items: center; justify-content: space-between; width: 100%; margin-top: 6px; border: 1px solid var(--glass-border); }
+        .btn-toggle-trx .chevron-trx { transition: transform 0.2s ease; font-size: 0.7rem; }
         .member-card.open .btn-toggle-trx .chevron-trx { transform: rotate(180deg); }
 
-        .member-trx-dropdown { display: none; padding-top: 8px; flex-direction: column; gap: 6px; }
+        .member-trx-dropdown { display: none; padding: 0 12px 12px 12px; background: rgba(255, 255, 255, 0.35); border-top: 1px dashed rgba(0, 0, 0, 0.08); margin-top: 6px; flex-direction: column; gap: 6px; }
         .member-card.open .member-trx-dropdown { display: flex; }
 
-        .date-folder-card { background: rgba(255, 255, 255, 0.85); border-radius: 8px; border: 1px solid var(--glass-border); margin-top: 2px; overflow: hidden; }
-        .date-folder-header { padding: 6px 8px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; font-size: 0.72rem; font-weight: 800; color: var(--text-main); }
-        .date-folder-body { display: none; padding: 0 6px 6px 6px; flex-direction: column; gap: 4px; }
+        .date-folder-card { background: rgba(255, 255, 255, 0.8); border-radius: 10px; border: 1px solid var(--glass-border); margin-top: 4px; overflow: hidden; }
+        .date-folder-header { padding: 8px 10px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; font-size: 0.75rem; font-weight: 800; color: var(--text-main); }
+        .date-folder-body { display: none; padding: 0 8px 8px 8px; flex-direction: column; gap: 6px; }
         .date-folder-card.open .date-folder-body { display: flex; }
         .date-folder-card.open .date-chevron { transform: rotate(180deg); }
-        .date-chevron { transition: transform 0.2s ease; font-size: 0.68rem; color: var(--text-sub); }
+        .date-chevron { transition: transform 0.2s ease; font-size: 0.7rem; color: var(--text-sub); }
 
-        .sub-trx-card { background: rgba(255, 255, 255, 0.95); padding: 6px 8px; border-radius: 6px; border: 1px solid var(--glass-border); display: flex; flex-direction: column; gap: 3px; }
-        .sub-trx-header { display: flex; justify-content: space-between; font-size: 0.65rem; font-weight: 700; color: var(--text-sub); }
-        .sub-trx-body { display: flex; justify-content: space-between; align-items: flex-end; gap: 6px; }
-        .sub-trx-prod { font-size: 0.75rem; font-weight: 800; color: var(--text-main); }
-        .sub-trx-target { font-size: 0.68rem; color: var(--primary); font-weight: 700; }
-        .sub-trx-price { font-size: 0.75rem; font-weight: 900; color: #10b981; }
+        .sub-trx-card { background: rgba(255, 255, 255, 0.95); padding: 8px 10px; border-radius: 8px; border: 1px solid var(--glass-border); display: flex; flex-direction: column; gap: 4px; }
+        .sub-trx-header { display: flex; justify-content: space-between; font-size: 0.68rem; font-weight: 700; color: var(--text-sub); }
+        .sub-trx-body { display: flex; justify-content: space-between; align-items: flex-end; gap: 8px; }
+        .sub-trx-prod { font-size: 0.78rem; font-weight: 800; color: var(--text-main); }
+        .sub-trx-target { font-size: 0.72rem; color: var(--primary); font-weight: 700; }
+        .sub-trx-price { font-size: 0.8rem; font-weight: 900; color: #10b981; }
         
-        .sub-trx-status { font-size: 0.62rem; font-weight: 800; padding: 1px 5px; border-radius: 5px; text-transform: uppercase; }
+        .sub-trx-status { font-size: 0.65rem; font-weight: 800; padding: 1px 6px; border-radius: 6px; text-transform: uppercase; }
         .sub-trx-status.sukses { background: rgba(16, 185, 129, 0.15); color: #10b981; }
         .sub-trx-status.proses { background: rgba(245, 158, 11, 0.15); color: #f59e0b; }
         .sub-trx-status.gagal { background: rgba(239, 68, 68, 0.15); color: #ef4444; }
 
-        /* ACCORDIONS KATEGORI & PROVIDER */
+        /* FOLDER ACCORDION PRODUK & PROVIDER */
         .folder-card { background: rgba(255, 255, 255, 0.65); border-radius: 14px; border: 1px solid var(--glass-border); margin-bottom: 10px; overflow: hidden; box-shadow: var(--glass-shadow); }
         .folder-header { padding: 10px 14px; display: flex; align-items: center; justify-content: space-between; user-select: none; }
         .folder-left { display: flex; align-items: center; gap: 8px; font-weight: 800; font-size: 0.82rem; color: var(--pink-accent); cursor: pointer; flex: 1; }
@@ -248,6 +217,7 @@
         .folder-card.open .chevron { transform: rotate(180deg); }
         .chevron { transition: transform 0.2s; color: var(--text-sub); font-size: 0.75rem; cursor: pointer; }
 
+        /* BRAND PROVIDER ACCORDION */
         .brand-block { background: rgba(255, 255, 255, 0.75); border-radius: 12px; border: 1px solid var(--glass-border); margin-bottom: 8px; overflow: hidden; }
         .brand-header { padding: 10px 12px; background: rgba(255, 255, 255, 0.85); display: flex; align-items: center; justify-content: space-between; cursor: pointer; font-weight: 800; font-size: 0.85rem; color: var(--primary); }
         .brand-body { display: none; padding: 8px; flex-direction: column; gap: 6px; }
@@ -269,7 +239,15 @@
         .prod-price { font-size: 0.8rem; font-weight: 900; color: #10b981; }
         .prod-modal { font-size: 0.68rem; color: var(--text-sub); font-weight: 700; }
 
-        .dot-indicator { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-left: 4px; vertical-align: middle; flex-shrink: 0; }
+        .dot-indicator {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            margin-left: 4px;
+            vertical-align: middle;
+            flex-shrink: 0;
+        }
         .dot-digiflazz { background-color: #6366f1; box-shadow: 0 0 6px rgba(99, 102, 241, 0.5); }
         .dot-okeconnect { background-color: #10b981; box-shadow: 0 0 6px rgba(16, 185, 129, 0.5); }
 
@@ -369,11 +347,7 @@
 
             <div class="glass-card">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; flex-wrap: wrap; gap: 6px;">
-                    <h3 style="margin:0; font-size:0.88rem;">
-                        <i class="fa-solid fa-user-gear"></i> Member 
-                        (Saldo: <span id="dispSaldoMember" style="color: #10b981;">Rp 0</span> | 
-                        Profit: <span id="dispTotalProfitMember" style="color: #6366f1;">Rp 0</span>)
-                    </h3>
+                    <h3 style="margin:0; font-size:0.88rem;"><i class="fa-solid fa-user-gear"></i> Member (Total Saldo: <span id="dispSaldoMember" style="color: #10b981;">Rp 0</span>)</h3>
                     <button class="btn-success btn-sm" onclick="bukaModalMember()"><i class="fa-solid fa-user-plus"></i> + Member</button>
                 </div>
                 <input type="text" id="searchMember" placeholder="🔍 Cari Nama / No HP Member..." oninput="filterMember()" style="width: 100%; margin-bottom: 10px;">
@@ -383,7 +357,7 @@
             </div>
         </div>
 
-        <!-- TAB KATEGORI CUSTOM -->
+        <!-- TAB KATEGORI CUSTOM (PEMETAAN SQLITE & BUAT KATEGORI) -->
         <div id="tab-custom-cat" class="tab-content">
             <div class="glass-card">
                 <h3><i class="fa-solid fa-folder-plus"></i> Buat Kategori Custom Manual (SQLite)</h3>
@@ -487,7 +461,7 @@
         </div>
     </div>
 
-    <!-- MODAL EDIT PRODUK CUSTOM -->
+    <!-- MODAL EDIT PRODUK CUSTOM (SQLITE) -->
     <div id="modalEditCustomProduct" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.3); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); z-index: 9999; justify-content: center; align-items: center;">
         <div class="glass-card" style="width: 90%; max-width: 420px; padding: 20px; background: rgba(255, 255, 255, 0.95);">
             <h3><i class="fa-solid fa-pen-to-square"></i> Edit Produk Custom</h3>
@@ -631,7 +605,6 @@
             }
         }
 
-        /* RENDER ALL TRANSACTIONS (MENAMPILKAN MODAL, JUAL & UNTUNG) */
         function renderAllTransactions(list) {
             const container = document.getElementById('allTrxContainer');
             if (!list || list.length === 0) {
@@ -653,11 +626,7 @@
                 const userName = t.username || t.nama_member || '-';
                 const produk = t.produk || t.product_name || 'Produk PPOB';
                 const targetNo = t.no_tujuan || t.customer_no || '-';
-
-                const hModal = parseFloat(t.harga) || 0;
-                const hJual = parseFloat(t.harga_jual || t.price) || hModal;
-                const laba = hJual - hModal;
-
+                const harga = parseFloat(t.harga || t.price || 0);
                 const statusStr = String(t.status || 'PROSES').toUpperCase();
 
                 let statusClass = 'proses';
@@ -676,11 +645,10 @@
                                 <div class="sub-trx-target"><i class="fa-solid fa-mobile-screen-button"></i> ${targetNo}</div>
                             </div>
                             <div style="text-align:right;">
-                                <div class="sub-trx-price">Jual: Rp ${hJual.toLocaleString('id-ID')}</div>
-                                <div style="font-size: 0.68rem; color: var(--text-sub); font-weight:700;">Modal: Rp ${hModal.toLocaleString('id-ID')} | <b style="color:${laba >= 0 ? '#6366f1' : '#ef4444'};">Untung: Rp ${laba.toLocaleString('id-ID')}</b></div>
+                                <div class="sub-trx-price">Rp ${harga.toLocaleString('id-ID')}</div>
                                 <div style="display:flex; gap:4px; justify-content:flex-end; margin-top:2px;">
                                     <span class="sub-trx-status ${statusClass}">${statusStr}</span>
-                                    <button class="btn-sm btn-warning" style="padding:1px 5px; font-size:0.62rem;" onclick="editHargaTransaksi('${refId}', ${hModal}, ${hJual})"><i class="fa-solid fa-pen"></i> Edit</button>
+                                    <button class="btn-sm btn-warning" style="padding:1px 5px; font-size:0.62rem;" onclick="editHargaTransaksi('${refId}', ${harga})"><i class="fa-solid fa-pen"></i> Edit</button>
                                 </div>
                             </div>
                         </div>
@@ -704,15 +672,12 @@
             renderAllTransactions(filtered);
         }
 
-        /* RENDER MEMBER (DESAIN STRUCTURAL RAMPING TERBARU) */
         function renderTabelMember(list) {
             const el = document.getElementById('tabelMember');
             if (!list || list.length === 0) { el.innerHTML = `<div style="text-align:center; color: var(--text-sub); padding:10px; font-size:0.8rem;">Belum ada member.</div>`; return; }
 
             const now = new Date();
             const todayStr = `${String(now.getDate()).padStart(2, '0')}/${String(now.getMonth() + 1).padStart(2, '0')}/${now.getFullYear()}`;
-            
-            let totalProfitSemuaMember = 0;
             let html = '';
 
             list.forEach(m => {
@@ -727,74 +692,44 @@
                 });
 
                 const groupedByDate = {};
-                let totalHarian = 0; 
-                let profitHariIni = 0;
-                let totalSemuaSukses = 0;
-                let profitMemberIni = 0;
+                let totalHarian = 0; let totalSemuaSukses = 0;
 
                 memberTrxSukses.forEach(t => {
                     const parsed = parseWaktu(t.waktu || t.date || t.created_at || t.timestamp || '');
                     const dateKey = parsed.tanggal;
-                    
-                    const hModal = parseFloat(t.harga) || 0;
-                    const hJual = parseFloat(t.harga_jual || t.price) || hModal;
-                    const labaTrx = hJual - hModal;
+                    const harga = parseFloat(t.harga || t.price || 0) || 0;
 
                     if (!groupedByDate[dateKey]) groupedByDate[dateKey] = { dateStr: dateKey, trxs: [], timestamp: parsed.dateObj.getTime() };
                     groupedByDate[dateKey].trxs.push({ ...t, parsedTime: parsed });
-                    
-                    totalSemuaSukses += hJual;
-                    profitMemberIni += labaTrx;
-                    if (dateKey === todayStr) {
-                        totalHarian += hJual;
-                        profitHariIni += labaTrx;
-                    }
+                    totalSemuaSukses += harga;
+                    if (dateKey === todayStr) totalHarian += harga;
                 });
-
-                totalProfitSemuaMember += profitMemberIni;
 
                 const sortedDateGroups = Object.values(groupedByDate).sort((a, b) => b.timestamp - a.timestamp);
                 const isMemberOpen = openMemberCards.has(String(noHp));
 
                 html += `
                     <div class="member-card ${isMemberOpen ? 'open' : ''}" id="member-card-${noHp}">
-                        
-                        <!-- BARIS 1: NAMA MEMBER - NO HP - ID -->
-                        <div class="member-header-row">
-                            <div class="member-title-info">
-                                <span><i class="fa-solid fa-user-circle" style="color:var(--primary);"></i> <b>${m.name || m.nama || '-'}</b></span>
-                                <span>—</span>
-                                <span class="hp">${noHp}</span>
-                                <span>—</span>
-                                <span class="id">ID: ${idMem}</span>
+                        <div class="member-card-header">
+                            <div class="member-info-main">
+                                <div class="member-name"><i class="fa-solid fa-user-circle" style="color:var(--primary);"></i> ${m.name || m.nama || '-'}</div>
+                                <div class="member-sub">
+                                    <span>ID: <b>${idMem}</b> | <b>${noHp}</b></span>
+                                    <button class="btn-sm btn-warning" style="padding:2px 6px; font-size:0.65rem;" onclick="pilihUbahSaldo('${noHp}')"><i class="fa-solid fa-wallet"></i> Topup</button>
+                                    <button class="btn-sm btn-danger" style="padding:2px 6px; font-size:0.65rem;" onclick="hapusMember('${noHp}')"><i class="fa-solid fa-trash"></i></button>
+                                </div>
                             </div>
-                            <button class="btn-sm btn-danger" style="padding:2px 6px; font-size:0.62rem;" onclick="hapusMember('${noHp}')" title="Hapus Member"><i class="fa-solid fa-trash"></i></button>
-                        </div>
-
-                        <!-- BARIS 2: RAMPING STATS GRID (TOP UP - HARI INI - PROFIT HARI INI) -->
-                        <div class="member-stats-grid">
-                            <div class="stat-box" style="flex:0.8; cursor:pointer;" onclick="pilihUbahSaldo('${noHp}')" title="Klik untuk Topup">
-                                <span class="stat-label"><i class="fa-solid fa-wallet" style="color:#10b981;"></i> Saldo</span>
-                                <span class="stat-val saldo">Rp ${saldo.toLocaleString('id-ID')}</span>
-                            </div>
-                            <div class="stat-box">
-                                <span class="stat-label">Hari Ini</span>
-                                <span class="stat-val omset">Rp ${totalHarian.toLocaleString('id-ID')}</span>
-                            </div>
-                            <div class="stat-box">
-                                <span class="stat-label">Profit Hari Ini</span>
-                                <span class="stat-val profit">Rp ${profitHariIni.toLocaleString('id-ID')}</span>
+                            <div class="member-right-info">
+                                <div class="member-saldo">Rp ${saldo.toLocaleString('id-ID')}</div>
+                                <div class="daily-summary-badge"><i class="fa-solid fa-calendar-day"></i> Hari Ini: Rp ${totalHarian.toLocaleString('id-ID')}</div>
                             </div>
                         </div>
-
-                        <!-- BARIS 3: DROPDOWN REKAP TRANSAKSI -->
-                        <div>
+                        <div style="padding: 0 12px 10px 12px;">
                             <button class="btn-toggle-trx" onclick="toggleMemberTrx('${noHp}')">
-                                <span><i class="fa-solid fa-chart-pie"></i> Rekap Sukses: <b>${memberTrxSukses.length} Trx</b> (Total Profit: Rp ${profitMemberIni.toLocaleString('id-ID')})</span>
+                                <span><i class="fa-solid fa-chart-pie"></i> Rekap Sukses: <b>${memberTrxSukses.length} Trx</b> (Rp ${totalSemuaSukses.toLocaleString('id-ID')})</span>
                                 <i class="fa-solid fa-chevron-down chevron-trx"></i>
                             </button>
                         </div>
-
                         <div class="member-trx-dropdown">
                 `;
 
@@ -803,7 +738,7 @@
                 } else {
                     sortedDateGroups.forEach(group => {
                         const trxsInDate = group.trxs;
-                        const totalDateNominal = trxsInDate.reduce((a, b) => a + parseFloat(b.harga_jual || b.price || b.harga || 0), 0);
+                        const totalDateNominal = trxsInDate.reduce((a, b) => a + parseFloat(b.harga || b.price || 0), 0);
                         const dateFolderKey = `${noHp}_${group.dateStr}`;
                         const isDateOpen = openDateFolders.has(dateFolderKey);
 
@@ -816,21 +751,15 @@
                                 <div class="date-folder-body">
                         `;
                         trxsInDate.forEach(t => {
-                            const hM = parseFloat(t.harga) || 0;
-                            const hJ = parseFloat(t.harga_jual || t.price) || hM;
-                            const untung = hJ - hM;
-
                             html += `
                                 <div class="sub-trx-card">
                                     <div class="sub-trx-header"><span>#${t.ref_id || t.id || '-'}</span><span><i class="fa-regular fa-clock"></i> ${t.parsedTime.full}</span></div>
                                     <div class="sub-trx-body">
                                         <div><div class="sub-trx-prod">${t.produk || t.product_name || 'Produk PPOB'}</div><div class="sub-trx-target"><i class="fa-solid fa-mobile-screen-button"></i> ${t.no_tujuan || t.customer_no || '-'}</div></div>
-                                        <div style="text-align:right;">
-                                            <div class="sub-trx-price">Jual: Rp ${hJ.toLocaleString('id-ID')}</div>
-                                            <div style="font-size:0.65rem; color:var(--text-sub);">Modal: Rp ${hM.toLocaleString('id-ID')} | <b style="color:${untung >= 0 ? '#6366f1' : '#ef4444'};">Untung: Rp ${untung.toLocaleString('id-ID')}</b></div>
+                                        <div style="text-align:right;"><div class="sub-trx-price">Rp ${parseFloat(t.harga || t.price || 0).toLocaleString('id-ID')}</div>
                                             <div style="display:flex; gap:4px; justify-content:flex-end; margin-top:2px;">
                                                 <span class="sub-trx-status sukses">SUKSES</span>
-                                                <button class="btn-sm btn-warning" style="padding:1px 5px; font-size:0.62rem;" onclick="editHargaTransaksi('${t.ref_id || t.id || '-'}', ${hM}, ${hJ})"><i class="fa-solid fa-pen"></i> Edit</button>
+                                                <button class="btn-sm btn-warning" style="padding:1px 5px; font-size:0.62rem;" onclick="editHargaTransaksi('${t.ref_id || t.id || '-'}', ${parseFloat(t.harga || t.price || 0)})"><i class="fa-solid fa-pen"></i> Edit</button>
                                             </div>
                                         </div>
                                     </div>
@@ -841,12 +770,6 @@
                 }
                 html += `</div></div>`;
             });
-            
-            const elTotalProfit = document.getElementById('dispTotalProfitMember');
-            if (elTotalProfit) {
-                elTotalProfit.innerText = 'Rp ' + totalProfitSemuaMember.toLocaleString('id-ID');
-            }
-
             el.innerHTML = html;
         }
 
@@ -874,33 +797,21 @@
             } 
         }
 
-        /* FUNGSI EDIT HARGA TRANSAKSI DUA VARIABLE (MODAL & JUAL) */
-        async function editHargaTransaksi(refId, hargaModalLama, hargaJualLama) {
-            const modalInput = prompt(`[1/2] Ubah HARGA MODAL transaksi #${refId}:`, hargaModalLama);
-            if (modalInput === null || modalInput === "") return;
-            const newModal = parseInt(modalInput);
-            if (isNaN(newModal) || newModal < 0) return showToast("Harga modal tidak valid!", "danger");
-
-            const jualInput = prompt(`[2/2] Ubah HARGA JUAL transaksi #${refId}:`, hargaJualLama);
-            if (jualInput === null || jualInput === "") return;
-            const newJual = parseInt(jualInput);
-            if (isNaN(newJual) || newJual < 0) return showToast("Harga jual tidak valid!", "danger");
+        async function editHargaTransaksi(refId, hargaLama) {
+            const hargaBaru = prompt(`Ubah harga transaksi #${refId}:`, hargaLama);
+            if (hargaBaru === null || hargaBaru === "") return;
+            const nominalBaru = parseInt(hargaBaru);
+            if (isNaN(nominalBaru) || nominalBaru < 0) return showToast("Nominal harga tidak valid!", "danger");
 
             try {
-                const res = await fetch('/api/admin/update-transaction-price', { 
-                    method: 'POST', 
-                    headers: { 'Content-Type': 'application/json' }, 
-                    body: JSON.stringify({ ref_id: refId, harga_modal: newModal, harga_jual: newJual }) 
-                });
+                const res = await fetch('/api/admin/update-transaction-price', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ref_id: refId, new_price: nominalBaru }) });
                 const result = await res.json();
-                if (result.status === 'success') { 
-                    showToast('✅ Harga modal & jual diperbarui!'); 
-                    await loadTransactions(); 
-                } else { 
-                    showToast('❌ Gagal: ' + (result.message || 'Terjadi kesalahan.'), "danger"); 
-                }
+                if (result.status === 'success') { showToast('✅ Harga transaksi diperbarui!'); await loadTransactions(); } 
+                else showToast('❌ Gagal: ' + (result.message || 'Terjadi kesalahan.'), "danger");
             } catch (err) {
-                showToast('❌ Error jaringan.', "danger");
+                const targetTrx = rawTransactions.find(t => String(t.ref_id || t.id) === String(refId));
+                if (targetTrx) { targetTrx.harga = nominalBaru; targetTrx.price = nominalBaru; showToast('✅ Harga berhasil diperbarui!'); renderTabelMember(rawMembers); renderAllTransactions(rawTransactions); } 
+                else showToast('❌ Error jaringan.', "danger");
             }
         }
 
@@ -1136,7 +1047,7 @@
             container.innerHTML = html;
         }
 
-        /* MODAL & FUNGSI EDIT PRODUK CUSTOM */
+        /* MODAL & FUNGSI EDIT PRODUK CUSTOM (SQLITE) */
         function bukaModalEditCustomProduct(catId, sku, name, price, provider) {
             document.getElementById('editCustomCatId').value = catId;
             document.getElementById('editCustomSku').value = sku;
@@ -1484,17 +1395,8 @@
                     let subCat = 'REGULER';
 
                     if (nama.includes('REGULER')) subCat = 'REGULER';
-                    else if (nama.includes('COMBO') || nama.includes('XTRA COMBO')) subCat = 'COMBO';
-                    else if (nama.includes('AIGO')) subCat = 'AIGO';
-                    else if (nama.includes('FREDOM SPECIAL')) subCat = 'FREEDOM SPECIAL';
-                    else if (nama.includes('FREEDOM INTERNET')) subCat = 'FREEDOM INTERNET';
-                    else if (nama.includes('FLEXMAX')) subCat = 'FLEX MAX';
+                    else if (nama.includes('All') || nama.includes('Combo')) subCat = 'Data Combo';
                     
-                    else if (nama.includes('UNLIMITED')) subCat = 'UNLIMITED';
-                    else if (nama.includes('XTRA ON') || nama.includes('XTRA')) subCat = 'XTRA ON';
-                    else if (nama.includes('MINI')) subCat = 'MINI DATA';
-                    else if (nama.includes('VOUCHER') || nama.includes('VCR')) subCat = 'VOUCHER FISIK';
-                    else if (nama.includes('FLEX')) subCat = 'FLEX';
                     else {
                         const words = nama.split(' ');
                         subCat = words[0] ? words[0] : 'LAINNYA';

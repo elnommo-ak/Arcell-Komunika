@@ -45,6 +45,12 @@ function normalizePhone(phone) {
     return clean;
 }
 
+function cleanNumber(val) {
+    if (!val) return 0;
+    if (typeof val === 'number') return val;
+    return parseInt(String(val).replace(/[^0-9]/g, '')) || 0;
+}
+
 // ==================== DATABASE INITIALIZATION ====================
 const db = new sqlite3.Database('./database.db', (err) => {
     if (err) {
@@ -82,12 +88,14 @@ function initTables() {
             produk TEXT,
             product_name TEXT,
             harga REAL,
+            harga_jual REAL DEFAULT 0,
             price REAL,
             status TEXT DEFAULT 'Pending',
             sn TEXT DEFAULT '',
             message TEXT DEFAULT '',
             nomor_pembayaran TEXT,
             subscription_id TEXT,
+            provider TEXT DEFAULT 'digiflazz',
             waktu DATETIME DEFAULT CURRENT_TIMESTAMP,
             FOREIGN KEY (user_hp) REFERENCES members(phone) ON DELETE CASCADE ON UPDATE CASCADE
         )`);
@@ -114,7 +122,7 @@ function initTables() {
             sort_order INTEGER DEFAULT 0
         )`);
 
-        // 5. Tabel Mapping Produk Custom (Isolasi Nama & Harga Jual Custom)
+        // 5. Tabel Mapping Produk Custom
         db.run(`CREATE TABLE IF NOT EXISTS category_products (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             category_id INTEGER NOT NULL,
@@ -126,7 +134,9 @@ function initTables() {
             FOREIGN KEY (category_id) REFERENCES custom_categories(id) ON DELETE CASCADE
         )`);
 
-        // Safe Migrations (Cegah error saat menambahkan kolom pada database lama)
+        // Safe Migrations
+        db.run(`ALTER TABLE transactions ADD COLUMN harga_jual REAL DEFAULT 0`, () => {});
+        db.run(`ALTER TABLE transactions ADD COLUMN provider TEXT DEFAULT 'digiflazz'`, () => {});
         db.run(`ALTER TABLE products ADD COLUMN category TEXT DEFAULT 'Umum'`, () => {});
         db.run(`ALTER TABLE products ADD COLUMN sub_category TEXT DEFAULT 'REGULER'`, () => {});
         db.run(`ALTER TABLE products ADD COLUMN status TEXT DEFAULT '1'`, () => {});
@@ -236,7 +246,7 @@ async function kirimPushNotif(pesanTitle, pesanBody, targetId = null, isExternal
 // ==================== ENDPOINT OKECONNECT ====================
 app.post('/api/okeconnect/checkout', async (req, res) => {
     try {
-        const { buyer_sku_code, customer_no, user_hp, username, harga_jual, nama_produk, subscription_id } = req.body;
+        const { buyer_sku_code, customer_no, user_hp, username, harga_jual, harga_modal, nama_produk, subscription_id } = req.body;
         const targetNo = customer_no || user_hp;
         const userPhone = normalizePhone(user_hp || customer_no);
 
@@ -251,80 +261,98 @@ app.post('/api/okeconnect/checkout', async (req, res) => {
             return res.status(400).json({ status: 'failed', message: 'Nomor HP tidak valid (10-13 digit).' });
         }
 
-        const priceVal = parseFloat(harga_jual) || 0;
+        // AMBIL HARGA DARI DATABASE.DB (UTAMAKAN DARI DATABASE BUKAN CLIENT/API OKECONNECT)
+        const sqlDbProduct = `
+            SELECT 
+                p.price AS modal_db, 
+                COALESCE(cp.custom_jual, p.jual, p.price) AS jual_db,
+                COALESCE(cp.custom_name, p.product_name) AS nama_db
+            FROM products p
+            LEFT JOIN category_products cp ON p.buyer_sku_code = cp.buyer_sku_code AND LOWER(cp.provider) = 'okeconnect'
+            WHERE p.buyer_sku_code = ? AND (p.provider = 'okeconnect' OR p.provider IS NULL OR p.provider = '')
+            LIMIT 1
+        `;
 
-        db.get("SELECT * FROM members WHERE phone = ?", [userPhone], async (err, member) => {
-            if (err || !member) {
-                return res.status(404).json({ status: 'failed', message: 'Member tidak terdaftar!' });
-            }
-            if (member.balance < priceVal) {
-                return res.status(400).json({ status: 'failed', message: 'Saldo member tidak mencukupi!' });
-            }
+        db.get(sqlDbProduct, [cleanSku], async (errDb, dbProd) => {
+            const reqJual = parseFloat(harga_jual) || 0;
+            const reqModal = parseFloat(harga_modal) || 0;
 
-            const refId = "ARC_" + Date.now();
-            const memberName = username || member.name || 'Member Arcell';
-            const productName = nama_produk || cleanSku;
+            const finalModal = dbProd ? dbProd.modal_db : (reqModal > 0 ? reqModal : reqJual);
+            const finalJual  = reqJual > 0 ? reqJual : (dbProd ? dbProd.jual_db : finalModal);
+            const productName = nama_produk || (dbProd ? dbProd.nama_db : cleanSku);
 
-            db.run("UPDATE members SET balance = balance - ? WHERE phone = ?", [priceVal, userPhone], async (err) => {
-                if (err) return res.status(500).json({ status: 'failed', message: 'Gagal memotong saldo member' });
+            db.get("SELECT * FROM members WHERE phone = ?", [userPhone], async (err, member) => {
+                if (err || !member) {
+                    return res.status(404).json({ status: 'failed', message: 'Member tidak terdaftar!' });
+                }
+                if (member.balance < finalJual) {
+                    return res.status(400).json({ status: 'failed', message: 'Saldo member tidak mencukupi!' });
+                }
 
-                const queryInsert = `INSERT INTO transactions
-                    (ref_id, username, user_hp, no_tujuan, customer_no, produk, product_name, harga, price, status, subscription_id)
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'Pending', ?)`;
+                const refId = "ARC_" + Date.now();
+                const memberName = username || member.name || 'Member Arcell';
 
-                db.run(queryInsert, [refId, memberName, userPhone, cleanDest, cleanDest, productName, productName, priceVal, priceVal, subscription_id || ''], async function (err) {
-                    if (err) {
-                        db.run("UPDATE members SET balance = balance + ? WHERE phone = ?", [priceVal, userPhone]);
-                        return res.status(500).json({ status: 'failed', message: 'Gagal menyimpan transaksi ke database' });
-                    }
+                db.run("UPDATE members SET balance = balance - ? WHERE phone = ?", [finalJual, userPhone], async (err) => {
+                    if (err) return res.status(500).json({ status: 'failed', message: 'Gagal memotong saldo member' });
 
-                    try {
-                        const MEMBER_ID = OKECONNECT_CONFIG.memberId;
-                        const PIN_TRX   = OKECONNECT_CONFIG.pin;
-                        const PASSWORD  = OKECONNECT_CONFIG.password;
+                    const queryInsert = `INSERT INTO transactions
+                        (ref_id, username, user_hp, no_tujuan, customer_no, produk, product_name, harga, harga_jual, price, status, subscription_id, provider)
+                        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'Pending', ?, 'OKECONNECT')`;
 
-                        const params = new URLSearchParams({
-                            memberID: MEMBER_ID,
-                            pin: PIN_TRX,
-                            password: PASSWORD,
-                            product: cleanSku,
-                            dest: cleanDest,
-                            refID: refId
-                        });
-
-                        const okeConnectUrl = `https://h2h.okeconnect.com/trx?${params.toString()}`;
-                        const response = await axios.get(okeConnectUrl, {
-                            headers: { 'User-Agent': 'Mozilla/5.0' },
-                            timeout: 15000
-                        });
-
-                        const resultText = typeof response.data === 'string' ? response.data : JSON.stringify(response.data);
-                        const resUpper = resultText.toUpperCase();
-                        
-                        const isExplicitFailed = resUpper.includes("GAGAL") || resUpper.includes("SALDO TIDAK CUKUP");
-                        const isSuccess = (resUpper.includes("PROSES") || resUpper.includes("SUKSES") || resUpper.includes("PENDING")) && !isExplicitFailed;
-
-                        if (isSuccess) {
-                            db.run("UPDATE transactions SET status = 'Proses', message = ? WHERE ref_id = ?", [resultText, refId]);
-                            await kirimPushNotif("Transaksi Diproses! ⚡", `Pembelian ${productName} ke ${cleanDest} sedang diproses.`, subscription_id || userPhone, !subscription_id);
-
-                            return res.json({
-                                status: 'success',
-                                message: 'Transaksi Berhasil Diproses',
-                                data: { ref_id: refId, raw: resultText }
-                            });
-                        } else {
-                            db.run("UPDATE members SET balance = balance + ? WHERE phone = ?", [priceVal, userPhone]);
-                            db.run("UPDATE transactions SET status = 'Gagal', message = ? WHERE ref_id = ?", [resultText, refId]);
-                            await kirimPushNotif("❌ Transaksi Gagal", `${productName} gagal: ${resultText}. Saldo dikembalikan.`, subscription_id || userPhone, !subscription_id);
-
-                            return res.status(400).json({ status: 'failed', message: resultText });
+                    db.run(queryInsert, [refId, memberName, userPhone, cleanDest, cleanDest, productName, productName, finalModal, finalJual, finalJual, subscription_id || ''], async function (err) {
+                        if (err) {
+                            db.run("UPDATE members SET balance = balance + ? WHERE phone = ?", [finalJual, userPhone]);
+                            return res.status(500).json({ status: 'failed', message: 'Gagal menyimpan transaksi ke database' });
                         }
-                    } catch (error) {
-                        db.run("UPDATE members SET balance = balance + ? WHERE phone = ?", [priceVal, userPhone]);
-                        db.run("UPDATE transactions SET status = 'Gagal', message = ? WHERE ref_id = ?", [error.message, refId]);
-                        return res.status(500).json({ status: 'failed', message: 'Gagal terhubung ke OkeConnect: ' + error.message });
-                    }
+
+                        try {
+                            const MEMBER_ID = OKECONNECT_CONFIG.memberId;
+                            const PIN_TRX   = OKECONNECT_CONFIG.pin;
+                            const PASSWORD  = OKECONNECT_CONFIG.password;
+
+                            const params = new URLSearchParams({
+                                memberID: MEMBER_ID,
+                                pin: PIN_TRX,
+                                password: PASSWORD,
+                                product: cleanSku,
+                                dest: cleanDest,
+                                refID: refId
+                            });
+
+                            const okeConnectUrl = `https://h2h.okeconnect.com/trx?${params.toString()}`;
+                            const response = await axios.get(okeConnectUrl, {
+                                headers: { 'User-Agent': 'Mozilla/5.0' },
+                                timeout: 15000
+                            });
+
+                            const resultText = typeof response.data === 'string' ? response.data : JSON.stringify(response.data);
+                            const resUpper = resultText.toUpperCase();
+                            
+                            const isExplicitFailed = resUpper.includes("GAGAL") || resUpper.includes("SALDO TIDAK CUKUP");
+                            const isSuccess = (resUpper.includes("PROSES") || resUpper.includes("SUKSES") || resUpper.includes("PENDING")) && !isExplicitFailed;
+
+                            if (isSuccess) {
+                                db.run("UPDATE transactions SET status = 'Proses', message = ? WHERE ref_id = ?", [resultText, refId]);
+                                await kirimPushNotif("Transaksi Diproses! ⚡", `Pembelian ${productName} ke ${cleanDest} sedang diproses.`, subscription_id || userPhone, !subscription_id);
+
+                                return res.json({
+                                    status: 'success',
+                                    message: 'Transaksi Berhasil Diproses',
+                                    data: { ref_id: refId, raw: resultText }
+                                });
+                            } else {
+                                db.run("UPDATE members SET balance = balance + ? WHERE phone = ?", [finalJual, userPhone]);
+                                db.run("UPDATE transactions SET status = 'Gagal', message = ? WHERE ref_id = ?", [resultText, refId]);
+                                await kirimPushNotif("❌ Transaksi Gagal", `${productName} gagal: ${resultText}. Saldo dikembalikan.`, subscription_id || userPhone, !subscription_id);
+
+                                return res.status(400).json({ status: 'failed', message: resultText });
+                            }
+                        } catch (error) {
+                            db.run("UPDATE members SET balance = balance + ? WHERE phone = ?", [finalJual, userPhone]);
+                            db.run("UPDATE transactions SET status = 'Gagal', message = ? WHERE ref_id = ?", [error.message, refId]);
+                            return res.status(500).json({ status: 'failed', message: 'Gagal terhubung ke OkeConnect: ' + error.message });
+                        }
+                    });
                 });
             });
         });
@@ -333,8 +361,8 @@ app.post('/api/okeconnect/checkout', async (req, res) => {
     }
 });
 
-// CALLBACK / WEBHOOK OKECONNECT
-app.all(['/callback/okeconnect/event', '/api/okeconnect/callback'], express.urlencoded({ extended: true }), express.json(), async (req, res) => {
+// CALLBACK / WEBHOOK OKECONNECT (HANYA UPDATE STATUS & SN, HARGA DB TIDAK DITIMPA)
+app.all(['/callback/okeconnect/event', '/api/okeconnect/callback', '/api/webhook/okeconnect'], express.urlencoded({ extended: true }), express.json(), async (req, res) => {
     try {
         let data = req.body;
         if (typeof data === 'string') {
@@ -346,7 +374,7 @@ app.all(['/callback/okeconnect/event', '/api/okeconnect/callback'], express.urle
             data = req.query || {};
         }
 
-        console.log("🔔 [CALLBACK OKECONNECT / BUKAOLSHOP DITERIMA]:", JSON.stringify(data));
+        console.log("🔔 [CALLBACK OKECONNECT DITERIMA]:", JSON.stringify(data));
 
         const refID = data.refid || data.ref_id || data.reffid || data.refID || data.trxid;
         const message = data.message || data.msg || data.keterangan || '';
@@ -355,17 +383,12 @@ app.all(['/callback/okeconnect/event', '/api/okeconnect/callback'], express.urle
 
         if (!refID) return res.status(200).send("OK");
 
-	if ((!sn || sn === '-') && message.includes('SN:')) {
-        // 1. Ambil teks setelah "SN:" sampai sebelum kata Saldo, Sisa Pulsa, atau akhir teks
-        const snMatch = message.match(/SN:\s*([^]*?)(?=\s*(?:\.|\*|\b)\s*(?:Saldo|Sisa Pulsa|@\d{2}\/\d{2})|$)/i);
-    
-        if (snMatch && snMatch[1]) {
-        sn = snMatch[1]
-            // 2. Bersihkan tanda titik atau karakter pemisah sisa di ujung kalimat
-            .replace(/\s*\.?\s*$/, '')
-            .trim();
+        if ((!sn || sn === '-') && message.includes('SN:')) {
+            const snMatch = message.match(/SN:\s*([^]*?)(?=\s*(?:\.|\*|\b)\s*(?:Saldo|Sisa Pulsa|@\d{2}\/\d{2})|$)/i);
+            if (snMatch && snMatch[1]) {
+                sn = snMatch[1].replace(/\s*\.?\s*$/, '').trim();
+            }
         }
-    }
 
         const trx = await new Promise((resolve, reject) => {
             db.get("SELECT * FROM transactions WHERE ref_id = ?", [refID], (err, row) => {
@@ -373,13 +396,26 @@ app.all(['/callback/okeconnect/event', '/api/okeconnect/callback'], express.urle
             });
         });
 
-        if (!trx) return res.status(200).send("OK");
+        if (!trx) {
+            const targetHp = normalizePhone(data.user_hp || data.phone || data.target || data.no_tujuan || '');
+            const rawSt = String(rawStatus).toUpperCase();
+            let normSt = 'Pending';
+            if (rawSt.includes('SUKSES') || rawSt.includes('LUNAS') || rawSt.includes('SUCCESS') || rawSt === '1') normSt = 'Sukses';
+            else if (rawSt.includes('GAGAL') || rawSt.includes('BATAL') || rawSt.includes('FAILED') || rawSt === '0') normSt = 'Gagal';
+
+            db.run(
+                `INSERT INTO transactions (ref_id, user_hp, no_tujuan, customer_no, produk, product_name, harga, harga_jual, price, status, sn, message, provider)
+                 VALUES (?, ?, ?, ?, ?, ?, 0, 0, 0, ?, ?, ?, 'OKECONNECT')`,
+                [refID, targetHp, targetHp, targetHp, data.produk || 'Produk OkeConnect', data.produk || 'Produk OkeConnect', normSt, sn !== '-' ? sn : '', message]
+            );
+            return res.status(200).send("OK");
+        }
 
         const statusUpper = String(rawStatus).toUpperCase();
         let finalStatus = 'Pending';
-        if (statusUpper.includes('SUKSES') || statusUpper.includes('LUNAS') || statusUpper.includes('SUCCESS')) {
+        if (statusUpper.includes('SUKSES') || statusUpper.includes('LUNAS') || statusUpper.includes('SUCCESS') || statusUpper === '1') {
             finalStatus = 'Sukses';
-        } else if (statusUpper.includes('GAGAL') || statusUpper.includes('BATAL') || statusUpper.includes('REJECT') || statusUpper.includes('FAILED')) {
+        } else if (statusUpper.includes('GAGAL') || statusUpper.includes('BATAL') || statusUpper.includes('REJECT') || statusUpper.includes('FAILED') || statusUpper === '0') {
             finalStatus = 'Gagal';
         } else if (statusUpper.includes('PROSES') || statusUpper.includes('DIPROSES')) {
             finalStatus = 'Proses';
@@ -388,8 +424,7 @@ app.all(['/callback/okeconnect/event', '/api/okeconnect/callback'], express.urle
         const statusLamaUpper = String(trx.status).toUpperCase();
         const statusBaruUpper = finalStatus.toUpperCase();
 
-        if (statusLamaUpper === statusBaruUpper) return res.status(200).send("OK");
-
+        // KUNCI HARGA DB: HANYA UPDATE STATUS, SN DAN MESSAGE
         await new Promise((resolve, reject) => {
             db.run(
                 `UPDATE transactions SET status = ?, sn = ?, message = ? WHERE ref_id = ?`,
@@ -399,7 +434,7 @@ app.all(['/callback/okeconnect/event', '/api/okeconnect/callback'], express.urle
         });
 
         const userPhone = normalizePhone(trx.user_hp || trx.customer_no);
-        const refundPrice = parseFloat(trx.harga || trx.price || 0);
+        const refundPrice = parseFloat(trx.harga_jual || trx.price || 0);
         const targetId = trx.subscription_id || userPhone;
         const isExternalId = !trx.subscription_id;
 
@@ -432,7 +467,7 @@ app.all(['/callback/okeconnect/event', '/api/okeconnect/callback'], express.urle
     }
 });
 
-// SINKRONISASI PRODUK OKECONNECT (ISOLATED DARI CUSTOM CATEGORY)
+// SINKRONISASI PRODUK OKECONNECT (MODAL DIPERBARUI, DENGAN OPTIONAL LOCK JIKA PERLU)
 app.post('/api/admin/sync-okeconnect', async (req, res) => {
     try {
         console.log('🔄 Downloading Okeconnect Pricelist...');
@@ -458,7 +493,6 @@ app.post('/api/admin/sync-okeconnect', async (req, res) => {
                     if (err) return reject(err);
                 });
 
-                // HANYA UPDATE SISI MODAL & MASTER. JIKA KATEGORI CUSTOM BERADA DI CUSTOM_CATEGORY_PRODUCTS, HARGA JUAL TIDAK TERTAMPA.
                 const stmt = db.prepare(`
                     INSERT INTO products (buyer_sku_code, product_name, brand, type, category, sub_category, price, jual, status, provider)
                     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'okeconnect')
@@ -530,7 +564,7 @@ app.get('/api/admin/okeconnect-saldo', async (req, res) => {
 // ==================== ENDPOINT DIGIFLAZZ ====================
 
 app.post('/api/digiflazz/checkout', async (req, res) => {
-    const { buyer_sku_code, customer_no, user_hp, username, harga_jual, nama_produk, subscription_id } = req.body;
+    const { buyer_sku_code, customer_no, user_hp, username, harga_jual, harga_modal, nama_produk, subscription_id } = req.body;
     const targetNo = customer_no || user_hp;
     const userPhone = normalizePhone(user_hp || customer_no);
 
@@ -538,65 +572,82 @@ app.post('/api/digiflazz/checkout', async (req, res) => {
         return res.status(400).json({ status: 'error', message: 'SKU dan No Tujuan wajib diisi!' });
     }
 
-    const priceVal = parseFloat(harga_jual) || 0;
+    const sqlDbProduct = `
+        SELECT 
+            p.price AS modal_db, 
+            COALESCE(cp.custom_jual, p.jual, p.price) AS jual_db,
+            COALESCE(cp.custom_name, p.product_name) AS nama_db
+        FROM products p
+        LEFT JOIN category_products cp ON p.buyer_sku_code = cp.buyer_sku_code AND LOWER(cp.provider) = 'digiflazz'
+        WHERE p.buyer_sku_code = ? AND (p.provider = 'digiflazz' OR p.provider IS NULL OR p.provider = '')
+        LIMIT 1
+    `;
 
-    db.get("SELECT * FROM members WHERE phone = ?", [userPhone], async (err, member) => {
-        if (err || !member) return res.status(404).json({ status: 'error', message: 'Member tidak terdaftar!' });
-        if (member.balance < priceVal) return res.status(400).json({ status: 'error', message: 'Saldo member tidak mencukupi!' });
+    db.get(sqlDbProduct, [buyer_sku_code], async (errDb, dbProd) => {
+        const reqJual = parseFloat(harga_jual) || 0;
+        const reqModal = parseFloat(harga_modal) || 0;
 
-        const refId = 'TRX_' + Date.now();
-        const memberName = username || member.name || 'Member Arcell';
-        const productName = nama_produk || buyer_sku_code;
+        const finalModal = dbProd ? dbProd.modal_db : (reqModal > 0 ? reqModal : reqJual);
+        const finalJual  = reqJual > 0 ? reqJual : (dbProd ? dbProd.jual_db : finalModal);
+        const productName = nama_produk || (dbProd ? dbProd.nama_db : buyer_sku_code);
 
-        db.run("UPDATE members SET balance = balance - ? WHERE phone = ?", [priceVal, userPhone], (err) => {
-            if (err) return res.status(500).json({ status: 'error', message: 'Gagal potong saldo' });
+        db.get("SELECT * FROM members WHERE phone = ?", [userPhone], async (err, member) => {
+            if (err || !member) return res.status(404).json({ status: 'error', message: 'Member tidak terdaftar!' });
+            if (member.balance < finalJual) return res.status(400).json({ status: 'error', message: 'Saldo member tidak mencukupi!' });
 
-            const queryInsert = `INSERT INTO transactions
-                (ref_id, username, user_hp, no_tujuan, customer_no, produk, product_name, harga, price, status, subscription_id)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'Pending', ?)`;
+            const refId = 'TRX_' + Date.now();
+            const memberName = username || member.name || 'Member Arcell';
 
-            db.run(queryInsert, [refId, memberName, userPhone, targetNo, targetNo, productName, productName, priceVal, priceVal, subscription_id || ''], async function (err) {
-                if (err) {
-                    db.run("UPDATE members SET balance = balance + ? WHERE phone = ?", [priceVal, userPhone]);
-                    return res.status(500).json({ status: 'error', message: 'Gagal simpan transaksi' });
-                }
+            db.run("UPDATE members SET balance = balance - ? WHERE phone = ?", [finalJual, userPhone], (err) => {
+                if (err) return res.status(500).json({ status: 'error', message: 'Gagal potong saldo' });
 
-                try {
-                    const sign = generateMD5(USERNAME_DIGI + API_KEY_DIGI + refId);
-                    const callbackUrl = `${BASE_URL}/api/digiflazz/webhook`;
+                const queryInsert = `INSERT INTO transactions
+                    (ref_id, username, user_hp, no_tujuan, customer_no, produk, product_name, harga, harga_jual, price, status, subscription_id, provider)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'Pending', ?, 'digiflazz')`;
 
-                    const digiRes = await axios.post('https://api.digiflazz.com/v1/transaction', {
-                        username: USERNAME_DIGI,
-                        buyer_sku_code: buyer_sku_code,
-                        customer_no: targetNo,
-                        ref_id: refId,
-                        sign: sign,
-                        cb_url: callbackUrl
-                    });
-
-                    const dataRes = digiRes.data?.data;
-                    const finalStatus = dataRes?.status || 'Pending';
-
-                    db.run("UPDATE transactions SET status = ?, sn = ?, message = ? WHERE ref_id = ?",
-                        [finalStatus, dataRes?.sn || '', dataRes?.message || '', refId]);
-
-                    if (String(finalStatus).toLowerCase() === 'gagal') {
-                        db.run("UPDATE members SET balance = balance + ? WHERE phone = ?", [priceVal, userPhone]);
-                        const targetId = subscription_id || userPhone;
-                        await kirimPushNotif("❌ Transaksi Gagal", `${productName} ke ${targetNo} gagal: ${dataRes?.message || 'Error'}`, targetId, !subscription_id);
-                    } else {
-                        const targetId = subscription_id || userPhone;
-                        await kirimPushNotif("Transaksi Diproses! 🛍️", `Pembelian ${productName} senilai Rp ${priceVal.toLocaleString('id-ID')} ke ${targetNo} sedang diproses.`, targetId, !subscription_id);
+                db.run(queryInsert, [refId, memberName, userPhone, targetNo, targetNo, productName, productName, finalModal, finalJual, finalJual, subscription_id || ''], async function (err) {
+                    if (err) {
+                        db.run("UPDATE members SET balance = balance + ? WHERE phone = ?", [finalJual, userPhone]);
+                        return res.status(500).json({ status: 'error', message: 'Gagal simpan transaksi' });
                     }
 
-                    res.json({ status: 'success', message: 'Transaksi berhasil diproses', ref_id: refId, data: dataRes });
-                } catch (apiErr) {
-                    db.run("UPDATE members SET balance = balance + ? WHERE phone = ?", [priceVal, userPhone]);
-                    db.run("UPDATE transactions SET status = 'Gagal', message = ? WHERE ref_id = ?",
-                        [apiErr.response?.data?.data?.message || 'Error Provider', refId]);
+                    try {
+                        const sign = generateMD5(USERNAME_DIGI + API_KEY_DIGI + refId);
+                        const callbackUrl = `${BASE_URL}/api/digiflazz/webhook`;
 
-                    res.status(500).json({ status: 'error', message: 'Gagal ke provider' });
-                }
+                        const digiRes = await axios.post('https://api.digiflazz.com/v1/transaction', {
+                            username: USERNAME_DIGI,
+                            buyer_sku_code: buyer_sku_code,
+                            customer_no: targetNo,
+                            ref_id: refId,
+                            sign: sign,
+                            cb_url: callbackUrl
+                        });
+
+                        const dataRes = digiRes.data?.data;
+                        const finalStatus = dataRes?.status || 'Pending';
+
+                        db.run("UPDATE transactions SET status = ?, sn = ?, message = ? WHERE ref_id = ?",
+                            [finalStatus, dataRes?.sn || '', dataRes?.message || '', refId]);
+
+                        if (String(finalStatus).toLowerCase() === 'gagal') {
+                            db.run("UPDATE members SET balance = balance + ? WHERE phone = ?", [finalJual, userPhone]);
+                            const targetId = subscription_id || userPhone;
+                            await kirimPushNotif("❌ Transaksi Gagal", `${productName} ke ${targetNo} gagal: ${dataRes?.message || 'Error'}`, targetId, !subscription_id);
+                        } else {
+                            const targetId = subscription_id || userPhone;
+                            await kirimPushNotif("Transaksi Diproses! 🛍️", `Pembelian ${productName} senilai Rp ${finalJual.toLocaleString('id-ID')} ke ${targetNo} sedang diproses.`, targetId, !subscription_id);
+                        }
+
+                        res.json({ status: 'success', message: 'Transaksi berhasil diproses', ref_id: refId, data: dataRes });
+                    } catch (apiErr) {
+                        db.run("UPDATE members SET balance = balance + ? WHERE phone = ?", [finalJual, userPhone]);
+                        db.run("UPDATE transactions SET status = 'Gagal', message = ? WHERE ref_id = ?",
+                            [apiErr.response?.data?.data?.message || 'Error Provider', refId]);
+
+                        res.status(500).json({ status: 'error', message: 'Gagal ke provider' });
+                    }
+                });
             });
         });
     });
@@ -623,7 +674,7 @@ app.post('/api/digiflazz/webhook', (req, res) => {
 
                 if (['GAGAL', 'BATAL'].includes(statusUpper) && !['GAGAL', 'BATAL'].includes(statusLamaUpper)) {
                     const targetHp = normalizePhone(trx.user_hp || trx.customer_no);
-                    const refundPrice = trx.harga || trx.price || 0;
+                    const refundPrice = trx.harga_jual || trx.price || 0;
                     db.run("UPDATE members SET balance = balance + ? WHERE phone = ?", [refundPrice, targetHp]);
                 }
 
@@ -648,7 +699,7 @@ app.post('/api/digiflazz/webhook', (req, res) => {
     }
 });
 
-// SINKRONISASI PRODUK DIGIFLAZZ (ISOLATED DARI CUSTOM CATEGORY)
+// SINKRONISASI PRODUK DIGIFLAZZ
 app.post('/api/digiflazz/price-list', async (req, res) => {
     try {
         const username = USERNAME_DIGI.trim();
@@ -775,6 +826,36 @@ app.post('/api/member/login', (req, res) => {
     });
 });
 
+app.get('/api/transaction/detail', (req, res) => {
+    const trxId = (req.query.id || req.query.ref_id || '').trim();
+
+    if (!trxId) {
+        return res.status(400).json({ status: 'error', message: 'ID Transaksi kosong' });
+    }
+
+    const sql = `
+        SELECT * FROM transactions 
+        WHERE ref_id = ? OR id = ? OR no_tujuan = ? OR customer_no = ?
+        LIMIT 1
+    `;
+
+    db.get(sql, [trxId, trxId, trxId, trxId], (err, row) => {
+        if (err) return res.status(500).json({ status: 'error', message: 'Gagal query database' });
+        if (!row) return res.status(404).json({ status: 'error', message: 'Data transaksi tidak ditemukan' });
+
+        // SAMAKAN STRUKTUR HARGA DENGAN HISTORY (UTAMAKAN HARGA JUAL)
+        const finalHargaJual = parseFloat(row.harga_jual || row.price || row.harga || 0);
+        const dataFormatted = {
+            ...row,
+            harga: finalHargaJual,
+            harga_jual: finalHargaJual,
+            price: finalHargaJual
+        };
+
+        res.json({ status: 'success', data: dataFormatted });
+    });
+});
+
 app.get('/api/history', (req, res) => {
     const rawPhone = req.query.phone || req.query.hp || '';
     const phone = normalizePhone(rawPhone);
@@ -788,7 +869,20 @@ app.get('/api/history', (req, res) => {
 
     db.all(sql, [phone, altPhone, phone, altPhone], (err, rows) => {
         if (err) return res.status(500).json({ status: 'error', message: err.message });
-        res.json({ status: 'success', data: rows || [] });
+        
+        // PASTIKAN PROPERTI HARGA UNTUK CUSTOMER ADALAH HARGA_JUAL
+        const normalizedRows = (rows || []).map(row => {
+            const finalHargaJual = parseFloat(row.harga_jual || row.price || row.harga || 0);
+            return {
+                ...row,
+                harga: finalHargaJual,       // Mengunci 'harga' menjadi harga jual toko kamu
+                harga_jual: finalHargaJual,  // Properti eksplisit harga jual
+                price: finalHargaJual,       // Properti fallback price
+                modal: parseFloat(row.harga || 0) // Modal asli dipisah (hanya jika butuh)
+            };
+        });
+
+        res.json({ status: 'success', data: normalizedRows });
     });
 });
 
@@ -958,27 +1052,6 @@ app.get('/api/admin/transactions', (req, res) => {
     });
 });
 
-app.get('/api/transaction/detail', (req, res) => {
-    const trxId = (req.query.id || '').trim();
-
-    if (!trxId) {
-        return res.status(400).json({ status: 'error', message: 'ID Transaksi kosong' });
-    }
-
-    const sql = `
-        SELECT * FROM transactions 
-        WHERE ref_id = ? OR id = ? OR no_tujuan = ? OR customer_no = ?
-        LIMIT 1
-    `;
-
-    db.get(sql, [trxId, trxId, trxId, trxId], (err, row) => {
-        if (err) return res.status(500).json({ status: 'error', message: 'Gagal query database' });
-        if (!row) return res.status(404).json({ status: 'error', message: 'Data transaksi tidak ditemukan' });
-
-        res.json({ status: 'success', data: row });
-    });
-});
-
 // ==================== ENDPOINT USER / CATEGORIES (CUSTOM ISOLATED) ====================
 app.get('/api/user/products-by-prefix', (req, res) => {
     const { brand } = req.query;
@@ -987,7 +1060,6 @@ app.get('/api/user/products-by-prefix', (req, res) => {
         return res.json({ status: 'success', data: {} });
     }
 
-    // QUERY MULTI-LAYER: MENGAMBIL HARGA JUAL CUSTOM TERKUNCI JIKA ADA, ATAU HARGA JUAL MASTER
     const sql = `
         SELECT 
             cc.name as category_name,
@@ -1018,7 +1090,7 @@ app.get('/api/user/products-by-prefix', (req, res) => {
             grouped[row.category_name].push({
                 buyer_sku_code: row.buyer_sku_code,
                 product_name: row.product_name,
-                jual: parseFloat(row.jual || 0), // HARGA JUAL DIKIRIM KE CLIENT
+                jual: parseFloat(row.jual || 0),
                 price: parseFloat(row.modal_price || 0),
                 _provider: row.provider
             });
@@ -1029,7 +1101,6 @@ app.get('/api/user/products-by-prefix', (req, res) => {
 });
 
 // ==================== ENDPOINT FETCH CUSTOM CATEGORIES ====================
-// Mengambil Harga Modal dari master 'products' dan Harga Jual dari 'category_products'
 app.get('/api/admin/custom-categories', (req, res) => {
     db.all(`SELECT * FROM custom_categories ORDER BY sort_order ASC, id DESC`, [], (err, categories) => {
         if (err) return res.status(500).json({ status: 'error', message: err.message });
@@ -1076,7 +1147,6 @@ app.post('/api/admin/map-category-product-bulk', (req, res) => {
     const { category_id, skus, provider } = req.body;
     if (!skus || !Array.isArray(skus) || skus.length === 0) return res.json({ status: 'success' });
 
-    // Menggunakan INSERT OR IGNORE agar tidak bentrok jika belum ada CONSTRAINT UNIQUE di tabel
     const stmt = db.prepare(`
         INSERT OR IGNORE INTO category_products (category_id, buyer_sku_code, provider) 
         VALUES (?, ?, ?)
@@ -1101,8 +1171,31 @@ app.post('/api/admin/unmap-category-product', (req, res) => {
     });
 });
 
+// ==================== ENDPOINT UPDATE HARGA TRANSAKSI ADMIN ====================
+app.post('/api/admin/update-transaction-price', (req, res) => {
+    const { ref_id, harga_modal, harga_jual, new_price } = req.body;
+    const refId = String(ref_id || '').trim();
+
+    if (!refId) {
+        return res.status(400).json({ status: 'error', message: 'Ref ID Wajib' });
+    }
+
+    const modalVal = parseFloat(harga_modal !== undefined ? harga_modal : (new_price || 0));
+    const jualVal  = parseFloat(harga_jual !== undefined ? harga_jual : (new_price || 0));
+
+    db.run(
+        `UPDATE transactions SET harga = ?, harga_jual = ?, price = ? WHERE ref_id = ?`,
+        [modalVal, jualVal, jualVal, refId],
+        function(err) {
+            if (err) {
+                return res.status(500).json({ status: 'error', message: err.message });
+            }
+            res.json({ status: 'success', message: 'Harga transaksi berhasil diperbarui' });
+        }
+    );
+});
+
 // ==================== ENDPOINT UPDATE EDIT PRODUK CUSTOM ====================
-// Mengunci Nama Custom dan Harga Jual tanpa mengubah Harga Modal Provider
 app.post('/api/admin/update-custom-product', (req, res) => {
     const { category_id, buyer_sku_code, product_name, price, provider } = req.body;
 
@@ -1129,6 +1222,7 @@ app.post('/api/admin/update-custom-product', (req, res) => {
         return res.json({ status: 'success', message: 'Harga Jual berhasil diperbarui dan dikunci!' });
     });
 });
+
 // ==================== START SERVER ====================
 app.listen(PORT, () => {
     console.log(`🚀 Server Arcell Komunika berjalan di Port ${PORT}`);

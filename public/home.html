@@ -610,32 +610,62 @@
         let groupedProducts = {};
 
         phoneInput.addEventListener('input', (e) => {
-            let val = e.target.value;
-            let formattedVal = formatPhoneNumber(val);
-            phoneInput.value = formattedVal;
-            let rawDigits = formattedVal.replace(/[^0-9]/g, '');
+        let inputEl = e.target;
+        let originalValue = inputEl.value;
+        let cursorPos = inputEl.selectionStart;
+      
+        // Hitung berapa banyak angka (digit) sebelum posisi kursor saat ini
+        let digitsBeforeCursor = originalValue.substring(0, cursorPos).replace(/[^0-9]/g,    '').length;
 
-            let detectedOp = null;
-            if (rawDigits.length >= 4) {
-                let prefix = rawDigits.substring(0, 4);
-                for (let op in prefixes) {
-                    if (prefixes[op].indexOf(prefix) !== -1) { detectedOp = op; break; }
-                }
-            }
+        // Jalankan pemformatan
+        let formattedVal = formatPhoneNumber(originalValue);
+        inputEl.value = formattedVal;
 
-            if (detectedOp) {
-                badge.innerText = detectedOp;
-                badge.style.display = 'inline-block';
-                if (currentOperator !== detectedOp) {
-                    currentOperator = detectedOp;
-                    loadCustomCategoryProducts(detectedOp);
-                }
-            } else {
-                badge.style.display = 'none';
-                insetTabsWrapper.style.display = 'none';
-                popupTopContainer.style.display = 'none';
-                currentOperator = null;
+        // Hitung ulang posisi kursor yang baru agar tetap berada di posisi angka yang sedang diketik
+        let newCursorPos = 0;
+        let digitCount = 0;
+
+        for (let i = 0; i < formattedVal.length; i++) {
+        if (/[0-9]/.test(formattedVal[i])) {
+            digitCount++;
+        }
+        if (digitCount === digitsBeforeCursor) {
+            newCursorPos = i + 1;
+            break;
+        }
+    }
+
+        // Kembalikan kursor ke posisi yang tepat
+        if (digitsBeforeCursor === 0) newCursorPos = 0;
+        inputEl.setSelectionRange(newCursorPos, newCursorPos);
+
+        // --- Logika Deteksi Operator (Tetap Sama) ---
+        let rawDigits = formattedVal.replace(/[^0-9]/g, '');
+        let detectedOp = null;
+
+        if (rawDigits.length >= 4) {
+        let prefix = rawDigits.substring(0, 4);
+        for (let op in prefixes) {
+            if (prefixes[op].indexOf(prefix) !== -1) { 
+                detectedOp = op; 
+                break; 
             }
+        }
+    }
+
+        if (detectedOp) {
+        badge.innerText = detectedOp;
+        badge.style.display = 'inline-block';
+        if (currentOperator !== detectedOp) {
+            currentOperator = detectedOp;
+            loadCustomCategoryProducts(detectedOp);
+        }
+    } else {
+        badge.style.display = 'none';
+        insetTabsWrapper.style.display = 'none';
+        popupTopContainer.style.display = 'none';
+        currentOperator = null;
+        }
         });
 
         async function loadCustomCategoryProducts(brand) {
