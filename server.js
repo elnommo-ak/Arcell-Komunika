@@ -1373,6 +1373,35 @@ app.delete('/api/user/scheduled-transactions/:id', (req, res) => {
     });
 });
 
+// ==================== ENDPOINT GET PRODUK HASIL MAPPING CUSTOM (UNTUK KASIR) ====================
+app.get('/api/admin/products', (req, res) => {
+    // Query ini KHUSUS mengambil produk yang SUDAH DIMAPPING di category_products
+    // Menggunakan nama custom (custom_name) & harga jual custom (custom_jual) buatan Akang
+    const sqlMappedProducts = `
+        SELECT 
+            cp.buyer_sku_code,
+            cp.provider,
+            COALESCE(cp.custom_name, p.product_name) AS product_name,
+            COALESCE(cp.custom_jual, p.jual, p.price) AS harga_jual,
+            p.price AS harga_modal
+        FROM category_products cp
+        JOIN products p 
+            ON cp.buyer_sku_code = p.buyer_sku_code 
+            AND LOWER(cp.provider) = LOWER(p.provider)
+        ORDER BY product_name ASC
+    `;
+
+    db.all(sqlMappedProducts, [], (err, rows) => {
+        if (err) {
+            console.error("❌ Error Fetch Mapped Products Kasir:", err.message);
+            return res.status(500).json({ status: 'error', message: err.message });
+        }
+        
+        // Respon dikirim sesuai format data yang dibutuhkan kasir.html
+        res.json({ status: 'success', data: rows });
+    });
+});
+
 // ==================== START SERVER ====================
 app.listen(PORT, () => {
     console.log(`🚀 Server Arcell Komunika berjalan di Port ${PORT}`);
