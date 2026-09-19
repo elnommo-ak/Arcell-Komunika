@@ -60,9 +60,13 @@
             background-color: var(--bg-base);
             padding: 4px 0 10px 0;
             margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
 
         .filter-container {
+            flex: 1;
             display: flex;
             gap: 6px;
             padding: 6px;
@@ -94,6 +98,29 @@
             color: var(--accent-purple); 
             background: var(--bg-base);
             box-shadow: var(--neu-shadow-sm);
+        }
+
+        /* Tombol Buka Bottom Sheet Filter */
+        .btn-filter-trigger {
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            background: var(--bg-base);
+            box-shadow: var(--neu-shadow-flat);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--accent-purple);
+            font-size: 14px;
+            cursor: pointer;
+            border: none;
+            flex-shrink: 0;
+            transition: all 0.15s ease;
+        }
+
+        .btn-filter-trigger:active {
+            box-shadow: var(--neu-shadow-inset);
+            transform: scale(0.95);
         }
 
         .date-group {
@@ -214,6 +241,132 @@
             font-size: 13px;
             font-weight: 600;
         }
+
+        /* --- BOTTOM SHEET / OVERLAY STYLES --- */
+        .sheet-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(2px);
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .sheet-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .bottom-sheet {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            max-width: 480px;
+            margin: 0 auto;
+            background: var(--bg-base);
+            border-radius: 24px 24px 0 0;
+            padding: 20px;
+            z-index: 1001;
+            transform: translateY(100%);
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 -10px 25px rgba(0, 0, 0, 0.15);
+        }
+
+        .sheet-overlay.active .bottom-sheet {
+            transform: translateY(0);
+        }
+
+        .sheet-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 18px;
+        }
+
+        .sheet-title {
+            font-size: 15px;
+            font-weight: 800;
+            color: var(--text-main);
+        }
+
+        .btn-close {
+            background: var(--bg-base);
+            border: none;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            box-shadow: var(--neu-shadow-sm);
+            color: var(--text-muted);
+            font-size: 14px;
+            cursor: pointer;
+        }
+
+        .form-group {
+            margin-bottom: 14px;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--text-muted);
+            margin-bottom: 6px;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 10px 14px;
+            font-size: 12px;
+            border: none;
+            border-radius: var(--border-radius-sm);
+            background: var(--bg-base);
+            box-shadow: var(--neu-shadow-inset);
+            color: var(--text-main);
+            outline: none;
+            font-weight: 600;
+        }
+
+        .form-row {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn-apply {
+            width: 100%;
+            padding: 12px;
+            margin-top: 10px;
+            background: var(--accent-purple);
+            color: #ffffff;
+            border: none;
+            border-radius: var(--border-radius-pill);
+            font-size: 13px;
+            font-weight: 700;
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(112, 82, 255, 0.3);
+            transition: all 0.15s ease;
+        }
+
+        .btn-apply:active {
+            transform: scale(0.98);
+        }
+
+        .btn-reset {
+            width: 100%;
+            padding: 10px;
+            margin-top: 6px;
+            background: transparent;
+            color: var(--text-muted);
+            border: none;
+            font-size: 12px;
+            font-weight: 700;
+            cursor: pointer;
+        }
     </style>
 </head>
 <body>
@@ -226,6 +379,9 @@
             <div class="tab-filter" onclick="filterKategori('pending', this)">Pending</div>
             <div class="tab-filter" onclick="filterKategori('batal', this)">Batal</div>
         </div>
+        <button class="btn-filter-trigger" onclick="toggleBottomSheet(true)" title="Filter Pencarian">
+            <i class="fa-solid fa-sliders"></i>
+        </button>
     </div>
 
     <div id="app">
@@ -233,11 +389,52 @@
     </div>
 </div>
 
+<!-- Bottom Sheet Overlay -->
+<div class="sheet-overlay" id="sheetOverlay" onclick="toggleBottomSheet(false)">
+    <div class="bottom-sheet" onclick="event.stopPropagation()">
+        <div class="sheet-header">
+            <span class="sheet-title"><i class="fa-solid fa-filter me-2"></i>Filter Pencarian</span>
+            <button class="btn-close" onclick="toggleBottomSheet(false)"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+
+        <div class="form-group">
+            <label class="form-label">Jenis Produk (Opsional)</label>
+            <input type="text" id="filterProduk" class="form-input" placeholder="Contoh: Telkomsel, PLN, Dana...">
+        </div>
+
+        <div class="form-group">
+            <label class="form-label">No. HP / ID Trx (Opsional)</label>
+            <input type="text" id="filterQuery" class="form-input" placeholder="Masukkan ID Ref atau No Tujuan">
+        </div>
+
+        <div class="form-row">
+            <div class="form-group" style="flex: 1;">
+                <label class="form-label">Dari Tanggal</label>
+                <input type="date" id="filterStartDate" class="form-input">
+            </div>
+            <div class="form-group" style="flex: 1;">
+                <label class="form-label">Ke Tanggal</label>
+                <input type="date" id="filterEndDate" class="form-input">
+            </div>
+        </div>
+
+        <button class="btn-apply" onclick="terapkanFilterPencarian()">Terapkan Filter</button>
+        <button class="btn-reset" onclick="resetFilterPencarian()">Reset Filter</button>
+    </div>
+</div>
+
 <script>
     let totalData = [];
     let kategoriAktif = "semua";
 
-    // Normalisasi Format No HP (08xx <-> 628xx)
+    // State Filter Lanjutan
+    let searchFilters = {
+        produk: '',
+        query: '',
+        startDate: '',
+        endDate: ''
+    };
+
     function normalizePhone(phone) {
         if (!phone) return '';
         let clean = String(phone).replace(/\D/g, '');
@@ -245,10 +442,38 @@
         return clean;
     }
 
+    function toggleBottomSheet(show) {
+        const overlay = document.getElementById('sheetOverlay');
+        if (show) overlay.classList.add('active');
+        else overlay.classList.remove('active');
+    }
+
     function filterKategori(kategori, el) {
         kategoriAktif = kategori;
         document.querySelectorAll('.tab-filter').forEach(tab => tab.classList.remove('active'));
         if (el) el.classList.add('active');
+        renderData(totalData);
+    }
+
+    function terapkanFilterPencarian() {
+        searchFilters.produk = document.getElementById('filterProduk').value.trim().toLowerCase();
+        searchFilters.query = document.getElementById('filterQuery').value.trim().toLowerCase();
+        searchFilters.startDate = document.getElementById('filterStartDate').value;
+        searchFilters.endDate = document.getElementById('filterEndDate').value;
+
+        toggleBottomSheet(false);
+        renderData(totalData);
+    }
+
+    function resetFilterPencarian() {
+        document.getElementById('filterProduk').value = '';
+        document.getElementById('filterQuery').value = '';
+        document.getElementById('filterStartDate').value = '';
+        document.getElementById('filterEndDate').value = '';
+
+        searchFilters = { produk: '', query: '', startDate: '', endDate: '' };
+        
+        toggleBottomSheet(false);
         renderData(totalData);
     }
 
@@ -274,11 +499,11 @@
 
             const dataList = Array.isArray(res) ? res : (res.data || []);
 
-            // Filter transaksi khusus member yang sedang login
+            // Filter transaksi khusus member yang sedang login & ambil maksimal 100 terbaru
             const myDataList = dataList.filter(item => {
                 const itemHp = normalizePhone(item.user_hp || item.customer_no || item.phone || '');
                 return itemHp !== '' && itemHp === hp;
-            });
+            }).slice(0, 100);
 
             if (myDataList.length > 0) {
                 totalData = myDataList;
@@ -325,15 +550,35 @@
         const container = document.getElementById("app");
         
         const dataFiltered = list.filter(item => {
+            // 1. Filter Kategori Status Tab
             const st = (item.status || "PENDING").toLowerCase();
-            if (kategoriAktif === "sukses") return st === "sukses" || st === "lunas";
-            if (kategoriAktif === "pending") return st === "pending" || st === "proses";
-            if (kategoriAktif === "batal") return st === "batal" || st === "gagal";
+            if (kategoriAktif === "sukses" && !(st === "sukses" || st === "lunas")) return false;
+            if (kategoriAktif === "pending" && !(st === "pending" || st === "proses")) return false;
+            if (kategoriAktif === "batal" && !(st === "batal" || st === "gagal")) return false;
+
+            // 2. Filter Jenis Produk (Hanya dicek jika kolom diisi)
+            if (searchFilters.produk) {
+                const namaProduk = (item.produk || item.product_name || item.sku || '').toLowerCase();
+                if (!namaProduk.includes(searchFilters.produk)) return false;
+            }
+
+            // 3. Filter No HP / ID Trx (Hanya dicek jika kolom diisi)
+            if (searchFilters.query) {
+                const noTujuan = (item.no_tujuan || item.customer_no || item.user_hp || '').toLowerCase();
+                const refId = (item.ref_id || '').toLowerCase();
+                if (!noTujuan.includes(searchFilters.query) && !refId.includes(searchFilters.query)) return false;
+            }
+
+            // 4. Filter Dari Tanggal & Ke Tanggal (Bisa diisi salah satu atau keduanya)
+            const { tanggal } = parseWaktu(item.waktu);
+            if (searchFilters.startDate && tanggal < searchFilters.startDate) return false;
+            if (searchFilters.endDate && tanggal > searchFilters.endDate) return false;
+
             return true;
         });
 
         if (dataFiltered.length === 0) {
-            container.innerHTML = `<div class="info-text">Tidak ada transaksi untuk kategori <b>${kategoriAktif.toUpperCase()}</b>.</div>`;
+            container.innerHTML = `<div class="info-text">Tidak ada transaksi yang sesuai kriteria.</div>`;
             return;
         }
 
@@ -363,12 +608,8 @@
                 const noTujuan = item.no_tujuan || item.customer_no || item.user_hp || '';
                 const namaProduk = item.produk || item.product_name || item.sku || 'Produk PPOB';
 
-                // ==========================================
-                // EKSTRAKSI SN OKECONNECT SAMA SEPERTI detail.html
-                // ==========================================
                 var rawSn = item.sn || item.serial_number || item.serialNumber || item.nomor_resi || item.resi || item.sn_resi || '';
                 
-                // Jika key 'sn' kosong, ekstrak otomatis dari pesan/message balasan OkeConnect
                 if (!rawSn && (item.message || item.keterangan || item.catatan || item.note || item.pesan)) {
                     var teksPesan = item.message || item.keterangan || item.catatan || item.note || item.pesan;
                     var matchSn = teksPesan.match(/SN[\/\:\s]+([A-Za-z0-9\.\/\-]+)/i);
@@ -378,7 +619,6 @@
                 }
 
                 var displaySn = (rawSn && rawSn !== '' && rawSn !== '-') ? 'SN: ' + rawSn : '';
-                // ==========================================
 
                 htmlList += `
                     <div class="card" onclick="window.location.href='detail.html?id=${encodeURIComponent(item.ref_id)}'">
