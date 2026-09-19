@@ -7,8 +7,26 @@ const crypto = require('crypto');
 const sqlite3 = require('sqlite3').verbose();
 const multer = require('multer');
 const cron = require('node-cron');
-
 const app = express();
+
+
+// 1. ========== ROUTE APLIKASI ==========
+// A. Panel Admin Arcell
+app.get('/', (req, res) => {
+    const host = req.headers.host || '';
+
+    // admin.html
+    if (host.includes('admin.')) {
+        return res.sendFile(path.join(__dirname, 'public/admin.html'));
+    }
+
+    // index.html
+    return res.sendFile(path.join(__dirname, 'public/index.html'));
+});
+
+// B. Arcell Komunika('/')
+app.use(express.static(path.join(__dirname, 'public'), { index: false }));
+
 const PORT = process.env.PORT || 3000;
 const upload = multer();
 
@@ -52,7 +70,7 @@ function cleanNumber(val) {
     return parseInt(String(val).replace(/[^0-9]/g, '')) || 0;
 }
 
-// HELPER KONSISTENSI TIMEZONE WIB (UTC+7)
+// 2. ========== HELPER KONSISTENSI TIMEZONE WIB (UTC+7) ==========
 function getWibDateTimeString(dateObj = new Date()) {
     const wibDate = new Date(dateObj.getTime() + (7 * 60 * 60 * 1000));
     const yyyy = wibDate.getUTCFullYear();
@@ -65,7 +83,7 @@ function getWibDateTimeString(dateObj = new Date()) {
     return `${yyyy}-${mm}-${dd} ${hh}:${min}:${ss}`;
 }
 
-// ==================== DATABASE INITIALIZATION ====================
+// 3. ==================== DATABASE INITIALIZATION ====================
 const db = new sqlite3.Database('./database.db', (err) => {
     if (err) {
         console.error('❌ Error Connecting to SQLite Database:', err.message);
@@ -175,7 +193,7 @@ function initTables() {
     });
 }
 
-// ==================== CRON JOB SCHEDULER ====================
+// 4. ==================== CRON JOB SCHEDULER ====================
 function initScheduler() {
     cron.schedule('* * * * *', () => {
         // Gunakan Waktu WIB Presisi
@@ -234,6 +252,7 @@ function initScheduler() {
     console.log('⏰ Job Scheduler Transaksi Otomatis Aktif (setiap 1 menit)');
 }
 
+// 5. ========== EXTRACT PRODUK ==========
 function extractProducts(data) {
     if (!data) return [];
     let rawList = [];
@@ -285,12 +304,12 @@ function extractProducts(data) {
     }).filter(item => item.sku && String(item.sku).trim() !== '-' && String(item.sku).trim() !== '');
 }
 
-// ==================== HELPER PUSH NOTIFICATION ====================
+// 6. ==================== HELPER PUSH NOTIFICATION ====================
 async function kirimPushNotif(pesanTitle, pesanBody, targetId = null, isExternalId = false) {
     try {
-        const ONESIGNAL_APP_ID = process.env.ONESIGNAL_APP_ID || "8370e207-3701-48a6-82d0-45d76f860691";
-        const ONESIGNAL_REST_KEY = process.env.ONESIGNAL_REST_KEY || "os_v2_app_qnyoebzxafeknawqixlw7bqgse42u2bozijersn3ayftdeieijqe4gbb7wvjqqgyp3d5g4ncbdfxuiniszddmjdy43xh63xrmsmigui";
-        const targetUrl = (typeof BASE_URL !== 'undefined' && BASE_URL) ? BASE_URL : "https://arcellkomunika.site/";
+        const ONESIGNAL_APP_ID = process.env.ONESIGNAL_APP_ID || "";
+        const ONESIGNAL_REST_KEY = process.env.ONESIGNAL_REST_KEY || "";
+        const targetUrl = (typeof BASE_URL !== 'undefined' && BASE_URL) ? BASE_URL : "/";
 
         // ⚡ ID Unik per notifikasi agar tidak saling menimpa
         const uniqueNotificationId = "notif_" + Date.now() + "_" + Math.floor(Math.random() * 1000);
@@ -340,7 +359,66 @@ async function kirimPushNotif(pesanTitle, pesanBody, targetId = null, isExternal
     }
 }
 
-// ==================== ENDPOINT TRANSAKSI TERJADWAL ====================
+// 7. ==================== HELPER PUSH NOTIFICATION ADMIN ====================
+async function kirimPushNotifAdmin(pesanTitle, pesanBody) {
+    try {
+        // App ID & REST Key ti .env (Khusus Admin)
+        const ONESIGNAL_APP_ID = process.env.ONESIGNAL_APP_ID_ADMIN || "";
+        const ONESIGNAL_REST_KEY = process.env.ONESIGNAL_REST_KEY_ADMIN || "";
+        const targetUrl = process.env.BASE_URL_ADMIN || "/";
+
+        const uniqueNotificationId = "notif_adm_" + Date.now() + "_" + Math.floor(Math.random() * 1000);
+
+        const payload = {
+            app_id: ONESIGNAL_APP_ID,
+            headings: { "en": pesanTitle, "id": pesanTitle },
+            contents: { "en": pesanBody, "id": pesanBody },
+            url: targetUrl,
+            icon: LOGO_URL,
+            large_icon: LOGO_URL,
+            chrome_web_icon: LOGO_URL,
+
+            collapse_id: uniqueNotificationId,
+            web_push_topic: uniqueNotificationId,
+
+            // ⚡ KHUSUS ADMIN: Paksa nembak External ID "admin_arcell"
+            include_aliases: { external_id: ["admin_arcell"] },
+            target_channel: "push"
+        };
+
+        const response = await axios.post(
+            'https://onesignal.com/api/v1/notifications',
+            payload,
+            {
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Key ${ONESIGNAL_REST_KEY}` // Tetep make 'Key ' persis kawas nu geus jalan
+                }
+            }
+        );
+
+        console.log("🔔 Admin Push Notification Status:", response.data?.id || "OK");
+    } catch (err) {
+        console.warn("⚠️ Warning Admin Push Notif:", err.response?.data || err.message);
+        
+        // FALLBACK:  external_id, tembak ka sadaya Subscribed Users di App Admin
+        try {
+            const fallbackPayload = { ...payload };
+            delete fallbackPayload.include_aliases;
+            delete fallbackPayload.target_channel;
+            fallbackPayload.included_segments = ["Subscribed Users"];
+
+            await axios.post(
+                'https://onesignal.com/api/v1/notifications',
+                fallbackPayload,
+                { headers: { 'Content-Type': 'application/json', 'Authorization': `Key ${ONESIGNAL_REST_KEY}` } }
+            );
+            console.log("🔔 Fallback Admin Broadcast Status: OK");
+        } catch (fErr) {}
+    }
+}
+
+// 8. ==================== ENDPOINT TRANSAKSI TERJADWAL ====================
 app.post('/api/user/schedule-transaction', (req, res) => {
     const { user_hp, username, buyer_sku_code, customer_no, nama_produk, harga_jual, provider, schedule_time } = req.body;
 
@@ -370,7 +448,7 @@ app.post('/api/user/schedule-transaction', (req, res) => {
     });
 });
 
-// ==================== ENDPOINT OKECONNECT ====================
+// 9. ==================== ENDPOINT OKECONNECT ====================
 app.post('/api/okeconnect/checkout', async (req, res) => {
     try {
         const { buyer_sku_code, customer_no, user_hp, username, harga_jual, harga_modal, nama_produk, subscription_id } = req.body;
@@ -488,7 +566,7 @@ app.post('/api/okeconnect/checkout', async (req, res) => {
     }
 });
 
-// CALLBACK / WEBHOOK OKECONNECT
+// 10. ================== CALLBACK OKECONNECT ===============
 app.all(['/callback/okeconnect/event', '/api/okeconnect/callback', '/api/webhook/okeconnect'], express.urlencoded({ extended: true }), express.json(), async (req, res) => {
     try {
         let data = req.body;
@@ -517,6 +595,9 @@ app.all(['/callback/okeconnect/event', '/api/okeconnect/callback', '/api/webhook
             }
         }
 
+        // Helper SN maksimal 24 karakter
+        const snClean = (sn && sn !== '-') ? String(sn).trim().substring(0, 24) : '-';
+
         const trx = await new Promise((resolve, reject) => {
             db.get("SELECT * FROM transactions WHERE ref_id = ?", [refID], (err, row) => {
                 if (err) reject(err); else resolve(row);
@@ -535,6 +616,18 @@ app.all(['/callback/okeconnect/event', '/api/okeconnect/callback', '/api/webhook
                  VALUES (?, ?, ?, ?, ?, ?, 0, 0, 0, ?, ?, ?, 'OKECONNECT')`,
                 [refID, targetHp, targetHp, targetHp, data.produk || 'Produk OkeConnect', data.produk || 'Produk OkeConnect', normSt, sn !== '-' ? sn : '', message]
             );
+
+            // 🔔 NOTIFIKASI KA ADMIN (Sistem Baru / Unregistered Trx)
+            if (typeof kirimPushNotifAdmin === 'function') {
+                const namaMember = data.username || data.nama_member || targetHp || 'Member';
+                const namaProduk = data.produk || 'Produk OkeConnect';
+                
+                kirimPushNotifAdmin(
+                    `"${namaMember}" melakukan transaksi`,
+                    `RefID: #${refID}\nProduk: ${namaProduk}\nTujuan: ${targetHp}\nSN: ${snClean}`
+                );
+            }
+
             return res.status(200).send("OK");
         }
 
@@ -564,6 +657,13 @@ app.all(['/callback/okeconnect/event', '/api/okeconnect/callback', '/api/webhook
         const targetId = trx.subscription_id || userPhone;
         const isExternalId = !trx.subscription_id;
 
+        // Ambil nama member ti database pikeun notifikasi Admin
+        const memberRow = await new Promise((resolve) => {
+            db.get("SELECT name FROM members WHERE phone = ?", [userPhone], (err, row) => resolve(row));
+        });
+        const namaMember = memberRow?.name || trx.username || userPhone || 'Member';
+        const namaProduk = trx.product_name || trx.produk || 'Produk PPOB';
+
         if (['GAGAL', 'BATAL'].includes(statusBaruUpper) && !['GAGAL', 'BATAL'].includes(statusLamaUpper)) {
             await new Promise((resolve, reject) => {
                 db.run("UPDATE members SET balance = balance + ? WHERE phone = ?", [refundPrice, userPhone], (err) => {
@@ -571,19 +671,38 @@ app.all(['/callback/okeconnect/event', '/api/okeconnect/callback', '/api/webhook
                 });
             });
 
+            // Notif Member
             await kirimPushNotif(
                 "❌ Transaksi Gagal",
-                `${trx.product_name || 'Produk'} ke ${trx.no_tujuan} GAGAL. Saldo Rp ${refundPrice.toLocaleString('id-ID')} dikembalikan.`,
+                `${namaProduk} ke ${trx.no_tujuan} GAGAL. Saldo Rp ${refundPrice.toLocaleString('id-ID')} dikembalikan.`,
                 targetId,
                 isExternalId
             );
+
+            // 🔔 notif admin
+            if (typeof kirimPushNotifAdmin === 'function') {
+                kirimPushNotifAdmin(
+                    `❌ "${namaMember}" transaksi GAGAL`,
+                    `RefID: #${refID}\nProduk: ${namaProduk}\nTujuan: ${trx.no_tujuan}\nSN: ${snClean}`
+                );
+            }
+
         } else if (['SUKSES', 'LUNAS'].includes(statusBaruUpper) && !['SUKSES', 'LUNAS'].includes(statusLamaUpper)) {
+            // Notif Member
             await kirimPushNotif(
                 "🎉 Transaksi Berhasil!",
-                `${trx.product_name || 'Produk'} ke ${trx.no_tujuan} SUKSES. SN: ${sn}`,
+                `${namaProduk} ke ${trx.no_tujuan} SUKSES. SN: ${sn}`,
                 targetId,
                 isExternalId
             );
+
+            // 🔔 notif admin
+            if (typeof kirimPushNotifAdmin === 'function') {
+                kirimPushNotifAdmin(
+                    `"${namaMember}" melakukan transaksi`,
+                    `RefID: #${refID}\nProduk: ${namaProduk}\nTujuan: ${trx.no_tujuan}\nSN: ${snClean}`
+                );
+            }
         }
 
         return res.status(200).send("OK");
@@ -593,7 +712,7 @@ app.all(['/callback/okeconnect/event', '/api/okeconnect/callback', '/api/webhook
     }
 });
 
-// SINKRONISASI PRODUK OKECONNECT
+// 11. =============== SINKRONISASI PRODUK OKECONNECT ==================
 app.post('/api/admin/sync-okeconnect', async (req, res) => {
     try {
         console.log('🔄 Downloading Okeconnect Pricelist...');
@@ -687,7 +806,7 @@ app.get('/api/admin/okeconnect-saldo', async (req, res) => {
     }
 });
 
-// ==================== ENDPOINT DIGIFLAZZ ====================
+// 12. ==================== ENDPOINT DIGIFLAZZ ====================
 
 app.post('/api/digiflazz/checkout', async (req, res) => {
     const { buyer_sku_code, customer_no, user_hp, username, harga_jual, harga_modal, nama_produk, subscription_id } = req.body;
@@ -779,6 +898,7 @@ app.post('/api/digiflazz/checkout', async (req, res) => {
     });
 });
 
+// 13. =============== CALLBACK DIGIFLAZZ ===============
 app.post('/api/digiflazz/webhook', (req, res) => {
     try {
         const bodyData = req.body.data || req.body;
@@ -798,22 +918,48 @@ app.post('/api/digiflazz/webhook', (req, res) => {
                 db.run("UPDATE transactions SET status = ?, sn = ?, message = ? WHERE ref_id = ?",
                     [statusClean, cleanSn, message || '', ref_id]);
 
+                const userPhone = normalizePhone(trx.user_hp || trx.customer_no);
+                const refundPrice = trx.harga_jual || trx.price || 0;
+
                 if (['GAGAL', 'BATAL'].includes(statusUpper) && !['GAGAL', 'BATAL'].includes(statusLamaUpper)) {
-                    const targetHp = normalizePhone(trx.user_hp || trx.customer_no);
-                    const refundPrice = trx.harga_jual || trx.price || 0;
-                    db.run("UPDATE members SET balance = balance + ? WHERE phone = ?", [refundPrice, targetHp]);
+                    db.run("UPDATE members SET balance = balance + ? WHERE phone = ?", [refundPrice, userPhone]);
                 }
 
                 const namaProduk = trx.produk || trx.product_name || 'Produk PPOB';
                 const noTujuan = trx.no_tujuan || trx.customer_no || '';
-                const targetId = trx.subscription_id || trx.user_hp;
+                const targetId = trx.subscription_id || userPhone;
                 const isExternalId = !trx.subscription_id; 
 
+                // Ambil nama member ti database pikeun notifikasi Admin
+                const memberRow = await new Promise((resolve) => {
+                    db.get("SELECT name FROM members WHERE phone = ?", [userPhone], (err, row) => resolve(row));
+                });
+                const namaMember = memberRow?.name || trx.username || userPhone || 'Member';
+
+                // Helper pikeun motong SN maksimal 24 karakter
+                const snDisplay = (cleanSn && cleanSn !== '-') ? String(cleanSn).trim().substring(0, 24) : '-';
+
+                // ==================== NOTIFIKASI KA MEMBER ====================
                 if (targetId) {
                     if (statusUpper === 'SUKSES' || statusUpper === 'LUNAS') {
                         await kirimPushNotif("🎉 Transaksi Berhasil!", `${namaProduk} (${noTujuan}) SUKSES. SN: ${cleanSn}`, targetId, isExternalId);
                     } else if (['GAGAL', 'BATAL'].includes(statusUpper)) {
                         await kirimPushNotif("❌ Transaksi Gagal", `${namaProduk} (${noTujuan}) Gagal: ${message || 'Gagal diproses'}. Saldo dikembalikan.`, targetId, isExternalId);
+                    }
+                }
+
+                // ==================== NOTIFIKASI KA ADMIN ====================
+                if (typeof kirimPushNotifAdmin === 'function') {
+                    if (statusUpper === 'SUKSES' || statusUpper === 'LUNAS') {
+                        kirimPushNotifAdmin(
+                            `"${namaMember}" melakukan transaksi`,
+                            `RefID: #${ref_id}\nProduk: ${namaProduk}\nTujuan: ${noTujuan}\nSN: ${snDisplay}`
+                        );
+                    } else if (['GAGAL', 'BATAL'].includes(statusUpper)) {
+                        kirimPushNotifAdmin(
+                            `❌ "${namaMember}" transaksi GAGAL`,
+                            `RefID: #${ref_id}\nProduk: ${namaProduk}\nTujuan: ${noTujuan}\nSN: ${snDisplay}`
+                        );
                     }
                 }
             });
@@ -825,7 +971,7 @@ app.post('/api/digiflazz/webhook', (req, res) => {
     }
 });
 
-// SINKRONISASI PRODUK DIGIFLAZZ
+// 14. ================ SINKRONISASI PRODUK DIGIFLAZZ ================
 app.post('/api/digiflazz/price-list', async (req, res) => {
     try {
         const username = USERNAME_DIGI.trim();
@@ -885,7 +1031,7 @@ app.post('/api/digiflazz/price-list', async (req, res) => {
     }
 });
 
-// ==================== ENDPOINT PRODUK CLIENT ====================
+// 15. ==================== ENDPOINT PRODUK CLIENT ====================
 
 app.get('/api/products', (req, res) => {
     const query = `
@@ -923,7 +1069,7 @@ app.get('/api/products/okeconnect', (req, res) => {
     });
 });
 
-// ==================== ENDPOINT MEMBER & HISTORY ====================
+// 16. ==================== ENDPOINT MEMBER & HISTORY ====================
 
 app.post('/api/member/login', (req, res) => {
     const { name, phone } = req.body;
@@ -1010,7 +1156,7 @@ app.get('/api/history', (req, res) => {
     });
 });
 
-// ==================== ADMIN MANAGEMENTS ENDPOINTS ====================
+// 17. ==================== ADMIN MANAGEMENTS ENDPOINTS ====================
 
 app.get('/admin', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'admin.html'));
@@ -1176,7 +1322,7 @@ app.get('/api/admin/transactions', (req, res) => {
     });
 });
 
-// ==================== ENDPOINT USER / CATEGORIES (CUSTOM ISOLATED) ====================
+// 18. ==================== ENDPOINT USER / CATEGORIES (CUSTOM ISOLATED) ====================
 app.get('/api/user/products-by-prefix', (req, res) => {
     const { brand } = req.query;
 
@@ -1224,7 +1370,7 @@ app.get('/api/user/products-by-prefix', (req, res) => {
     });
 });
 
-// ==================== ENDPOINT FETCH CUSTOM CATEGORIES ====================
+// 19. ==================== ENDPOINT FETCH CUSTOM CATEGORIES ====================
 app.get('/api/admin/custom-categories', (req, res) => {
     db.all(`SELECT * FROM custom_categories ORDER BY sort_order ASC, id DESC`, [], (err, categories) => {
         if (err) return res.status(500).json({ status: 'error', message: err.message });
@@ -1295,7 +1441,7 @@ app.post('/api/admin/unmap-category-product', (req, res) => {
     });
 });
 
-// ==================== ENDPOINT UPDATE HARGA TRANSAKSI ADMIN ====================
+// 20. ==================== ENDPOINT UPDATE HARGA TRANSAKSI ADMIN ====================
 app.post('/api/admin/update-transaction-price', (req, res) => {
     const { ref_id, harga_modal, harga_jual, new_price } = req.body;
     const refId = String(ref_id || '').trim();
@@ -1319,7 +1465,7 @@ app.post('/api/admin/update-transaction-price', (req, res) => {
     );
 });
 
-// ==================== ENDPOINT UPDATE EDIT PRODUK CUSTOM ====================
+// 21. ==================== ENDPOINT UPDATE EDIT PRODUK CUSTOM ====================
 app.post('/api/admin/update-custom-product', (req, res) => {
     const { category_id, buyer_sku_code, product_name, price, provider } = req.body;
 
@@ -1347,7 +1493,7 @@ app.post('/api/admin/update-custom-product', (req, res) => {
     });
 });
 
-// GET: Ambil daftar transaksi terjadwal berdasarkan nomor tujuan
+// 22. =============== GET: TRANSAKSI OTOMATIS ===============
 app.get('/api/user/scheduled-transactions', (req, res) => {
     const customerNo = req.query.customer_no;
     if (!customerNo) return res.json({ status: 'success', data: [] });
@@ -1373,7 +1519,7 @@ app.delete('/api/user/scheduled-transactions/:id', (req, res) => {
     });
 });
 
-// ==================== ENDPOINT GET PRODUK HASIL MAPPING CUSTOM (UNTUK KASIR) ====================
+// 23. ==================== ENDPOINT GET PRODUK HASIL MAPPING CUSTOM (UNTUK KASIR) ====================
 app.get('/api/admin/products', (req, res) => {
     // Query ini KHUSUS mengambil produk yang SUDAH DIMAPPING di category_products
     // Menggunakan nama custom (custom_name) & harga jual custom (custom_jual) buatan Akang
@@ -1402,7 +1548,7 @@ app.get('/api/admin/products', (req, res) => {
     });
 });
 
-// ==================== START SERVER ====================
+// 24. ==================== START SERVER ====================
 app.listen(PORT, () => {
     console.log(`🚀 Server Arcell Komunika berjalan di Port ${PORT}`);
 });

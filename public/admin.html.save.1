@@ -5,33 +5,22 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Panel Admin - Arcell Komunika</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="manifest" href="/manifest-admin.json">
 
-    <!-- 🔔 ONESIGNAL SDK v16 KHUSUS ADMIN -->
-<script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
-<script>
-  window.OneSignalDeferred = window.OneSignalDeferred || [];
-  OneSignalDeferred.push(async function(OneSignal) {
+    <!-- 🔔 ONESIGNAL SDK v16 FINAL (FIXED) -->
+    <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
+    <script>
+    window.OneSignalDeferred = window.OneSignalDeferred || [];
+    OneSignalDeferred.push(async function(OneSignal) {
     await OneSignal.init({
-      appId: "e9b5d447-82c7-4907-9248-bf2f6b59b993",
-      safari_web_id: "web.onesignal.auto.087eca46-faed-450d-af5b-90e7f525c88c",
-      notifyButton: {
-        enable: false // Dihapus lonceng ngambangna sangkan ramping tampilan PWA
-      },
-      allowLocalhostAsSecureOrigin: true
-    });
-
-    // 1. Menta izin notifikasi langsung ka browser / APK
-    if (!OneSignal.Notifications.permission) {
-      await OneSignal.Notifications.requestPermission();
-    }
-
-    // 2. Hubungkan HP Admin salaku External ID "admin_arcell"
-    await OneSignal.login("admin_arcell");
-    console.log("✅ Device Admin terhubung ka OneSignal salaku: admin_arcell");
+    appId: "8370e207-3701-48a6-82d0-45d76f860691",
+    safari_web_id: "web.onesignal.auto.19aac151-6a52-4f31-b603-0bf7908b06b4",
+    notifyButton: { enable: false }
   });
-</script>
 
+  // 🔑 WAJIB: Login-kan device Admin ke external_id "admin_arcell"
+  await OneSignal.login("admin_arcell");
+  });
+   l</scr
     <style>
         :root {
             --glass-bg: rgba(255, 255, 255, 0.45);
@@ -398,8 +387,8 @@
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; flex-wrap: wrap; gap: 6px;">
                     <h3 style="margin:0; font-size:0.88rem;">
                         <i class="fa-solid fa-user-gear"></i> Member 
-                        Saldo: <span id="dispSaldoMember" style="color: #10b981;">Rp 0</span> | 
-                        Profit: <span id="dispTotalProfitMember" style="color: #6366f1;">Rp 0</span>
+                        (Saldo: <span id="dispSaldoMember" style="color: #10b981;">Rp 0</span> | 
+                        Profit: <span id="dispTotalProfitMember" style="color: #6366f1;">Rp 0</span>)
                     </h3>
                     <button class="btn-success btn-sm" onclick="bukaModalMember()"><i class="fa-solid fa-user-plus"></i> + Member</button>
                 </div>
@@ -413,7 +402,7 @@
         <!-- TAB KATEGORI CUSTOM -->
         <div id="tab-custom-cat" class="tab-content">
             <div class="glass-card">
-                <h3><i class="fa-solid fa-folder-plus"></i> Buat Kategori</h3>
+                <h3><i class="fa-solid fa-folder-plus"></i> Buat Kategori Custom Manual (SQLite)</h3>
                 <div style="display: flex; gap: 6px; flex-wrap: wrap;">
                     <input type="text" id="namaKategoriBaru" placeholder="Nama Kategori (misal: Freedom Sensasi)" style="flex: 2; min-width: 150px;">
                     <select id="brandKategoriBaru" style="flex: 1; min-width: 110px;">
@@ -434,11 +423,11 @@
 
             <div class="glass-card">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-                    <h3 style="margin: 0;"><i class="fa-solid fa-folder-tree"></i> Custom Produk</h3>
+                    <h3 style="margin: 0;"><i class="fa-solid fa-folder-tree"></i> Pemetaan Kategori Custom (SQLite)</h3>
                     <button onclick="loadCustomCategoriesFromDB()" class="btn-sm"><i class="fa-solid fa-rotate-right"></i> Refresh DB</button>
                 </div>
                 <div style="font-size: 0.72rem; color: var(--text-sub); margin-bottom: 12px; background: rgba(255,255,255,0.5); padding: 8px; border-radius: 8px;">
-                    💡 <b>Harga Modal</b> akan terus otomatis diperbarui saat Sync.
+                    💡 <b>Harga Modal</b> akan terus otomatis diperbarui saat Sync API Provider, sedangkan <b>Harga Jual & Nama Custom</b> pada kategori ini tetap aman terkunci.
                 </div>
                 <div id="customCategoryContainer">
                     <div style="text-align: center; color: var(--text-sub); padding: 15px; font-size: 0.8rem;">Memuat daftar kategori kustom...</div>
