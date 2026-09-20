@@ -98,7 +98,6 @@
     </div>
 
     <datalist id="customer-suggestions"></datalist>
-    <!-- DATALIST SARAN PRODUK DATABASE -->
     <datalist id="db-product-suggestions"></datalist>
 
     <div class="header">
@@ -245,6 +244,12 @@
 
     let currentActiveMember = defaultMembersList[0];
 
+    const getStoredManualFakturs = () => JSON.parse(localStorage.getItem('manual_faktur_full_list') || '[]');
+    const saveManualFakturs = (list) => localStorage.setItem('manual_faktur_full_list', JSON.stringify(list));
+    const getTodayString = () => new Date().toISOString().split('T')[0];
+    const cleanNumber = (val) => typeof val === 'number' ? val : (parseInt(String(val).replace(/[^0-9-]/g, '')) || 0);
+    const formatRp = (angka) => new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(cleanNumber(angka));
+
     // INTEGRASI DATALIST PRODUK DATABASE
     const fetchDatabaseProducts = async () => {
         try {
@@ -317,21 +322,13 @@
             const tgl = `${yyyy}-${mm}-${dd}`;
             const jm = `${hh}:${min}:${ss}`;
 
-            return {
-                tanggal: tgl,
-                jam: jm,
-                formatted: `${tgl} ${jm} WIB`
-            };
+            return { tanggal: tgl, jam: jm, formatted: `${tgl} ${jm} WIB` };
         }
 
         const parts = cleanedStr.split(/[\s,T]+/);
         const tgl = parts[0] || getTodayString();
         const jm = parts[1] || '';
-        return { 
-            tanggal: tgl, 
-            jam: jm, 
-            formatted: (tgl + ' ' + jm).trim() 
-        };
+        return { tanggal: tgl, jam: jm, formatted: (tgl + ' ' + jm).trim() };
     }
 
     const extractTxDate = (waktuStr) => parseWaktu(waktuStr).tanggal;
@@ -423,24 +420,25 @@
         }));
     };
 
+    // PERBAIKAN LOGIKA: UTAMAKAN FAKTUR MANUAL DARI LOCALSTORAGE
     const getConsolidatedDayData = (dateKey) => {
-        const activeName = (currentActiveMember.name || '').toLowerCase();
+        const activeName = (currentActiveMember.name || '').trim().toLowerCase();
         const localFakturs = getStoredManualFakturs().filter(f => 
-            (f.kasir_member || f.pembeli || '').toLowerCase() === activeName && f.tanggal === dateKey
+            (f.kasir_member || f.pembeli || '').trim().toLowerCase() === activeName && f.tanggal === dateKey
         );
 
         let rawItems = [];
         let sisaLama = 0;
         let bayarNominal = 0;
 
-        const serverItems = getValidServerTx(dateKey);
-
-        if (localFakturs.length > 0 && localFakturs[0].items && localFakturs[0].items.length > 0) {
-            rawItems = localFakturs[0].items;
+        if (localFakturs.length > 0) {
+            // Prioritas Utama: Hasil Edit / Simpan Manual di LocalStorage
+            rawItems = localFakturs[0].items || [];
             sisaLama = localFakturs[0].sisa_lama || 0;
             bayarNominal = localFakturs[0].bayar || 0;
         } else {
-            rawItems = serverItems;
+            // Jika belum pernah diedit manual, gunakan data awal dari API server
+            rawItems = getValidServerTx(dateKey);
         }
 
         const groupedItems = groupSameItems(rawItems);
@@ -451,8 +449,8 @@
         const container = document.getElementById("kas-history-list");
         if (!container) return;
 
-        const activeName = (currentActiveMember.name || '').toLowerCase();
-        const localFakturs = getStoredManualFakturs().filter(f => (f.kasir_member || f.pembeli || '').toLowerCase() === activeName);
+        const activeName = (currentActiveMember.name || '').trim().toLowerCase();
+        const localFakturs = getStoredManualFakturs().filter(f => (f.kasir_member || f.pembeli || '').trim().toLowerCase() === activeName);
         const serverTx = getValidServerTx();
 
         const datesMap = {};
@@ -540,7 +538,6 @@
         showToast(`Struk Harian ${dateKey} dimuat ke form!`);
     };
 
-    // --- MODAL STRUK HARIAN THERMAL (CLEAN TANPA BORDER) ---
     window.openStrukHarianModal = (dateKey) => {
         const { groupedItems, sisaLama, bayarNominal } = getConsolidatedDayData(dateKey);
         const totalModalHarian = groupedItems.reduce((acc, i) => acc + i.subtotal_jual, 0);
@@ -564,7 +561,7 @@
                         <div style="margin-bottom:8px;">
                             <div style="font-weight:bold; word-break:break-word; color:#000;">${item.nama}</div>
                             <div style="display:flex; justify-content:space-between; margin-top:2px; color:#000;">
-                                <span>${item.qty} x ${formatRp(item.jual).replace('Rp', '').trim()}</span>
+                                <span>${item.qty} x${formatRp(item.jual).replace('Rp', '').trim()}</span>
                                 <span style="font-weight:bold;">${formatRp(item.subtotal_jual).replace('Rp', '').trim()}</span>
                             </div>
                         </div>
@@ -617,7 +614,6 @@
         document.getElementById("faktur-fullscreen-modal").classList.add("open");
     };
 
-    // --- CETAK THERMAL BLUETOOTH ---
     window.cetakThermalBluetooth = (dateKey) => {
         const { groupedItems, sisaLama, bayarNominal } = getConsolidatedDayData(dateKey);
         const totalModalHarian = groupedItems.reduce((acc, i) => acc + i.subtotal_jual, 0);
@@ -638,7 +634,6 @@
         window.print();
     };
 
-    // --- UNDUH PNG THERMAL POLOS TANPA BORDER ---
     window.downloadStrukPngHD = (dateKey) => {
         const area = document.getElementById("capture-struk-area");
         showToast("Memproses PNG Thermal...");
@@ -659,19 +654,12 @@
         });
     };
 
-    // --- FUNGSI CLOSE MODAL (X) RESPONSIF DENGAN WINDOW ---
     window.closeFakturFullscreen = () => {
         const modal = document.getElementById("faktur-fullscreen-modal");
         if (modal) {
             modal.classList.remove("open");
         }
     };
-
-    const getStoredManualFakturs = () => JSON.parse(localStorage.getItem('manual_faktur_full_list') || '[]');
-    const saveManualFakturs = (list) => localStorage.setItem('manual_faktur_full_list', JSON.stringify(list));
-    const getTodayString = () => new Date().toISOString().split('T')[0];
-    const cleanNumber = (val) => typeof val === 'number' ? val : (parseInt(String(val).replace(/[^0-9-]/g, '')) || 0);
-    const formatRp = (angka) => new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(cleanNumber(angka));
 
     const showToast = (msg, isError = false) => {
         const toast = document.getElementById("toast");
@@ -737,6 +725,7 @@
         document.getElementById("faktur-kembalian-val").innerText = formatRp(Math.abs(selisih));
     };
 
+    // PERBAIKAN PENYIMPANAN FAKTUR LEBIH PRESISI (MEMBER + TANGGAL)
     window.saveFakturPenjualan = async () => {
         const txDate = document.getElementById("faktur-date-inp")?.value || getTodayString();
         const sisaLama = cleanNumber(document.getElementById("faktur-sisa-lama-inp")?.value || 0);
@@ -759,10 +748,12 @@
 
         if (itemsList.length === 0) return showToast("Isi nama produk & harga jual!", true);
 
+        const activeMemberName = (currentActiveMember.name || '').trim();
+
         const newFakturRecord = {
-            no_faktur: "INV-" + Date.now().toString().slice(-6),
-            kasir_member: currentActiveMember.name,
-            pembeli: currentActiveMember.name,
+            no_faktur: document.getElementById("faktur-no-inp")?.value || ("INV-" + Date.now().toString().slice(-6)),
+            kasir_member: activeMemberName,
+            pembeli: activeMemberName,
             tanggal: txDate,
             items: itemsList,
             subtotal_jual: subtotalJualFaktur,
@@ -772,10 +763,11 @@
         };
 
         let currentFakturs = getStoredManualFakturs();
-        const activeName = (currentActiveMember.name || '').toLowerCase();
+        const activeNameLower = activeMemberName.toLowerCase();
         
+        // Hapus faktur lama untuk tanggal & member yang sama agar tertimpa revisi terbaru
         currentFakturs = currentFakturs.filter(f => {
-            const isSameMember = (f.kasir_member || f.pembeli || '').toLowerCase() === activeName;
+            const isSameMember = (f.kasir_member || f.pembeli || '').trim().toLowerCase() === activeNameLower;
             const isSameDate = f.tanggal === txDate;
             return !(isSameMember && isSameDate);
         });
