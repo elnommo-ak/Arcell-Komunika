@@ -1513,6 +1513,60 @@ app.post('/api/admin/update-transaction-price', (req, res) => {
     );
 });
 
+// Endpoint untuk menyimpan urutan posisi sub-kategori ke SQLite
+app.post('/api/admin/reorder-custom-categories', (req, res) => {
+    const { order } = req.body; // Ekspektasi array: [{ id: 1, position: 1 }, { id: 2, position: 2 }]
+    if (!order || !Array.isArray(order)) {
+        return res.status(400).json({ status: 'error', message: 'Data urutan tidak valid' });
+    }
+
+    db.serialize(() => {
+        db.run("BEGIN TRANSACTION");
+        const stmt = db.prepare(`UPDATE custom_categories SET sort_order = ? WHERE id = ?`);
+
+        order.forEach(item => {
+            stmt.run(parseInt(item.position) || 0, parseInt(item.id));
+        });
+
+        stmt.finalize();
+        db.run("COMMIT", (err) => {
+            if (err) {
+                db.run("ROLLBACK");
+                return res.status(500).json({ status: 'error', message: 'Gagal memperbarui urutan posisi di database' });
+            }
+            res.json({ status: 'success', message: 'Urutan posisi berhasil disimpan' });
+        });
+    });
+});
+
+// Endpoint untuk memperbarui Status & SN Transaksi
+app.post('/api/admin/update-transaction-status', (req, res) => {
+    const { ref_id, status, sn } = req.body;
+
+    if (!ref_id || !status) {
+        return res.status(400).json({ status: 'error', message: 'Ref ID dan Status wajib diisi' });
+    }
+
+    // Query update ke database (Contoh SQLite / MySQL)
+    const sql = `UPDATE transactions SET status = ?, sn = ? WHERE ref_id = ? OR id = ?`;
+    
+    db.run(sql, [status, sn || '', ref_id, ref_id], function(err) {
+        if (err) {
+            console.error('Gagal update status transaksi:', err.message);
+            return res.status(500).json({ status: 'error', message: 'Gagal memperbarui database: ' + err.message });
+        }
+
+        if (this.changes === 0) {
+            return res.status(404).json({ status: 'error', message: 'Transaksi tidak ditemukan' });
+        }
+
+        res.json({ 
+            status: 'success', 
+            message: `Status transaksi #${ref_id} berhasil diubah menjadi ${status}` 
+        });
+    });
+});
+
 // =========================================================================
 // 9. START SERVER
 // =========================================================================

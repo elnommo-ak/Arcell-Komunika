@@ -439,7 +439,7 @@
                     <button onclick="loadCustomCategoriesFromDB()" class="btn-sm"><i class="fa-solid fa-rotate-right"></i> Refresh DB</button>
                 </div>
                 <div style="font-size: 0.72rem; color: var(--text-sub); margin-bottom: 12px; background: rgba(255,255,255,0.5); padding: 8px; border-radius: 8px;">
-                    💡 <b>Harga Modal</b> akan terus otomatis diperbarui saat Sync.
+                    💡 <b>Harga Modal</b> akan terus otomatis diperbarui saat Sync. Gunakan panah (▲ / ▼) untuk mengubah posisi urutan sub-kategori secara manual.
                 </div>
                 <div id="customCategoryContainer">
                     <div style="text-align: center; color: var(--text-sub); padding: 15px; font-size: 0.8rem;">Memuat daftar kategori kustom...</div>
@@ -1114,6 +1114,7 @@
             }
         }
 
+        /* 🟢 RENDER CUSTOM CATEGORIES DENGAN TOMBOL NAVIGASI POSISI (MANUAL & PERMANEN) */
         function renderCustomCategoriesTab() {
             const container = document.getElementById('customCategoryContainer');
             if(!dbCustomCategories || dbCustomCategories.length === 0) {
@@ -1130,7 +1131,8 @@
 
             let html = '';
             Object.keys(groupedByBrand).forEach(brand => {
-                const categories = groupedByBrand[brand];
+                // Urutkan kategori berdasarkan sort_order / id
+                const categories = groupedByBrand[brand].sort((a, b) => (a.sort_order || a.id) - (b.sort_order || b.id));
                 const isBrandOpen = openCustomBrands.has(brand);
 
                 html += `
@@ -1145,7 +1147,7 @@
                         <div class="brand-body">
                 `;
 
-                categories.forEach(cat => {
+                categories.forEach((cat, index) => {
                     const prods = [...(cat.products || [])];
                     prods.sort((a, b) => parseFloat(a.jual || 0) - parseFloat(b.jual || 0));
 
@@ -1155,7 +1157,14 @@
                     html += `
                         <div class="sub-cat-card ${isSubCatOpen ? 'open' : ''}" id="sub-cat-${cat.id}" data-catid="${cat.id}">
                             <div class="sub-cat-header" onclick="toggleSubCatAccordion(this, '${cat.id}')">
-                                <span><i class="fa-solid fa-folder-open" style="margin-right: 4px;"></i> ${cat.name}</span>
+                                <div style="display: flex; align-items: center; gap: 6px;">
+                                    <!-- TOMBOL NAVIGASI UBAH POSISI SUB-KATEGORI -->
+                                    <div style="display: flex; flex-direction: column; gap: 2px;" onclick="event.stopPropagation();">
+                                        <button class="btn-sm" style="padding: 1px 4px; font-size: 0.55rem; line-height: 1;" onclick="geserPosisiKategori('${brand}', ${cat.id}, 'up')" title="Geser Ke Atas"><i class="fa-solid fa-chevron-up"></i></button>
+                                        <button class="btn-sm" style="padding: 1px 4px; font-size: 0.55rem; line-height: 1;" onclick="geserPosisiKategori('${brand}', ${cat.id}, 'down')" title="Geser Ke Bawah"><i class="fa-solid fa-chevron-down"></i></button>
+                                    </div>
+                                    <span><i class="fa-solid fa-folder-open" style="margin-right: 4px;"></i> ${cat.name}</span>
+                                </div>
                                 <div style="display: flex; align-items: center; gap: 6px;">
                                     <span class="badge-count item-count-badge" style="font-size: 0.62rem;">${prods.length} Item</span>
                                     <button class="btn-sm btn-danger" style="padding: 2px 6px;" onclick="event.stopPropagation(); hapusCustomCategoryDB(${cat.id}, '${cat.name}')" title="Hapus Kategori"><i class="fa-solid fa-trash"></i></button>
@@ -1200,6 +1209,50 @@
             });
 
             container.innerHTML = html;
+        }
+
+        /* 🟢 FUNGSI UNTUK MENGGESER POSISI SUB-KATEGORI SECARA MANUALLY & PERMANEN */
+        async function geserPosisiKategori(brand, catId, arah) {
+            const catList = dbCustomCategories
+                .filter(c => (c.brand || 'LAINNYA') === brand)
+                .sort((a, b) => (a.sort_order || a.id) - (b.sort_order || b.id));
+
+            const idx = catList.findIndex(c => c.id === catId);
+            if (idx === -1) return;
+
+            if (arah === 'up' && idx > 0) {
+                const temp = catList[idx];
+                catList[idx] = catList[idx - 1];
+                catList[idx - 1] = temp;
+            } else if (arah === 'down' && idx < catList.length - 1) {
+                const temp = catList[idx];
+                catList[idx] = catList[idx + 1];
+                catList[idx + 1] = temp;
+            } else {
+                return;
+            }
+
+            catList.forEach((c, index) => {
+                c.sort_order = index + 1;
+            });
+
+            renderCustomCategoriesTab();
+
+            const orderPayload = catList.map(c => ({ id: c.id, position: c.sort_order }));
+
+            try {
+                const res = await fetch('/api/admin/reorder-custom-categories', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ order: orderPayload })
+                });
+                const result = await res.json();
+                if (result.status !== 'success') {
+                    console.error('Gagal menyimpan posisi ke database:', result.message);
+                }
+            } catch (err) {
+                console.error('Error jaringan saat menyimpan posisi kategori:', err);
+            }
         }
 
         /* MODAL & FUNGSI EDIT PRODUK CUSTOM */
