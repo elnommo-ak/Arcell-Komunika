@@ -172,11 +172,13 @@ async function kirimPushNotif(pesanTitle, pesanBody, targetId = null, isExternal
     }
 }
 
-async function kirimPushNotifAdmin(pesanTitle, pesanBody) {
+async function kirimPushNotifAdmin(pesanTitle, pesanBody, options = {}) {
     try {
         const ONESIGNAL_APP_ID = process.env.ONESIGNAL_APP_ID_ADMIN || "";
         const ONESIGNAL_REST_KEY = process.env.ONESIGNAL_REST_KEY_ADMIN || "";
-        const targetUrl = process.env.BASE_URL_ADMIN || "/";
+        
+        // Prioritaskan URL dari options, jika tidak ada baru gunakan env atau default
+        const targetUrl = options.url || process.env.BASE_URL_ADMIN || "/";
         const uniqueNotificationId = "notif_adm_" + Date.now() + "_" + Math.floor(Math.random() * 1000);
 
         const payload = {
@@ -184,6 +186,7 @@ async function kirimPushNotifAdmin(pesanTitle, pesanBody) {
             headings: { "en": pesanTitle, "id": pesanTitle },
             contents: { "en": pesanBody, "id": pesanBody },
             url: targetUrl,
+            data: { url: targetUrl, ...options.data }, // Data tambahan untuk Service Worker / Client-side JS
             icon: LOGO_URL,
             large_icon: LOGO_URL,
             chrome_web_icon: LOGO_URL,
@@ -208,10 +211,24 @@ async function kirimPushNotifAdmin(pesanTitle, pesanBody) {
     } catch (err) {
         console.warn("⚠️ Warning Admin Push Notif:", err.response?.data || err.message);
         try {
-            const fallbackPayload = { ...payload };
-            delete fallbackPayload.include_aliases;
-            delete fallbackPayload.target_channel;
-            fallbackPayload.included_segments = ["Subscribed Users"];
+            const ONESIGNAL_APP_ID = process.env.ONESIGNAL_APP_ID_ADMIN || "";
+            const ONESIGNAL_REST_KEY = process.env.ONESIGNAL_REST_KEY_ADMIN || "";
+            const targetUrl = options.url || process.env.BASE_URL_ADMIN || "/";
+            const uniqueNotificationId = "notif_adm_" + Date.now() + "_" + Math.floor(Math.random() * 1000);
+
+            const fallbackPayload = {
+                app_id: ONESIGNAL_APP_ID,
+                headings: { "en": pesanTitle, "id": pesanTitle },
+                contents: { "en": pesanBody, "id": pesanBody },
+                url: targetUrl,
+                data: { url: targetUrl, ...options.data },
+                icon: LOGO_URL,
+                large_icon: LOGO_URL,
+                chrome_web_icon: LOGO_URL,
+                collapse_id: uniqueNotificationId,
+                web_push_topic: uniqueNotificationId,
+                included_segments: ["Subscribed Users"]
+            };
 
             await axios.post(
                 'https://onesignal.com/api/v1/notifications',
@@ -219,7 +236,9 @@ async function kirimPushNotifAdmin(pesanTitle, pesanBody) {
                 { headers: { 'Content-Type': 'application/json', 'Authorization': `Key ${ONESIGNAL_REST_KEY}` } }
             );
             console.log("🔔 Fallback Admin Broadcast Status: OK");
-        } catch (fErr) {}
+        } catch (fErr) {
+            console.error("❌ Fallback Admin Push Notif Error:", fErr.response?.data || fErr.message);
+        }
     }
 }
 
@@ -545,7 +564,6 @@ app.get('/api/transaction/detail', (req, res) => {
         res.json({ status: 'success', data: dataFormatted });
     });
 });
-
 app.get('/api/history', (req, res) => {
     const rawPhone = req.query.phone || req.query.hp || '';
     const phone = normalizePhone(rawPhone);
@@ -573,6 +591,65 @@ app.get('/api/history', (req, res) => {
 
         res.json({ status: 'success', data: normalizedRows });
     });
+});
+
+// =========================================================================
+// ENDPOINT KHUSUS DETAIL TRANSAKSI UNTUK PANEL ADMIN / DETAILMEMBER.HTML
+// =========================================================================
+app.get('/api/admin/transaction/detail', (req, res) => {
+    try {
+        const trxId = (req.query.id || req.query.ref_id || req.query.trx_id || '').trim();
+
+        if (!trxId) {
+            return res.status(400).json({ status: 'error', message: 'ID Transaksi wajib diisi' });
+        }
+
+        const sql = `
+            SELECT 
+                t.*,
+                COALESCE(t.ref_id, t.id) AS ref_id,
+                COALESCE(t.user_hp, t.customer_no, t.phone, '-') AS user_hp,
+                COALESCE(t.username, t.nama_member, '-') AS username,
+                COALESCE(t.produk, t.product_name, t.nama_produk) AS produk,
+                COALESCE(t.no_tujuan, t.customer_no, t.target) AS no_tujuan,
+                COALESCE(t.harga, t.modal, 0) AS harga_modal,
+                COALESCE(t.harga_jual, t.price, t.harga, 0) AS harga_jual,
+                COALESCE(t.sn, t.serial_number, t.nomor_resi, '-') AS sn,
+                COALESCE(t.status, 'PROSES') AS status,
+                COALESCE(t.waktu, t.created_at, t.date) AS waktu
+            FROM transactions t
+            WHERE t.ref_id = ? OR t.id = ? OR t.no_tujuan = ? OR t.customer_no = ?
+            LIMIT 1
+        `;
+
+        db.get(sql, [trxId, trxId, trxId, trxId], (err, row) => {
+            if (err) {
+                console.error("DB Error Admin Detail:", err.message);
+                return res.status(500).json({ status: 'error', message: 'Gagal query database admin' });
+            }
+            
+            if (!row) {
+                return res.status(404).json({ status: 'error', message: 'Data transaksi tidak ditemukan' });
+            }
+
+            const hModal = parseFloat(row.harga_modal || 0);
+            const hJual = parseFloat(row.harga_jual || hModal);
+
+            res.json({
+                status: 'success',
+                data: {
+                    ...row,
+                    harga: hModal,          // Modal untuk Admin
+                    harga_jual: hJual,      // Jual untuk Admin
+                    price: hJual,
+                    nama_member: row.username !== '-' ? row.username : (row.user_hp || 'Member'),
+                    phone: row.user_hp
+                }
+            });
+        });
+    } catch (e) {
+        res.status(500).json({ status: 'error', message: 'Internal Server Error Admin' });
+    }
 });
 
 // D. Scheduled Transactions (Feature)
@@ -723,6 +800,7 @@ app.post('/api/digiflazz/checkout', async (req, res) => {
     });
 });
 
+// 🟢 WEBHOOK DIGIFLAZZ (Notifikasi Admin Dihapus dari Callback Updates)
 app.post('/api/digiflazz/webhook', (req, res) => {
     try {
         const bodyData = req.body.data || req.body;
@@ -754,33 +832,12 @@ app.post('/api/digiflazz/webhook', (req, res) => {
                 const targetId = trx.subscription_id || userPhone;
                 const isExternalId = !trx.subscription_id; 
 
-                const memberRow = await new Promise((resolve) => {
-                    db.get("SELECT name FROM members WHERE phone = ?", [userPhone], (err, row) => resolve(row));
-                });
-                const namaMember = memberRow?.name || trx.username || userPhone || 'Member';
-                const snDisplay = (cleanSn && cleanSn !== '-') ? String(cleanSn).trim().substring(0, 24) : '-';
-
-                // Push Notif Member
+                // 🔔 Push Notif Member Tetap Berjalan Sesuai Status Akhir
                 if (targetId) {
                     if (statusUpper === 'SUKSES' || statusUpper === 'LUNAS') {
                         await kirimPushNotif("🎉 Transaksi Berhasil!", `${namaProduk} (${noTujuan}) SUKSES. SN: ${cleanSn}`, targetId, isExternalId);
                     } else if (['GAGAL', 'BATAL'].includes(statusUpper)) {
                         await kirimPushNotif("❌ Transaksi Gagal", `${namaProduk} (${noTujuan}) Gagal: ${message || 'Gagal diproses'}. Saldo dikembalikan.`, targetId, isExternalId);
-                    }
-                }
-
-                // Push Notif Admin
-                if (typeof kirimPushNotifAdmin === 'function') {
-                    if (statusUpper === 'SUKSES' || statusUpper === 'LUNAS') {
-                        kirimPushNotifAdmin(
-                            `"${namaMember}" melakukan transaksi`,
-                            `RefID: #${ref_id}\nProduk: ${namaProduk}\nTujuan: ${noTujuan}\nSN: ${snDisplay}`
-                        );
-                    } else if (['GAGAL', 'BATAL'].includes(statusUpper)) {
-                        kirimPushNotifAdmin(
-                            `❌ "${namaMember}" transaksi GAGAL`,
-                            `RefID: #${ref_id}\nProduk: ${namaProduk}\nTujuan: ${noTujuan}\nSN: ${snDisplay}`
-                        );
                     }
                 }
             });
@@ -909,6 +966,7 @@ app.post('/api/okeconnect/checkout', async (req, res) => {
     }
 });
 
+// 🟢 CALLBACK / WEBHOOK OKECONNECT
 app.all(['/callback/okeconnect/event', '/api/okeconnect/callback', '/api/webhook/okeconnect'], express.urlencoded({ extended: true }), express.json(), async (req, res) => {
     try {
         let data = req.body;
@@ -937,14 +995,13 @@ app.all(['/callback/okeconnect/event', '/api/okeconnect/callback', '/api/webhook
             }
         }
 
-        const snClean = (sn && sn !== '-') ? String(sn).trim().substring(0, 24) : '-';
-
         const trx = await new Promise((resolve, reject) => {
             db.get("SELECT * FROM transactions WHERE ref_id = ?", [refID], (err, row) => {
                 if (err) reject(err); else resolve(row);
             });
         });
 
+        // 🟢 JIKA TRANSAKSI BARU PERTAMA KALI MASUK / DIBUAT
         if (!trx) {
             const targetHp = normalizePhone(data.user_hp || data.phone || data.target || data.no_tujuan || '');
             const rawSt = String(rawStatus).toUpperCase();
@@ -958,13 +1015,15 @@ app.all(['/callback/okeconnect/event', '/api/okeconnect/callback', '/api/webhook
                 [refID, targetHp, targetHp, targetHp, data.produk || 'Produk OkeConnect', data.produk || 'Produk OkeConnect', normSt, sn !== '-' ? sn : '', message]
             );
 
+            // 🔔 PUSH NOTIF ADMIN: Hanya dikirim saat transaksi baru dibuat oleh member!
             if (typeof kirimPushNotifAdmin === 'function') {
                 const namaMember = data.username || data.nama_member || targetHp || 'Member';
                 const namaProduk = data.produk || 'Produk OkeConnect';
                 
                 kirimPushNotifAdmin(
-                    `"${namaMember}" melakukan transaksi`,
-                    `RefID: #${refID}\nProduk: ${namaProduk}\nTujuan: ${targetHp}\nSN: ${snClean}`
+                    `📲 Transaksi Baru: ${namaMember}`,
+                    `${namaProduk}\nKlik untuk info selengkapnya`,
+                    { url: `detailmember.html?phone=${targetHp}` }
                 );
             }
 
@@ -997,12 +1056,9 @@ app.all(['/callback/okeconnect/event', '/api/okeconnect/callback', '/api/webhook
         const targetId = trx.subscription_id || userPhone;
         const isExternalId = !trx.subscription_id;
 
-        const memberRow = await new Promise((resolve) => {
-            db.get("SELECT name FROM members WHERE phone = ?", [userPhone], (err, row) => resolve(row));
-        });
-        const namaMember = memberRow?.name || trx.username || userPhone || 'Member';
         const namaProduk = trx.product_name || trx.produk || 'Produk PPOB';
 
+        // 🔔 Push Notif ke Member saat Transaksi Gagal / Sukses (Notif Admin Tidak Dikirim Lagi di Sini)
         if (['GAGAL', 'BATAL'].includes(statusBaruUpper) && !['GAGAL', 'BATAL'].includes(statusLamaUpper)) {
             await new Promise((resolve, reject) => {
                 db.run("UPDATE members SET balance = balance + ? WHERE phone = ?", [refundPrice, userPhone], (err) => {
@@ -1017,13 +1073,6 @@ app.all(['/callback/okeconnect/event', '/api/okeconnect/callback', '/api/webhook
                 isExternalId
             );
 
-            if (typeof kirimPushNotifAdmin === 'function') {
-                kirimPushNotifAdmin(
-                    `❌ "${namaMember}" transaksi GAGAL`,
-                    `RefID: #${refID}\nProduk: ${namaProduk}\nTujuan: ${trx.no_tujuan}\nSN: ${snClean}`
-                );
-            }
-
         } else if (['SUKSES', 'LUNAS'].includes(statusBaruUpper) && !['SUKSES', 'LUNAS'].includes(statusLamaUpper)) {
             await kirimPushNotif(
                 "🎉 Transaksi Berhasil!",
@@ -1031,13 +1080,6 @@ app.all(['/callback/okeconnect/event', '/api/okeconnect/callback', '/api/webhook
                 targetId,
                 isExternalId
             );
-
-            if (typeof kirimPushNotifAdmin === 'function') {
-                kirimPushNotifAdmin(
-                    `"${namaMember}" melakukan transaksi`,
-                    `RefID: #${refID}\nProduk: ${namaProduk}\nTujuan: ${trx.no_tujuan}\nSN: ${snClean}`
-                );
-            }
         }
 
         return res.status(200).send("OK");
@@ -1511,32 +1553,6 @@ app.post('/api/admin/update-transaction-price', (req, res) => {
             res.json({ status: 'success', message: 'Harga transaksi berhasil diperbarui' });
         }
     );
-});
-
-// Endpoint untuk menyimpan urutan posisi sub-kategori ke SQLite
-app.post('/api/admin/reorder-custom-categories', (req, res) => {
-    const { order } = req.body; // Ekspektasi array: [{ id: 1, position: 1 }, { id: 2, position: 2 }]
-    if (!order || !Array.isArray(order)) {
-        return res.status(400).json({ status: 'error', message: 'Data urutan tidak valid' });
-    }
-
-    db.serialize(() => {
-        db.run("BEGIN TRANSACTION");
-        const stmt = db.prepare(`UPDATE custom_categories SET sort_order = ? WHERE id = ?`);
-
-        order.forEach(item => {
-            stmt.run(parseInt(item.position) || 0, parseInt(item.id));
-        });
-
-        stmt.finalize();
-        db.run("COMMIT", (err) => {
-            if (err) {
-                db.run("ROLLBACK");
-                return res.status(500).json({ status: 'error', message: 'Gagal memperbarui urutan posisi di database' });
-            }
-            res.json({ status: 'success', message: 'Urutan posisi berhasil disimpan' });
-        });
-    });
 });
 
 // Endpoint untuk memperbarui Status & SN Transaksi

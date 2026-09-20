@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="id" dir="ltr">
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+  <meta charset="utf-8">
+  <title>Detail Transaksi Member - Arcell Komunika</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+  <style media="screen">
+    :root {
+      --bg-base: #e6eaf0;
+      --neu-light: #ffffff;
+      --neu-dark: #babecc;
+      --text-main: #4a5568;
+      --text-muted: #8c98a9;
+      --accent-purple: #7052ff;
+      --border-radius-sm: 14px;
+      --border-radius-md: 20px;
+      --border-radius-pill: 50px;
+
+      --neu-shadow-flat: 6px 6px 12px var(--neu-dark), -6px -6px 12px var(--neu-light);
+      --neu-shadow-sm: 3px 3px 6px var(--neu-dark), -3px -3px 6px var(--neu-light);
+      --neu-shadow-inset: inset 3px 3px 6px var(--neu-dark), inset -3px -3px 6px var(--neu-light);
+    }
+
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; margin: 0; padding: 0; }
+
+    body {
+      background-color: var(--bg-base);
+      color: var(--text-main);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      font-size: 13px;
+      min-height: 100vh;
+      padding: 16px;
+      padding-bottom: 90px;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .app-container { width: 100%; max-width: 480px; margin: 0 auto; }
+
+    .app-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+
+    .btn-back {
+      width: 40px; height: 40px; border-radius: 50%;
+      background: var(--bg-base); box-shadow: var(--neu-shadow-sm);
+      display: flex; align-items: center; justify-content: center;
+      color: var(--accent-purple); text-decoration: none; font-size: 14px; border: none; cursor: pointer;
+    }
+    .btn-back:active { box-shadow: var(--neu-shadow-inset); transform: scale(0.95); }
+
+    .header-title { font-weight: 800; font-size: 15px; color: var(--text-main); }
+
+    .card-neu {
+      background: var(--bg-base); border-radius: var(--border-radius-md);
+      padding: 16px; margin-bottom: 18px; box-shadow: var(--neu-shadow-flat);
+    }
+
+    .card-status-row {
+      display: flex; align-items: center; justify-content: space-between;
+      border-radius: var(--border-radius-pill); padding: 10px 16px;
+      background: var(--bg-base); box-shadow: var(--neu-shadow-inset); margin-bottom: 18px;
+    }
+
+    .status-left { display: flex; align-items: center; gap: 10px; }
+    
+    .icon-wrapper-status {
+      width: 32px; height: 32px; border-radius: 50%;
+      background: var(--bg-base); box-shadow: var(--neu-shadow-sm);
+      display: flex; align-items: center; justify-content: center;
+      color: var(--accent-purple); font-size: 14px;
+    }
+
+    .status-label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-muted); font-weight: 800; }
+
+    .status-value {
+      font-size: 10px; font-weight: 800; text-transform: uppercase;
+      padding: 5px 12px; border-radius: 10px; box-shadow: var(--neu-shadow-sm); background: var(--bg-base);
+    }
+
+    .status-value.success { color: #10b981; }
+    .status-value.pending { color: #f59e0b; }
+    .status-value.failed { color: #dc3545; }
+
+    .badge-title {
+      display: inline-flex; align-items: center; gap: 6px;
+      font-size: 10px; font-weight: 800; color: var(--accent-purple);
+      background: var(--bg-base); padding: 4px 14px;
+      border-radius: var(--border-radius-pill); box-shadow: var(--neu-shadow-inset);
+      margin-bottom: 14px; text-transform: uppercase; letter-spacing: 0.5px;
+    }
+
+    .detail-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+    .detail-row:last-child { margin-bottom: 0; }
+
+    .label-teks { font-size: 12px; font-weight: 600; color: var(--text-muted); flex: 1; }
+    .value-teks { font-size: 12px; font-weight: 700; color: var(--text-main); text-align: right; flex: 1.5; word-break: break-word; }
+    .value-id { color: var(--accent-purple) !important; font-weight: 800; }
+
+    .produk-item {
+      padding: 12px 14px; border-radius: var(--border-radius-sm); background-color: var(--bg-base);
+      box-shadow: var(--neu-shadow-inset); margin-bottom: 12px;
+    }
+
+    .copy-btn {
+      color: var(--accent-purple); font-size: 12px; padding: 2px 6px;
+      background: var(--bg-base); border: none; cursor: pointer; margin-left: 6px;
+      border-radius: 6px; box-shadow: var(--neu-shadow-sm);
+    }
+    .copy-btn:active { box-shadow: var(--neu-shadow-inset); }
+
+    .input-harga {
+      background: var(--bg-base); border: none; box-shadow: var(--neu-shadow-inset);
+      border-radius: 10px; padding: 6px 12px; font-size: 13px; font-weight: 800;
+      color: #10b981; text-align: right; width: 140px; outline: none;
+    }
+
+    .total-label { font-weight: 800; color: var(--text-main); }
+    .total-value { font-size: 15px; font-weight: 800; color: var(--accent-purple); }
+
+    .btn-container { 
+      position: fixed; bottom: 0; left: 50%; transform: translateX(-50%);
+      width: 100%; max-width: 480px; padding: 14px 16px; 
+      background: var(--bg-base); z-index: 100; display: flex; gap: 12px;
+      box-shadow: 0 -5px 15px rgba(0,0,0,0.03);
+      border-top-left-radius: 20px; border-top-right-radius: 20px;
+    }
+
+    .btn-action {
+      background-color: var(--bg-base); border-radius: var(--border-radius-pill); 
+      box-shadow: var(--neu-shadow-sm); color: var(--accent-purple); 
+      font-weight: 800; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px;
+      border: none; padding: 14px 0; flex: 1; cursor: pointer;
+      display: flex; align-items: center; justify-content: center; text-decoration: none !important;
+    }
+    .btn-action:active { box-shadow: var(--neu-shadow-inset); transform: scale(0.98); }
+
+    #struk-printable {
+      display: none; width: 300px; background: #fff; color: #000;
+      font-family: 'Courier New', Courier, monospace; padding: 16px; margin: 0 auto;
+    }
+    #struk-printable .header { text-align: center; border-bottom: 1px dashed #000; padding-bottom: 8px; margin-bottom: 8px; }
+    #struk-printable .header h6 { font-size: 14px; font-weight: bold; margin: 0; }
+    #struk-printable .header p { font-size: 10px; margin: 0; }
+    #struk-printable .item-row { display: flex; justify-content: space-between; font-size: 11px; margin-bottom: 4px; }
+    #struk-printable .divider { border-top: 1px dashed #000; margin: 8px 0; }
+    #struk-printable .footer { text-align: center; font-size: 10px; margin-top: 10px; }
+  </style>
+</head>
+
+<body>
+
+  <div class="app-container" id="app-container">
+    
+    <div class="app-header">
+      <a href="javascript:history.back()" class="btn-back"><i class="fa-solid fa-arrow-left"></i></a>
+      <div class="header-title">Detail Transaksi Admin</div>
+      <div style="width: 40px;"></div>
+    </div>
+
+    <div class="card-status-row">
+      <div class="status-left">
+        <div class="icon-wrapper-status">
+          <i class="fa-solid fa-clock-rotate-left" id="status_icon"></i>
+        </div>
+        <span class="status-label">Status Kirim</span>
+      </div>
+      <div class="status-value" id="status_kirim">Memuat...</div>
+    </div>
+
+    <div class="card-neu">
+      <div class="badge-title">
+        <i class="fa-solid fa-circle-info"></i> Informasi Pesanan
+      </div>
+      
+      <div class="detail-row">
+        <span class="label-teks">ID Transaksi / Ref ID</span>
+        <span class="value-teks value-id" id="info_ref_id">-</span>
+      </div>
+      <div class="detail-row">
+        <span class="label-teks">Nama Member</span>
+        <span class="value-teks" id="info_nama_member" style="color:var(--accent-purple); font-weight:800;">-</span>
+      </div>
+      <div class="detail-row">
+        <span class="label-teks">Tanggal / Waktu</span>
+        <span class="value-teks" id="info_dibuat_pada">-</span>
+      </div>
+      <div class="detail-row">
+        <span class="label-teks">Kategori</span>
+        <span class="value-teks" id="info_ekspedisi">-</span>
+      </div>
+    </div>
+
+    <div class="card-neu">
+      <div class="badge-title">
+        <i class="fa-solid fa-box-archive"></i> Rincian Produk
+      </div>
+      <div id="keranjang_transaksi">
+        <div style="text-align: center; color: var(--text-muted); padding: 10px 0;">Memuat rincian produk...</div>
+      </div>
+    </div>
+
+    <div class="card-neu">
+      <div class="badge-title">
+        <i class="fa-solid fa-wallet"></i> Detail Pembayaran
+      </div>
+      
+      <div class="detail-row mb-3" style="margin-bottom: 12px;">
+        <span class="label-teks">Metode Bayar</span>
+        <span class="value-teks" id="penerima_bank">Saldo Member</span>
+      </div>
+      
+      <div class="produk-item">
+        <div class="detail-row" style="margin-bottom: 8px;">
+          <span class="label-teks">Edit Harga Jual</span>
+          <input type="number" class="input-harga" id="edit_harga_jual" value="0">
+        </div>
+
+        <div class="detail-row pt-2" style="border-top: 1px dashed var(--neu-dark); padding-top: 8px; margin-top: 4px;">
+          <span class="label-teks total-label">Total Bayar</span>
+          <span class="value-teks total-value" id="total_transaksi">Rp0</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div id="struk-printable">
+    <div class="header">
+      <h6>ARCELL KOMUNIKA</h6>
+      <p>Struk Bukti Pembayaran</p>
+    </div>
+    <div class="item-row"><span>No. Ref</span><span id="s_ref">-</span></div>
+    <div class="item-row"><span>Member</span><span id="s_member">-</span></div>
+    <div class="item-row"><span>Waktu</span><span id="s_waktu">-</span></div>
+    <div class="divider"></div>
+    <div class="item-row"><span>Produk</span><span id="s_produk">-</span></div>
+    <div class="item-row"><span>Tujuan</span><span id="s_tujuan">-</span></div>
+    <div class="item-row" id="s_sn_row"><span>SN/Resi</span><span id="s_sn">-</span></div>
+    <div class="divider"></div>
+    <div class="item-row" style="font-weight: bold;"><span>TOTAL</span><span id="s_total">Rp0</span></div>
+    <div class="divider"></div>
+    <div class="footer">
+      <p>Terima Kasih Telah Berbelanja</p>
+      <p>Simpan Struk Ini Sebagai Bukti Pembayaran Sah</p>
+    </div>
+  </div>
+
+  <div id="cetak-struk" class="btn-container"></div>
+
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+  <script type="text/javascript">
+    var globalData = {};
+    var autoRefreshInterval = null;
+
+    function parseWaktu(strWaktu) {
+        if (!strWaktu) return { tanggal: 'Hari Ini', jam: '', formatted: 'Hari Ini' };
+        
+        let formattedStr = strWaktu.trim().replace(' ', 'T');
+        if (!formattedStr.endsWith('Z')) {
+            formattedStr += 'Z';
+        }
+
+        const d = new Date(formattedStr);
+
+        if (!isNaN(d.getTime())) {
+            const yyyy = d.getFullYear();
+            const mm = String(d.getMonth() + 1).padStart(2, '0');
+            const dd = String(d.getDate()).padStart(2, '0');
+
+            const hh = String(d.getHours()).padStart(2, '0');
+            const min = String(d.getMinutes()).padStart(2, '0');
+            const ss = String(d.getSeconds()).padStart(2, '0');
+
+            const tgl = `${yyyy}-${mm}-${dd}`;
+            const jm = `${hh}:${min}:${ss}`;
+
+            return {
+                tanggal: tgl,
+                jam: jm,
+                formatted: `${tgl} ${jm} WIB`
+            };
+        }
+
+        const parts = strWaktu.trim().split(/[\s,T]+/);
+        const tgl = parts[0] || 'Hari Ini';
+        const jm = parts[1] || '';
+        return { 
+            tanggal: tgl, 
+            jam: jm, 
+            formatted: (tgl + ' ' + jm).trim() + ' WIB' 
+        };
+    }
+
+    // 🟢 FETCH SIMPEL PERSIS SEPERTI DETAIL.HTML MEMBER
+    function fetchTransactionDetail(refId) {
+      // Membersihkan tanda '#' jika terbawa dari URL
+      var cleanId = String(refId).replace(/^#/, '').trim();
+      var targetUrl = window.location.origin + '/api/transaction/detail?id=' + encodeURIComponent(cleanId) + '&t=' + Date.now();
+
+      $.ajax({
+        url: targetUrl,
+        type: 'GET',
+        dataType: 'json',
+        success: function(res) {
+          var rowData = null;
+          if (res && res.status === 'success' && res.data) {
+            rowData = res.data;
+          } else if (res && (res.ref_id || res.refid || res.id || res.nomor_pembayaran)) {
+            rowData = res;
+          }
+
+          if (rowData) {
+            globalData = rowData;
+            renderSQLiteDataDetail(rowData);
+
+            var status = String(rowData.status || rowData.status_pengiriman || "PROSES").toLowerCase();
+            if (['selesai', 'sukses', 'lunas', 'success', 'batal', 'gagal', 'failed'].indexOf(status) !== -1) {
+              if (autoRefreshInterval) {
+                clearInterval(autoRefreshInterval);
+                autoRefreshInterval = null;
+              }
+            }
+          } else {
+            showErrorState("Data Tidak Ditemukan", "Transaksi tidak ditemukan.");
+            if (autoRefreshInterval) clearInterval(autoRefreshInterval);
+          }
+        },
+        error: function(xhr, status, error) {
+          console.error("AJAX Error:", error);
+          showErrorState("Gagal Memuat Data", "Terjadi kesalahan koneksi.");
+        }
+      });
+    }
+
+    $(document).ready(function(){
+      var urlParams = new URLSearchParams(window.location.search);
+      var refId = urlParams.get('id') || urlParams.get('ref_id') || urlParams.get('trx_id') || '';
+
+      if (refId) {
+        fetchTransactionDetail(refId);
+
+        autoRefreshInterval = setInterval(function() {
+          fetchTransactionDetail(refId);
+        }, 3000); 
+      } else {
+        showErrorState("Data Tidak Ditemukan", "ID Transaksi tidak valid.");
+      }
+
+      $('#edit_harga_jual').on('input', function() {
+        var val = parseFloat($(this).val()) || 0;
+        $('#total_transaksi').text(formatRupiah(val));
+        $('#s_total').text(formatRupiah(val));
+      });
+    });
+
+    $(window).on('beforeunload', function(){
+      if (autoRefreshInterval) clearInterval(autoRefreshInterval);
+    });
+
+    function showErrorState(title, message) {
+      $('#status_kirim').text(title).attr('class', 'status-value failed');
+      $('#status_icon').attr('class', 'fa-solid fa-circle-xmark').css('color', '#dc3545');
+      $('#info_ref_id').text('-');
+      $('#info_nama_member').text('-');
+      $('#keranjang_transaksi').html('<div style="text-align:center; color:var(--text-muted); padding:10px;">' + message + '</div>');
+    }
+
+    // 🟢 RENDER FUNCTION SAMA PERSIS DENGAN DETAIL.HTML (DENGAN TAMBAHAN PROFIT KHUSUS ADMIN)
+    function renderSQLiteDataDetail(row) {
+      var refId = row.ref_id || row.refid || row.nomor_pembayaran || row.trx_id || row.id || '-';
+      var userHp = row.user_hp || row.customer_no || row.phone || '-';
+      var userName = row.username || row.nama_member || row.name || userHp || 'Member';
+
+      $('#info_ref_id').text(refId);
+      $('#s_ref').text(refId);
+
+      $('#info_nama_member').text(userName + ' (' + userHp + ')');
+      $('#s_member').text(userName);
+      
+      var statusKirim = String(row.status || row.status_pengiriman || "PROSES").toUpperCase();
+      $('#status_kirim').text(statusKirim);
+      
+      var statusLower = statusKirim.toLowerCase();
+      if (['selesai', 'sukses', 'lunas', 'success'].indexOf(statusLower) !== -1) {
+        $('#status_kirim').attr('class', 'status-value success');
+        $('#status_icon').attr('class', 'fa-solid fa-circle-check').css('color', '#10b981');
+      } else if (['batal', 'gagal', 'failed'].indexOf(statusLower) !== -1) {
+        $('#status_kirim').attr('class', 'status-value failed');
+        $('#status_icon').attr('class', 'fa-solid fa-circle-xmark').css('color', '#dc3545');
+      } else {
+        $('#status_kirim').attr('class', 'status-value pending');
+        $('#status_icon').attr('class', 'fa-solid fa-clock-rotate-left fa-spin').css('color', '#f59e0b');
+      }
+
+      var waktuRaw = row.waktu || row.time || row.created_at || row.tanggal_buat || row.date || '';
+      var waktuParsed = parseWaktu(waktuRaw);
+
+      $('#info_dibuat_pada').text(waktuParsed.formatted);
+      $('#s_waktu').text(waktuParsed.formatted);
+
+      var namaProduk = row.produk || row.product_name || row.nama_produk || row.code || 'Produk Digital';
+      var noTujuan = row.no_tujuan || row.dest || row.customer_no || row.target || row.catatan || '-';
+      
+      var rawSn = row.sn || row.serial_number || row.serialNumber || row.nomor_resi || row.resi || row.sn_resi || '';
+      if (!rawSn && (row.message || row.keterangan || row.catatan || row.note || row.pesan)) {
+        var teksPesan = row.message || row.keterangan || row.catatan || row.note || row.pesan;
+        var matchSn = teksPesan.match(/SN[\/\:\s]+([A-Za-z0-9\.\/\-]+)/i);
+        if (matchSn && matchSn[1]) {
+          rawSn = matchSn[1].trim();
+        }
+      }
+
+      var snResi = (rawSn && rawSn !== '' && rawSn !== '-') ? rawSn : '-';
+
+      var hModal = parseFloat(row.harga_modal || row.harga || 0);
+      var hJual = parseFloat(row.harga_jual || row.price || hModal);
+      var laba = hJual - hModal;
+
+      $('#s_produk').text(namaProduk);
+      $('#s_tujuan').text(noTujuan);
+
+      var kategori = "Produk Digital";
+      if (/pln|token|listrik/i.test(namaProduk)) kategori = "Token PLN";
+      else if (/game|diamond|mlbb|ff|pubg/i.test(namaProduk)) kategori = "Voucher Game";
+      else if (/gb|mb|data|kuota/i.test(namaProduk)) kategori = "Paket Data";
+      else if (/pulsa|transfer/i.test(namaProduk)) kategori = "Pulsa";
+
+      $('#info_ekspedisi').text(kategori);
+
+      // Render Rincian Produk
+      var htmlProduk = '<div class="produk-item">' +
+        '<div class="detail-row"><span class="label-teks">Nama Produk</span><span class="value-teks">' + namaProduk + '</span></div>';
+
+      if (noTujuan && noTujuan !== '-') {
+        htmlProduk += '<div class="detail-row" style="margin-top:8px;">' +
+          '<span class="label-teks">Nomor Tujuan</span>' +
+          '<span class="value-teks">' + noTujuan + 
+            '<button onclick="copyText(\'' + noTujuan + '\', this)" class="copy-btn" title="Salin"><i class="fa-regular fa-copy"></i></button>' +
+          '</span></div>';
+      }
+
+      if (snResi && snResi !== '-') {
+        htmlProduk += '<div class="detail-row" style="margin-top:8px;">' +
+          '<span class="label-teks">SN / Nomor Resi</span>' +
+          '<span class="value-teks">' + snResi + 
+            '<button onclick="copyText(\'' + snResi + '\', this)" class="copy-btn" title="Salin SN"><i class="fa-regular fa-copy"></i></button>' +
+          '</span></div>';
+        $('#s_sn').text(snResi);
+        $('#s_sn_row').show();
+      } else {
+        $('#s_sn_row').hide();
+      }
+
+      // Tambahan Rincian Modal & Untung untuk Admin
+      htmlProduk += '<div class="detail-row" style="margin-top:8px; border-top:1px dashed var(--neu-dark); padding-top:6px;">' +
+        '<span class="label-teks">Harga Modal</span>' +
+        '<span class="value-teks">Rp ' + hModal.toLocaleString('id-ID') + '</span></div>';
+      
+      htmlProduk += '<div class="detail-row" style="margin-top:4px;">' +
+        '<span class="label-teks">Keuntungan</span>' +
+        '<span class="value-teks" style="color:' + (laba >= 0 ? '#10b981' : '#dc3545') + '; font-weight:800;">Rp ' + laba.toLocaleString('id-ID') + '</span></div>';
+
+      htmlProduk += '</div>';
+      $('#keranjang_transaksi').html(htmlProduk);
+
+      if (!$('#edit_harga_jual').is(':focus') && parseFloat($('#edit_harga_jual').val()) === 0) {
+        $('#edit_harga_jual').val(hJual);
+        $('#total_transaksi').text(formatRupiah(hJual));
+        $('#s_total').text(formatRupiah(hJual));
+      }
+
+      if (['selesai', 'sukses', 'lunas', 'success'].indexOf(statusLower) !== -1) {
+        var actionBtns = '<button onclick="simpanStrukPNG()" class="btn-action"><i class="fa-solid fa-download" style="margin-right:6px;"></i> Simpan PNG</button>' +
+                         '<button onclick="cetakThermalWeb()" class="btn-action"><i class="fa-solid fa-print" style="margin-right:6px;"></i> Cetak Thermal</button>';
+        $('#cetak-struk').html(actionBtns);
+      } else {
+        $('#cetak-struk').html('');
+      }
+    }
+
+    function copyText(teks, btn) {
+      if (navigator.clipboard) { navigator.clipboard.writeText(teks); }
+      var $icon = $(btn).find('i');$icon.removeClass('fa-regular fa-copy').addClass('fa-solid fa-check').css('color', '#10b981');
+      setTimeout(function() {
+        $icon.removeClass('fa-solid fa-check').addClass('fa-regular fa-copy').css('color', '');
+      }, 1500);
+    }
+
+    function formatRupiah(angka) {
+      if (!angka) return "Rp0";
+      return 'Rp' + parseInt(angka).toLocaleString('id-ID');
+    }
+
+    function simpanStrukPNG() {
+      var element = document.getElementById('struk-printable');
+      element.style.display = 'block';
+
+      html2canvas(element, { scale: 3, backgroundColor: "#ffffff" }).then(function(canvas) {
+        element.style.display = 'none';
+        var link = document.createElement('a');
+        link.download = 'Struk_' + ($('#info_ref_id').text() || 'Transaksi') + '.png';
+        link.href = canvas.toDataURL('image/png');
+        link.click();
+      });
+    }
+
+    async function cetakThermalWeb() {
+      var ref = $('#info_ref_id').text();
+      var waktu = $('#info_dibuat_pada').text();
+      var produk = $('#s_produk').text();
+      var tujuan = $('#s_tujuan').text();
+      var sn = $('#s_sn').text();
+      var total = $('#s_total').text();
+
+      var printData = 
+        "\x1B\x40" + 
+        "\x1B\x61\x01" + 
+        "\x1B\x45\x01" + "ARCELL KOMUNIKA\n" + "\x1B\x45\x00" +
+        "Struk Bukti Pembayaran\n" +
+        "--------------------------------\n" +
+        "\x1B\x61\x00" + 
+        "No. Ref : " + ref + "\n" +
+        "Waktu   : " + waktu + "\n" +
+        "--------------------------------\n" +
+        "Produk  : " + produk + "\n" +
+        "Tujuan  : " + tujuan + "\n";
+      
+      if (sn && sn !== '-') { printData += "SN/Resi : " + sn + "\n"; }
+
+      printData += 
+        "--------------------------------\n" +
+        "TOTAL   : " + total + "\n" +
+        "--------------------------------\n" +
+        "\x1B\x61\x01" + 
+        "Terima Kasih\n\n\n\n";
+
+      try {
+        if (!navigator.bluetooth) {
+          alert("Web Bluetooth API tidak didukung browser ini.");
+          return;
+        }
+
+        const device = await navigator.bluetooth.requestDevice({
+          filters: [{ services: ['000018f0-0000-1000-8000-00805f9b34fb'] }],
+          optionalServices: ['000018f0-0000-1000-8000-00805f9b34fb']
+        });
+
+        const server = await device.gatt.connect();
+        const service = await server.getPrimaryService('000018f0-0000-1000-8000-00805f9b34fb');
+        const characteristic = await service.getCharacteristic('00002af1-0000-1000-8000-00805f9b34fb');
+
+        let encoder = new TextEncoder();
+        await characteristic.writeValue(encoder.encode(printData));
+        alert("Pencetakan Berhasil!");
+      } catch (error) {
+        alert("Gagal mencetak: " + error.message);
+      }
+    }
+  </script>
+</body>
+</html>
+

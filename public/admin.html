@@ -16,17 +16,15 @@
       appId: "e9b5d447-82c7-4907-9248-bf2f6b59b993",
       safari_web_id: "web.onesignal.auto.087eca46-faed-450d-af5b-90e7f525c88c",
       notifyButton: {
-        enable: false // Dihapus lonceng ngambangna sangkan ramping tampilan PWA
+        enable: false
       },
       allowLocalhostAsSecureOrigin: true
     });
 
-    // 1. Menta izin notifikasi langsung ka browser / APK
     if (!OneSignal.Notifications.permission) {
       await OneSignal.Notifications.requestPermission();
     }
 
-    // 2. Hubungkan HP Admin salaku External ID "admin_arcell"
     await OneSignal.login("admin_arcell");
     console.log("✅ Device Admin terhubung ka OneSignal salaku: admin_arcell");
   });
@@ -186,6 +184,7 @@
         .btn-success { color: #10b981; }
         .btn-warning { color: #f59e0b; }
         .btn-danger { color: #ef4444; }
+        .btn-info { color: #3b82f6; }
         .btn-sm { padding: 4px 8px; font-size: 0.72rem; border-radius: 8px; }
 
         .bulk-bar { 
@@ -213,6 +212,7 @@
         .member-title-info {
             font-size: 0.82rem; font-weight: 800; color: var(--text-main);
             display: flex; align-items: center; gap: 6px; flex-wrap: wrap;
+            cursor: pointer;
         }
         .member-title-info span.hp { color: var(--primary); font-weight: 700; }
         .member-title-info span.id { color: var(--text-sub); font-size: 0.72rem; font-weight: 600; }
@@ -251,7 +251,19 @@
         .date-folder-card.open .date-chevron { transform: rotate(180deg); }
         .date-chevron { transition: transform 0.2s ease; font-size: 0.68rem; color: var(--text-sub); }
 
-        .sub-trx-card { background: rgba(255, 255, 255, 0.95); padding: 6px 8px; border-radius: 6px; border: 1px solid var(--glass-border); display: flex; flex-direction: column; gap: 3px; }
+        .sub-trx-card { 
+            background: rgba(255, 255, 255, 0.95); 
+            padding: 6px 8px; 
+            border-radius: 6px; 
+            border: 1px solid var(--glass-border); 
+            display: flex; 
+            flex-direction: column; 
+            gap: 3px;
+            transition: background 0.2s ease;
+        }
+        .sub-trx-card.clickable { cursor: pointer; }
+        .sub-trx-card.clickable:hover { background: rgba(255, 255, 255, 1); }
+
         .sub-trx-header { display: flex; justify-content: space-between; font-size: 0.65rem; font-weight: 700; color: var(--text-sub); }
         .sub-trx-body { display: flex; justify-content: space-between; align-items: flex-end; gap: 6px; }
         .sub-trx-prod { font-size: 0.75rem; font-weight: 800; color: var(--text-main); }
@@ -544,7 +556,7 @@
         </div>
     </div>
 
-    <!-- 🟢 MODAL EDIT STATUS TRANSAKSI & SN / RESI -->
+    <!-- MODAL EDIT STATUS TRANSAKSI & SN / RESI -->
     <div id="modalEditStatusTrx" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.3); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); z-index: 9999; justify-content: center; align-items: center;">
         <div class="glass-card" style="width: 90%; max-width: 420px; padding: 20px; background: rgba(255, 255, 255, 0.95);">
             <h3><i class="fa-solid fa-list-check"></i> Edit Status & SN Transaksi</h3>
@@ -588,11 +600,20 @@
         let openCustomSubCats = new Set();
 
         let isFirstLoadTrx = true;
-        
         let dbCustomCategories = [];
         
         let selectedSKUsDigi = new Set();
         let selectedSKUsOkec = new Set();
+
+        /* 🟢 NAVIGASI KE DETAIL TRANSAKSI / MEMBER DENGAN Bawa PARAMETER ID AKURAT */
+        function keDetailMember(identifier, isRefId = false) {
+            if (!identifier || identifier === '-') return;
+            if (isRefId) {
+                window.location.href = `detailmember.html?id=${encodeURIComponent(identifier)}`;
+            } else {
+                window.location.href = `detailmember.html?phone=${encodeURIComponent(identifier)}`;
+            }
+        }
 
         function parseWaktu(strWaktu) {
             if (!strWaktu) return { tanggal: '', jam: '', full: '', dateObj: new Date() };
@@ -658,7 +679,7 @@
             }
         }
 
-        /* RENDER ALL TRANSACTIONS (MENAMPILKAN MODAL, JUAL, UNTUNG & DUKUNGAN EDIT STATUS/SN) */
+        /* 🟢 RENDER TRANSAKSI (MENGIRIMKAN PARAMETER REF_ID DENGAN BENAR) */
         function renderAllTransactions(list) {
             const container = document.getElementById('allTrxContainer');
             if (!list || list.length === 0) {
@@ -695,9 +716,9 @@
                 const safeSn = snVal.replace(/'/g, "\\'").replace(/"/g, "&quot;");
 
                 html += `
-                    <div class="sub-trx-card">
+                    <div class="sub-trx-card clickable" onclick="keDetailMember('${refId}', true)" title="Klik untuk lihat detail transaksi #${refId}">
                         <div class="sub-trx-header">
-                            <span><b>#${refId}</b> | Member: <b>${userName}</b> (${userHp})</span>
+                            <span><b>#${refId}</b> | Member: <b style="color:var(--primary);">${userName}</b> (${userHp})</span>
                             <span><i class="fa-regular fa-clock"></i> ${parsedTime.full}</span>
                         </div>
                         <div class="sub-trx-body">
@@ -709,8 +730,9 @@
                             <div style="text-align:right;">
                                 <div class="sub-trx-price">Jual: Rp ${hJual.toLocaleString('id-ID')}</div>
                                 <div style="font-size: 0.68rem; color: var(--text-sub); font-weight:700;">Modal: Rp ${hModal.toLocaleString('id-ID')} | <b style="color:${laba >= 0 ? '#6366f1' : '#ef4444'};">Untung: Rp ${laba.toLocaleString('id-ID')}</b></div>
-                                <div style="display:flex; gap:4px; justify-content:flex-end; margin-top:3px; flex-wrap:wrap;">
+                                <div style="display:flex; gap:4px; justify-content:flex-end; margin-top:3px; flex-wrap:wrap;" onclick="event.stopPropagation();">
                                     <span class="sub-trx-status ${statusClass}">${statusStr}</span>
+                                    <button class="btn-sm btn-info" style="padding:1px 5px; font-size:0.62rem;" onclick="keDetailMember('${refId}', true)" title="Detail Transaksi"><i class="fa-solid fa-receipt"></i> Detail</button>
                                     <button class="btn-sm btn-success" style="padding:1px 5px; font-size:0.62rem;" onclick="bukaModalEditStatusTrx('${refId}', '${statusStr}', '${safeSn}')" title="Edit Status & SN"><i class="fa-solid fa-list-check"></i> Status</button>
                                     <button class="btn-sm btn-warning" style="padding:1px 5px; font-size:0.62rem;" onclick="editHargaTransaksi('${refId}', ${hModal}, ${hJual})"><i class="fa-solid fa-pen"></i> Harga</button>
                                 </div>
@@ -737,7 +759,6 @@
             renderAllTransactions(filtered);
         }
 
-        /* RENDER MEMBER (DESAIN STRUCTURAL RAMPING TERBARU) */
         function renderTabelMember(list) {
             const el = document.getElementById('tabelMember');
             if (!list || list.length === 0) { el.innerHTML = `<div style="text-align:center; color: var(--text-sub); padding:10px; font-size:0.8rem;">Belum ada member.</div>`; return; }
@@ -792,19 +813,20 @@
                 html += `
                     <div class="member-card ${isMemberOpen ? 'open' : ''}" id="member-card-${noHp}">
                         
-                        <!-- BARIS 1: NAMA MEMBER - NO HP - ID -->
                         <div class="member-header-row">
-                            <div class="member-title-info">
+                            <div class="member-title-info" onclick="keDetailMember('${noHp}')" title="Klik untuk lihat detail member">
                                 <span><i class="fa-solid fa-user-circle" style="color:var(--primary);"></i> <b>${m.name || m.nama || '-'}</b></span>
                                 <span>—</span>
                                 <span class="hp">${noHp}</span>
                                 <span>—</span>
                                 <span class="id">ID: ${idMem}</span>
                             </div>
-                            <button class="btn-sm btn-danger" style="padding:2px 6px; font-size:0.62rem;" onclick="hapusMember('${noHp}')" title="Hapus Member"><i class="fa-solid fa-trash"></i></button>
+                            <div style="display:flex; gap:4px;">
+                                <button class="btn-sm btn-info" style="padding:2px 6px; font-size:0.62rem;" onclick="keDetailMember('${noHp}')" title="Buka Detail Member"><i class="fa-solid fa-arrow-right-to-bracket"></i> Detail</button>
+                                <button class="btn-sm btn-danger" style="padding:2px 6px; font-size:0.62rem;" onclick="hapusMember('${noHp}')" title="Hapus Member"><i class="fa-solid fa-trash"></i></button>
+                            </div>
                         </div>
 
-                        <!-- BARIS 2: RAMPING STATS GRID (TOP UP - HARI INI - PROFIT HARI INI) -->
                         <div class="member-stats-grid">
                             <div class="stat-box" style="flex:0.8; cursor:pointer;" onclick="pilihUbahSaldo('${noHp}')" title="Klik untuk Topup">
                                 <span class="stat-label"><i class="fa-solid fa-wallet" style="color:#10b981;"></i> Saldo</span>
@@ -820,7 +842,6 @@
                             </div>
                         </div>
 
-                        <!-- BARIS 3: DROPDOWN REKAP TRANSAKSI -->
                         <div>
                             <button class="btn-toggle-trx" onclick="toggleMemberTrx('${noHp}')">
                                 <span><i class="fa-solid fa-chart-pie"></i> Rekap Sukses: <b>${memberTrxSukses.length} Trx</b> (Total Profit: Rp ${profitMemberIni.toLocaleString('id-ID')})</span>
@@ -857,7 +878,7 @@
                             const safeSn = snVal.replace(/'/g, "\\'").replace(/"/g, "&quot;");
 
                             html += `
-                                <div class="sub-trx-card">
+                                <div class="sub-trx-card clickable" onclick="keDetailMember('${refId}', true)">
                                     <div class="sub-trx-header"><span>#${refId}</span><span><i class="fa-regular fa-clock"></i> ${t.parsedTime.full}</span></div>
                                     <div class="sub-trx-body">
                                         <div>
@@ -868,7 +889,7 @@
                                         <div style="text-align:right;">
                                             <div class="sub-trx-price">Jual: Rp ${hJ.toLocaleString('id-ID')}</div>
                                             <div style="font-size:0.65rem; color:var(--text-sub);">Modal: Rp ${hM.toLocaleString('id-ID')} | <b style="color:${untung >= 0 ? '#6366f1' : '#ef4444'};">Untung: Rp ${untung.toLocaleString('id-ID')}</b></div>
-                                            <div style="display:flex; gap:4px; justify-content:flex-end; margin-top:3px; flex-wrap:wrap;">
+                                            <div style="display:flex; gap:4px; justify-content:flex-end; margin-top:3px; flex-wrap:wrap;" onclick="event.stopPropagation();">
                                                 <span class="sub-trx-status sukses">SUKSES</span>
                                                 <button class="btn-sm btn-success" style="padding:1px 5px; font-size:0.62rem;" onclick="bukaModalEditStatusTrx('${refId}', 'SUKSES', '${safeSn}')" title="Edit Status & SN"><i class="fa-solid fa-list-check"></i> Status</button>
                                                 <button class="btn-sm btn-warning" style="padding:1px 5px; font-size:0.62rem;" onclick="editHargaTransaksi('${refId}', ${hM}, ${hJ})"><i class="fa-solid fa-pen"></i> Harga</button>
@@ -915,7 +936,6 @@
             } 
         }
 
-        /* 🟢 FUNGSI MODAL EDIT STATUS TRANSAKSI & SN */
         function bukaModalEditStatusTrx(refId, currentStatus, currentSn) {
             document.getElementById('editTrxRefId').value = refId;
             
@@ -956,7 +976,6 @@
             }
         }
 
-        /* FUNGSI EDIT HARGA TRANSAKSI DUA VARIABLE (MODAL & JUAL) */
         async function editHargaTransaksi(refId, hargaModalLama, hargaJualLama) {
             const modalInput = prompt(`[1/2] Ubah HARGA MODAL transaksi #${refId}:`, hargaModalLama);
             if (modalInput === null || modalInput === "") return;
@@ -1028,7 +1047,6 @@
             } catch (err) { alert('Error jaringan'); }
         }
 
-        /* 🔄 POLLING AUTOMATIS REAL-TIME TRANSAKSI & MEMBER */
         async function loadTransactions(manualRefresh = false) {
             try {
                 const res = await fetch('/api/admin/transactions?t=' + Date.now());
@@ -1048,9 +1066,6 @@
             } catch (err) {}
         }
 
-        // ==========================================
-        // FITUR KATEGORI CUSTOM SQLITE
-        // ==========================================
         async function loadCustomCategoriesFromDB() {
             try {
                 const res = await fetch('/api/admin/custom-categories?t=' + Date.now());
@@ -1114,7 +1129,6 @@
             }
         }
 
-        /* 🟢 RENDER CUSTOM CATEGORIES DENGAN TOMBOL NAVIGASI POSISI (MANUAL & PERMANEN) */
         function renderCustomCategoriesTab() {
             const container = document.getElementById('customCategoryContainer');
             if(!dbCustomCategories || dbCustomCategories.length === 0) {
@@ -1131,7 +1145,6 @@
 
             let html = '';
             Object.keys(groupedByBrand).forEach(brand => {
-                // Urutkan kategori berdasarkan sort_order / id
                 const categories = groupedByBrand[brand].sort((a, b) => (a.sort_order || a.id) - (b.sort_order || b.id));
                 const isBrandOpen = openCustomBrands.has(brand);
 
@@ -1147,7 +1160,7 @@
                         <div class="brand-body">
                 `;
 
-                categories.forEach((cat, index) => {
+                categories.forEach((cat) => {
                     const prods = [...(cat.products || [])];
                     prods.sort((a, b) => parseFloat(a.jual || 0) - parseFloat(b.jual || 0));
 
@@ -1158,7 +1171,6 @@
                         <div class="sub-cat-card ${isSubCatOpen ? 'open' : ''}" id="sub-cat-${cat.id}" data-catid="${cat.id}">
                             <div class="sub-cat-header" onclick="toggleSubCatAccordion(this, '${cat.id}')">
                                 <div style="display: flex; align-items: center; gap: 6px;">
-                                    <!-- TOMBOL NAVIGASI UBAH POSISI SUB-KATEGORI -->
                                     <div style="display: flex; flex-direction: column; gap: 2px;" onclick="event.stopPropagation();">
                                         <button class="btn-sm" style="padding: 1px 4px; font-size: 0.55rem; line-height: 1;" onclick="geserPosisiKategori('${brand}', ${cat.id}, 'up')" title="Geser Ke Atas"><i class="fa-solid fa-chevron-up"></i></button>
                                         <button class="btn-sm" style="padding: 1px 4px; font-size: 0.55rem; line-height: 1;" onclick="geserPosisiKategori('${brand}', ${cat.id}, 'down')" title="Geser Ke Bawah"><i class="fa-solid fa-chevron-down"></i></button>
@@ -1211,7 +1223,6 @@
             container.innerHTML = html;
         }
 
-        /* 🟢 FUNGSI UNTUK MENGGESER POSISI SUB-KATEGORI SECARA MANUALLY & PERMANEN */
         async function geserPosisiKategori(brand, catId, arah) {
             const catList = dbCustomCategories
                 .filter(c => (c.brand || 'LAINNYA') === brand)
@@ -1246,16 +1257,12 @@
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ order: orderPayload })
                 });
-                const result = await res.json();
-                if (result.status !== 'success') {
-                    console.error('Gagal menyimpan posisi ke database:', result.message);
-                }
+                await res.json();
             } catch (err) {
                 console.error('Error jaringan saat menyimpan posisi kategori:', err);
             }
         }
 
-        /* MODAL & FUNGSI EDIT PRODUK CUSTOM */
         function bukaModalEditCustomProduct(catId, sku, name, price, provider) {
             document.getElementById('editCustomCatId').value = catId;
             document.getElementById('editCustomSku').value = sku;
@@ -1351,7 +1358,6 @@
                         
                         setTimeout(() => {
                             prodCard.remove();
-                            
                             if (subCatCard) {
                                 const badge = subCatCard.querySelector('.item-count-badge');
                                 const remainingCount = subCatBody.querySelectorAll('.prod-item').length;
@@ -1371,7 +1377,6 @@
             }
         }
 
-        /* RENDER DIGIFLAZZ */
         async function loadProduk() {
             try {
                 const res = await fetch('/api/products?t=' + Date.now());
@@ -1617,7 +1622,6 @@
                     else if (nama.includes('FREDOM SPECIAL')) subCat = 'FREEDOM SPECIAL';
                     else if (nama.includes('FREEDOM INTERNET')) subCat = 'FREEDOM INTERNET';
                     else if (nama.includes('FLEXMAX')) subCat = 'FLEX MAX';
-                    
                     else if (nama.includes('UNLIMITED')) subCat = 'UNLIMITED';
                     else if (nama.includes('XTRA ON') || nama.includes('XTRA')) subCat = 'XTRA ON';
                     else if (nama.includes('MINI')) subCat = 'MINI DATA';
@@ -1802,7 +1806,6 @@
             loadProduk();
             loadOkeconnectProducts();
 
-            // 🔄 Polling otomatis per 3 detik untuk memperbarui transaksi & saldo member
             setInterval(() => {
                 loadTransactions();
                 loadSaldoInfo();
