@@ -8,41 +8,54 @@
     <link rel="manifest" href="/manifest-admin.json">
 
     <!-- 🔔 ONESIGNAL SDK v16 KHUSUS ADMIN -->
-<script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
-<script>
-  window.OneSignalDeferred = window.OneSignalDeferred || [];
-  OneSignalDeferred.push(async function(OneSignal) {
-    await OneSignal.init({
-      appId: "e9b5d447-82c7-4907-9248-bf2f6b59b993",
-      safari_web_id: "web.onesignal.auto.087eca46-faed-450d-af5b-90e7f525c88c",
-      notifyButton: {
-        enable: false
-      },
-      allowLocalhostAsSecureOrigin: true
-    });
+    <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
+    <script>
+      window.OneSignalDeferred = window.OneSignalDeferred || [];
+      OneSignalDeferred.push(async function(OneSignal) {
+        await OneSignal.init({
+          appId: "e9b5d447-82c7-4907-9248-bf2f6b59b993",
+          safari_web_id: "web.onesignal.auto.087eca46-faed-450d-af5b-90e7f525c88c",
+          notifyButton: { enable: false },
+          allowLocalhostAsSecureOrigin: true
+        });
 
-    if (!OneSignal.Notifications.permission) {
-      await OneSignal.Notifications.requestPermission();
-    }
+        if (!OneSignal.Notifications.permission) {
+          await OneSignal.Notifications.requestPermission();
+        }
 
-    await OneSignal.login("admin_arcell");
-    console.log("✅ Device Admin terhubung ka OneSignal salaku: admin_arcell");
-  });
-</script>
+        await OneSignal.login("admin_arcell");
+        console.log("✅ Device Admin terhubung ka OneSignal salaku: admin_arcell");
+      });
+    </script>
 
     <style>
         :root {
-            --glass-bg: rgba(255, 255, 255, 0.45);
-            --glass-card: rgba(255, 255, 255, 0.65);
-            --glass-border: rgba(255, 255, 255, 0.8);
-            --glass-shadow: 0 4px 20px 0 rgba(31, 38, 135, 0.06);
+            /* PALET SOFT WHITE GLASSMORPHISM */
+            --bg-gradient: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 50%, #f1f5f9 100%);
             
-            --text-main: #2d3748;
-            --text-sub: #718096;
-            --primary: #6366f1;
-            --primary-hover: #4f46e5;
-            --pink-accent: #ec4899;
-            --badge-blue: #3b82f6;
+            --glass-base: rgba(255, 255, 255, 0.55);
+            --glass-card: rgba(255, 255, 255, 0.72);
+            --glass-card-hover: rgba(255, 255, 255, 0.88);
+            --glass-input: rgba(255, 255, 255, 0.85);
+            --glass-border: rgba(255, 255, 255, 0.95);
+            --glass-border-subtle: rgba(226, 232, 240, 0.6);
+            
+            --shadow-soft: 0 8px 32px 0 rgba(148, 163, 184, 0.15);
+            --shadow-card: 0 4px 20px -2px rgba(100, 116, 139, 0.08), inset 0 1px 0 0 rgba(255, 255, 255, 0.9);
+            --shadow-button: 0 4px 12px rgba(148, 163, 184, 0.2), inset 0 1px 0 rgba(255, 255, 255, 1);
+            
+            --text-main: #1e293b;
+            --text-sub: #64748b;
+            --text-muted: #94a3b8;
+
+            --primary: #4f46e5;
+            --primary-hover: #4338ca;
+            --primary-light: rgba(79, 70, 229, 0.1);
+            --pink-accent: #db2777;
+            --badge-blue: #2563eb;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
         }
 
         * { 
@@ -53,83 +66,118 @@
         }
 
         body { 
-            background: linear-gradient(135deg, #e0c3fc 0%, #8ec5fc 100%);
+            background: var(--bg-gradient);
             background-attachment: fixed;
             color: var(--text-main); 
-            padding-bottom: 30px; 
+            padding-bottom: 40px; 
             min-height: 100vh;
+            position: relative;
+        }
+
+        /* Ambient Light Spheres untuk memperkuat Glass Effect Soft White */
+        body::before {
+            content: '';
+            position: fixed;
+            top: -100px;
+            left: -100px;
+            width: 350px;
+            height: 350px;
+            background: rgba(199, 210, 254, 0.4);
+            filter: blur(90px);
+            border-radius: 50%;
+            z-index: -1;
+        }
+        body::after {
+            content: '';
+            position: fixed;
+            bottom: -50px;
+            right: -50px;
+            width: 400px;
+            height: 400px;
+            background: rgba(251, 207, 232, 0.35);
+            filter: blur(100px);
+            border-radius: 50%;
+            z-index: -1;
         }
 
         .header { 
-            background: var(--glass-bg);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            padding: 14px 20px; 
+            background: var(--glass-base);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            padding: 16px 20px; 
             text-align: center;
             border-bottom: 1px solid var(--glass-border);
-            margin-bottom: 12px;
+            box-shadow: 0 4px 15px rgba(148, 163, 184, 0.05);
+            margin-bottom: 16px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
         }
-        .header h2 { font-size: 1.15rem; color: var(--text-main); font-weight: 800; }
+        .header h2 { font-size: 1.2rem; color: var(--text-main); font-weight: 800; letter-spacing: -0.3px; }
 
-        .container { max-width: 1000px; margin: 0 auto; padding: 0 10px; }
+        .container { max-width: 1000px; margin: 0 auto; padding: 0 12px; }
 
         .glass-card {
             background: var(--glass-card);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
             border: 1px solid var(--glass-border);
-            border-radius: 16px;
-            padding: 14px;
-            margin-bottom: 12px;
-            box-shadow: var(--glass-shadow);
+            border-radius: 20px;
+            padding: 16px;
+            margin-bottom: 14px;
+            box-shadow: var(--shadow-card);
+            transition: all 0.25s ease;
         }
 
         .main-balance-card {
             text-align: center;
-            background: linear-gradient(135deg, rgba(255, 255, 255, 0.8), rgba(255, 255, 255, 0.5));
-            padding: 14px;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.65));
+            padding: 18px;
+            border: 1px solid var(--glass-border);
+            box-shadow: 0 10px 25px -5px rgba(148, 163, 184, 0.12), inset 0 1px 0 rgba(255, 255, 255, 1);
         }
-        .main-balance-card .title { font-size: 0.78rem; color: var(--text-sub); font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase; }
-        .main-balance-card .value { font-size: 1.6rem; font-weight: 900; color: var(--primary); margin-top: 2px; }
+        .main-balance-card .title { font-size: 0.78rem; color: var(--text-sub); font-weight: 800; letter-spacing: 0.6px; text-transform: uppercase; }
+        .main-balance-card .value { font-size: 1.8rem; font-weight: 900; color: var(--primary); margin-top: 4px; text-shadow: 0 2px 4px rgba(79, 70, 229, 0.1); }
 
         .nav-tabs { 
             display: grid; 
             grid-template-columns: repeat(5, 1fr); 
-            gap: 6px; 
-            margin-bottom: 12px; 
+            gap: 8px; 
+            margin-bottom: 14px; 
         }
 
         .tab-btn { 
-            background: var(--glass-bg); 
-            backdrop-filter: blur(8px);
-            -webkit-backdrop-filter: blur(8px);
+            background: var(--glass-base); 
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
             border: 1px solid var(--glass-border);
             padding: 10px 4px; 
-            border-radius: 12px; 
+            border-radius: 14px; 
             font-weight: 700; 
             color: var(--text-sub); 
             cursor: pointer; 
-            box-shadow: var(--glass-shadow); 
+            box-shadow: var(--shadow-button); 
             display: flex; 
             flex-direction: column;
             align-items: center; 
             justify-content: center;
             gap: 4px; 
-            transition: all 0.2s ease; 
-            font-size: 0.68rem;
+            transition: all 0.25s ease; 
+            font-size: 0.7rem;
         }
-        .tab-btn i { font-size: 0.95rem; }
+        .tab-btn i { font-size: 1rem; }
         .tab-btn.active { 
-            background: rgba(255, 255, 255, 0.9);
+            background: #ffffff;
             color: var(--primary); 
-            border-color: var(--primary);
-            box-shadow: 0 2px 10px rgba(99, 102, 241, 0.2);
+            border-color: rgba(79, 70, 229, 0.4);
+            box-shadow: 0 6px 20px rgba(79, 70, 229, 0.15), inset 0 0 0 1px rgba(79, 70, 229, 0.1);
+            transform: translateY(-1px);
         }
 
         .tab-content { display: none; }
         .tab-content.active { display: block; }
 
-        h3 { margin-bottom: 10px; color: var(--primary); display: flex; align-items: center; gap: 6px; font-size: 0.92rem; font-weight: 800; }
+        h3 { margin-bottom: 12px; color: var(--primary); display: flex; align-items: center; gap: 8px; font-size: 0.95rem; font-weight: 800; }
 
         .form-grid-inline { 
             display: flex; 
@@ -139,104 +187,106 @@
         }
         .form-grid-inline input, .form-grid-inline select {
             flex: 1 1 130px;
-            padding: 8px 12px;
+            padding: 9px 12px;
             font-size: 0.8rem;
-            border-radius: 10px;
+            border-radius: 12px;
         }
 
         input, select { 
-            padding: 9px 12px; 
-            border-radius: 10px; 
-            border: 1px solid var(--glass-border); 
+            padding: 10px 14px; 
+            border-radius: 12px; 
+            border: 1px solid var(--glass-border-subtle); 
             outline: none; 
             font-size: 0.82rem; 
             font-weight: 600;
-            background: rgba(255, 255, 255, 0.75);
+            background: var(--glass-input);
             color: var(--text-main);
-            backdrop-filter: blur(4px);
+            backdrop-filter: blur(8px);
             transition: all 0.2s ease;
             width: 100%;
+            box-shadow: inset 0 2px 4px rgba(148, 163, 184, 0.05);
         }
         input:focus, select:focus {
-            background: rgba(255, 255, 255, 0.95);
+            background: #ffffff;
             border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.12);
         }
 
         button { 
-            background: rgba(255, 255, 255, 0.85); 
+            background: #ffffff; 
             color: var(--primary); 
             border: 1px solid var(--glass-border); 
-            padding: 8px 14px;
-            border-radius: 10px;
+            padding: 9px 16px;
+            border-radius: 12px;
             cursor: pointer; 
             font-weight: 800; 
             font-size: 0.8rem;
             transition: all 0.2s ease; 
-            box-shadow: var(--glass-shadow);
+            box-shadow: var(--shadow-button);
             display: inline-flex;
             align-items: center;
             justify-content: center;
             gap: 6px;
         }
-        button:hover { background: #ffffff; color: var(--primary-hover); }
-        button:active { transform: scale(0.98); }
+        button:hover { background: #f8fafc; color: var(--primary-hover); transform: translateY(-1px); }
+        button:active { transform: scale(0.97); }
 
-        .btn-success { color: #10b981; }
-        .btn-warning { color: #f59e0b; }
-        .btn-danger { color: #ef4444; }
-        .btn-info { color: #3b82f6; }
-        .btn-sm { padding: 4px 8px; font-size: 0.72rem; border-radius: 8px; }
+        .btn-success { color: #059669; }
+        .btn-warning { color: #d97706; }
+        .btn-danger { color: #dc2626; }
+        .btn-info { color: #2563eb; }
+        .btn-sm { padding: 5px 10px; font-size: 0.72rem; border-radius: 9px; }
 
         .bulk-bar { 
-            display: flex; gap: 8px; flex-wrap: wrap; background: rgba(255, 255, 255, 0.5); 
-            padding: 10px; border-radius: 12px; margin-bottom: 12px; align-items: center; 
+            display: flex; gap: 8px; flex-wrap: wrap; 
+            background: rgba(255, 255, 255, 0.5); 
+            padding: 10px; border-radius: 14px; margin-bottom: 12px; align-items: center; 
             border: 1px solid var(--glass-border);
         }
 
-        /* --- DESAIN STRUCTURAL MEMBER RAMPING --- */
+        /* --- STRUCTURAL MEMBER SOFT WHITE --- */
         .member-list-container { display: flex; flex-direction: column; gap: 8px; }
         .member-card { 
-            background: rgba(255, 255, 255, 0.75); 
-            border-radius: 14px; 
+            background: rgba(255, 255, 255, 0.8); 
+            border-radius: 16px; 
             border: 1px solid var(--glass-border); 
-            padding: 10px 12px;
-            box-shadow: var(--glass-shadow);
+            padding: 12px;
+            box-shadow: var(--shadow-card);
             transition: all 0.2s ease; 
         }
 
-        /* BARIS 1: NAMA - NO HP - ID */
         .member-header-row {
             display: flex; justify-content: space-between; align-items: center;
-            border-bottom: 1px dashed rgba(0,0,0,0.08); padding-bottom: 6px; margin-bottom: 8px;
+            border-bottom: 1px dashed rgba(203, 213, 225, 0.8); padding-bottom: 8px; margin-bottom: 8px;
         }
         .member-title-info {
-            font-size: 0.82rem; font-weight: 800; color: var(--text-main);
+            font-size: 0.84rem; font-weight: 800; color: var(--text-main);
             display: flex; align-items: center; gap: 6px; flex-wrap: wrap;
             cursor: pointer;
         }
-        .member-title-info span.hp { color: var(--primary); font-weight: 700; }
+        .member-title-info span.hp { color: var(--primary); font-weight: 800; }
         .member-title-info span.id { color: var(--text-sub); font-size: 0.72rem; font-weight: 600; }
 
-        /* BARIS 2: GRID STATS RAMPING (TOPUP - HARI INI - PROFIT HARI INI) */
         .member-stats-grid {
             display: flex; gap: 6px; align-items: center; justify-content: space-between; margin-bottom: 8px;
         }
         .stat-box {
-            flex: 1; background: rgba(255, 255, 255, 0.6); border: 1px solid var(--glass-border);
-            padding: 5px 8px; border-radius: 8px; text-align: center; display: flex; flex-direction: column; justify-content: center;
+            flex: 1; background: rgba(255, 255, 255, 0.65); border: 1px solid var(--glass-border);
+            padding: 6px 8px; border-radius: 10px; text-align: center; display: flex; flex-direction: column; justify-content: center;
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8);
         }
-        .stat-label { font-size: 0.58rem; color: var(--text-sub); font-weight: 800; text-transform: uppercase; }
-        .stat-val { font-size: 0.78rem; font-weight: 900; }
-        .stat-val.saldo { color: #10b981; }
+        .stat-label { font-size: 0.58rem; color: var(--text-sub); font-weight: 800; text-transform: uppercase; letter-spacing: 0.3px; }
+        .stat-val { font-size: 0.8rem; font-weight: 900; }
+        .stat-val.saldo { color: #059669; }
         .stat-val.omset { color: var(--text-main); }
         .stat-val.profit { color: var(--primary); }
 
-        /* BARIS 3: REKAP DROPDOWN BUTTON */
         .btn-toggle-trx { 
-            background: rgba(255, 255, 255, 0.9); color: var(--text-main); 
-            border-radius: 8px; padding: 5px 10px; font-size: 0.72rem; font-weight: 800; 
+            background: rgba(255, 255, 255, 0.95); color: var(--text-main); 
+            border-radius: 10px; padding: 7px 12px; font-size: 0.72rem; font-weight: 800; 
             cursor: pointer; display: flex; align-items: center; justify-content: space-between; 
             width: 100%; border: 1px solid var(--glass-border); 
+            box-shadow: var(--shadow-button);
         }
         .btn-toggle-trx .chevron-trx { transition: transform 0.2s ease; font-size: 0.68rem; color: var(--text-sub); }
         .member-card.open .btn-toggle-trx .chevron-trx { transform: rotate(180deg); }
@@ -244,78 +294,79 @@
         .member-trx-dropdown { display: none; padding-top: 8px; flex-direction: column; gap: 6px; }
         .member-card.open .member-trx-dropdown { display: flex; }
 
-        .date-folder-card { background: rgba(255, 255, 255, 0.85); border-radius: 8px; border: 1px solid var(--glass-border); margin-top: 2px; overflow: hidden; }
-        .date-folder-header { padding: 6px 8px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; font-size: 0.72rem; font-weight: 800; color: var(--text-main); }
-        .date-folder-body { display: none; padding: 0 6px 6px 6px; flex-direction: column; gap: 4px; }
+        .date-folder-card { background: rgba(255, 255, 255, 0.9); border-radius: 10px; border: 1px solid var(--glass-border); margin-top: 2px; overflow: hidden; }
+        .date-folder-header { padding: 8px 10px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; font-size: 0.72rem; font-weight: 800; color: var(--text-main); }
+        .date-folder-body { display: none; padding: 0 8px 8px 8px; flex-direction: column; gap: 6px; }
         .date-folder-card.open .date-folder-body { display: flex; }
         .date-folder-card.open .date-chevron { transform: rotate(180deg); }
         .date-chevron { transition: transform 0.2s ease; font-size: 0.68rem; color: var(--text-sub); }
 
         .sub-trx-card { 
             background: rgba(255, 255, 255, 0.95); 
-            padding: 6px 8px; 
-            border-radius: 6px; 
-            border: 1px solid var(--glass-border); 
+            padding: 8px 10px; 
+            border-radius: 8px; 
+            border: 1px solid var(--glass-border-subtle); 
             display: flex; 
             flex-direction: column; 
-            gap: 3px;
-            transition: background 0.2s ease;
+            gap: 4px;
+            transition: all 0.2s ease;
+            box-shadow: 0 2px 6px rgba(148, 163, 184, 0.05);
         }
         .sub-trx-card.clickable { cursor: pointer; }
-        .sub-trx-card.clickable:hover { background: rgba(255, 255, 255, 1); }
+        .sub-trx-card.clickable:hover { background: #ffffff; border-color: rgba(79, 70, 229, 0.3); }
 
-        .sub-trx-header { display: flex; justify-content: space-between; font-size: 0.65rem; font-weight: 700; color: var(--text-sub); }
+        .sub-trx-header { display: flex; justify-content: space-between; font-size: 0.68rem; font-weight: 700; color: var(--text-sub); }
         .sub-trx-body { display: flex; justify-content: space-between; align-items: flex-end; gap: 6px; }
-        .sub-trx-prod { font-size: 0.75rem; font-weight: 800; color: var(--text-main); }
-        .sub-trx-target { font-size: 0.68rem; color: var(--primary); font-weight: 700; }
-        .sub-trx-price { font-size: 0.75rem; font-weight: 900; color: #10b981; }
+        .sub-trx-prod { font-size: 0.78rem; font-weight: 800; color: var(--text-main); }
+        .sub-trx-target { font-size: 0.7rem; color: var(--primary); font-weight: 700; }
+        .sub-trx-price { font-size: 0.78rem; font-weight: 900; color: #059669; }
         .sub-trx-sn { font-size: 0.65rem; color: var(--text-sub); font-weight: 700; margin-top: 2px; word-break: break-all; }
         
-        .sub-trx-status { font-size: 0.62rem; font-weight: 800; padding: 1px 5px; border-radius: 5px; text-transform: uppercase; }
-        .sub-trx-status.sukses { background: rgba(16, 185, 129, 0.15); color: #10b981; }
-        .sub-trx-status.proses { background: rgba(245, 158, 11, 0.15); color: #f59e0b; }
-        .sub-trx-status.gagal { background: rgba(239, 68, 68, 0.15); color: #ef4444; }
+        .sub-trx-status { font-size: 0.62rem; font-weight: 800; padding: 2px 6px; border-radius: 6px; text-transform: uppercase; }
+        .sub-trx-status.sukses { background: rgba(16, 185, 129, 0.12); color: #059669; border: 1px solid rgba(16, 185, 129, 0.2); }
+        .sub-trx-status.proses { background: rgba(245, 158, 11, 0.12); color: #d97706; border: 1px solid rgba(245, 158, 11, 0.2); }
+        .sub-trx-status.gagal { background: rgba(239, 68, 68, 0.12); color: #dc2626; border: 1px solid rgba(239, 68, 68, 0.2); }
 
-        /* ACCORDIONS KATEGORI & PROVIDER */
-        .folder-card { background: rgba(255, 255, 255, 0.65); border-radius: 14px; border: 1px solid var(--glass-border); margin-bottom: 10px; overflow: hidden; box-shadow: var(--glass-shadow); }
-        .folder-header { padding: 10px 14px; display: flex; align-items: center; justify-content: space-between; user-select: none; }
-        .folder-left { display: flex; align-items: center; gap: 8px; font-weight: 800; font-size: 0.82rem; color: var(--pink-accent); cursor: pointer; flex: 1; }
-        .folder-icon { font-size: 0.95rem; color: var(--pink-accent); }
+        /* ACCORDIONS SOFT WHITE */
+        .folder-card { background: rgba(255, 255, 255, 0.7); border-radius: 16px; border: 1px solid var(--glass-border); margin-bottom: 10px; overflow: hidden; box-shadow: var(--shadow-card); }
+        .folder-header { padding: 12px 14px; display: flex; align-items: center; justify-content: space-between; user-select: none; }
+        .folder-left { display: flex; align-items: center; gap: 8px; font-weight: 800; font-size: 0.85rem; color: var(--pink-accent); cursor: pointer; flex: 1; }
+        .folder-icon { font-size: 1rem; color: var(--pink-accent); }
         .folder-right { display: flex; align-items: center; gap: 6px; }
-        .badge-count { background: rgba(219, 234, 254, 0.8); color: var(--badge-blue); padding: 2px 8px; border-radius: 10px; font-size: 0.68rem; font-weight: 800; }
+        .badge-count { background: rgba(224, 231, 255, 0.8); color: var(--primary); padding: 3px 9px; border-radius: 12px; font-size: 0.68rem; font-weight: 800; border: 1px solid rgba(199, 210, 254, 0.6); }
         .folder-body { display: none; padding: 0 10px 10px 10px; flex-direction: column; gap: 6px; }
         .folder-card.open .folder-body { display: flex; }
         .folder-card.open .chevron { transform: rotate(180deg); }
         .chevron { transition: transform 0.2s; color: var(--text-sub); font-size: 0.75rem; cursor: pointer; }
 
-        .brand-block { background: rgba(255, 255, 255, 0.75); border-radius: 12px; border: 1px solid var(--glass-border); margin-bottom: 8px; overflow: hidden; }
-        .brand-header { padding: 10px 12px; background: rgba(255, 255, 255, 0.85); display: flex; align-items: center; justify-content: space-between; cursor: pointer; font-weight: 800; font-size: 0.85rem; color: var(--primary); }
+        .brand-block { background: rgba(255, 255, 255, 0.8); border-radius: 14px; border: 1px solid var(--glass-border); margin-bottom: 8px; overflow: hidden; }
+        .brand-header { padding: 10px 12px; background: rgba(255, 255, 255, 0.9); display: flex; align-items: center; justify-content: space-between; cursor: pointer; font-weight: 800; font-size: 0.85rem; color: var(--primary); }
         .brand-body { display: none; padding: 8px; flex-direction: column; gap: 6px; }
         .brand-block.open .brand-body { display: flex; }
         .brand-block.open .brand-chevron { transform: rotate(180deg); }
         .brand-chevron { transition: transform 0.2s; font-size: 0.75rem; color: var(--text-sub); }
 
-        .sub-cat-card { background: rgba(255, 255, 255, 0.9); border-radius: 10px; border: 1px solid var(--glass-border); overflow: hidden; }
-        .sub-cat-header { padding: 8px 10px; display: flex; align-items: center; justify-content: space-between; cursor: pointer; font-weight: 800; font-size: 0.78rem; color: var(--pink-accent); }
-        .sub-cat-body { display: none; padding: 6px; flex-direction: column; gap: 6px; background: rgba(255, 255, 255, 0.5); }
+        .sub-cat-card { background: rgba(255, 255, 255, 0.9); border-radius: 12px; border: 1px solid var(--glass-border); overflow: hidden; }
+        .sub-cat-header { padding: 9px 12px; display: flex; align-items: center; justify-content: space-between; cursor: pointer; font-weight: 800; font-size: 0.8rem; color: var(--pink-accent); }
+        .sub-cat-body { display: none; padding: 8px; flex-direction: column; gap: 6px; background: rgba(248, 250, 252, 0.6); }
         .sub-cat-card.open .sub-cat-body { display: flex; }
         .sub-cat-card.open .sub-chevron { transform: rotate(180deg); }
         .sub-chevron { transition: transform 0.2s; font-size: 0.7rem; color: var(--text-sub); }
 
-        .prod-item { background: rgba(255, 255, 255, 0.8); padding: 8px 10px; border-radius: 10px; border: 1px solid var(--glass-border); display: flex; align-items: center; justify-content: space-between; transition: all 0.25s ease; }
-        .prod-name { font-size: 0.78rem; font-weight: 800; color: var(--text-main); display: inline-flex; align-items: center; gap: 4px; }
-        .prod-sku { font-size: 0.65rem; color: var(--text-sub); font-weight: 700; margin-top: 1px; }
+        .prod-item { background: rgba(255, 255, 255, 0.95); padding: 9px 12px; border-radius: 12px; border: 1px solid var(--glass-border-subtle); display: flex; align-items: center; justify-content: space-between; transition: all 0.2s ease; box-shadow: 0 2px 5px rgba(148, 163, 184, 0.04); }
+        .prod-name { font-size: 0.8rem; font-weight: 800; color: var(--text-main); display: inline-flex; align-items: center; gap: 4px; }
+        .prod-sku { font-size: 0.68rem; color: var(--text-sub); font-weight: 700; margin-top: 1px; }
         .prod-sku span { color: var(--primary); }
-        .prod-price { font-size: 0.8rem; font-weight: 900; color: #10b981; }
+        .prod-price { font-size: 0.82rem; font-weight: 900; color: #059669; }
         .prod-modal { font-size: 0.68rem; color: var(--text-sub); font-weight: 700; }
 
         .dot-indicator { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-left: 4px; vertical-align: middle; flex-shrink: 0; }
-        .dot-digiflazz { background-color: #6366f1; box-shadow: 0 0 6px rgba(99, 102, 241, 0.5); }
-        .dot-okeconnect { background-color: #10b981; box-shadow: 0 0 6px rgba(16, 185, 129, 0.5); }
+        .dot-digiflazz { background-color: #6366f1; box-shadow: 0 0 8px rgba(99, 102, 241, 0.6); }
+        .dot-okeconnect { background-color: #10b981; box-shadow: 0 0 8px rgba(16, 185, 129, 0.6); }
 
-        .status-badge { font-size: 0.62rem; font-weight: 800; padding: 2px 6px; border-radius: 6px; text-transform: uppercase; }
-        .status-badge.active { background: rgba(16, 185, 129, 0.15); color: #10b981; }
-        .status-badge.hidden { background: rgba(239, 68, 68, 0.15); color: #ef4444; }
+        .status-badge { font-size: 0.62rem; font-weight: 800; padding: 2px 7px; border-radius: 6px; text-transform: uppercase; }
+        .status-badge.active { background: rgba(16, 185, 129, 0.12); color: #059669; border: 1px solid rgba(16, 185, 129, 0.2); }
+        .status-badge.hidden { background: rgba(239, 68, 68, 0.12); color: #dc2626; border: 1px solid rgba(239, 68, 68, 0.2); }
     </style>
 </head>
 <body>
@@ -411,8 +462,8 @@
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; flex-wrap: wrap; gap: 6px;">
                     <h3 style="margin:0; font-size:0.88rem;">
                         <i class="fa-solid fa-user-gear"></i> Member 
-                        Saldo: <span id="dispSaldoMember" style="color: #10b981;">Rp 0</span> | 
-                        Profit: <span id="dispTotalProfitMember" style="color: #6366f1;">Rp 0</span>
+                        Saldo: <span id="dispSaldoMember" style="color: #059669;">Rp 0</span> | 
+                        Profit: <span id="dispTotalProfitMember" style="color: #4f46e5;">Rp 0</span>
                     </h3>
                     <button class="btn-success btn-sm" onclick="bukaModalMember()"><i class="fa-solid fa-user-plus"></i> + Member</button>
                 </div>
@@ -430,16 +481,16 @@
                 <div style="display: flex; gap: 6px; flex-wrap: wrap;">
                     <input type="text" id="namaKategoriBaru" placeholder="Nama Kategori (misal: Freedom Sensasi)" style="flex: 2; min-width: 150px;">
                     <select id="brandKategoriBaru" style="flex: 1; min-width: 110px;">
-                    <option value="INDOSAT">INDOSAT</option>
-                    <option value="TELKOMSEL">TELKOMSEL</option>
-                    <option value="XL">XL</option>
-                    <option value="AXIS">AXIS</option>
-                    <option value="TRI">TRI</option>
-                    <option value="SMARTFREN">SMARTFREN</option>
-                    <option value="E-WALLET">E-WALLET</option>
-                    <option value="TOKEN">TOKEN PLN</option>
-                    <option value="PLN">TAGIHAN PLN</option>
-                    <option value="GAMING">GAMING</option>
+                        <option value="INDOSAT">INDOSAT</option>
+                        <option value="TELKOMSEL">TELKOMSEL</option>
+                        <option value="XL">XL</option>
+                        <option value="AXIS">AXIS</option>
+                        <option value="TRI">TRI</option>
+                        <option value="SMARTFREN">SMARTFREN</option>
+                        <option value="E-WALLET">E-WALLET</option>
+                        <option value="TOKEN">TOKEN PLN</option>
+                        <option value="PLN">TAGIHAN PLN</option>
+                        <option value="GAMING">GAMING</option>
                     </select>
                     <button onclick="tambahKategoriBaru()"><i class="fa-solid fa-plus"></i> Buat</button>
                 </div>
@@ -450,7 +501,7 @@
                     <h3 style="margin: 0;"><i class="fa-solid fa-folder-tree"></i> Custom Produk</h3>
                     <button onclick="loadCustomCategoriesFromDB()" class="btn-sm"><i class="fa-solid fa-rotate-right"></i> Refresh DB</button>
                 </div>
-                <div style="font-size: 0.72rem; color: var(--text-sub); margin-bottom: 12px; background: rgba(255,255,255,0.5); padding: 8px; border-radius: 8px;">
+                <div style="font-size: 0.72rem; color: var(--text-sub); margin-bottom: 12px; background: rgba(255,255,255,0.6); padding: 8px 12px; border-radius: 10px; border: 1px solid var(--glass-border-subtle);">
                     💡 <b>Harga Modal</b> akan terus otomatis diperbarui saat Sync. Gunakan panah (▲ / ▼) untuk mengubah posisi urutan sub-kategori secara manual.
                 </div>
                 <div id="customCategoryContainer">
@@ -483,7 +534,7 @@
         <div id="tab-okeconnect" class="tab-content">
             <div class="glass-card" style="padding:12px;">
                 <h3><i class="fa-solid fa-network-wired"></i> Konfigurasi Okeconnect H2H</h3>
-                <div style="font-size:0.75rem; color:var(--text-sub); display:flex; flex-direction:column; gap:4px; background:rgba(255,255,255,0.6); padding:10px; border-radius:10px; border:1px solid var(--glass-border);">
+                <div style="font-size:0.75rem; color:var(--text-sub); display:flex; flex-direction:column; gap:4px; background:rgba(255,255,255,0.7); padding:10px 12px; border-radius:12px; border:1px solid var(--glass-border-subtle);">
                     <div><b>IP Center H2H:</b> <span style="color:var(--primary); font-weight:800;">103.139.245.61</span></div>
                     <div><b>URL Transaksi:</b> <span style="color:var(--primary); font-weight:700;">https://h2h.okeconnect.com/trx</span></div>
                     <div><b>API Pricelist JSON:</b> <span style="color:var(--text-main); font-size:0.7rem; word-break:break-all;">https://www.okeconnect.com/harga/json?id=905ccd028329b0a</span></div>
@@ -512,8 +563,8 @@
     </div>
 
     <!-- MODAL MEMBER -->
-    <div id="modalMember" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.3); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); z-index: 9999; justify-content: center; align-items: center;">
-        <div class="glass-card" style="width: 90%; max-width: 400px; padding: 20px; background: rgba(255, 255, 255, 0.95);">
+    <div id="modalMember" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(148, 163, 184, 0.25); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); z-index: 9999; justify-content: center; align-items: center;">
+        <div class="glass-card" style="width: 90%; max-width: 400px; padding: 22px; background: rgba(255, 255, 255, 0.95); box-shadow: 0 20px 40px rgba(0,0,0,0.12);">
             <h3><i class="fa-solid fa-user-plus"></i> Tambah Member Baru</h3>
             <div style="display: flex; flex-direction: column; gap: 10px; margin-top: 10px;">
                 <input type="text" id="addNamaMember" placeholder="Nama Member">
@@ -528,8 +579,8 @@
     </div>
 
     <!-- MODAL EDIT PRODUK CUSTOM -->
-    <div id="modalEditCustomProduct" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.3); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); z-index: 9999; justify-content: center; align-items: center;">
-        <div class="glass-card" style="width: 90%; max-width: 420px; padding: 20px; background: rgba(255, 255, 255, 0.95);">
+    <div id="modalEditCustomProduct" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(148, 163, 184, 0.25); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); z-index: 9999; justify-content: center; align-items: center;">
+        <div class="glass-card" style="width: 90%; max-width: 420px; padding: 22px; background: rgba(255, 255, 255, 0.95); box-shadow: 0 20px 40px rgba(0,0,0,0.12);">
             <h3><i class="fa-solid fa-pen-to-square"></i> Edit Produk Custom</h3>
             <div style="display: flex; flex-direction: column; gap: 10px; margin-top: 10px;">
                 <input type="hidden" id="editCustomCatId">
@@ -537,7 +588,7 @@
                 
                 <div>
                     <label style="font-size: 0.7rem; font-weight: 800; color: var(--text-sub);">SKU / KODE PRODUK</label>
-                    <input type="text" id="editCustomSku" readonly style="background: rgba(0,0,0,0.05); color: var(--text-sub);">
+                    <input type="text" id="editCustomSku" readonly style="background: rgba(241,245,249,0.8); color: var(--text-sub);">
                 </div>
                 <div>
                     <label style="font-size: 0.7rem; font-weight: 800; color: var(--text-sub);">NAMA PRODUK CUSTOM</label>
@@ -557,13 +608,13 @@
     </div>
 
     <!-- MODAL EDIT STATUS TRANSAKSI & SN / RESI -->
-    <div id="modalEditStatusTrx" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.3); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); z-index: 9999; justify-content: center; align-items: center;">
-        <div class="glass-card" style="width: 90%; max-width: 420px; padding: 20px; background: rgba(255, 255, 255, 0.95);">
+    <div id="modalEditStatusTrx" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(148, 163, 184, 0.25); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); z-index: 9999; justify-content: center; align-items: center;">
+        <div class="glass-card" style="width: 90%; max-width: 420px; padding: 22px; background: rgba(255, 255, 255, 0.95); box-shadow: 0 20px 40px rgba(0,0,0,0.12);">
             <h3><i class="fa-solid fa-list-check"></i> Edit Status & SN Transaksi</h3>
             <div style="display: flex; flex-direction: column; gap: 10px; margin-top: 10px;">
                 <div>
                     <label style="font-size: 0.7rem; font-weight: 800; color: var(--text-sub);">REF ID TRANSAKSI</label>
-                    <input type="text" id="editTrxRefId" readonly style="background: rgba(0,0,0,0.05); color: var(--text-sub);">
+                    <input type="text" id="editTrxRefId" readonly style="background: rgba(241,245,249,0.8); color: var(--text-sub);">
                 </div>
                 <div>
                     <label style="font-size: 0.7rem; font-weight: 800; color: var(--text-sub);">STATUS PESANAN</label>
@@ -674,7 +725,7 @@
                 renderTabelMember(rawMembers);
             } catch (err) {
                 if (!silent) {
-                    document.getElementById('tabelMember').innerHTML = `<div style="text-align:center; color:red; padding:10px;">Gagal memuat data member.</div>`;
+                    document.getElementById('tabelMember').innerHTML = `<div style="text-align:center; color:var(--danger); padding:10px;">Gagal memuat data member.</div>`;
                 }
             }
         }
@@ -729,7 +780,7 @@
                             </div>
                             <div style="text-align:right;">
                                 <div class="sub-trx-price">Jual: Rp ${hJual.toLocaleString('id-ID')}</div>
-                                <div style="font-size: 0.68rem; color: var(--text-sub); font-weight:700;">Modal: Rp ${hModal.toLocaleString('id-ID')} | <b style="color:${laba >= 0 ? '#6366f1' : '#ef4444'};">Untung: Rp ${laba.toLocaleString('id-ID')}</b></div>
+                                <div style="font-size: 0.68rem; color: var(--text-sub); font-weight:700;">Modal: Rp ${hModal.toLocaleString('id-ID')} | <b style="color:${laba >= 0 ? '#4f46e5' : '#ef4444'};">Untung: Rp ${laba.toLocaleString('id-ID')}</b></div>
                                 <div style="display:flex; gap:4px; justify-content:flex-end; margin-top:3px; flex-wrap:wrap;" onclick="event.stopPropagation();">
                                     <span class="sub-trx-status ${statusClass}">${statusStr}</span>
                                     <button class="btn-sm btn-info" style="padding:1px 5px; font-size:0.62rem;" onclick="keDetailMember('${refId}', true)" title="Detail Transaksi"><i class="fa-solid fa-receipt"></i> Detail</button>
@@ -829,7 +880,7 @@
 
                         <div class="member-stats-grid">
                             <div class="stat-box" style="flex:0.8; cursor:pointer;" onclick="pilihUbahSaldo('${noHp}')" title="Klik untuk Topup">
-                                <span class="stat-label"><i class="fa-solid fa-wallet" style="color:#10b981;"></i> Saldo</span>
+                                <span class="stat-label"><i class="fa-solid fa-wallet" style="color:#059669;"></i> Saldo</span>
                                 <span class="stat-val saldo">Rp ${saldo.toLocaleString('id-ID')}</span>
                             </div>
                             <div class="stat-box">
@@ -865,7 +916,7 @@
                             <div class="date-folder-card ${isDateOpen ? 'open' : ''}" data-key="${dateFolderKey}">
                                 <div class="date-folder-header" onclick="toggleDateFolder(this, '${dateFolderKey}')">
                                     <span><i class="fa-regular fa-calendar-check" style="color:var(--primary); margin-right:4px;"></i> ${group.dateStr} (${trxsInDate.length})</span>
-                                    <div><span style="color:#10b981; font-weight:900; margin-right:4px;">Rp ${totalDateNominal.toLocaleString('id-ID')}</span><i class="fa-solid fa-chevron-down date-chevron"></i></div>
+                                    <div><span style="color:#059669; font-weight:900; margin-right:4px;">Rp ${totalDateNominal.toLocaleString('id-ID')}</span><i class="fa-solid fa-chevron-down date-chevron"></i></div>
                                 </div>
                                 <div class="date-folder-body">
                         `;
@@ -888,7 +939,7 @@
                                         </div>
                                         <div style="text-align:right;">
                                             <div class="sub-trx-price">Jual: Rp ${hJ.toLocaleString('id-ID')}</div>
-                                            <div style="font-size:0.65rem; color:var(--text-sub);">Modal: Rp ${hM.toLocaleString('id-ID')} | <b style="color:${untung >= 0 ? '#6366f1' : '#ef4444'};">Untung: Rp ${untung.toLocaleString('id-ID')}</b></div>
+                                            <div style="font-size:0.65rem; color:var(--text-sub);">Modal: Rp ${hM.toLocaleString('id-ID')} | <b style="color:${untung >= 0 ? '#4f46e5' : '#ef4444'};">Untung: Rp ${untung.toLocaleString('id-ID')}</b></div>
                                             <div style="display:flex; gap:4px; justify-content:flex-end; margin-top:3px; flex-wrap:wrap;" onclick="event.stopPropagation();">
                                                 <span class="sub-trx-status sukses">SUKSES</span>
                                                 <button class="btn-sm btn-success" style="padding:1px 5px; font-size:0.62rem;" onclick="bukaModalEditStatusTrx('${refId}', 'SUKSES', '${safeSn}')" title="Edit Status & SN"><i class="fa-solid fa-list-check"></i> Status</button>
@@ -1575,7 +1626,7 @@
                     renderOkeconnectFolders();
                 }
             } catch (err) {
-                container.innerHTML = `<div style="text-align:center; color:#ef4444; padding:15px; font-size:0.8rem;">❌ Gagal memuat data Okeconnect.</div>`;
+                container.innerHTML = `<div style="text-align:center; color:var(--danger); padding:15px; font-size:0.8rem;">❌ Gagal memuat data Okeconnect.</div>`;
             }
         }
 

@@ -9,25 +9,39 @@
 
   <style media="screen">
     :root {
-      --bg-base: #e6eaf0;
-      --neu-light: #ffffff;
-      --neu-dark: #babecc;
-      --text-main: #4a5568;
-      --text-muted: #8c98a9;
-      --accent-purple: #7052ff;
-      --border-radius-sm: 14px;
-      --border-radius-md: 20px;
-      --border-radius-pill: 50px;
+      /* PALET SOFT WHITE GLASSMORPHISM (SERAGAM DENGAN ADMIN.HTML) */
+      --bg-gradient: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 50%, #f1f5f9 100%);
+      
+      --glass-base: rgba(255, 255, 255, 0.55);
+      --glass-card: rgba(255, 255, 255, 0.72);
+      --glass-input: rgba(255, 255, 255, 0.85);
+      --glass-border: rgba(255, 255, 255, 0.95);
+      --glass-border-subtle: rgba(226, 232, 240, 0.6);
+      
+      --shadow-card: 0 4px 20px -2px rgba(100, 116, 139, 0.08), inset 0 1px 0 0 rgba(255, 255, 255, 0.9);
+      --shadow-button: 0 4px 12px rgba(148, 163, 184, 0.2), inset 0 1px 0 rgba(255, 255, 255, 1);
+      
+      --text-main: #1e293b;
+      --text-sub: #64748b;
+      --text-muted: #94a3b8;
 
-      --neu-shadow-flat: 6px 6px 12px var(--neu-dark), -6px -6px 12px var(--neu-light);
-      --neu-shadow-sm: 3px 3px 6px var(--neu-dark), -3px -3px 6px var(--neu-light);
-      --neu-shadow-inset: inset 3px 3px 6px var(--neu-dark), inset -3px -3px 6px var(--neu-light);
+      --primary: #4f46e5;
+      --primary-hover: #4338ca;
+      --pink-accent: #db2777;
+      --success: #059669;
+      --warning: #d97706;
+      --danger: #dc2626;
+
+      --border-radius-sm: 10px;
+      --border-radius-md: 16px;
+      --border-radius-pill: 50px;
     }
 
     * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; margin: 0; padding: 0; }
 
     body {
-      background-color: var(--bg-base);
+      background: var(--bg-gradient);
+      background-attachment: fixed;
       color: var(--text-main);
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
       font-size: 13px;
@@ -35,105 +49,156 @@
       padding: 16px;
       padding-bottom: 90px;
       -webkit-font-smoothing: antialiased;
+      position: relative;
+    }
+
+    /* Ambient Light Spheres */
+    body::before {
+      content: '';
+      position: fixed;
+      top: -100px;
+      left: -100px;
+      width: 350px;
+      height: 350px;
+      background: rgba(199, 210, 254, 0.4);
+      filter: blur(90px);
+      border-radius: 50%;
+      z-index: -1;
+    }
+    body::after {
+      content: '';
+      position: fixed;
+      bottom: -50px;
+      right: -50px;
+      width: 400px;
+      height: 400px;
+      background: rgba(251, 207, 232, 0.35);
+      filter: blur(100px);
+      border-radius: 50%;
+      z-index: -1;
     }
 
     .app-container { width: 100%; max-width: 480px; margin: 0 auto; }
 
-    .app-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+    .app-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
 
     .btn-back {
       width: 40px; height: 40px; border-radius: 50%;
-      background: var(--bg-base); box-shadow: var(--neu-shadow-sm);
+      background: #ffffff; border: 1px solid var(--glass-border);
+      box-shadow: var(--shadow-button);
       display: flex; align-items: center; justify-content: center;
-      color: var(--accent-purple); text-decoration: none; font-size: 14px; border: none; cursor: pointer;
+      color: var(--primary); text-decoration: none; font-size: 14px; cursor: pointer;
+      transition: all 0.2s ease;
     }
-    .btn-back:active { box-shadow: var(--neu-shadow-inset); transform: scale(0.95); }
+    .btn-back:hover { background: #f8fafc; transform: translateY(-1px); }
+    .btn-back:active { transform: scale(0.95); }
 
-    .header-title { font-weight: 800; font-size: 15px; color: var(--text-main); }
+    .header-title { font-weight: 800; font-size: 1rem; color: var(--text-main); letter-spacing: -0.3px; }
 
     .card-neu {
-      background: var(--bg-base); border-radius: var(--border-radius-md);
-      padding: 16px; margin-bottom: 18px; box-shadow: var(--neu-shadow-flat);
+      background: var(--glass-card);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid var(--glass-border);
+      border-radius: var(--border-radius-md);
+      padding: 16px; margin-bottom: 14px; box-shadow: var(--shadow-card);
     }
 
     .card-status-row {
       display: flex; align-items: center; justify-content: space-between;
       border-radius: var(--border-radius-pill); padding: 10px 16px;
-      background: var(--bg-base); box-shadow: var(--neu-shadow-inset); margin-bottom: 18px;
+      background: rgba(255, 255, 255, 0.8);
+      border: 1px solid var(--glass-border);
+      box-shadow: var(--shadow-card); margin-bottom: 14px;
     }
 
     .status-left { display: flex; align-items: center; gap: 10px; }
     
     .icon-wrapper-status {
-      width: 32px; height: 32px; border-radius: 50%;
-      background: var(--bg-base); box-shadow: var(--neu-shadow-sm);
+      width: 34px; height: 34px; border-radius: 50%;
+      background: #ffffff; border: 1px solid var(--glass-border);
+      box-shadow: var(--shadow-button);
       display: flex; align-items: center; justify-content: center;
-      color: var(--accent-purple); font-size: 14px;
+      color: var(--primary); font-size: 14px;
     }
 
-    .status-label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-muted); font-weight: 800; }
+    .status-label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-sub); font-weight: 800; }
 
     .status-value {
       font-size: 10px; font-weight: 800; text-transform: uppercase;
-      padding: 5px 12px; border-radius: 10px; box-shadow: var(--neu-shadow-sm); background: var(--bg-base);
+      padding: 4px 10px; border-radius: 8px; border: 1px solid transparent;
     }
 
-    .status-value.success { color: #10b981; }
-    .status-value.pending { color: #f59e0b; }
-    .status-value.failed { color: #dc3545; }
+    .status-value.success { background: rgba(16, 185, 129, 0.12); color: var(--success); border-color: rgba(16, 185, 129, 0.2); }
+    .status-value.pending { background: rgba(245, 158, 11, 0.12); color: var(--warning); border-color: rgba(245, 158, 11, 0.2); }
+    .status-value.failed { background: rgba(239, 68, 68, 0.12); color: var(--danger); border-color: rgba(239, 68, 68, 0.2); }
 
     .badge-title {
       display: inline-flex; align-items: center; gap: 6px;
-      font-size: 10px; font-weight: 800; color: var(--accent-purple);
-      background: var(--bg-base); padding: 4px 14px;
-      border-radius: var(--border-radius-pill); box-shadow: var(--neu-shadow-inset);
+      font-size: 0.72rem; font-weight: 800; color: var(--primary);
+      background: rgba(224, 231, 255, 0.8); padding: 4px 12px;
+      border-radius: 12px; border: 1px solid rgba(199, 210, 254, 0.6);
       margin-bottom: 14px; text-transform: uppercase; letter-spacing: 0.5px;
     }
 
     .detail-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
     .detail-row:last-child { margin-bottom: 0; }
 
-    .label-teks { font-size: 12px; font-weight: 600; color: var(--text-muted); flex: 1; }
+    .label-teks { font-size: 12px; font-weight: 600; color: var(--text-sub); flex: 1; }
     .value-teks { font-size: 12px; font-weight: 700; color: var(--text-main); text-align: right; flex: 1.5; word-break: break-word; }
-    .value-id { color: var(--accent-purple) !important; font-weight: 800; }
+    .value-id { color: var(--primary) !important; font-weight: 800; }
 
     .produk-item {
-      padding: 12px 14px; border-radius: var(--border-radius-sm); background-color: var(--bg-base);
-      box-shadow: var(--neu-shadow-inset); margin-bottom: 12px;
+      padding: 12px; border-radius: var(--border-radius-sm);
+      background: rgba(255, 255, 255, 0.9);
+      border: 1px solid var(--glass-border-subtle);
+      box-shadow: 0 2px 6px rgba(148, 163, 184, 0.04);
+      margin-bottom: 10px;
     }
 
     .copy-btn {
-      color: var(--accent-purple); font-size: 12px; padding: 2px 6px;
-      background: var(--bg-base); border: none; cursor: pointer; margin-left: 6px;
-      border-radius: 6px; box-shadow: var(--neu-shadow-sm);
+      color: var(--primary); font-size: 11px; padding: 2px 6px;
+      background: #ffffff; border: 1px solid var(--glass-border); cursor: pointer; margin-left: 6px;
+      border-radius: 6px; box-shadow: var(--shadow-button); transition: all 0.2s ease;
     }
-    .copy-btn:active { box-shadow: var(--neu-shadow-inset); }
+    .copy-btn:hover { background: #f8fafc; }
+    .copy-btn:active { transform: scale(0.95); }
 
     .input-harga {
-      background: var(--bg-base); border: none; box-shadow: var(--neu-shadow-inset);
-      border-radius: 10px; padding: 6px 12px; font-size: 13px; font-weight: 800;
-      color: #10b981; text-align: right; width: 140px; outline: none;
+      background: var(--glass-input); border: 1px solid var(--glass-border-subtle);
+      border-radius: 8px; padding: 5px 10px; font-size: 13px; font-weight: 800;
+      color: var(--success); text-align: right; width: 140px; outline: none;
+      box-shadow: inset 0 1px 2px rgba(148, 163, 184, 0.05);
+      transition: all 0.2s ease;
+    }
+    .input-harga:focus {
+      background: #ffffff; border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.12);
     }
 
     .total-label { font-weight: 800; color: var(--text-main); }
-    .total-value { font-size: 15px; font-weight: 800; color: var(--accent-purple); }
+    .total-value { font-size: 15px; font-weight: 900; color: var(--primary); }
 
     .btn-container { 
       position: fixed; bottom: 0; left: 50%; transform: translateX(-50%);
-      width: 100%; max-width: 480px; padding: 14px 16px; 
-      background: var(--bg-base); z-index: 100; display: flex; gap: 12px;
-      box-shadow: 0 -5px 15px rgba(0,0,0,0.03);
+      width: 100%; max-width: 480px; padding: 12px 16px; 
+      background: var(--glass-base); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+      z-index: 100; display: flex; gap: 10px;
+      border-top: 1px solid var(--glass-border);
+      box-shadow: 0 -4px 15px rgba(148, 163, 184, 0.08);
       border-top-left-radius: 20px; border-top-right-radius: 20px;
     }
 
     .btn-action {
-      background-color: var(--bg-base); border-radius: var(--border-radius-pill); 
-      box-shadow: var(--neu-shadow-sm); color: var(--accent-purple); 
-      font-weight: 800; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px;
-      border: none; padding: 14px 0; flex: 1; cursor: pointer;
+      background-color: #ffffff; border-radius: 12px; 
+      border: 1px solid var(--glass-border); box-shadow: var(--shadow-button); 
+      color: var(--primary); font-weight: 800; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px;
+      padding: 12px 0; flex: 1; cursor: pointer;
       display: flex; align-items: center; justify-content: center; text-decoration: none !important;
+      transition: all 0.2s ease;
     }
-    .btn-action:active { box-shadow: var(--neu-shadow-inset); transform: scale(0.98); }
+    .btn-action:hover { background: #f8fafc; transform: translateY(-1px); }
+    .btn-action:active { transform: scale(0.97); }
 
     #struk-printable {
       display: none; width: 300px; background: #fff; color: #000;
@@ -179,7 +244,7 @@
       </div>
       <div class="detail-row">
         <span class="label-teks">Nama Member</span>
-        <span class="value-teks" id="info_nama_member" style="color:var(--accent-purple); font-weight:800;">-</span>
+        <span class="value-teks" id="info_nama_member" style="color:var(--primary); font-weight:800;">-</span>
       </div>
       <div class="detail-row">
         <span class="label-teks">Tanggal / Waktu</span>
@@ -216,7 +281,7 @@
           <input type="number" class="input-harga" id="edit_harga_jual" value="0">
         </div>
 
-        <div class="detail-row pt-2" style="border-top: 1px dashed var(--neu-dark); padding-top: 8px; margin-top: 4px;">
+        <div class="detail-row pt-2" style="border-top: 1px dashed var(--glass-border-subtle); padding-top: 8px; margin-top: 4px;">
           <span class="label-teks total-label">Total Bayar</span>
           <span class="value-teks total-value" id="total_transaksi">Rp0</span>
         </div>
@@ -293,9 +358,7 @@
         };
     }
 
-    // 🟢 FETCH SIMPEL PERSIS SEPERTI DETAIL.HTML MEMBER
     function fetchTransactionDetail(refId) {
-      // Membersihkan tanda '#' jika terbawa dari URL
       var cleanId = String(refId).replace(/^#/, '').trim();
       var targetUrl = window.location.origin + '/api/transaction/detail?id=' + encodeURIComponent(cleanId) + '&t=' + Date.now();
 
@@ -361,13 +424,12 @@
 
     function showErrorState(title, message) {
       $('#status_kirim').text(title).attr('class', 'status-value failed');
-      $('#status_icon').attr('class', 'fa-solid fa-circle-xmark').css('color', '#dc3545');
+      $('#status_icon').attr('class', 'fa-solid fa-circle-xmark').css('color', '#dc2626');
       $('#info_ref_id').text('-');
       $('#info_nama_member').text('-');
       $('#keranjang_transaksi').html('<div style="text-align:center; color:var(--text-muted); padding:10px;">' + message + '</div>');
     }
 
-    // 🟢 RENDER FUNCTION SAMA PERSIS DENGAN DETAIL.HTML (DENGAN TAMBAHAN PROFIT KHUSUS ADMIN)
     function renderSQLiteDataDetail(row) {
       var refId = row.ref_id || row.refid || row.nomor_pembayaran || row.trx_id || row.id || '-';
       var userHp = row.user_hp || row.customer_no || row.phone || '-';
@@ -385,13 +447,13 @@
       var statusLower = statusKirim.toLowerCase();
       if (['selesai', 'sukses', 'lunas', 'success'].indexOf(statusLower) !== -1) {
         $('#status_kirim').attr('class', 'status-value success');
-        $('#status_icon').attr('class', 'fa-solid fa-circle-check').css('color', '#10b981');
+        $('#status_icon').attr('class', 'fa-solid fa-circle-check').css('color', '#059669');
       } else if (['batal', 'gagal', 'failed'].indexOf(statusLower) !== -1) {
         $('#status_kirim').attr('class', 'status-value failed');
-        $('#status_icon').attr('class', 'fa-solid fa-circle-xmark').css('color', '#dc3545');
+        $('#status_icon').attr('class', 'fa-solid fa-circle-xmark').css('color', '#dc2626');
       } else {
         $('#status_kirim').attr('class', 'status-value pending');
-        $('#status_icon').attr('class', 'fa-solid fa-clock-rotate-left fa-spin').css('color', '#f59e0b');
+        $('#status_icon').attr('class', 'fa-solid fa-clock-rotate-left fa-spin').css('color', '#d97706');
       }
 
       var waktuRaw = row.waktu || row.time || row.created_at || row.tanggal_buat || row.date || '';
@@ -429,7 +491,6 @@
 
       $('#info_ekspedisi').text(kategori);
 
-      // Render Rincian Produk
       var htmlProduk = '<div class="produk-item">' +
         '<div class="detail-row"><span class="label-teks">Nama Produk</span><span class="value-teks">' + namaProduk + '</span></div>';
 
@@ -453,14 +514,13 @@
         $('#s_sn_row').hide();
       }
 
-      // Tambahan Rincian Modal & Untung untuk Admin
-      htmlProduk += '<div class="detail-row" style="margin-top:8px; border-top:1px dashed var(--neu-dark); padding-top:6px;">' +
+      htmlProduk += '<div class="detail-row" style="margin-top:8px; border-top:1px dashed var(--glass-border-subtle); padding-top:6px;">' +
         '<span class="label-teks">Harga Modal</span>' +
         '<span class="value-teks">Rp ' + hModal.toLocaleString('id-ID') + '</span></div>';
       
       htmlProduk += '<div class="detail-row" style="margin-top:4px;">' +
         '<span class="label-teks">Keuntungan</span>' +
-        '<span class="value-teks" style="color:' + (laba >= 0 ? '#10b981' : '#dc3545') + '; font-weight:800;">Rp ' + laba.toLocaleString('id-ID') + '</span></div>';
+        '<span class="value-teks" style="color:' + (laba >= 0 ? '#059669' : '#dc2626') + '; font-weight:800;">Rp ' + laba.toLocaleString('id-ID') + '</span></div>';
 
       htmlProduk += '</div>';
       $('#keranjang_transaksi').html(htmlProduk);
@@ -482,7 +542,7 @@
 
     function copyText(teks, btn) {
       if (navigator.clipboard) { navigator.clipboard.writeText(teks); }
-      var $icon = $(btn).find('i');$icon.removeClass('fa-regular fa-copy').addClass('fa-solid fa-check').css('color', '#10b981');
+      var $icon = $(btn).find('i');$icon.removeClass('fa-regular fa-copy').addClass('fa-solid fa-check').css('color', '#059669');
       setTimeout(function() {
         $icon.removeClass('fa-solid fa-check').addClass('fa-regular fa-copy').css('color', '');
       }, 1500);

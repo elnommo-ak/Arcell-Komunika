@@ -167,7 +167,7 @@
         .card-wrapper { position: relative; z-index: 101; padding: 0 16px; }
 
         .popup-top-container {
-            display: none; height: 250px; overflow-y: auto; margin-bottom: var(--main-gap); padding: 14px;
+            display: none; height: 250px; overflow-y: auto; margin-bottom: 8px; padding: 10px 12px;
             background: var(--bg-base); border-radius: var(--border-radius-md);
             box-shadow: var(--neu-shadow-inset); animation: dropUpAnimation 0.3s ease-out forwards;
         }
@@ -177,38 +177,38 @@
             100% { opacity: 1; transform: translateY(0); }
         }
 
-        .card-container { display: flex; flex-direction: column; gap: var(--main-gap); }
+        .card-container { display: flex; flex-direction: column; gap: 8px; }
 
         .inset-tabs-wrapper {
-            display: none; overflow-x: auto; white-space: nowrap; gap: 10px; padding: 4px 2px 8px 2px;
+            display: none; overflow-x: auto; white-space: nowrap; gap: 6px; padding: 2px 2px 6px 2px;
             scroll-behavior: smooth; width: 100%;
         }
 
         .tab-item-inset {
             display: inline-flex; align-items: center; justify-content: center;
-            padding: 8px 18px; border-radius: var(--border-radius-pill); border: none;
-            background: var(--bg-base); color: var(--text-muted); font-size: 0.72rem; font-weight: 700;
+            padding: 5px 12px; border-radius: var(--border-radius-pill); border: none;
+            background: var(--bg-base); color: var(--text-muted); font-size: 0.65rem; font-weight: 700;
             cursor: pointer; transition: all 0.2s ease; flex-shrink: 0; box-shadow: var(--neu-shadow-sm);
         }
         .tab-item-inset.active { color: var(--accent-purple); box-shadow: var(--neu-shadow-inset); }
 
         .input-box {
-            display: flex; align-items: center; padding: 10px 18px; gap: 12px; 
+            display: flex; align-items: center; padding: 8px 14px; gap: 10px; 
             background: var(--bg-base); border-radius: var(--border-radius-pill);
             box-shadow: var(--neu-shadow-inset); transition: all 0.25s;
         }
 
         .input-icon-left { 
-            color: var(--accent-purple); font-size: 0.9rem; 
-            width: 30px; height: 30px; border-radius: 50%; background: var(--bg-base);
+            color: var(--accent-purple); font-size: 0.85rem; 
+            width: 28px; height: 28px; border-radius: 50%; background: var(--bg-base);
             box-shadow: var(--neu-shadow-sm); display: flex; align-items: center; justify-content: center; flex-shrink: 0;
         }
 
         .input-box input {
             flex: 1; border: none; background: transparent; outline: none; 
-            font-size: 1.05rem; font-weight: 700; color: var(--text-main); width: 100%; letter-spacing: 0.5px;
+            font-size: 0.95rem; font-weight: 700; color: var(--text-main); width: 100%; letter-spacing: 0.5px;
         }
-        .input-box input::placeholder { color: var(--text-muted); font-weight: 500; font-size: 0.85rem; opacity: 0.8; }
+        .input-box input::placeholder { color: var(--text-muted); font-weight: 500; font-size: 0.82rem; opacity: 0.8; }
 
         .operator-badge {
             background: var(--bg-base); color: var(--accent-purple); box-shadow: var(--neu-shadow-sm);
@@ -218,7 +218,7 @@
 
         /* --- STYLE DROPDOWN TRANSAKSI OTOMATIS --- */
         .scheduled-dropdown-wrapper {
-            display: none;
+            display: flex;
             flex-direction: column;
             width: 100%;
             margin-top: 4px;
@@ -562,8 +562,8 @@
                     <span class="operator-badge" id="operatorBadge"></span>
                 </div>
 
-                <!-- DIVIDER TRANSAKSI OTOMATIS -->
-                <div class="section-divider" id="scheduledDivider" style="display: none; margin: 12px 0 6px 0;">
+                <!-- DIVIDER TRANSAKSI OTOMATIS (SELALU TAMPIL) -->
+                <div class="section-divider" id="scheduledDivider" style="display: flex; margin: 12px 0 6px 0;">
                     <div class="divider-line"></div>
                     <div class="divider-badge"><i class="fa-solid fa-robot"></i> Transaksi Otomatis</div>
                     <div class="divider-line"></div>
@@ -748,8 +748,8 @@
             const content = document.getElementById('scheduledDropdownContent');
 
             if (!searchNo) {
-                dropdownWrapper.style.display = 'none';
-                divider.style.display = 'none';
+                badgeCount.innerText = '0';
+                content.innerHTML = `<div style="text-align:center; padding: 10px; font-size: 0.75rem; color: var(--text-muted);">Belum ada transaksi yang dijadwalkan.</div>`;
                 return;
             }
 
@@ -776,16 +776,14 @@
                         `;
                     });
                     content.innerHTML = html;
-                    dropdownWrapper.style.display = 'flex';
-                    divider.style.display = 'flex';
                 } else {
-                    dropdownWrapper.style.display = 'none';
-                    divider.style.display = 'none';
+                    badgeCount.innerText = '0';
+                    content.innerHTML = `<div style="text-align:center; padding: 10px; font-size: 0.75rem; color: var(--text-muted);">Belum ada transaksi yang dijadwalkan.</div>`;
                 }
             } catch (err) {
                 console.error("Gagal load transaksi terjadwal:", err);
-                dropdownWrapper.style.display = 'none';
-                divider.style.display = 'none';
+                badgeCount.innerText = '0';
+                content.innerHTML = `<div style="text-align:center; padding: 10px; font-size: 0.75rem; color: var(--text-muted);">Belum ada transaksi yang dijadwalkan.</div>`;
             }
         }
 
