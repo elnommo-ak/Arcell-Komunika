@@ -250,7 +250,6 @@
     const cleanNumber = (val) => typeof val === 'number' ? val : (parseInt(String(val).replace(/[^0-9-]/g, '')) || 0);
     const formatRp = (angka) => new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(cleanNumber(angka));
 
-    // INTEGRASI DATALIST PRODUK DATABASE
     const fetchDatabaseProducts = async () => {
         try {
             const res = await fetch('/api/admin/products?t=' + Date.now());
@@ -401,12 +400,12 @@
     const groupSameItems = (items) => {
         const map = {};
         items.forEach(i => {
-            const key = (i.nama || 'Produk').trim().toLowerCase() + '_' + (i.jual || 0);
+            const key = (i.nama || 'Produk').trim().toLowerCase() + '_' + cleanNumber(i.jual);
             if (!map[key]) {
                 map[key] = {
                     nama: i.nama,
-                    modal: i.modal || i.jual || 0,
-                    jual: i.jual || 0,
+                    modal: cleanNumber(i.modal || i.jual || 0),
+                    jual: cleanNumber(i.jual || 0),
                     qty: 0
                 };
             }
@@ -420,7 +419,7 @@
         }));
     };
 
-    // PERBAIKAN LOGIKA: UTAMAKAN FAKTUR MANUAL DARI LOCALSTORAGE
+    // MERGE PERSISTEN: MENGGABUNGKAN DATA EDIT LOCAL DENGAN DATA SERVER
     const getConsolidatedDayData = (dateKey) => {
         const activeName = (currentActiveMember.name || '').trim().toLowerCase();
         const localFakturs = getStoredManualFakturs().filter(f => 
@@ -430,19 +429,19 @@
         let rawItems = [];
         let sisaLama = 0;
         let bayarNominal = 0;
+        let isEditedLocal = false;
 
         if (localFakturs.length > 0) {
-            // Prioritas Utama: Hasil Edit / Simpan Manual di LocalStorage
             rawItems = localFakturs[0].items || [];
-            sisaLama = localFakturs[0].sisa_lama || 0;
-            bayarNominal = localFakturs[0].bayar || 0;
+            sisaLama = cleanNumber(localFakturs[0].sisa_lama || 0);
+            bayarNominal = cleanNumber(localFakturs[0].bayar || 0);
+            isEditedLocal = true;
         } else {
-            // Jika belum pernah diedit manual, gunakan data awal dari API server
             rawItems = getValidServerTx(dateKey);
         }
 
         const groupedItems = groupSameItems(rawItems);
-        return { groupedItems, rawItems, sisaLama, bayarNominal };
+        return { groupedItems, rawItems, sisaLama, bayarNominal, isEditedLocal };
     };
 
     const renderKasTabUI = () => {
@@ -461,6 +460,7 @@
 
         if (sortedDates.length === 0) {
             container.innerHTML = `<div style="text-align:center; padding:30px; color:var(--text-muted); font-size:0.8rem;">Belum ada riwayat transaksi sukses untuk member <b>${currentActiveMember.name}</b>.</div>`;
+            document.getElementById("member-daily-tx-display").innerHTML = `<i class="fa-solid fa-chart-line"></i> 0 Tx Sukses (Rp 0)`;
             return;
         }
 
@@ -469,7 +469,7 @@
         let grandTotalAllNominal = 0;
 
         sortedDates.forEach(dateKey => {
-            const { groupedItems, rawItems } = getConsolidatedDayData(dateKey);
+            const { groupedItems, rawItems, isEditedLocal } = getConsolidatedDayData(dateKey);
 
             const totalTrxCount = rawItems.reduce((acc, i) => acc + (parseInt(i.qty) || 1), 0);
             const totalNominalHariIni = groupedItems.reduce((acc, i) => acc + i.subtotal_jual, 0);
@@ -482,18 +482,23 @@
                     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
                         <div>
                             <div style="font-size:0.95rem; font-weight:900; color:#0f172a;"><i class="fa-solid fa-calendar-day" style="color:var(--primary);"></i> Tanggal: ${dateKey}</div>
-                            <div style="font-size:0.72rem; color:var(--text-muted); margin-top:2px;">Total: <b>${totalTrxCount} Produk Sukses</b></div>
+                            <div style="font-size:0.72rem; color:var(--text-muted); margin-top:2px;">
+                                Total: <b>${totalTrxCount} Produk Sukses</b> ${isEditedLocal ? '<span style="color:var(--primary); font-weight:800;">(Edited)</span>' : '<span style="color:var(--success); font-weight:800;">(Database)</span>'}
+                            </div>
                         </div>
                         <div style="text-align:right;">
                             <div style="font-size:1rem; font-weight:900; color:var(--success);">${formatRp(totalNominalHariIni)}</div>
                         </div>
                     </div>
-                    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:8px; margin-top:12px;">
-                        <button onclick="editStrukHarian('${dateKey}')" style="background:rgba(112, 82, 255, 0.15); color:var(--primary); border:none; padding:8px; border-radius:10px; font-size:0.75rem; font-weight:800; cursor:pointer;">
-                            <i class="fa-solid fa-pen-to-square"></i> Edit Struk
+                    <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:6px; margin-top:12px;">
+                        <button onclick="editStrukHarian('${dateKey}')" style="background:rgba(112, 82, 255, 0.15); color:var(--primary); border:none; padding:8px 4px; border-radius:10px; font-size:0.72rem; font-weight:800; cursor:pointer;">
+                            <i class="fa-solid fa-pen-to-square"></i> Edit
                         </button>
-                        <button onclick="openStrukHarianModal('${dateKey}')" style="background:var(--primary); color:white; border:none; padding:8px; border-radius:10px; font-size:0.75rem; font-weight:800; cursor:pointer;">
-                            <i class="fa-solid fa-receipt"></i> Struk Harian
+                        <button onclick="openStrukHarianModal('${dateKey}')" style="background:var(--primary); color:white; border:none; padding:8px 4px; border-radius:10px; font-size:0.72rem; font-weight:800; cursor:pointer;">
+                            <i class="fa-solid fa-receipt"></i> Struk
+                        </button>
+                        <button onclick="deleteStrukHarian('${dateKey}')" style="background:rgba(239, 68, 68, 0.15); color:var(--danger); border:none; padding:8px 4px; border-radius:10px; font-size:0.72rem; font-weight:800; cursor:pointer;">
+                            <i class="fa-solid fa-trash-can"></i> Hapus
                         </button>
                     </div>
                 </div>
@@ -502,6 +507,33 @@
 
         container.innerHTML = html;
         document.getElementById("member-daily-tx-display").innerHTML = `<i class="fa-solid fa-chart-line"></i> ${grandTotalAllTxCount} Tx Sukses (${formatRp(grandTotalAllNominal)})`;
+    };
+
+    // FUNGSI HAPUS STRUK & REVERT KE HISTORI DATABASE
+    window.deleteStrukHarian = (dateKey) => {
+        if (!confirm(`Hapus revisi struk kasir tanggal ${dateKey}?\n\nJika terdapat histori di database.db, data akan dikembalikan otomatis ke histori transaksi database asli.`)) {
+            return;
+        }
+
+        const activeNameLower = (currentActiveMember.name || '').trim().toLowerCase();
+        let currentFakturs = getStoredManualFakturs();
+
+        // Hapus revisi lokal untuk tanggal & member ini
+        currentFakturs = currentFakturs.filter(f => {
+            const isSameMember = (f.kasir_member || f.pembeli || '').trim().toLowerCase() === activeNameLower;
+            const isSameDate = f.tanggal === dateKey;
+            return !(isSameMember && isSameDate);
+        });
+
+        saveManualFakturs(currentFakturs);
+        showToast(`Struk ${dateKey} dihapus. Data dipulihkan dari Database!`);
+        
+        // Reset form jika sedang dalam mode edit tanggal yang sama
+        if (document.getElementById("faktur-date-inp").value === dateKey) {
+            resetFakturForm();
+        }
+
+        renderKasTabUI();
     };
 
     window.editStrukHarian = (dateKey) => {
@@ -524,8 +556,8 @@
             row.innerHTML = `
                 <div><input type="text" class="faktur-nama-inp" list="db-product-suggestions" value="${item.nama}" oninput="onProductNameInput(this, ${fakturItemCounter})"></div>
                 <div><input type="number" class="faktur-qty-inp" value="${item.qty}" min="1" oninput="calcFakturTotals()"></div>
-                <div><input type="text" inputmode="numeric" class="faktur-modal-inp inp-modal" value="${(item.modal || 0).toLocaleString('id-ID')}" onfocus="handleInputFocus(event)" onblur="handleInputBlur(event)" oninput="calcFakturTotals()"></div>
-                <div><input type="text" inputmode="numeric" class="faktur-jual-inp inp-jual" value="${(item.jual || 0).toLocaleString('id-ID')}" onfocus="handleInputFocus(event)" onblur="handleInputBlur(event)" oninput="calcFakturTotals()"></div>
+                <div><input type="text" inputmode="numeric" class="faktur-modal-inp inp-modal" value="${cleanNumber(item.modal).toLocaleString('id-ID')}" onfocus="handleInputFocus(event)" onblur="handleInputBlur(event)" oninput="calcFakturTotals()"></div>
+                <div><input type="text" inputmode="numeric" class="faktur-jual-inp inp-jual" value="${cleanNumber(item.jual).toLocaleString('id-ID')}" onfocus="handleInputFocus(event)" onblur="handleInputBlur(event)" oninput="calcFakturTotals()"></div>
                 <div style="text-align:center;"><button type="button" class="btn-remove-item" onclick="removeFakturItemRow(${fakturItemCounter})"><i class="fa-solid fa-xmark"></i></button></div>
             `;
             container.appendChild(row);
@@ -725,7 +757,7 @@
         document.getElementById("faktur-kembalian-val").innerText = formatRp(Math.abs(selisih));
     };
 
-    // PERBAIKAN PENYIMPANAN FAKTUR LEBIH PRESISI (MEMBER + TANGGAL)
+    // PENYIMPANAN FAKTUR RESMI LOKAL PERSISTEN
     window.saveFakturPenjualan = async () => {
         const txDate = document.getElementById("faktur-date-inp")?.value || getTodayString();
         const sisaLama = cleanNumber(document.getElementById("faktur-sisa-lama-inp")?.value || 0);
@@ -765,7 +797,6 @@
         let currentFakturs = getStoredManualFakturs();
         const activeNameLower = activeMemberName.toLowerCase();
         
-        // Hapus faktur lama untuk tanggal & member yang sama agar tertimpa revisi terbaru
         currentFakturs = currentFakturs.filter(f => {
             const isSameMember = (f.kasir_member || f.pembeli || '').trim().toLowerCase() === activeNameLower;
             const isSameDate = f.tanggal === txDate;
@@ -783,6 +814,7 @@
     window.resetFakturForm = () => {
         document.getElementById("form-mode-title").innerText = "Struk Penjualan / Nota Kasir";
         document.getElementById("faktur-pembeli-inp").value = currentActiveMember.name || "";
+        document.getElementById("faktur-date-inp").value = getTodayString();
         document.getElementById("faktur-sisa-lama-inp").value = "";
         document.getElementById("faktur-bayar-inp").value = "";
         document.getElementById("faktur-no-inp").value = "INV-" + Date.now().toString().slice(-6);
