@@ -1,0 +1,594 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Keuangan Buku Kas Digital</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        /* --- CLEAN WHITE NEUMORPHISM THEME (SERASI DENGAN INDEX.HTML) --- */
+        :root {
+            --bg-base: #e6eaf0;
+            --neu-light: #ffffff;
+            --neu-dark: #babecc;
+            --text-main: #4a5568;
+            --text-muted: #8c98a9;
+            --accent-purple: #7052ff;
+            --accent-purple-light: rgba(112, 82, 255, 0.1);
+            --success: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+
+            --border-radius-sm: 14px;
+            --border-radius-md: 20px;
+            --border-radius-pill: 50px;
+            --bottom-nav-height: 70px;
+
+            --neu-shadow-flat: 6px 6px 12px var(--neu-dark), -6px -6px 12px var(--neu-light);
+            --neu-shadow-sm: 3px 3px 6px var(--neu-dark), -3px -3px 6px var(--neu-light);
+            --neu-shadow-inset: inset 3px 3px 6px var(--neu-dark), inset -3px -3px 6px var(--neu-light);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background-color: var(--bg-base);
+            color: var(--text-main);
+            padding: 16px;
+            padding-bottom: calc(var(--bottom-nav-height) + 30px);
+            min-height: 100vh;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 480px;
+            margin: 0 auto;
+        }
+
+        /* Header Style */
+        .page-header {
+            text-align: center;
+            margin-bottom: 18px;
+        }
+        .page-header h2 {
+            font-size: 1.1rem;
+            font-weight: 800;
+            color: var(--text-main);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        .page-header p {
+            font-size: 0.72rem;
+            color: var(--text-muted);
+            font-weight: 600;
+            margin-top: 2px;
+        }
+
+        /* Neumorphic Card */
+        .neo-card {
+            background: var(--bg-base);
+            border-radius: var(--border-radius-md);
+            padding: 18px;
+            margin-bottom: 16px;
+            box-shadow: var(--neu-shadow-flat);
+            border: none;
+        }
+
+        .title {
+            font-size: 0.72rem;
+            font-weight: 800;
+            color: var(--accent-purple);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .main-val {
+            font-size: 1.7rem;
+            font-weight: 900;
+            color: var(--text-main);
+        }
+
+        /* Navigation Tabs Filter Header */
+        .tab-menu {
+            display: flex;
+            gap: 6px;
+            padding: 6px;
+            background: var(--bg-base);
+            border-radius: var(--border-radius-pill);
+            box-shadow: var(--neu-shadow-inset);
+            margin-bottom: 18px;
+        }
+        
+        .tab-btn {
+            flex: 1;
+            padding: 10px 14px;
+            border: none;
+            border-radius: var(--border-radius-pill);
+            background: transparent;
+            color: var(--text-muted);
+            font-size: 11px;
+            font-weight: 800;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+
+        .tab-btn.active {
+            color: var(--accent-purple);
+            background: var(--bg-base);
+            box-shadow: var(--neu-shadow-sm);
+        }
+
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+
+        /* Inputs */
+        .neo-input-group { margin-bottom: 12px; }
+        .neo-label {
+            font-size: 0.72rem;
+            font-weight: 700;
+            color: var(--text-muted);
+            margin-bottom: 6px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        
+        .neo-input {
+            width: 100%;
+            padding: 12px 14px;
+            background: var(--bg-base);
+            border-radius: var(--border-radius-sm);
+            box-shadow: var(--neu-shadow-inset);
+            border: none;
+            outline: none;
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--text-main);
+        }
+
+        /* Buttons */
+        .neo-btn {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: var(--border-radius-pill);
+            background: var(--bg-base);
+            color: var(--accent-purple);
+            font-weight: 800;
+            font-size: 12px;
+            cursor: pointer;
+            box-shadow: var(--neu-shadow-sm);
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            text-transform: uppercase;
+        }
+
+        .neo-btn:active {
+            box-shadow: var(--neu-shadow-inset);
+            transform: scale(0.985);
+        }
+
+        .neo-btn-secondary {
+            color: var(--text-muted);
+            margin-top: 10px;
+        }
+
+        /* List Item */
+        .list-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 14px;
+            background: var(--bg-base);
+            border-radius: var(--border-radius-sm);
+            box-shadow: var(--neu-shadow-sm);
+            margin-bottom: 10px;
+        }
+
+        /* Dropdown Mitra */
+        .mitra-dropdown {
+            background: var(--bg-base);
+            border-radius: var(--border-radius-sm);
+            box-shadow: var(--neu-shadow-sm);
+            margin-bottom: 10px;
+            overflow: hidden;
+        }
+
+        .mitra-info-head {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex: 1;
+            justify-content: space-between;
+            padding: 12px 14px;
+            font-size: 0.85rem;
+            font-weight: 800;
+        }
+
+        .mitra-val-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .mitra-name-text {
+            color: var(--text-main);
+            font-weight: 800;
+        }
+
+        .mitra-val-badge {
+            font-size: 0.75rem;
+            font-weight: 800;
+            color: var(--success);
+            background: rgba(16, 185, 129, 0.12);
+            padding: 4px 8px;
+            border-radius: 8px;
+            box-shadow: var(--neu-shadow-inset);
+        }
+
+        .btn-edit-val {
+            border: none;
+            background: var(--bg-base);
+            color: var(--accent-purple);
+            box-shadow: var(--neu-shadow-sm);
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 0.75rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .btn-edit-val:active {
+            box-shadow: var(--neu-shadow-inset);
+        }
+
+        /* Grid Ringkasan Laporan */
+        .report-summary-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 14px;
+        }
+
+        .report-summary-item {
+            padding: 12px;
+            border-radius: var(--border-radius-sm);
+            box-shadow: var(--neu-shadow-inset);
+            background: var(--bg-base);
+        }
+
+        .report-summary-item .lbl {
+            font-size: 0.65rem;
+            font-weight: 700;
+            color: var(--text-muted);
+            text-transform: uppercase;
+        }
+
+        .report-summary-item .val {
+            font-size: 0.95rem;
+            font-weight: 800;
+            margin-top: 4px;
+        }
+
+        @media print {
+            body { background: white; color: black; padding: 0; }
+            .tab-menu, .bottom-nav, .neo-card:not(#print-area), button { display: none !important; }
+            .container { max-width: 100%; }
+            .neo-card { box-shadow: none; border: 1px solid #ccc; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="page-header">
+        <h2><i class="fa-solid fa-wallet" style="color:var(--accent-purple)"></i> BUKU KAS DIGITAL</h2>
+        <p>Pencatatan Kelola Kas Mandiri</p>
+    </div>
+
+    <!-- TAB NAVIGATION -->
+    <div class="tab-menu">
+        <button class="tab-btn active" onclick="switchTab('kas')"><i class="fa-solid fa-cash-register"></i> Kas & Mutasi</button>
+        <button class="tab-btn" onclick="switchTab('laporan')"><i class="fa-solid fa-file-invoice-dollar"></i> Laporan</button>
+    </div>
+
+    <!-- TAB 1: KAS & MUTASI -->
+    <div id="tab-kas" class="tab-content active">
+        <!-- BALANCE TOTAL -->
+        <div class="neo-card">
+            <div class="title">Total Estimasi Kas Terkelola</div>
+            <div class="main-val" id="disp-total-kas">Rp 0</div>
+        </div>
+
+        <!-- FORM RINCIAN KEUANGAN -->
+        <div class="neo-card">
+            <div class="title"><i class="fa-solid fa-coins"></i> Rincian Keuangan</div>
+            <div class="neo-input-group">
+                <label class="neo-label">Tunai</label>
+                <input type="text" inputmode="numeric" id="kas-tunai" class="neo-input" placeholder="0" oninput="saveKasData()" onblur="formatField(this)">
+            </div>
+            <div class="neo-input-group">
+                <label class="neo-label">Bank / E-Wallet</label>
+                <input type="text" inputmode="numeric" id="kas-bank" class="neo-input" placeholder="0" oninput="saveKasData()" onblur="formatField(this)">
+            </div>
+            <div class="neo-input-group">
+                <label class="neo-label">Modal</label>
+                <input type="text" inputmode="numeric" id="kas-modal" class="neo-input" placeholder="0" oninput="saveKasData()" onblur="formatField(this)">
+            </div>
+            <!-- INPUT ASET BEKU -->
+            <div class="neo-input-group">
+                <label class="neo-label" style="color: var(--warning);"><i class="fa-solid fa-snowflake"></i> Aset Beku (Piutang/Barang Mandeg)</label>
+                <input type="text" inputmode="numeric" id="kas-aset-beku" class="neo-input" placeholder="0" oninput="saveKasData()" onblur="formatField(this)">
+            </div>
+        </div>
+
+        <!-- PENGATURAN NAMA MITRA -->
+        <div class="neo-card">
+            <div class="title"><i class="fa-solid fa-users"></i> Kelola Transaksi Mitra</div>
+            
+            <!-- LOOP MITRA 1 S/D 4 -->
+            <script>
+                for(let i=1; i<=4; i++) {
+                    document.write(`
+                    <div class="mitra-dropdown">
+                        <div class="mitra-info-head">
+                            <span><i class="fa-solid fa-user-tag" style="margin-right:6px; color:var(--accent-purple);"></i> <span id="label-mitra-${i}" class="mitra-name-text">Mitra ${i}</span></span>
+                            <div class="mitra-val-wrapper">
+                                <span id="badge-mitra-val-${i}" class="mitra-val-badge">Rp 0</span>
+                                <button class="btn-edit-val" onclick="editMitraVal(${i})" title="Edit Nilai Transaksi">
+                                    <i class="fa-solid fa-pen-to-square"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    `);
+                }
+            </script>
+        </div>
+    </div>
+
+    <!-- TAB 2: LAPORAN -->
+    <div id="tab-laporan" class="tab-content">
+        <div class="neo-card" id="print-area">
+            <div class="title"><i class="fa-solid fa-chart-pie"></i> Ringkasan Keuangan Saat Ini</div>
+            
+            <div class="report-summary-grid">
+                <div class="report-summary-item">
+                    <div class="lbl">Kas Likuid (Tunai+Bank)</div>
+                    <div class="val" id="rep-kas-likuid" style="color:var(--success)">Rp 0</div>
+                </div>
+                <div class="report-summary-item">
+                    <div class="lbl">Total Modal</div>
+                    <div class="val" id="rep-modal" style="color:var(--accent-purple)">Rp 0</div>
+                </div>
+                <div class="report-summary-item">
+                    <div class="lbl">Aset Beku</div>
+                    <div class="val" id="rep-aset-beku" style="color:var(--warning)">Rp 0</div>
+                </div>
+                <div class="report-summary-item">
+                    <div class="lbl">Total Transaksi Mitra</div>
+                    <div class="val" id="rep-total-mitra" style="color:var(--text-main)">Rp 0</div>
+                </div>
+            </div>
+
+            <div style="padding: 12px; border-radius: var(--border-radius-sm); box-shadow: var(--neu-shadow-inset); margin-bottom: 16px; text-align: center;">
+                <div style="font-size: 0.7rem; font-weight: 800; color: var(--text-muted); text-transform: uppercase;">TOTAL KAS KESELURUHAN</div>
+                <div style="font-size: 1.5rem; font-weight: 900; color: var(--accent-purple); margin-top: 4px;" id="rep-total-semua">Rp 0</div>
+            </div>
+
+            <button class="neo-btn" onclick="simpanLaporanKas()"><i class="fa-solid fa-floppy-disk"></i> Simpan Laporan Kas</button>
+
+            <hr style="margin: 18px 0; border: none; border-top: 1px dashed var(--neu-dark);">
+
+            <div class="title"><i class="fa-solid fa-clock-rotate-left"></i> Riwayat Laporan Kas</div>
+
+            <div id="laporan-kas-list" style="margin-top: 12px; max-height: 350px; overflow-y: auto;">
+                <!-- List riwayat tersimpan via JS -->
+            </div>
+        </div>
+
+        <button class="neo-btn neo-btn-secondary" onclick="window.print()"><i class="fa-solid fa-print"></i> Cetak / Ekspor PDF</button>
+    </div>
+
+</div>
+
+<script>
+    const cleanNum = (val) => parseInt(String(val || 0).replace(/[^0-9-]/g, '')) || 0;
+    const formatRp = (val) => new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(cleanNum(val));
+
+    const formatField = (el) => {
+        const val = cleanNum(el.value);
+        el.value = val === 0 && el.value === '' ? '' : val.toLocaleString('id-ID');
+    };
+
+    // Navigasi Tab
+    const switchTab = (tabName) => {
+        document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+        document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+
+        if(tabName === 'kas') {
+            document.querySelectorAll('.tab-btn')[0].classList.add('active');
+            document.getElementById('tab-kas').classList.add('active');
+        } else {
+            document.querySelectorAll('.tab-btn')[1].classList.add('active');
+            document.getElementById('tab-laporan').classList.add('active');
+            renderFullReport();
+        }
+    };
+
+    const loadData = () => {
+        // Load Rincian Keuangan
+        const tunai = cleanNum(localStorage.getItem('bk_tunai'));
+        const bank = cleanNum(localStorage.getItem('bk_bank'));
+        const modal = cleanNum(localStorage.getItem('bk_modal'));
+        const asetBeku = cleanNum(localStorage.getItem('bk_aset_beku'));
+        
+        if (tunai) document.getElementById('kas-tunai').value = tunai.toLocaleString('id-ID');
+        if (bank) document.getElementById('kas-bank').value = bank.toLocaleString('id-ID');
+        if (modal) document.getElementById('kas-modal').value = modal.toLocaleString('id-ID');
+        if (asetBeku) document.getElementById('kas-aset-beku').value = asetBeku.toLocaleString('id-ID');
+
+        updateMitraHeaderUI();
+        calculateTotal();
+    };
+
+    const saveKasData = () => {
+        localStorage.setItem('bk_tunai', cleanNum(document.getElementById('kas-tunai').value));
+        localStorage.setItem('bk_bank', cleanNum(document.getElementById('kas-bank').value));
+        localStorage.setItem('bk_modal', cleanNum(document.getElementById('kas-modal').value));
+        localStorage.setItem('bk_aset_beku', cleanNum(document.getElementById('kas-aset-beku').value));
+        calculateTotal();
+    };
+
+    const updateMitraHeaderUI = () => {
+        for(let i=1; i<=4; i++) {
+            const name = localStorage.getItem(`bk_mitra_${i}_name`) || `Mitra ${i}`;
+            const val = cleanNum(localStorage.getItem(`bk_mitra_${i}_val`));
+            
+            const lbl = document.getElementById(`label-mitra-${i}`);
+            const badge = document.getElementById(`badge-mitra-val-${i}`);
+            
+            if(lbl) lbl.innerText = name;
+            if(badge) {
+                badge.innerText = formatRp(val);
+                badge.style.color = val >= 0 ? 'var(--success)' : 'var(--danger)';
+                badge.style.background = val >= 0 ? 'rgba(16, 185, 129, 0.12)' : 'rgba(239, 68, 68, 0.12)';
+            }
+        }
+    };
+
+    // Edit Nilai Transaksi Mitra
+    const editMitraVal = (mitraId) => {
+        const name = localStorage.getItem(`bk_mitra_${mitraId}_name`) || `Mitra ${mitraId}`;
+        const currentVal = cleanNum(localStorage.getItem(`bk_mitra_${mitraId}_val`));
+        
+        const newValInput = prompt(`Ubah Nilai Transaksi untuk ${name}:`, currentVal);
+        if (newValInput !== null) {
+            const newVal = cleanNum(newValInput);
+            localStorage.setItem(`bk_mitra_${mitraId}_val`, newVal);
+            updateMitraHeaderUI();
+            calculateTotal();
+        }
+    };
+
+    const calculateTotal = () => {
+        const tunai = cleanNum(localStorage.getItem('bk_tunai'));
+        const bank = cleanNum(localStorage.getItem('bk_bank'));
+        const modal = cleanNum(localStorage.getItem('bk_modal'));
+        const asetBeku = cleanNum(localStorage.getItem('bk_aset_beku'));
+        
+        let totalMitra = 0;
+        for(let i=1; i<=4; i++) {
+            totalMitra += cleanNum(localStorage.getItem(`bk_mitra_${i}_val`));
+        }
+
+        const totalKas = tunai + bank + modal + asetBeku + totalMitra;
+        document.getElementById('disp-total-kas').innerText = formatRp(totalKas);
+    };
+
+    // Simpan snapshot Laporan
+    const simpanLaporanKas = () => {
+        const tunai = cleanNum(localStorage.getItem('bk_tunai'));
+        const bank = cleanNum(localStorage.getItem('bk_bank'));
+        const modal = cleanNum(localStorage.getItem('bk_modal'));
+        const asetBeku = cleanNum(localStorage.getItem('bk_aset_beku'));
+        
+        let totalMitra = 0;
+        for(let i=1; i<=4; i++) {
+            totalMitra += cleanNum(localStorage.getItem(`bk_mitra_${i}_val`));
+        }
+
+        const totalKas = tunai + bank + modal + asetBeku + totalMitra;
+
+        if (totalKas === 0) {
+            if (!confirm("Total Kas masih Rp 0. Tetap ingin menyimpan laporan kas ini?")) return;
+        }
+
+        const now = new Date();
+        const dateStr = now.toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' }) + ' ' + now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+
+        const laporanList = JSON.parse(localStorage.getItem('bk_laporan_kas_list') || '[]');
+        laporanList.unshift({
+            id: Date.now(),
+            tanggal: dateStr,
+            totalKas: totalKas,
+            detail: { tunai, bank, modal, asetBeku, totalMitra }
+        });
+
+        localStorage.setItem('bk_laporan_kas_list', JSON.stringify(laporanList));
+        alert("Laporan Kas Keseluruhan berhasil disimpan!");
+        renderFullReport();
+    };
+
+    const deleteLaporanKas = (id) => {
+        if (!confirm("Hapus catatan laporan kas ini?")) return;
+        let laporanList = JSON.parse(localStorage.getItem('bk_laporan_kas_list') || '[]');
+        laporanList = laporanList.filter(item => item.id !== id);
+        localStorage.setItem('bk_laporan_kas_list', JSON.stringify(laporanList));
+        renderFullReport();
+    };
+
+    // Render Laporan Lengkap
+    const renderFullReport = () => {
+        const tunai = cleanNum(localStorage.getItem('bk_tunai'));
+        const bank = cleanNum(localStorage.getItem('bk_bank'));
+        const modal = cleanNum(localStorage.getItem('bk_modal'));
+        const asetBeku = cleanNum(localStorage.getItem('bk_aset_beku'));
+        
+        let totalMitra = 0;
+        for(let i=1; i<=4; i++) {
+            totalMitra += cleanNum(localStorage.getItem(`bk_mitra_${i}_val`));
+        }
+
+        document.getElementById('rep-kas-likuid').innerText = formatRp(tunai + bank);
+        document.getElementById('rep-modal').innerText = formatRp(modal);
+        document.getElementById('rep-aset-beku').innerText = formatRp(asetBeku);
+        document.getElementById('rep-total-mitra').innerText = formatRp(totalMitra);
+        document.getElementById('rep-total-semua').innerText = formatRp(tunai + bank + modal + asetBeku + totalMitra);
+
+        const laporanList = JSON.parse(localStorage.getItem('bk_laporan_kas_list') || '[]');
+        const container = document.getElementById('laporan-kas-list');
+
+        if(laporanList.length === 0) {
+            container.innerHTML = '<div style="font-size:0.75rem; color:var(--text-muted); text-align:center; padding:15px; font-weight:600;">Belum ada riwayat laporan kas yang disimpan.</div>';
+        } else {
+            container.innerHTML = laporanList.map(item => `
+                <div class="list-item">
+                    <div>
+                        <div style="font-size:0.85rem; font-weight:900; color:var(--accent-purple);">${formatRp(item.totalKas)}</div>
+                        <div style="font-size:0.65rem; color:var(--text-muted); font-weight:700;">${item.tanggal}</div>
+                    </div>
+                    <button onclick="deleteLaporanKas(${item.id})" style="border:none; background:transparent; color:var(--danger); cursor:pointer; font-size:0.9rem;" title="Hapus Laporan"><i class="fa-solid fa-trash"></i></button>
+                </div>
+            `).join('');
+        }
+    };
+
+    document.addEventListener("DOMContentLoaded", loadData);
+</script>
+</body>
+</html>
+

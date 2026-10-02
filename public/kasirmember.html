@@ -9,6 +9,12 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
+    <script>
+      (function() {
+          if (localStorage.getItem('isLoggedIn') !== 'true') window.location.href = 'akun.html';
+      })();
+    </script>
+
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; -webkit-tap-highlight-color: transparent; }
         :root {
@@ -20,10 +26,6 @@
             --shadow-in-1: inset 3px 3px 6px var(--neu-dark), inset -3px -3px 6px var(--neu-light);
         }
         body { background-color: var(--bg-color); color: var(--text-main); padding-bottom: calc(var(--bottom-nav-height) + 20px); min-height: 100vh; }
-        
-        #pin-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(230, 234, 240, 0.95); backdrop-filter: blur(8px); z-index: 999999; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; }
-        .pin-box { background: var(--bg-color); padding: 24px; border-radius: 20px; box-shadow: var(--shadow-out-1); text-align: center; width: 100%; max-width: 320px; }
-        .pin-input { width: 100%; padding: 12px; margin: 16px 0; border: none; outline: none; border-radius: 12px; background: var(--bg-color); box-shadow: var(--shadow-in-1); text-align: center; font-size: 1.4rem; font-weight: 900; color: var(--primary); }
 
         .header { position: sticky; top: 0; z-index: 99; background-color: var(--bg-color); padding: 15px 20px 10px 20px; }
         .header-top { display: flex; justify-content: space-between; align-items: center; }
@@ -33,10 +35,7 @@
         .user-info .username { font-size: 0.98rem; font-weight: 800; color: var(--text-main); }
         .user-info .daily-badge { font-size: 0.65rem; font-weight: 700; color: var(--primary); background: rgba(112, 82, 255, 0.12); padding: 2px 8px; border-radius: 10px; margin-top: 2px; display: inline-block; }
 
-        .menu-btn { width: 42px; height: 42px; display: flex; align-items: center; justify-content: center; background: var(--bg-color); border-radius: 50%; color: var(--text-main); box-shadow: var(--shadow-out-2); cursor: pointer; border: none; }
         #app { padding: 0 16px; margin-top: 10px; }
-        .neo-input-box { display: flex; align-items: center; padding: 12px 16px; gap: 12px; background: var(--bg-color); border-radius: 16px; box-shadow: var(--shadow-in-1); margin-bottom: 10px; }
-        .neo-input-box select, .neo-input-box input { flex: 1; border: none; background: transparent; outline: none; font-size: 0.9rem; font-weight: 700; color: var(--text-main); width: 100%; }
 
         .pos-receipt-card { background: #ffffff; border-radius: 16px; padding: 18px 15px; margin-bottom: 16px; box-shadow: 0 8px 20px rgba(0, 0, 0, 0.06); border: 1px solid #e2e8f0; }
         .pos-header { text-align: center; border-bottom: 2px dashed #cbd5e1; padding-bottom: 12px; margin-bottom: 12px; }
@@ -81,17 +80,6 @@
 </head>
 <body>
 
-    <div id="pin-overlay">
-        <div class="pin-box">
-            <i class="fa-solid fa-lock" style="font-size: 2.5rem; color: var(--primary);"></i>
-            <h3 style="margin-top: 10px; font-weight: 800;">Kasir Locked</h3>
-            <p style="font-size: 0.75rem; color: var(--text-muted); margin-top: 4px;">Masukkan PIN Kasir untuk melanjutkan</p>
-            <input type="password" id="pin-input-field" class="pin-input" maxlength="4" placeholder="••••">
-            <button class="neo-btn" onclick="verifyPin()">Buka Akses</button>
-        </div>
-    </div>
-
-    <datalist id="customer-suggestions"></datalist>
     <datalist id="db-product-suggestions"></datalist>
 
     <div class="header">
@@ -99,21 +87,15 @@
             <div class="user-profile">
                 <img src="https://images.bukaolshop.com/hosting/180774/3b0c09d4696e527913.png" class="profile-img" alt="Logo">
                 <div class="user-info">
-                    <div class="greeting" id="time-greeting">Selamat Pagi,</div>
-                    <div class="username" id="member-name-display">Arcell Komunika</div>
-                    <div class="daily-badge" id="member-daily-tx-display"><i class="fa-solid fa-chart-line"></i> Memuat Data...</div>
+                    <div class="greeting" id="time-greeting">Selamat Datang,</div>
+                    <div class="username">Arcell Komunika</div>
+                    <div class="daily-badge" id="kasir-summary-display"><i class="fa-solid fa-cash-register"></i> Kasir Manual Penjualan</div>
                 </div>
             </div>
-            <button class="menu-btn" onclick="lockKasir()" title="Kunci Kasir"><i class="fa-solid fa-lock"></i></button>
         </div>
     </div>
 
     <div id="app">
-        <div class="glass-card" style="background:#ffffff; border-radius:16px; padding:12px 14px; margin-bottom:12px; border:1px solid #e2e8f0;">
-            <div style="font-size:0.75rem; font-weight:800; color:#64748b; margin-bottom:4px;"><i class="fa-solid fa-users" style="color:var(--primary);"></i> PILIH MEMBER AKUN:</div>
-            <select id="global-member-select" class="neo-input-box" style="margin:0; padding:10px 12px; font-size:0.85rem; font-weight:800; color:var(--primary);" onchange="onMemberSelectedChange()"></select>
-        </div>
-
         <div class="pos-receipt-card" id="printable-pos-receipt">
             <div class="pos-header">
                 <div class="pos-store-name"><i class="fa-solid fa-store" style="color:var(--primary);"></i> ARCELL KOMUNIKA</div>
@@ -131,7 +113,7 @@
                 </div>
                 <div class="pos-meta-field" style="grid-column: span 2;">
                     <span class="pos-meta-label">Nama Pelanggan</span>
-                    <input type="text" class="pos-meta-input" id="faktur-pembeli-inp" list="customer-suggestions" placeholder="Ketik / Pilih Pelanggan..." autocomplete="off">
+                    <input type="text" class="pos-meta-input" id="faktur-pembeli-inp" placeholder="Ketik Nama Pelanggan..." autocomplete="off">
                 </div>
             </div>
 
@@ -178,23 +160,23 @@
             </div>
 
             <div style="margin-top:16px; display:flex; gap:8px;">
-                <button class="neo-btn" style="font-size:0.85rem; padding:12px; flex:2;" onclick="saveFakturPenjualan()"><i class="fa-solid fa-floppy-disk"></i> Simpan Faktur Harian</button>
+                <button class="neo-btn" style="font-size:0.85rem; padding:12px; flex:2;" onclick="saveFakturPenjualan()"><i class="fa-solid fa-floppy-disk"></i> Simpan Penjualan</button>
                 <button class="neo-btn secondary" style="font-size:0.85rem; padding:12px; flex:1;" onclick="resetFakturForm()"><i class="fa-solid fa-rotate-left"></i> Reset</button>
             </div>
         </div>
 
         <div style="font-size:0.85rem; font-weight:800; margin: 18px 0 10px 4px; color:#1e293b;">
-            <i class="fa-solid fa-calendar-check" style="color:var(--primary);"></i> Rekap Transaksi Per Hari (Struk Harian)
+            <i class="fa-solid fa-receipt" style="color:var(--primary);"></i> Riwayat Transaksi Kasir Manual
         </div>
 
         <div id="kas-history-list"></div>
     </div>
 
-    <!-- MODAL CETAK STRUK HARIAN THERMAL & PNG -->
+    <!-- MODAL CETAK STRUK THERMAL & PNG -->
     <div class="faktur-fullscreen-overlay" id="faktur-fullscreen-modal">
         <div class="faktur-fullscreen-card">
             <div class="faktur-fullscreen-header">
-                <div style="font-size:0.95rem; font-weight:800; color:#0f172a;" id="faktur-modal-title">Struk Rekap Harian</div>
+                <div style="font-size:0.95rem; font-weight:800; color:#0f172a;" id="faktur-modal-title">Struk Transaksi</div>
                 <button type="button" class="faktur-fullscreen-close" onclick="closeFakturFullscreen()"><i class="fa-solid fa-xmark"></i></button>
             </div>
             <div class="faktur-fullscreen-body" id="faktur-modal-body-content"></div>
@@ -205,13 +187,14 @@
     <!-- ELEMEN PRINT STRUK THERMAL BLUETOOTH -->
     <div id="thermal-receipt-template">
         <div class="t-title">ARCELL KOMUNIKA</div>
-        <div class="t-sub" id="th-store-sub">Struk Rekap Harian</div>
-        <div class="t-row"><span>Member:</span><span id="th-member"></span></div>
+        <div class="t-sub" id="th-store-sub">Struk Penjualan</div>
+        <div class="t-row"><span>No Faktur:</span><span id="th-faktur-no"></span></div>
+        <div class="t-row"><span>Pelanggan:</span><span id="th-pembeli"></span></div>
         <div class="t-row"><span>Tgl:</span><span id="th-date"></span></div>
         <div class="t-border"></div>
         <div id="th-items"></div>
         <div class="t-border"></div>
-        <div class="t-row"><span>Total Harian:</span><b id="th-total"></b></div>
+        <div class="t-row"><span>Total Belanja:</span><b id="th-total"></b></div>
         <div class="t-row"><span>Hutang Lama:</span><span id="th-hutang"></span></div>
         <div class="t-row"><span>Grand Total:</span><b id="th-grand"></b></div>
         <div class="t-row"><span>Bayar:</span><span id="th-bayar"></span></div>
@@ -224,19 +207,7 @@
 
 <script>
     let fakturItemCounter = 0;
-    let allServerMembers = [];
-    let activeMemberTransactions = [];
     let dbProductsList = [];
-
-    const defaultMembersList = [
-        { name: "Arcell Komunika", member_id: "ARC-284719", phone: "087875966012" },
-        { name: "Irma kuota", member_id: "ARC-423936", phone: "085782642352" },
-        { name: "Putri Kuota", member_id: "ARC-691360", phone: "087875966010" },
-        { name: "Iman nurdin", member_id: "ARC-478420", phone: "081958145926" },
-        { name: "Andri Cell", member_id: "ARC-930873", phone: "081958145881" }
-    ];
-
-    let currentActiveMember = defaultMembersList[0];
 
     const getStoredManualFakturs = () => JSON.parse(localStorage.getItem('manual_faktur_full_list') || '[]');
     const saveManualFakturs = (list) => localStorage.setItem('manual_faktur_full_list', JSON.stringify(list));
@@ -292,206 +263,44 @@
         }
     };
 
-    function parseWaktu(strWaktu) {
-        if (!strWaktu) return { tanggal: getTodayString(), jam: '', formatted: getTodayString() };
-        
-        let cleanedStr = String(strWaktu).trim();
-        let formattedStr = cleanedStr.replace(' ', 'T');
-        if (!formattedStr.endsWith('Z') && !formattedStr.includes('+')) {
-            formattedStr += 'Z';
-        }
-
-        const d = new Date(formattedStr);
-
-        if (!isNaN(d.getTime())) {
-            const yyyy = d.getFullYear();
-            const mm = String(d.getMonth() + 1).padStart(2, '0');
-            const dd = String(d.getDate()).padStart(2, '0');
-
-            const hh = String(d.getHours()).padStart(2, '0');
-            const min = String(d.getMinutes()).padStart(2, '0');
-            const ss = String(d.getSeconds()).padStart(2, '0');
-
-            const tgl = `${yyyy}-${mm}-${dd}`;
-            const jm = `${hh}:${min}:${ss}`;
-
-            return { tanggal: tgl, jam: jm, formatted: `${tgl} ${jm} WIB` };
-        }
-
-        const parts = cleanedStr.split(/[\s,T]+/);
-        const tgl = parts[0] || getTodayString();
-        const jm = parts[1] || '';
-        return { tanggal: tgl, jam: jm, formatted: (tgl + ' ' + jm).trim() };
-    }
-
-    const extractTxDate = (waktuStr) => parseWaktu(waktuStr).tanggal;
-
-    const initMemberList = async () => {
-        try {
-            const res = await fetch('/api/admin/members?t=' + Date.now());
-            if (res.ok) {
-                const data = await res.json();
-                if (Array.isArray(data) && data.length > 0) allServerMembers = data;
-            }
-        } catch (e) {}
-
-        if (allServerMembers.length === 0) allServerMembers = defaultMembersList;
-
-        const selectEl = document.getElementById("global-member-select");
-        if (selectEl) {
-            selectEl.innerHTML = allServerMembers.map((m, idx) => `
-                <option value="${idx}">${m.name || m.nama} (${m.member_id || m.id || 'ARC-000'})</option>
-            `).join('');
-        }
-        selectMemberByIndex(0);
-    };
-
-    const selectMemberByIndex = async (idx) => {
-        currentActiveMember = allServerMembers[idx] || allServerMembers[0];
-        document.getElementById("member-name-display").innerHTML = `${currentActiveMember.name} <span style="font-size:0.75rem; color:var(--text-muted);">(${currentActiveMember.member_id || ''})</span>`;
-        document.getElementById("faktur-pembeli-inp").value = currentActiveMember.name;
-        await fetchMemberTransactionsFromBackend(currentActiveMember.phone || currentActiveMember.nohp);
-    };
-
-    const fetchMemberTransactionsFromBackend = async (phone) => {
-        try {
-            if (phone) {
-                const res = await fetch(`/api/admin/transactions?phone=${phone}&t=` + Date.now());
-                if (res.ok) {
-                    const data = await res.json();
-                    activeMemberTransactions = Array.isArray(data) ? data : [];
-                }
-            }
-        } catch (e) { activeMemberTransactions = []; }
-        renderKasTabUI();
-    };
-
-    const onMemberSelectedChange = () => {
-        selectMemberByIndex(document.getElementById("global-member-select").value);
-    };
-
-    const getValidServerTx = (dateKey = null) => {
-        return activeMemberTransactions.filter(t => {
-            const st = String(t.status || t.status_pengiriman || '').toLowerCase();
-            const isSuccess = !st || st.includes('sukses') || st.includes('lunas') || st.includes('success') || st === '1' || st.includes('proses') || st.includes('pending') || st.includes('berhasil') || st.includes('selesai');
-            const isNotFailed = !st.includes('gagal') && !st.includes('batal') && !st.includes('failed');
-            const rawTime = t.waktu || t.created_at || t.date || t.time || '';
-            const matchDate = dateKey ? extractTxDate(rawTime) === dateKey : true;
-            return isSuccess && isNotFailed && matchDate;
-        }).map(t => {
-            const hgModal = parseFloat(t.harga || t.price || t.modal || t.total_transaksi || 0);
-            const hgJual = parseFloat(t.harga_jual || t.jual || t.price || t.harga || t.total_transaksi || 0);
-            return {
-                nama: t.product_name || t.produk || t.nama_produk || 'Produk PPOB',
-                qty: 1,
-                modal: hgModal,
-                jual: hgJual > 0 ? hgJual : hgModal,
-                tanggal: extractTxDate(t.waktu || t.created_at || t.date || t.time)
-            };
-        });
-    };
-
-    const groupSameItems = (items) => {
-        const map = {};
-        items.forEach(i => {
-            const key = (i.nama || 'Produk').trim().toLowerCase() + '_' + cleanNumber(i.jual);
-            if (!map[key]) {
-                map[key] = {
-                    nama: i.nama,
-                    modal: cleanNumber(i.modal || i.jual || 0),
-                    jual: cleanNumber(i.jual || 0),
-                    qty: 0
-                };
-            }
-            map[key].qty += (parseInt(i.qty) || 1);
-        });
-
-        return Object.values(map).map(item => ({
-            ...item,
-            subtotal_jual: item.jual * item.qty,
-            subtotal_modal: item.modal * item.qty
-        }));
-    };
-
-    // MERGE PERSISTEN: MENGGABUNGKAN DATA EDIT LOCAL DENGAN DATA SERVER
-    const getConsolidatedDayData = (dateKey) => {
-        const activeName = (currentActiveMember.name || '').trim().toLowerCase();
-        const localFakturs = getStoredManualFakturs().filter(f => 
-            (f.kasir_member || f.pembeli || '').trim().toLowerCase() === activeName && f.tanggal === dateKey
-        );
-
-        let rawItems = [];
-        let sisaLama = 0;
-        let bayarNominal = 0;
-        let isEditedLocal = false;
-
-        if (localFakturs.length > 0) {
-            rawItems = localFakturs[0].items || [];
-            sisaLama = cleanNumber(localFakturs[0].sisa_lama || 0);
-            bayarNominal = cleanNumber(localFakturs[0].bayar || 0);
-            isEditedLocal = true;
-        } else {
-            rawItems = getValidServerTx(dateKey);
-        }
-
-        const groupedItems = groupSameItems(rawItems);
-        return { groupedItems, rawItems, sisaLama, bayarNominal, isEditedLocal };
-    };
-
     const renderKasTabUI = () => {
         const container = document.getElementById("kas-history-list");
         if (!container) return;
 
-        const activeName = (currentActiveMember.name || '').trim().toLowerCase();
-        const localFakturs = getStoredManualFakturs().filter(f => (f.kasir_member || f.pembeli || '').trim().toLowerCase() === activeName);
-        const serverTx = getValidServerTx();
+        const localFakturs = getStoredManualFakturs();
 
-        const datesMap = {};
-        localFakturs.forEach(f => { if (f.tanggal) datesMap[f.tanggal] = true; });
-        serverTx.forEach(t => { if (t.tanggal) datesMap[t.tanggal] = true; });
-
-        const sortedDates = Object.keys(datesMap).sort().reverse();
-
-        if (sortedDates.length === 0) {
-            container.innerHTML = `<div style="text-align:center; padding:30px; color:var(--text-muted); font-size:0.8rem;">Belum ada riwayat transaksi sukses untuk member <b>${currentActiveMember.name}</b>.</div>`;
-            document.getElementById("member-daily-tx-display").innerHTML = `<i class="fa-solid fa-chart-line"></i> 0 Tx Sukses (Rp 0)`;
+        if (localFakturs.length === 0) {
+            container.innerHTML = `<div style="text-align:center; padding:30px; color:var(--text-muted); font-size:0.8rem;">Belum ada riwayat transaksi kasir manual.</div>`;
             return;
         }
 
         let html = '';
-        let grandTotalAllTxCount = 0;
-        let grandTotalAllNominal = 0;
-
-        sortedDates.forEach(dateKey => {
-            const { groupedItems, rawItems, isEditedLocal } = getConsolidatedDayData(dateKey);
-
-            const totalTrxCount = rawItems.reduce((acc, i) => acc + (parseInt(i.qty) || 1), 0);
-            const totalNominalHariIni = groupedItems.reduce((acc, i) => acc + i.subtotal_jual, 0);
-
-            grandTotalAllTxCount += totalTrxCount;
-            grandTotalAllNominal += totalNominalHariIni;
+        localFakturs.forEach((f, idx) => {
+            const items = f.items || [];
+            const totalNominal = f.total_tagihan || f.subtotal_jual || 0;
 
             html += `
                 <div class="daily-card">
-                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
                         <div>
-                            <div style="font-size:0.95rem; font-weight:900; color:#0f172a;"><i class="fa-solid fa-calendar-day" style="color:var(--primary);"></i> Tanggal: ${dateKey}</div>
-                            <div style="font-size:0.72rem; color:var(--text-muted); margin-top:2px;">
-                                Total: <b>${totalTrxCount} Produk Sukses</b> ${isEditedLocal ? '<span style="color:var(--primary); font-weight:800;">(Edited)</span>' : '<span style="color:var(--success); font-weight:800;">(Database)</span>'}
-                            </div>
+                            <div style="font-size:0.9rem; font-weight:900; color:#0f172a;">${f.no_faktur || 'INV-000000'}</div>
+                            <div style="font-size:0.72rem; color:var(--text-muted);">Tgl: <b>${f.tanggal || '-'}</b> | Pelanggan: <b>${f.pembeli || 'Umum'}</b></div>
                         </div>
                         <div style="text-align:right;">
-                            <div style="font-size:1rem; font-weight:900; color:var(--success);">${formatRp(totalNominalHariIni)}</div>
+                            <div style="font-size:0.95rem; font-weight:900; color:var(--success);">${formatRp(totalNominal)}</div>
                         </div>
                     </div>
-                    <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:6px; margin-top:12px;">
-                        <button onclick="editStrukHarian('${dateKey}')" style="background:rgba(112, 82, 255, 0.15); color:var(--primary); border:none; padding:8px 4px; border-radius:10px; font-size:0.72rem; font-weight:800; cursor:pointer;">
+                    <div style="font-size:0.72rem; color:#475569; border-top:1px dashed #e2e8f0; padding-top:6px; margin-top:6px;">
+                        <b>Detail Item:</b> ${items.map(i => `${i.nama} (${i.qty}x)`).join(', ')}
+                    </div>
+                    <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:6px; margin-top:10px;">
+                        <button onclick="editStrukByIdx(${idx})" style="background:rgba(112, 82, 255, 0.15); color:var(--primary); border:none; padding:8px 4px; border-radius:10px; font-size:0.72rem; font-weight:800; cursor:pointer;">
                             <i class="fa-solid fa-pen-to-square"></i> Edit
                         </button>
-                        <button onclick="openStrukHarianModal('${dateKey}')" style="background:var(--primary); color:white; border:none; padding:8px 4px; border-radius:10px; font-size:0.72rem; font-weight:800; cursor:pointer;">
+                        <button onclick="openStrukModalByIdx(${idx})" style="background:var(--primary); color:white; border:none; padding:8px 4px; border-radius:10px; font-size:0.72rem; font-weight:800; cursor:pointer;">
                             <i class="fa-solid fa-receipt"></i> Struk
                         </button>
-                        <button onclick="deleteStrukHarian('${dateKey}')" style="background:rgba(239, 68, 68, 0.15); color:var(--danger); border:none; padding:8px 4px; border-radius:10px; font-size:0.72rem; font-weight:800; cursor:pointer;">
+                        <button onclick="deleteStrukByIdx(${idx})" style="background:rgba(239, 68, 68, 0.15); color:var(--danger); border:none; padding:8px 4px; border-radius:10px; font-size:0.72rem; font-weight:800; cursor:pointer;">
                             <i class="fa-solid fa-trash-can"></i> Hapus
                         </button>
                     </div>
@@ -500,49 +309,36 @@
         });
 
         container.innerHTML = html;
-        document.getElementById("member-daily-tx-display").innerHTML = `<i class="fa-solid fa-chart-line"></i> ${grandTotalAllTxCount} Tx Sukses (${formatRp(grandTotalAllNominal)})`;
     };
 
-    // FUNGSI HAPUS STRUK & REVERT KE HISTORI DATABASE
-    window.deleteStrukHarian = (dateKey) => {
-        if (!confirm(`Hapus revisi struk kasir tanggal ${dateKey}?\n\nJika terdapat histori di database.db, data akan dikembalikan otomatis ke histori transaksi database asli.`)) {
-            return;
-        }
-
-        const activeNameLower = (currentActiveMember.name || '').trim().toLowerCase();
+    window.deleteStrukByIdx = (idx) => {
         let currentFakturs = getStoredManualFakturs();
+        if (idx < 0 || idx >= currentFakturs.length) return;
 
-        // Hapus revisi lokal untuk tanggal & member ini
-        currentFakturs = currentFakturs.filter(f => {
-            const isSameMember = (f.kasir_member || f.pembeli || '').trim().toLowerCase() === activeNameLower;
-            const isSameDate = f.tanggal === dateKey;
-            return !(isSameMember && isSameDate);
-        });
+        if (!confirm(`Hapus transaksi ${currentFakturs[idx].no_faktur}?`)) return;
 
+        currentFakturs.splice(idx, 1);
         saveManualFakturs(currentFakturs);
-        showToast(`Struk ${dateKey} dihapus. Data dipulihkan dari Database!`);
-        
-        // Reset form jika sedang dalam mode edit tanggal yang sama
-        if (document.getElementById("faktur-date-inp").value === dateKey) {
-            resetFakturForm();
-        }
-
+        showToast("Transaksi berhasil dihapus!");
         renderKasTabUI();
     };
 
-    window.editStrukHarian = (dateKey) => {
-        const { groupedItems, sisaLama, bayarNominal } = getConsolidatedDayData(dateKey);
+    window.editStrukByIdx = (idx) => {
+        const currentFakturs = getStoredManualFakturs();
+        const itemData = currentFakturs[idx];
+        if (!itemData) return;
 
-        document.getElementById("faktur-date-inp").value = dateKey;
-        document.getElementById("faktur-pembeli-inp").value = currentActiveMember.name;
-        document.getElementById("faktur-sisa-lama-inp").value = (sisaLama || 0).toLocaleString('id-ID');
-        document.getElementById("faktur-bayar-inp").value = (bayarNominal || 0).toLocaleString('id-ID');
+        document.getElementById("faktur-no-inp").value = itemData.no_faktur || "";
+        document.getElementById("faktur-date-inp").value = itemData.tanggal || getTodayString();
+        document.getElementById("faktur-pembeli-inp").value = itemData.pembeli || "";
+        document.getElementById("faktur-sisa-lama-inp").value = (itemData.sisa_lama || 0).toLocaleString('id-ID');
+        document.getElementById("faktur-bayar-inp").value = (itemData.bayar || 0).toLocaleString('id-ID');
 
         const container = document.getElementById("faktur-items-container");
         container.innerHTML = "";
         fakturItemCounter = 0;
 
-        groupedItems.forEach(item => {
+        (itemData.items || []).forEach(item => {
             fakturItemCounter++;
             const row = document.createElement("div");
             row.className = "pos-item-row";
@@ -557,38 +353,44 @@
             container.appendChild(row);
         });
 
-        document.getElementById("form-mode-title").innerHTML = `<span style="color:var(--primary); font-weight:900;">[MODE EDIT STRUK HARIAN: ${dateKey}]</span>`;
+        document.getElementById("form-mode-title").innerHTML = `<span style="color:var(--primary); font-weight:900;">[EDIT FAKTUR: ${itemData.no_faktur}]</span>`;
         calcFakturTotals();
 
         window.scrollTo({ top: 0, behavior: 'smooth' });
-        showToast(`Struk Harian ${dateKey} dimuat ke form!`);
+        showToast(`Faktur ${itemData.no_faktur} dimuat ke form!`);
     };
 
-    window.openStrukHarianModal = (dateKey) => {
-        const { groupedItems, sisaLama, bayarNominal } = getConsolidatedDayData(dateKey);
-        const totalModalHarian = groupedItems.reduce((acc, i) => acc + i.subtotal_jual, 0);
-        const grandTotal = totalModalHarian + sisaLama;
+    window.openStrukModalByIdx = (idx) => {
+        const currentFakturs = getStoredManualFakturs();
+        const f = currentFakturs[idx];
+        if (!f) return;
+
+        const subtotalBarang = f.subtotal_jual || 0;
+        const sisaLama = f.sisa_lama || 0;
+        const grandTotal = f.total_tagihan || (subtotalBarang + sisaLama);
+        const bayarNominal = f.bayar || 0;
         const kembalianOrSisa = bayarNominal - grandTotal;
 
-        document.getElementById("faktur-modal-title").innerText = `Struk Harian (${dateKey})`;
+        document.getElementById("faktur-modal-title").innerText = `Struk ${f.no_faktur}`;
 
         document.getElementById("faktur-modal-body-content").innerHTML = `
             <div id="capture-struk-area" style="background:#ffffff; padding:24px 18px; font-family:'Courier New', Courier, monospace; color:#000000; width:100%; max-width:320px; margin:0 auto; box-sizing:border-box;">
                 
                 <div style="text-align:center; border-bottom:1px dashed #000000; padding-bottom:12px; margin-bottom:12px;">
                     <div style="font-size:1.15rem; font-weight:900; letter-spacing:1px; color:#000;">ARCELL KOMUNIKA</div>
-                    <div style="font-size:0.75rem; color:#000;">STRUK PENJUALAN HARIAN</div>
-                    <div style="font-size:0.75rem; font-weight:700; margin-top:4px; color:#000;">TGL: ${dateKey}</div>
-                    <div style="font-size:0.75rem; color:#000;">MEMBER: ${(currentActiveMember.name || '').toUpperCase()}</div>
+                    <div style="font-size:0.75rem; color:#000;">STRUK PENJUALAN</div>
+                    <div style="font-size:0.75rem; font-weight:700; margin-top:4px; color:#000;">NO: ${f.no_faktur}</div>
+                    <div style="font-size:0.75rem; color:#000;">TGL: ${f.tanggal}</div>
+                    <div style="font-size:0.75rem; color:#000;">PELANGGAN: ${(f.pembeli || 'UMUM').toUpperCase()}</div>
                 </div>
 
                 <div style="font-size:0.78rem; color:#000;">
-                    ${groupedItems.map(item => `
+                    ${(f.items || []).map(item => `
                         <div style="margin-bottom:8px;">
                             <div style="font-weight:bold; word-break:break-word; color:#000;">${item.nama}</div>
                             <div style="display:flex; justify-content:space-between; margin-top:2px; color:#000;">
                                 <span>${item.qty} x${formatRp(item.jual).replace('Rp', '').trim()}</span>
-                                <span style="font-weight:bold;">${formatRp(item.subtotal_jual).replace('Rp', '').trim()}</span>
+                                <span style="font-weight:bold;">${formatRp(item.subtotal_jual || (item.jual * item.qty)).replace('Rp', '').trim()}</span>
                             </div>
                         </div>
                     `).join('')}
@@ -596,8 +398,8 @@
 
                 <div style="border-top:1px dashed #000000; margin-top:12px; padding-top:10px; font-size:0.8rem; color:#000;">
                     <div style="display:flex; justify-content:space-between;">
-                        <span>TOTAL TRANSAKSI</span>
-                        <span style="font-weight:bold;">${formatRp(totalModalHarian)}</span>
+                        <span>TOTAL BARANG</span>
+                        <span style="font-weight:bold;">${formatRp(subtotalBarang)}</span>
                     </div>
                     ${sisaLama > 0 ? `
                     <div style="display:flex; justify-content:space-between; margin-top:3px;">
@@ -628,10 +430,10 @@
 
         document.getElementById("faktur-modal-footer-actions").innerHTML = `
             <div style="display:grid; grid-template-columns: 1fr 1fr; gap:8px;">
-                <button class="neo-btn" style="background:var(--info);" onclick="cetakThermalBluetooth('${dateKey}')">
+                <button class="neo-btn" style="background:var(--info);" onclick="cetakThermalBluetooth(${idx})">
                     <i class="fa-solid fa-print"></i> Cetak Thermal
                 </button>
-                <button class="neo-btn" style="background:var(--success);" onclick="downloadStrukPngHD('${dateKey}')">
+                <button class="neo-btn" style="background:var(--success);" onclick="downloadStrukPngHD('${f.no_faktur}')">
                     <i class="fa-solid fa-file-image"></i> Simpan PNG Thermal
                 </button>
             </div>
@@ -640,18 +442,24 @@
         document.getElementById("faktur-fullscreen-modal").classList.add("open");
     };
 
-    window.cetakThermalBluetooth = (dateKey) => {
-        const { groupedItems, sisaLama, bayarNominal } = getConsolidatedDayData(dateKey);
-        const totalModalHarian = groupedItems.reduce((acc, i) => acc + i.subtotal_jual, 0);
-        const grandTotal = totalModalHarian + sisaLama;
+    window.cetakThermalBluetooth = (idx) => {
+        const currentFakturs = getStoredManualFakturs();
+        const f = currentFakturs[idx];
+        if (!f) return;
 
-        document.getElementById("th-member").innerText = currentActiveMember.name;
-        document.getElementById("th-date").innerText = dateKey;
-        document.getElementById("th-items").innerHTML = groupedItems.map(i => `
-            <div class="t-row"><span>${i.qty}x ${i.nama.substring(0,16)}</span><span>${formatRp(i.subtotal_jual)}</span></div>
+        const subtotalBarang = f.subtotal_jual || 0;
+        const sisaLama = f.sisa_lama || 0;
+        const grandTotal = f.total_tagihan || (subtotalBarang + sisaLama);
+        const bayarNominal = f.bayar || 0;
+
+        document.getElementById("th-faktur-no").innerText = f.no_faktur;
+        document.getElementById("th-pembeli").innerText = f.pembeli || "Umum";
+        document.getElementById("th-date").innerText = f.tanggal;
+        document.getElementById("th-items").innerHTML = (f.items || []).map(i => `
+            <div class="t-row"><span>${i.qty}x ${i.nama.substring(0,16)}</span><span>${formatRp(i.subtotal_jual || (i.jual * i.qty))}</span></div>
         `).join('');
 
-        document.getElementById("th-total").innerText = formatRp(totalModalHarian);
+        document.getElementById("th-total").innerText = formatRp(subtotalBarang);
         document.getElementById("th-hutang").innerText = formatRp(sisaLama);
         document.getElementById("th-grand").innerText = formatRp(grandTotal);
         document.getElementById("th-bayar").innerText = formatRp(bayarNominal);
@@ -660,7 +468,7 @@
         window.print();
     };
 
-    window.downloadStrukPngHD = (dateKey) => {
+    window.downloadStrukPngHD = (noFaktur) => {
         const area = document.getElementById("capture-struk-area");
         showToast("Memproses PNG Thermal...");
         
@@ -671,7 +479,7 @@
             logging: false
         }).then(canvas => {
             const link = document.createElement('a');
-            link.download = `Struk_Thermal_${currentActiveMember.name}_${dateKey}.png`;
+            link.download = `Struk_Thermal_${noFaktur}.png`;
             link.href = canvas.toDataURL("image/png");
             link.click();
             showToast("PNG Thermal Berhasil Diunduh!");
@@ -751,9 +559,10 @@
         document.getElementById("faktur-kembalian-val").innerText = formatRp(Math.abs(selisih));
     };
 
-    // PENYIMPANAN FAKTUR RESMI LOKAL PERSISTEN
-    window.saveFakturPenjualan = async () => {
+    window.saveFakturPenjualan = () => {
+        const noFaktur = document.getElementById("faktur-no-inp")?.value || ("INV-" + Date.now().toString().slice(-6));
         const txDate = document.getElementById("faktur-date-inp")?.value || getTodayString();
+        const pembeli = document.getElementById("faktur-pembeli-inp")?.value.trim() || "Umum";
         const sisaLama = cleanNumber(document.getElementById("faktur-sisa-lama-inp")?.value || 0);
         const bayarNominal = cleanNumber(document.getElementById("faktur-bayar-inp")?.value || 0);
 
@@ -774,12 +583,9 @@
 
         if (itemsList.length === 0) return showToast("Isi nama produk & harga jual!", true);
 
-        const activeMemberName = (currentActiveMember.name || '').trim();
-
         const newFakturRecord = {
-            no_faktur: document.getElementById("faktur-no-inp")?.value || ("INV-" + Date.now().toString().slice(-6)),
-            kasir_member: activeMemberName,
-            pembeli: activeMemberName,
+            no_faktur: noFaktur,
+            pembeli: pembeli,
             tanggal: txDate,
             items: itemsList,
             subtotal_jual: subtotalJualFaktur,
@@ -789,25 +595,21 @@
         };
 
         let currentFakturs = getStoredManualFakturs();
-        const activeNameLower = activeMemberName.toLowerCase();
         
-        currentFakturs = currentFakturs.filter(f => {
-            const isSameMember = (f.kasir_member || f.pembeli || '').trim().toLowerCase() === activeNameLower;
-            const isSameDate = f.tanggal === txDate;
-            return !(isSameMember && isSameDate);
-        });
+        // Hapus jika faktur dengan nomor sama sudah ada (Mode Edit)
+        currentFakturs = currentFakturs.filter(f => f.no_faktur !== noFaktur);
 
         currentFakturs.unshift(newFakturRecord);
         saveManualFakturs(currentFakturs);
 
-        showToast(`Struk Harian (${txDate}) berhasil disimpan!`);
+        showToast(`Penjualan (${noFaktur}) berhasil disimpan!`);
         resetFakturForm();
         renderKasTabUI();
     };
 
     window.resetFakturForm = () => {
         document.getElementById("form-mode-title").innerText = "Struk Penjualan / Nota Kasir";
-        document.getElementById("faktur-pembeli-inp").value = currentActiveMember.name || "";
+        document.getElementById("faktur-pembeli-inp").value = "";
         document.getElementById("faktur-date-inp").value = getTodayString();
         document.getElementById("faktur-sisa-lama-inp").value = "";
         document.getElementById("faktur-bayar-inp").value = "";
@@ -817,26 +619,12 @@
         addFakturItemRow();
     };
 
-    const verifyPin = () => {
-        if (document.getElementById("pin-input-field").value === "1122") {
-            document.getElementById("pin-overlay").style.display = "none";
-            sessionStorage.setItem("kasir_unlocked", "true");
-        } else { showToast("PIN Salah!", true); }
-    };
-
-    const lockKasir = () => {
-        sessionStorage.removeItem("kasir_unlocked");
-        document.getElementById("pin-overlay").style.display = "flex";
-    };
-
     document.addEventListener("DOMContentLoaded", async () => {
-        if (!sessionStorage.getItem("kasir_unlocked")) document.getElementById("pin-overlay").style.display = "flex";
-        else document.getElementById("pin-overlay").style.display = "none";
         document.getElementById("faktur-no-inp").value = "INV-" + Date.now().toString().slice(-6);
         document.getElementById("faktur-date-inp").value = getTodayString();
         await fetchDatabaseProducts();
-        await initMemberList();
         addFakturItemRow();
+        renderKasTabUI();
     });
 </script>
 </body>

@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Catatan Hutang Pelanggan</title>
+    <!-- FontAwesome 6 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --bg-base: #e6eaf0;
+            --neu-light: #ffffff;
+            --neu-dark: #babecc;
+            --text-main: #4a5568;
+            --text-muted: #8c98a9;
+            --accent-purple: #7052ff;
+            --danger: #ef4444;
+            --danger-bg: #fee2e2;
+            --success: #10b981;
+            --success-bg: #d1fae5;
+            
+            --border-radius-sm: 14px;
+            --border-radius-md: 20px;
+            --border-radius-pill: 50px;
+
+            --neu-shadow-flat: 6px 6px 12px var(--neu-dark), -6px -6px 12px var(--neu-light);
+            --neu-shadow-sm: 3px 3px 6px var(--neu-dark), -3px -3px 6px var(--neu-light);
+            --neu-shadow-inset: inset 3px 3px 6px var(--neu-dark), inset -3px -3px 6px var(--neu-light);
+        }
+
+        * {
+            margin: 0; padding: 0; box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background-color: var(--bg-base);
+            color: var(--text-main);
+            min-height: 100vh;
+            padding: 16px;
+        }
+
+        .app-container {
+            width: 100%;
+            max-width: 480px;
+            margin: 0 auto;
+        }
+
+        /* HEADER UI HOMEPAGE STYLE */
+        .user-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+
+        .user-profile {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .avatar-box {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: var(--bg-base);
+            box-shadow: var(--neu-shadow-sm);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--accent-purple);
+            font-size: 18px;
+        }
+
+        .greeting {
+            font-size: 11px;
+            color: var(--text-muted);
+            font-weight: 600;
+        }
+
+        .username {
+            font-size: 15px;
+            font-weight: 800;
+            color: var(--text-main);
+        }
+
+        .header-action-btn {
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            background: var(--bg-base);
+            box-shadow: var(--neu-shadow-sm);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-main);
+            font-size: 14px;
+            cursor: pointer;
+            border: none;
+        }
+
+        .header-action-btn:active {
+            box-shadow: var(--neu-shadow-inset);
+        }
+
+        /* CARDS NEUMORPHISM */
+        .neo-card {
+            background: var(--bg-base);
+            border-radius: var(--border-radius-md);
+            padding: 18px;
+            margin-bottom: 16px;
+            box-shadow: var(--neu-shadow-flat);
+        }
+
+        .card-title {
+            font-size: 11px;
+            font-weight: 800;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        /* INPUT SYSTEM */
+        .neo-input-group { margin-bottom: 10px; }
+        .neo-input-box {
+            display: flex;
+            align-items: center;
+            padding: 10px 14px;
+            gap: 10px;
+            background: var(--bg-base);
+            border-radius: var(--border-radius-sm);
+            box-shadow: var(--neu-shadow-inset);
+        }
+        .neo-input-box i {
+            color: var(--accent-purple);
+            font-size: 14px;
+            width: 18px;
+            text-align: center;
+        }
+        .neo-input-box input, .neo-input-box select {
+            flex: 1;
+            border: none;
+            background: transparent;
+            outline: none;
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--text-main);
+            width: 100%;
+        }
+
+        /* BUTTONS */
+        .neo-btn {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: var(--border-radius-pill);
+            background: var(--bg-base);
+            color: var(--accent-purple);
+            font-weight: 800;
+            font-size: 12px;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+            box-shadow: var(--neu-shadow-sm);
+            transition: all 0.2s ease;
+        }
+        .neo-btn:active {
+            box-shadow: var(--neu-shadow-inset);
+            transform: scale(0.985);
+        }
+        .neo-btn.secondary {
+            color: var(--text-muted);
+            font-size: 10px;
+            padding: 6px 12px;
+            border-radius: 12px;
+        }
+
+        /* ACCORDION / GROUPS */
+        .htg-group {
+            background: var(--bg-base);
+            border-radius: var(--border-radius-sm);
+            margin-bottom: 12px;
+            box-shadow: var(--neu-shadow-flat);
+            overflow: hidden;
+        }
+        .htg-header {
+            padding: 14px 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+        }
+        .htg-body {
+            max-height: 0;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            background: var(--bg-base);
+            box-shadow: var(--neu-shadow-inset);
+            padding: 0 14px;
+        }
+        .htg-body.open {
+            max-height: 1000px;
+            padding: 12px 14px;
+        }
+
+        .list-item {
+            background: var(--bg-base);
+            border-radius: 10px;
+            padding: 10px 12px;
+            margin-bottom: 8px;
+            box-shadow: var(--neu-shadow-sm);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .btn-icon {
+            background: var(--bg-base);
+            border: none;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            box-shadow: var(--neu-shadow-sm);
+            color: var(--danger);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-left: 6px;
+            font-size: 11px;
+        }
+        .btn-icon.check { color: var(--success); }
+        .btn-icon.wa { color: #25D366; }
+        .btn-icon:active {
+            box-shadow: var(--neu-shadow-inset);
+            transform: scale(0.92);
+        }
+
+        /* BADGES & TOAST */
+        .section-badge {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 16px 0 10px 0;
+        }
+        .section-badge span {
+            font-size: 10px;
+            font-weight: 800;
+            color: var(--accent-purple);
+            background: var(--bg-base);
+            padding: 4px 14px;
+            border-radius: var(--border-radius-pill);
+            box-shadow: var(--neu-shadow-inset);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        #toast {
+            visibility: hidden;
+            min-width: 220px;
+            background-color: var(--bg-base);
+            color: var(--text-main);
+            text-align: center;
+            border-radius: var(--border-radius-pill);
+            padding: 10px 18px;
+            position: fixed;
+            z-index: 9999;
+            left: 50%;
+            bottom: 0px;
+            transform: translateX(-50%);
+            font-size: 11px;
+            font-weight: 800;
+            box-shadow: var(--neu-shadow-flat);
+            opacity: 0;
+            transition: all 0.3s;
+        }
+        #toast.show {
+            visibility: visible;
+            opacity: 1;
+            bottom: 24px;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 24px 10px;
+            color: var(--text-muted);
+            font-size: 12px;
+            font-weight: 600;
+        }
+        .empty-state i {
+            font-size: 2rem;
+            margin-bottom: 8px;
+            color: var(--text-muted);
+        }
+    </style>
+</head>
+<body>
+
+<datalist id="customer-suggestions"></datalist>
+
+<div class="app-container">
+    <!-- HEADER MODERN HOMEPAGE -->
+    <div class="user-header">
+        <div class="user-profile">
+            <div class="avatar-box">
+                <i class="fa-solid fa-book-journal-whills"></i>
+            </div>
+            <div>
+                <div class="greeting">Pencatatan Finansial</div>
+                <div class="username">Hutang Pelanggan</div>
+            </div>
+        </div>
+        <button class="header-action-btn" onclick="window.history.back()" title="Kembali">
+            <i class="fa-solid fa-arrow-left"></i>
+        </button>
+    </div>
+
+    <!-- RINGKASAN REKAP SALDO -->
+    <div class="neo-card">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+            <div>
+                <div style="font-size:10px; font-weight:800; color:var(--text-muted); letter-spacing:0.5px;">TOTAL HUTANG BELUM LUNAS</div>
+                <div id="total-hutang-aktif" style="font-size:1.3rem; font-weight:900; color:var(--danger); margin-top:2px;">Rp 0</div>
+            </div>
+            <div style="text-align:right;">
+                <div style="font-size:10px; font-weight:800; color:var(--text-muted); letter-spacing:0.5px;">JUMLAH DEBITUR</div>
+                <div id="total-debitur-aktif" style="font-size:1.1rem; font-weight:900; color:var(--text-main); margin-top:2px;">0 Orang</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- FORM INPUT HUTANG -->
+    <div class="neo-card">
+        <div class="card-title">
+            <span><i class="fa-solid fa-user-plus" style="color:var(--accent-purple); margin-right:4px;"></i> Catat Hutang Baru</span>
+            <button class="neo-btn secondary" style="width:auto;" onclick="pickContact()">
+                <i class="fa-solid fa-address-book"></i> Kontak HP
+            </button>
+        </div>
+        <div class="neo-input-group">
+            <div class="neo-input-box">
+                <i class="fa-solid fa-user"></i>
+                <input type="text" id="hutang-nama-inp" list="customer-suggestions" placeholder="Nama Pelanggan / Debitur" autocomplete="off">
+            </div>
+        </div>
+        <div class="neo-input-group">
+            <div class="neo-input-box">
+                <i class="fa-solid fa-rupiah-sign"></i>
+                <input type="text" inputmode="numeric" id="hutang-nominal-inp" placeholder="Nominal Hutang (Rp)" onfocus="handleInputFocus(event)" onblur="handleInputBlur(event)">
+            </div>
+        </div>
+        <div class="neo-input-group" style="margin-bottom:14px;">
+            <div class="neo-input-box">
+                <i class="fa-solid fa-calendar-days"></i>
+                <input type="date" id="hutang-date-inp">
+            </div>
+        </div>
+        <button class="neo-btn" onclick="addHutang()"><i class="fa-solid fa-plus"></i> Simpan Catatan Hutang</button>
+    </div>
+
+    <!-- PEMISAH / BADGE FILTER -->
+    <div class="section-badge">
+        <span><i class="fa-solid fa-list-check me-1"></i> Daftar Catatan Hutang</span>
+    </div>
+
+    <!-- FILTER & PENCARIAN -->
+    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-bottom:14px;">
+        <div class="neo-input-box">
+            <i class="fa-solid fa-magnifying-glass"></i>
+            <input type="text" id="search-input" placeholder="Cari nama..." onkeyup="renderHutangUI()">
+        </div>
+        <div class="neo-input-box">
+            <i class="fa-solid fa-filter"></i>
+            <select id="filter-status-select" onchange="renderHutangUI()">
+                <option value="ALL">Semua Status</option>
+                <option value="BELUM_LUNAS" selected>Belum Lunas</option>
+                <option value="LUNAS">Sudah Lunas</option>
+            </select>
+        </div>
+    </div>
+
+    <!-- DAFTAR LIST HUTANG -->
+    <div id="hutang-list-container"></div>
+</div>
+
+<div id="toast"><i class="fa-solid fa-circle-check" style="color:var(--success);"></i> <span id="toast-msg">Berhasil</span></div>
+
+<script>
+    const cleanNumber = (val) => {
+        if (!val) return 0;
+        if (typeof val === 'number') return val;
+        return parseInt(String(val).replace(/[^0-9-]/g, '')) || 0;
+    };
+
+    const formatRp = (angka) => {
+        return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(cleanNumber(angka));
+    };
+
+    const getTodayString = () => {
+        const d = new Date();
+        return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+    };
+
+    const showToast = (msg, isError = false) => {
+        const toast = document.getElementById("toast");
+        const icon = isError ? '<i class="fa-solid fa-circle-exclamation" style="color:var(--danger);"></i>' : '<i class="fa-solid fa-circle-check" style="color:var(--success);"></i>';
+        toast.innerHTML = `${icon} <span>${msg}</span>`;
+        toast.classList.add("show");
+        setTimeout(() => toast.classList.remove("show"), 2500);
+    };
+
+    window.handleInputFocus = (e) => {
+        const val = cleanNumber(e.target.value);
+        e.target.value = val === 0 ? '' : val;
+    };
+    window.handleInputBlur = (e) => {
+        const val = cleanNumber(e.target.value);
+        e.target.value = val === 0 ? '' : val.toLocaleString("id-ID");
+    };
+
+    const getStoredHutang = () => JSON.parse(localStorage.getItem('hutang_list') || '[]');
+    const saveHutang = (list) => localStorage.setItem('hutang_list', JSON.stringify(list));
+
+    const getStoredCustomers = () => JSON.parse(localStorage.getItem('master_customer_list') || '[]');
+    const saveCustomerName = (nama) => {
+        if (!nama || !nama.trim()) return;
+        const cleanName = nama.trim();
+        if (cleanName.toLowerCase() === "pelanggan umum") return;
+
+        let customers = getStoredCustomers();
+        if (!customers.some(c => c.toLowerCase() === cleanName.toLowerCase())) {
+            customers.unshift(cleanName);
+            localStorage.setItem('master_customer_list', JSON.stringify(customers));
+            updateCustomerDatalist();
+        }
+    };
+
+    const updateCustomerDatalist = () => {
+        const datalist = document.getElementById('customer-suggestions');
+        if (!datalist) return;
+        const customers = getStoredCustomers();
+        datalist.innerHTML = customers.map(c => `<option value="${c}"></option>`).join('');
+    };
+
+    window.pickContact = async () => {
+        if ('contacts' in navigator && 'ContactsManager' in window) {
+            try {
+                const contacts = await navigator.contacts.select(['name'], { multiple: false });
+                if (contacts[0]?.name[0]) document.getElementById('hutang-nama-inp').value = contacts[0].name[0];
+            } catch (err) {}
+        } else {
+            showToast("Gunakan fitur kontak melalui browser seluler", true);
+        }
+    };
+
+    window.addHutang = () => {
+        const nama = document.getElementById('hutang-nama-inp').value.trim();
+        const nominal = cleanNumber(document.getElementById('hutang-nominal-inp').value);
+        const tanggal = document.getElementById('hutang-date-inp').value || getTodayString();
+
+        if(!nama || nominal <= 0) {
+            return showToast("Isi nama pelanggan & nominal!", true);
+        }
+        
+        saveCustomerName(nama);
+
+        const list = getStoredHutang();
+        list.unshift({ id: 'HTG-'+Date.now(), nama, nominal, tanggal, lunas: false });
+        saveHutang(list);
+
+        showToast("Catatan hutang disimpan!");
+        document.getElementById('hutang-nama-inp').value = ''; 
+        document.getElementById('hutang-nominal-inp').value = '';
+        renderHutangUI();
+    };
+
+    window.toggleLunasHutang = (id) => {
+        const list = getStoredHutang();
+        const idx = list.findIndex(h => h.id === id);
+        if (idx >= 0) { 
+            list[idx].lunas = !list[idx].lunas; 
+            saveHutang(list); 
+            showToast(list[idx].lunas ? "Status diubah ke LUNAS" : "Status diubah ke BELUM LUNAS");
+            renderHutangUI(); 
+        }
+    };
+
+    window.deleteHutang = (id) => {
+        if (confirm("Apakah Anda yakin ingin menghapus catatan hutang ini?")) { 
+            saveHutang(getStoredHutang().filter(h => h.id !== id)); 
+            showToast("Hutang dihapus!");
+            renderHutangUI(); 
+        }
+    };
+
+    window.toggleHtgGroup = (id) => {
+        const body = document.getElementById(`htg-body-${id}`);
+        if(body) body.classList.toggle('open');
+    };
+
+    window.sendWaReminder = (nama, sisaHutang) => {
+        const txt = `Halo Kak *${nama}*,\n\nSekadar mengingatkan catatan administrasi di *Arcell Komunika* bahwa terdapat sisa tanggungan sebesar *${formatRp(sisaHutang)}*.\n\nTerima kasih banyak atas perhatian dan kerja samanya! 🙏`;
+        window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(txt)}`, '_blank');
+    };
+
+    const renderHutangUI = () => {
+        const container = document.getElementById('hutang-list-container');
+        const searchKeyword = document.getElementById('search-input').value.toLowerCase();
+        const statusFilter = document.getElementById('filter-status-select').value;
+        const list = getStoredHutang();
+
+        let totalAktif = 0;
+        let setDebiturAktif = new Set();
+        
+        if (list.length === 0) {
+            container.innerHTML = '<div class="empty-state"><i class="fa-solid fa-clipboard-list"></i><br>Belum ada catatan hutang tersimpan.</div>';
+            document.getElementById('total-hutang-aktif').innerText = 'Rp 0';
+            document.getElementById('total-debitur-aktif').innerText = '0 Orang';
+            return;
+        }
+
+        list.forEach(h => {
+            if (!h.lunas) {
+                totalAktif += h.nominal;
+                setDebiturAktif.add(h.nama.trim().toLowerCase());
+            }
+        });
+
+        const grouped = {};
+        list.forEach(h => {
+            const matchName = h.nama.toLowerCase().includes(searchKeyword);
+            const matchStatus = statusFilter === 'ALL' || (statusFilter === 'LUNAS' && h.lunas) || (statusFilter === 'BELUM_LUNAS' && !h.lunas);
+
+            if (matchName && matchStatus) {
+                const key = h.nama.trim().toLowerCase();
+                if (!grouped[key]) grouped[key] = { name: h.nama.trim(), items: [] };
+                grouped[key].items.push(h);
+            }
+        });
+
+        let html = ''; 
+        let groupIdx = 0;
+
+        for (const key in grouped) {
+            groupIdx++; 
+            const grp = grouped[key];
+            const grpTotalUnpaid = grp.items.reduce((s, i) => s + (i.lunas ? 0 : i.nominal), 0);
+
+            html += `
+            <div class="htg-group">
+                <div class="htg-header" onclick="toggleHtgGroup(${groupIdx})">
+                    <div>
+                        <div style="font-size:13px; font-weight:800; color:var(--text-main);">
+                            <i class="fa-solid fa-user" style="color:var(--text-muted); margin-right:5px;"></i> ${grp.name}
+                        </div>
+                        <div style="font-size:10px; color:var(--text-muted); margin-top:2px;">${grp.items.length} Rincian Catatan</div>
+                    </div>
+                    <div style="text-align:right;">
+                        <div style="font-size:13px; font-weight:900; color:${grpTotalUnpaid > 0 ? 'var(--danger)' : 'var(--success)'};">${formatRp(grpTotalUnpaid)}</div>
+                        <div style="font-size:9px; font-weight:800; color:var(--text-muted);">${grpTotalUnpaid > 0 ? 'SISA HUTANG' : 'LUNAS'}</div>
+                    </div>
+                </div>
+                <div class="htg-body" id="htg-body-${groupIdx}">
+                    ${grp.items.map(h => `
+                        <div class="list-item" style="opacity: ${h.lunas ? '0.6' : '1'};">
+                            <div>
+                                <div style="font-size:11px; font-weight:800;">${h.lunas ? '✅ LUNAS' : '⏳ BELUM LUNAS'}</div>
+                                <div style="font-size:10px; color:var(--text-muted);">${h.tanggal}</div>
+                            </div>
+                            <div style="display:flex; align-items:center;">
+                                <span style="font-size:12px; font-weight:800; margin-right:6px; color:${h.lunas ? 'var(--text-muted)' : 'var(--danger)'}; ${h.lunas ? 'text-decoration:line-through;' : ''}">${formatRp(h.nominal)}</span>${!h.lunas ? `<button class="btn-icon wa" onclick="sendWaReminder('${grp.name}', ${h.nominal})" title="Ingatkan via WhatsApp"><i class="fa-brands fa-whatsapp"></i></button>` : ''}
+                                <button class="btn-icon check" onclick="toggleLunasHutang('${h.id}')" title="Ubah Status Lunas"><i class="fa-solid fa-check"></i></button>
+                                <button class="btn-icon" onclick="deleteHutang('${h.id}')" title="Hapus Catatan"><i class="fa-solid fa-trash-can"></i></button>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            </div>`;
+        }
+
+        container.innerHTML = html || '<div class="empty-state">Data tidak ditemukan sesuai filter.</div>';
+        document.getElementById('total-hutang-aktif').innerText = formatRp(totalAktif);
+        document.getElementById('total-debitur-aktif').innerText = `${setDebiturAktif.size} Orang`;
+    };
+
+    document.addEventListener("DOMContentLoaded", () => {
+        document.getElementById('hutang-date-inp').value = getTodayString();
+        updateCustomerDatalist();
+        renderHutangUI();
+    });
+</script>
+
+</body>
+</html>
+

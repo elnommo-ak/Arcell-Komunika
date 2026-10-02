@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kategori Custom Produk - Arcell Komunika</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="manifest" href="/manifest-admin.json">
+    <style>
+        :root {
+            --bg-gradient: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 50%, #f1f5f9 100%);
+            --glass-base: rgba(255, 255, 255, 0.55);
+            --glass-card: rgba(255, 255, 255, 0.72);
+            --glass-input: rgba(255, 255, 255, 0.85);
+            --glass-border: rgba(255, 255, 255, 0.95);
+            --glass-border-subtle: rgba(226, 232, 240, 0.6);
+            --shadow-card: 0 4px 20px -2px rgba(100, 116, 139, 0.08), inset 0 1px 0 0 rgba(255, 255, 255, 0.9);
+            --shadow-button: 0 4px 12px rgba(148, 163, 184, 0.2), inset 0 1px 0 rgba(255, 255, 255, 1);
+            --text-main: #1e293b;
+            --text-sub: #64748b;
+            --primary: #4f46e5;
+            --pink-accent: #db2777;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+        }
+
+        * { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; margin: 0; padding: 0; }
+        body { background: var(--bg-gradient); background-attachment: fixed; color: var(--text-main); padding-bottom: 40px; min-height: 100vh; }
+        .header { background: var(--glass-base); backdrop-filter: blur(16px); padding: 16px 20px; text-align: center; border-bottom: 1px solid var(--glass-border); margin-bottom: 16px; position: sticky; top: 0; z-index: 100; display: flex; align-items: center; justify-content: center; }
+        .header h2 { font-size: 1.2rem; color: var(--text-main); font-weight: 800; }
+
+        .menu-btn { position: absolute; left: 16px; background: transparent; border: none; font-size: 1.25rem; color: var(--text-main); cursor: pointer; padding: 6px 10px; }
+        .dropdown-menu { display: none; position: absolute; top: 55px; left: 16px; background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(20px); border: 1px solid var(--glass-border); border-radius: 16px; box-shadow: 0 10px 30px rgba(148, 163, 184, 0.25); width: 220px; z-index: 1000; flex-direction: column; padding: 6px 0; }
+        .dropdown-menu.show { display: flex; }
+        .dropdown-item { padding: 10px 16px; color: var(--text-main); text-decoration: none; font-size: 0.82rem; font-weight: 700; display: flex; align-items: center; gap: 10px; cursor: pointer; }
+        .dropdown-item i { width: 18px; text-align: center; color: var(--primary); }
+        .dropdown-divider { height: 1px; background: var(--glass-border-subtle); margin: 4px 0; }
+
+        .container { max-width: 1000px; margin: 0 auto; padding: 0 12px; }
+        .glass-card { background: var(--glass-card); backdrop-filter: blur(20px); border: 1px solid var(--glass-border); border-radius: 20px; padding: 16px; margin-bottom: 14px; box-shadow: var(--shadow-card); }
+
+        h3 { margin-bottom: 12px; color: var(--primary); display: flex; align-items: center; gap: 8px; font-size: 0.95rem; font-weight: 800; }
+        .form-grid-inline { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+        .form-grid-inline input, .form-grid-inline select { flex: 1 1 130px; padding: 9px 12px; font-size: 0.8rem; border-radius: 12px; }
+
+        input, select { padding: 10px 14px; border-radius: 12px; border: 1px solid var(--glass-border-subtle); outline: none; font-size: 0.82rem; font-weight: 600; background: var(--glass-input); color: var(--text-main); width: 100%; }
+        button { background: #ffffff; color: var(--primary); border: 1px solid var(--glass-border); padding: 9px 16px; border-radius: 12px; cursor: pointer; font-weight: 800; font-size: 0.8rem; box-shadow: var(--shadow-button); display: inline-flex; align-items: center; justify-content: center; gap: 6px; }
+
+        .btn-success { color: #059669; }
+        .btn-warning { color: #d97706; }
+        .btn-danger { color: #dc2626; }
+        .btn-sm { padding: 5px 10px; font-size: 0.72rem; border-radius: 9px; }
+
+        .brand-block { background: rgba(255, 255, 255, 0.8); border-radius: 14px; border: 1px solid var(--glass-border); margin-bottom: 8px; overflow: hidden; }
+        .brand-header { padding: 10px 12px; background: rgba(255, 255, 255, 0.9); display: flex; align-items: center; justify-content: space-between; cursor: pointer; font-weight: 800; font-size: 0.85rem; color: var(--primary); }
+        .brand-body { display: none; padding: 8px; flex-direction: column; gap: 6px; }
+        .brand-block.open .brand-body { display: flex; }
+        .brand-block.open .brand-chevron { transform: rotate(180deg); }
+        .brand-chevron { transition: transform 0.2s; font-size: 0.75rem; color: var(--text-sub); }
+
+        .sub-cat-card { background: rgba(255, 255, 255, 0.9); border-radius: 12px; border: 1px solid var(--glass-border); overflow: hidden; }
+        .sub-cat-header { padding: 9px 12px; display: flex; align-items: center; justify-content: space-between; cursor: pointer; font-weight: 800; font-size: 0.8rem; color: var(--pink-accent); }
+        .sub-cat-body { display: none; padding: 8px; flex-direction: column; gap: 6px; background: rgba(248, 250, 252, 0.6); }
+        .sub-cat-card.open .sub-cat-body { display: flex; }
+        .sub-cat-card.open .sub-chevron { transform: rotate(180deg); }
+        .sub-chevron { transition: transform 0.2s; font-size: 0.7rem; color: var(--text-sub); }
+
+        .prod-item { background: rgba(255, 255, 255, 0.95); padding: 9px 12px; border-radius: 12px; border: 1px solid var(--glass-border-subtle); display: flex; align-items: center; justify-content: space-between; }
+        .prod-name { font-size: 0.8rem; font-weight: 800; color: var(--text-main); display: inline-flex; align-items: center; gap: 4px; }
+        .prod-sku { font-size: 0.68rem; color: var(--text-sub); font-weight: 700; margin-top: 1px; }
+        .prod-sku span { color: var(--primary); }
+        .prod-price { font-size: 0.82rem; font-weight: 900; color: #059669; }
+        .prod-modal { font-size: 0.68rem; color: var(--text-sub); font-weight: 700; }
+
+        .dot-indicator { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-left: 4px; vertical-align: middle; flex-shrink: 0; }
+        .dot-digiflazz { background-color: #6366f1; }
+        .dot-okeconnect { background-color: #10b981; }
+        .badge-count { background: rgba(224, 231, 255, 0.8); color: var(--primary); padding: 3px 9px; border-radius: 12px; font-size: 0.68rem; font-weight: 800; }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <button class="menu-btn" onclick="toggleDropdownMenu(event)"><i class="fa-solid fa-bars"></i></button>
+        <h2>📁 Kategori Custom Produk</h2>
+
+        <div class="dropdown-menu" id="dropdownMenu">
+            <a href="#" class="dropdown-item" onclick="navTo('admin.html')">
+                <i class="fa-solid fa-user-gear"></i> Dashboard & Member
+            </a>
+            <a href="#" class="dropdown-item" onclick="navTo('custom.html')">
+                <i class="fa-solid fa-folder-tree"></i> Kategori Custom Produk
+            </a>
+            <a href="#" class="dropdown-item" onclick="navTo('okeconnect.html')">
+                <i class="fa-solid fa-bolt"></i> Produk Okeconnect
+            </a>
+            <a href="#" class="dropdown-item" onclick="navTo('digiflazz.html')">
+                <i class="fa-solid fa-box-open"></i> Produk Digiflazz
+            </a>
+            <div class="dropdown-divider"></div>
+            <a href="#" class="dropdown-item" onclick="navTo('hutang.html')">
+                <i class="fa-solid fa-book-bookmark"></i> Catatan Hutang
+            </a>
+            <a href="#" class="dropdown-item" onclick="navTo('kasir.html')">
+                <i class="fa-solid fa-cash-register"></i> Kasir
+            </a>
+        </div>
+    </div>
+
+    <div class="container">
+        <!-- FORM EDIT / TAMBAH PRODUK CUSTOM UNIFIED -->
+        <div class="glass-card">
+            <h3 id="formTitle"><i class="fa-solid fa-pen-to-square"></i> Tambah / Edit Produk Custom</h3>
+            <div class="form-grid-inline" style="margin-bottom: 8px;">
+                <select id="providerSelect" style="max-width: 140px;">
+                    <option value="digiflazz">Digiflazz</option>
+                    <option value="okeconnect">OkeConnect</option>
+                </select>
+                <input type="text" id="sku" placeholder="SKU Kode / Kode Produk">
+                <input type="text" id="nama" placeholder="Nama Produk">
+                <select id="brand">
+                    <option value="INDOSAT">INDOSAT</option>
+                    <option value="TELKOMSEL">TELKOMSEL</option>
+                    <option value="XL">XL</option>
+                    <option value="AXIS">AXIS</option>
+                    <option value="TRI">TRI</option>
+                    <option value="SMARTFREN">SMARTFREN</option>
+                    <option value="E-WALLET">E-WALLET</option>
+                    <option value="TOKEN">TOKEN PLN</option>
+                    <option value="PLN">TAGIHAN PLN</option>
+                    <option value="GAMING">GAMING</option>
+                </select>
+                <select id="typeSelect">
+                    <option value="Umum">-- Pilih Kategori --</option>
+                </select>
+                <input type="number" id="harga" placeholder="Harga Jual (Rp)">
+                <select id="statusSelect" style="max-width: 150px;">
+                    <option value="1">Tampilkan (Aktif)</option>
+                    <option value="0">Sembunyikan</option>
+                </select>
+            </div>
+            <div style="display: flex; gap: 8px;">
+                <button onclick="simpanProduk()" style="flex: 1;"><i class="fa-solid fa-floppy-disk"></i> Simpan Produk</button>
+                <button onclick="resetForm()" class="btn-warning" id="btnReset" style="display: none;">Batal</button>
+            </div>
+        </div>
+
+        <div class="glass-card">
+            <h3><i class="fa-solid fa-folder-plus"></i> Buat Kategori Baru</h3>
+            <div style="display: flex; gap: 6px; flex-wrap: wrap;">
+                <input type="text" id="namaKategoriBaru" placeholder="Nama Kategori (misal: Freedom Sensasi)" style="flex: 2; min-width: 150px;">
+                <select id="brandKategoriBaru" style="flex: 1; min-width: 110px;">
+                    <option value="INDOSAT">INDOSAT</option>
+                    <option value="TELKOMSEL">TELKOMSEL</option>
+                    <option value="XL">XL</option>
+                    <option value="AXIS">AXIS</option>
+                    <option value="TRI">TRI</option>
+                    <option value="SMARTFREN">SMARTFREN</option>
+                    <option value="E-WALLET">E-WALLET</option>
+                    <option value="TOKEN">TOKEN PLN</option>
+                    <option value="PLN">TAGIHAN PLN</option>
+                    <option value="GAMING">GAMING</option>
+                </select>
+                <button onclick="tambahKategoriBaru()"><i class="fa-solid fa-plus"></i> Buat</button>
+            </div>
+        </div>
+
+        <div class="glass-card">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                <h3 style="margin: 0;"><i class="fa-solid fa-folder-tree"></i> Custom Produk</h3>
+                <button onclick="loadCustomCategoriesFromDB()" class="btn-sm"><i class="fa-solid fa-rotate-right"></i> Refresh DB</button>
+            </div>
+            <div style="font-size: 0.72rem; color: var(--text-sub); margin-bottom: 12px; background: rgba(255,255,255,0.6); padding: 8px 12px; border-radius: 10px; border: 1px solid var(--glass-border-subtle);">
+                💡 <b>Harga Modal</b> akan terus otomatis diperbarui saat Sync. Gunakan panah (▲ / ▼) untuk mengubah posisi urutan sub-kategori secara manual.
+            </div>
+            <div id="customCategoryContainer">
+                <div style="text-align: center; color: var(--text-sub); padding: 15px; font-size: 0.8rem;">Memuat daftar kategori kustom...</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL EDIT PRODUK CUSTOM -->
+    <div id="modalEditCustomProduct" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(148, 163, 184, 0.25); backdrop-filter: blur(12px); z-index: 9999; justify-content: center; align-items: center;">
+        <div class="glass-card" style="width: 90%; max-width: 420px; padding: 22px; background: rgba(255, 255, 255, 0.95);">
+            <h3><i class="fa-solid fa-pen-to-square"></i> Edit Produk Custom</h3>
+            <div style="display: flex; flex-direction: column; gap: 10px; margin-top: 10px;">
+                <input type="hidden" id="editCustomCatId">
+                <input type="hidden" id="editCustomProvider">
+                <div>
+                    <label style="font-size: 0.7rem; font-weight: 800; color: var(--text-sub);">SKU / KODE PRODUK</label>
+                    <input type="text" id="editCustomSku" readonly style="background: rgba(241,245,249,0.8); color: var(--text-sub);">
+                </div>
+                <div>
+                    <label style="font-size: 0.7rem; font-weight: 800; color: var(--text-sub);">NAMA PRODUK CUSTOM</label>
+                    <input type="text" id="editCustomName" placeholder="Nama Produk">
+                </div>
+                <div>
+                    <label style="font-size: 0.7rem; font-weight: 800; color: var(--text-sub);">HARGA JUAL CUSTOM (RP)</label>
+                    <input type="number" id="editCustomPrice" placeholder="Harga Jual (Rp)">
+                </div>
+                <div style="display: flex; gap: 8px; margin-top: 6px;">
+                    <button onclick="simpanEditCustomProduct()" class="btn-success" style="flex: 1;"><i class="fa-solid fa-check"></i> Simpan</button>
+                    <button onclick="tutupModalEditCustomProduct()" class="btn-danger"><i class="fa-solid fa-xmark"></i> Batal</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let dbCustomCategories = [];
+        let openCustomBrands = new Set();
+        let openCustomSubCats = new Set();
+
+        function navTo(url) { window.location.replace(url); }
+        function toggleDropdownMenu(evt) { evt.stopPropagation(); document.getElementById('dropdownMenu').classList.toggle('show'); }
+        window.addEventListener('click', () => { const d = document.getElementById('dropdownMenu'); if (d && d.classList.contains('show')) d.classList.remove('show'); });
+
+        async function loadCustomCategoriesFromDB() {
+            try {
+                const res = await fetch('/api/admin/custom-categories?t=' + Date.now());
+                const result = await res.json();
+                dbCustomCategories = Array.isArray(result) ? result : (result.data || []);
+                renderCustomCategoriesTab();
+            } catch (err) {}
+        }
+
+        async function tambahKategoriBaru() {
+            const input = document.getElementById('namaKategoriBaru');
+            const brandSelect = document.getElementById('brandKategoriBaru');
+            const catName = input.value.trim();
+            if(!catName) return alert('Ketik nama kategori!');
+            try {
+                const res = await fetch('/api/admin/custom-categories', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name: catName, brand: brandSelect.value }) });
+                const result = await res.json();
+                if(result.status === 'success') { input.value = ''; loadCustomCategoriesFromDB(); } else alert('Gagal: ' + result.message);
+            } catch(e) { alert('Gagal terhubung ke server'); }
+        }
+
+        async function hapusCustomCategoryDB(id, catName) {
+            if (!confirm(`Hapus kategori custom "${catName}"?`)) return;
+            try {
+                const res = await fetch(`/api/admin/custom-categories/${id}`, { method: 'DELETE' });
+                const result = await res.json();
+                if(result.status === 'success') loadCustomCategoriesFromDB(); else alert('Gagal');
+            } catch(e) { alert('Error jaringan'); }
+        }
+
+        function renderCustomCategoriesTab() {
+            const container = document.getElementById('customCategoryContainer');
+            if(!dbCustomCategories || dbCustomCategories.length === 0) {
+                container.innerHTML = `<div style="text-align:center; color: var(--text-sub); padding: 15px; font-size:0.8rem;">Belum ada kategori custom. Buat di atas!</div>`;
+                return;
+            }
+
+            const groupedByBrand = {};
+            dbCustomCategories.forEach(cat => {
+                const brand = cat.brand || 'LAINNYA';
+                if(!groupedByBrand[brand]) groupedByBrand[brand] = [];
+                groupedByBrand[brand].push(cat);
+            });
+
+            let html = '';
+            Object.keys(groupedByBrand).forEach(brand => {
+                const categories = groupedByBrand[brand].sort((a, b) => (a.sort_order || a.id) - (b.sort_order || b.id));
+                const isBrandOpen = openCustomBrands.has(brand);
+
+                html += `
+                    <div class="brand-block ${isBrandOpen ? 'open' : ''}" data-brand="${brand}">
+                        <div class="brand-header" onclick="toggleBrandAccordion(this, '${brand}')">
+                            <span><i class="fa-solid fa-mobile-screen" style="margin-right: 6px;"></i>${brand}</span>
+                            <div style="display: flex; align-items: center; gap: 8px;">
+                                <span class="badge-count">${categories.length} Kategori</span>
+                                <i class="fa-solid fa-chevron-down brand-chevron"></i>
+                            </div>
+                        </div>
+                        <div class="brand-body">
+                `;
+
+                categories.forEach((cat) => {
+                    const prods = [...(cat.products || [])];
+                    prods.sort((a, b) => parseFloat(a.jual || 0) - parseFloat(b.jual || 0));
+                    const isSubCatOpen = openCustomSubCats.has(String(cat.id));
+
+                    html += `
+                        <div class="sub-cat-card ${isSubCatOpen ? 'open' : ''}" id="sub-cat-${cat.id}">
+                            <div class="sub-cat-header" onclick="toggleSubCatAccordion(this, '${cat.id}')">
+                                <div style="display: flex; align-items: center; gap: 6px;">
+                                    <div style="display: flex; flex-direction: column; gap: 2px;" onclick="event.stopPropagation();">
+                                        <button class="btn-sm" style="padding: 1px 4px; font-size: 0.55rem;" onclick="geserPosisiKategori('${brand}', ${cat.id}, 'up')"><i class="fa-solid fa-chevron-up"></i></button>
+                                        <button class="btn-sm" style="padding: 1px 4px; font-size: 0.55rem;" onclick="geserPosisiKategori('${brand}', ${cat.id}, 'down')"><i class="fa-solid fa-chevron-down"></i></button>
+                                    </div>
+                                    <span><i class="fa-solid fa-folder-open" style="margin-right: 4px;"></i> ${cat.name}</span>
+                                </div>
+                                <div style="display: flex; align-items: center; gap: 6px;">
+                                    <span class="badge-count" style="font-size: 0.62rem;">${prods.length} Item</span>
+                                    <button class="btn-sm btn-danger" style="padding: 2px 6px;" onclick="event.stopPropagation(); hapusCustomCategoryDB(${cat.id}, '${cat.name}')"><i class="fa-solid fa-trash"></i></button>
+                                    <i class="fa-solid fa-chevron-down sub-chevron"></i>
+                                </div>
+                            </div>
+                            <div class="sub-cat-body">
+                    `;
+
+                    if(prods.length === 0) {
+                        html += `<div style="font-size:0.72rem; color:var(--text-sub); padding:6px; text-align:center;">Belum ada produk dipetakan ke folder ini.</div>`;
+                    } else {
+                        prods.forEach(p => {
+                            const dotClass = p.provider === 'okeconnect' ? 'dot-okeconnect' : 'dot-digiflazz';
+                            const hargaModal = parseFloat(p.harga_modal || 0);
+                            const hargaJual = parseFloat(p.jual || 0);
+
+                            html += `
+                                <div class="prod-item" id="prod-item-${cat.id}-${p.buyer_sku_code}">
+                                    <div>
+                                        <div class="prod-name">${p.product_name} <span class="dot-indicator ${dotClass}"></span></div>
+                                        <div class="prod-sku">SKU: <span>${p.buyer_sku_code}</span></div>
+                                    </div>
+                                    <div style="text-align:right;">
+                                        <div class="prod-price">Rp ${hargaJual.toLocaleString('id-ID')}</div>
+                                        <div class="prod-modal">Modal: Rp ${hargaModal.toLocaleString('id-ID')}</div>
+                                        <div style="display:flex; gap:4px; justify-content:flex-end; margin-top:2px;">
+                                            <button class="btn-sm btn-warning" style="padding:2px 6px;" onclick="bukaModalEditCustomProduct(${cat.id}, '${p.buyer_sku_code}', '${p.product_name.replace(/'/g, "\\'")}', ${hargaJual}, '${p.provider}')"><i class="fa-solid fa-pen"></i> Edit</button>
+                                            <button class="btn-sm btn-danger" style="padding:2px 6px;" onclick="hapusMappingProduk(${cat.id}, '${p.buyer_sku_code}', '${p.provider}', this)"><i class="fa-solid fa-xmark"></i> Lepas</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            `;
+                        });
+                    }
+                    html += `</div></div>`;
+                });
+                html += `</div></div>`;
+            });
+            container.innerHTML = html;
+        }
+
+        async function geserPosisiKategori(brand, catId, arah) {
+            const catList = dbCustomCategories.filter(c => (c.brand || 'LAINNYA') === brand).sort((a, b) => (a.sort_order || a.id) - (b.sort_order || b.id));
+            const idx = catList.findIndex(c => c.id === catId);
+            if (idx === -1) return;
+            if (arah === 'up' && idx > 0) { const t = catList[idx]; catList[idx] = catList[idx - 1]; catList[idx - 1] = t; }
+            else if (arah === 'down' && idx < catList.length - 1) { const t = catList[idx]; catList[idx] = catList[idx + 1]; catList[idx + 1] = t; }
+            else return;
+
+            catList.forEach((c, i) => c.sort_order = i + 1);
+            renderCustomCategoriesTab();
+            try { await fetch('/api/admin/reorder-custom-categories', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ order: catList.map(c => ({ id: c.id, position: c.sort_order })) }) }); } catch (err) {}
+        }
+
+        function bukaModalEditCustomProduct(catId, sku, name, price, provider) {
+            document.getElementById('editCustomCatId').value = catId;
+            document.getElementById('editCustomSku').value = sku;
+            document.getElementById('editCustomName').value = name;
+            document.getElementById('editCustomPrice').value = price;
+            document.getElementById('editCustomProvider').value = provider;
+            document.getElementById('modalEditCustomProduct').style.display = 'flex';
+        }
+        function tutupModalEditCustomProduct() { document.getElementById('modalEditCustomProduct').style.display = 'none'; }
+
+        async function simpanEditCustomProduct() {
+            const catId = document.getElementById('editCustomCatId').value;
+            const sku = document.getElementById('editCustomSku').value;
+            const name = document.getElementById('editCustomName').value.trim();
+            const price = parseInt(document.getElementById('editCustomPrice').value) || 0;
+            const provider = document.getElementById('editCustomProvider').value;
+            if(!name || price < 0) return alert('Input tidak valid!');
+            try {
+                const res = await fetch('/api/admin/update-custom-product', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ category_id: catId, buyer_sku_code: sku, product_name: name, price, provider }) });
+                const result = await res.json();
+                if(result.status === 'success') { tutupModalEditCustomProduct(); loadCustomCategoriesFromDB(); } else alert('Gagal: ' + result.message);
+            } catch(e) { alert('Error jaringan'); }
+        }
+
+        function toggleBrandAccordion(el, brandName) { const block = el.closest('.brand-block'); block.classList.toggle('open'); block.classList.contains('open') ? openCustomBrands.add(brandName) : openCustomBrands.delete(brandName); }
+        function toggleSubCatAccordion(el, catId) { const card = el.closest('.sub-cat-card'); card.classList.toggle('open'); card.classList.contains('open') ? openCustomSubCats.add(String(catId)) : openCustomSubCats.delete(String(catId)); }
+
+        async function hapusMappingProduk(categoryId, buyerSkuCode, provider, btnEl) {
+            try {
+                const res = await fetch('/api/admin/unmap-category-product', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ category_id: categoryId, buyer_sku_code: buyerSkuCode, provider }) });
+                const result = await res.json();
+                if(result.status === 'success') loadCustomCategoriesFromDB(); else alert('Gagal melepas produk');
+            } catch(e) { alert('Error jaringan'); }
+        }
+
+        function resetForm() {
+            document.getElementById('providerSelect').value = 'digiflazz'; document.getElementById('sku').value = ''; document.getElementById('sku').readOnly = false; document.getElementById('nama').value = ''; document.getElementById('harga').value = ''; document.getElementById('statusSelect').value = '1'; document.getElementById('formTitle').innerHTML = '<i class="fa-solid fa-pen-to-square"></i> Tambah / Edit Produk Custom'; document.getElementById('btnReset').style.display = 'none';
+        }
+
+        async function simpanProduk() {
+            const providerVal = document.getElementById('providerSelect').value;
+            const skuVal = document.getElementById('sku').value.trim();
+            const namaVal = document.getElementById('nama').value.trim();
+            const hargaVal = parseInt(document.getElementById('harga').value) || 0;
+            const statusVal = document.getElementById('statusSelect').value;
+            if(!skuVal || !namaVal) return alert('SKU Kode dan Nama Produk wajib diisi!');
+            const body = { buyer_sku_code: skuVal, product_name: namaVal, brand: document.getElementById('brand').value, type: document.getElementById('typeSelect').value || 'Umum', price: hargaVal, jual: hargaVal, status: statusVal, provider: providerVal };
+            await fetch('/api/admin/products', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+            resetForm();
+            loadCustomCategoriesFromDB();
+        }
+
+        window.onload = () => { loadCustomCategoriesFromDB(); };
+    </script>
+</body>
+</html>
+

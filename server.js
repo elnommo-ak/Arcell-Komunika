@@ -154,7 +154,7 @@ async function kirimPushNotif(pesanTitle, pesanBody, targetId = null, isExternal
     }
 }
 
-// 🟢 PUSH NOTIFICATION HELPER - ADMIN (PERBAIKAN TOTAL)
+// 🟢 PUSH NOTIFICATION HELPER - ADMIN
 async function kirimPushNotifAdmin(pesanTitle, pesanBody, options = {}) {
     const ONESIGNAL_APP_ID = process.env.ONESIGNAL_APP_ID_ADMIN || process.env.ONESIGNAL_APP_ID || "";
     const ONESIGNAL_REST_KEY = process.env.ONESIGNAL_REST_KEY_ADMIN || process.env.ONESIGNAL_REST_KEY || "";
@@ -167,7 +167,6 @@ async function kirimPushNotifAdmin(pesanTitle, pesanBody, options = {}) {
     const targetUrl = options.url || process.env.BASE_URL_ADMIN || "/admin";
     const uniqueNotificationId = "notif_adm_" + Date.now() + "_" + Math.floor(Math.random() * 1000);
 
-    // Payload Utama (Gunakan External ID / Broadcast jika dikirim)
     const basePayload = {
         app_id: ONESIGNAL_APP_ID,
         headings: { "en": pesanTitle, "id": pesanTitle },
@@ -182,7 +181,6 @@ async function kirimPushNotifAdmin(pesanTitle, pesanBody, options = {}) {
     };
 
     try {
-        // Percobaan 1: Kirim Spesifik ke External ID Admin
         const payloadExternal = {
             ...basePayload,
             include_aliases: { external_id: ["admin_arcell"] },
@@ -200,7 +198,6 @@ async function kirimPushNotifAdmin(pesanTitle, pesanBody, options = {}) {
         console.warn("⚠️ External ID Admin tidak merespons, mengirim via Broadcast Subscribed Users...");
 
         try {
-            // Percobaan 2 (Fallback): Broadcast ke seluruh Aplikasi Admin yang Aktif
             const payloadBroadcast = {
                 ...basePayload,
                 included_segments: ["Subscribed Users"]
@@ -699,6 +696,15 @@ app.post('/api/okeconnect/checkout', async (req, res) => {
             const finalJual  = reqJual > 0 ? reqJual : (dbProd ? dbProd.jual_db : finalModal);
             const productName = nama_produk || (dbProd ? dbProd.nama_db : cleanSku);
 
+            // 🛡️ PROTEKSI ANTI-NOMBOK UNTUK OKECONNECT
+            if (finalModal >= finalJual) {
+                console.warn(`[ANTI-NOMBOK OKECONNECT] Dibatal: ${cleanSku} | Modal: Rp ${finalModal} >= Jual: Rp ${finalJual}`);
+                return res.status(400).json({
+                    status: 'failed',
+                    message: `Gagal: Ada kenaikan modal supplier (Modal: Rp ${finalModal.toLocaleString('id-ID')}, Jual: Rp ${finalJual.toLocaleString('id-ID')}). Silakan hubungi Admin.`
+                });
+            }
+
             db.get("SELECT * FROM members WHERE phone = ?", [userPhone], async (err, member) => {
                 if (err || !member) return res.status(404).json({ status: 'failed', message: 'Member tidak terdaftar!' });
                 if (member.balance < finalJual) return res.status(400).json({ status: 'failed', message: 'Saldo member tidak mencukupi!' });
@@ -719,7 +725,7 @@ app.post('/api/okeconnect/checkout', async (req, res) => {
                             return res.status(500).json({ status: 'failed', message: 'Gagal menyimpan transaksi ke database' });
                         }
 
-                        // 🔔 PUSH NOTIFIKASI KE ADMIN: Transaksi Okeconnect Baru Dibuat!
+                        // 🔔 PUSH NOTIFIKASI KE ADMIN
                         kirimPushNotifAdmin(
                             `📲 Transaksi Baru: ${memberName}`,
                             `${productName} (${cleanDest})\nRef ID: ${refId}`,
@@ -815,7 +821,6 @@ app.all(['/callback/okeconnect/event', '/api/okeconnect/callback', '/api/webhook
                 [refID, targetHp, targetHp, targetHp, data.produk || 'Produk OkeConnect', data.produk || 'Produk OkeConnect', normSt, sn !== '-' ? sn : '', message]
             );
 
-            // 🔔 NOTIFIKASI ADMIN UNTUK TRANSAKSI MASUK DARI EXTERNAL CALLBACK
             kirimPushNotifAdmin(
                 `📲 Transaksi Baru: ${data.username || targetHp}`,
                 `${data.produk || 'Produk OkeConnect'}\nRef ID: ${refID}`,
@@ -931,12 +936,27 @@ app.post('/api/digiflazz/price-list', async (req, res) => {
     }
 });
 
+// 🔄 SYNC OKECONNECT DENGAN AUTO-MARGIN ANTI-NOMBOK
 app.post('/api/admin/sync-okeconnect', async (req, res) => {
     try {
         const response = await axios.get(OKECONNECT_CONFIG.pricelistUrl, { timeout: 30000, headers: { 'User-Agent': 'Mozilla/5.0' } });
         const productsList = extractProducts(response.data);
 
         if (!productsList || productsList.length === 0) return res.status(400).json({ status: 'error', message: 'SKU kosong atau format salah.' });
+
+        // Ambil data harga lama dari SQLite untuk perbandingan
+        const existingProductsMap = new Map();
+        await new Promise((resolve) => {
+            db.all("SELECT buyer_sku_code, price, jual FROM products WHERE provider = 'okeconnect'", [], (err, rows) => {
+                if (!err && rows) {
+                    rows.forEach(r => existingProductsMap.set(r.buyer_sku_code, r));
+                }
+                resolve();
+            });
+        });
+
+        let updatedCount = 0;
+        let adjustedPriceCount = 0;
 
         await new Promise((resolve, reject) => {
             db.serialize(() => {
@@ -945,12 +965,26 @@ app.post('/api/admin/sync-okeconnect', async (req, res) => {
                     INSERT INTO products (buyer_sku_code, product_name, brand, type, category, sub_category, price, jual, status, provider)
                     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'okeconnect')
                     ON CONFLICT(buyer_sku_code) DO UPDATE SET
-                    brand = excluded.brand, type = excluded.type, category = excluded.category, sub_category = excluded.sub_category, price = excluded.price, provider = 'okeconnect'
+                    brand = excluded.brand, type = excluded.type, category = excluded.category, sub_category = excluded.sub_category, price = excluded.price, jual = excluded.jual, provider = 'okeconnect'
                 `);
 
                 productsList.forEach(item => {
-                    const hargaModal = item.harga || 0;
-                    stmt.run(String(item.sku).trim(), String(item.nama || '').trim(), String(item.brand || '').trim(), String(item.type || '').trim(), String(item.category || item.type || 'LAINNYA').trim().toUpperCase(), String(item.sub_category || item.brand || 'REGULER').trim(), hargaModal, hargaModal, String(item.status || '1'));
+                    const sku = String(item.sku).trim();
+                    const hargaModal = parseFloat(item.harga || 0);
+                    const existing = existingProductsMap.get(sku);
+
+                    let hargaJual = existing ? parseFloat(existing.jual || 0) : hargaModal;
+
+                    // 🛠️ LOGIKA AUTO-ADJUST MARGIN JIKA MODAL NAIK >= HARGA JUAL
+                    if (existing && hargaModal >= hargaJual) {
+                        hargaJual = hargaModal + 2000; // Beri margin otomatis Rp 2.000 jika nombok
+                        adjustedPriceCount++;
+                    } else if (!existing) {
+                        hargaJual = hargaModal + 2000; // Margin awal jika produk baru
+                    }
+
+                    stmt.run(sku, String(item.nama || '').trim(), String(item.brand || '').trim(), String(item.type || '').trim(), String(item.category || item.type || 'LAINNYA').trim().toUpperCase(), String(item.sub_category || item.brand || 'REGULER').trim(), hargaModal, hargaJual, String(item.status || '1'));
+                    updatedCount++;
                 });
 
                 stmt.finalize();
@@ -958,7 +992,12 @@ app.post('/api/admin/sync-okeconnect', async (req, res) => {
             });
         });
 
-        res.json({ status: 'success', message: `Berhasil sinkronisasi ${productsList.length} produk OkeConnect!`, total: productsList.length });
+        res.json({
+            status: 'success',
+            message: `Berhasil sinkronisasi ${updatedCount} produk OkeConnect! (${adjustedPriceCount} produk otomatis dinaikkan harganya agar tidak nombok).`,
+            total: updatedCount,
+            adjusted: adjustedPriceCount
+        });
     } catch (err) {
         res.status(500).json({ status: 'error', message: err.message });
     }
