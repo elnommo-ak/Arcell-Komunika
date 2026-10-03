@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Panel Admin - Arcell Komunika</title>
+    <title>Panel Admin - Arcell Komunika (OtoMaX Style)</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="manifest" href="/manifest-admin.json">
 
@@ -29,123 +29,122 @@
 
     <style>
         :root {
-            --bg-gradient: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 50%, #f1f5f9 100%);
-            --glass-base: rgba(255, 255, 255, 0.55);
-            --glass-card: rgba(255, 255, 255, 0.72);
-            --glass-card-hover: rgba(255, 255, 255, 0.88);
-            --glass-input: rgba(255, 255, 255, 0.85);
-            --glass-border: rgba(255, 255, 255, 0.95);
-            --glass-border-subtle: rgba(226, 232, 240, 0.6);
-            --shadow-soft: 0 8px 32px 0 rgba(148, 163, 184, 0.15);
-            --shadow-card: 0 4px 20px -2px rgba(100, 116, 139, 0.08), inset 0 1px 0 0 rgba(255, 255, 255, 0.9);
-            --shadow-button: 0 4px 12px rgba(148, 163, 184, 0.2), inset 0 1px 0 rgba(255, 255, 255, 1);
-            --text-main: #1e293b;
+            --otomax-bg: #f1f5f9;
+            --otomax-header: #1e293b;
+            --otomax-card-bg: #ffffff;
+            --otomax-border: #cbd5e1;
+            --text-main: #0f172a;
             --text-sub: #64748b;
-            --text-muted: #94a3b8;
-            --primary: #4f46e5;
-            --primary-hover: #4338ca;
-            --primary-light: rgba(79, 70, 229, 0.1);
-            --pink-accent: #db2777;
-            --badge-blue: #2563eb;
-            --success: #10b981;
-            --warning: #f59e0b;
-            --danger: #ef4444;
+            --primary: #1d4ed8;
+            --success: #16a34a;
+            --warning: #d97706;
+            --danger: #dc2626;
         }
 
         * { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; margin: 0; padding: 0; }
-        body { background: var(--bg-gradient); background-attachment: fixed; color: var(--text-main); padding-bottom: 40px; min-height: 100vh; position: relative; }
-        body::before { content: ''; position: fixed; top: -100px; left: -100px; width: 350px; height: 350px; background: rgba(199, 210, 254, 0.4); filter: blur(90px); border-radius: 50%; z-index: -1; }
-        body::after { content: ''; position: fixed; bottom: -50px; right: -50px; width: 400px; height: 400px; background: rgba(251, 207, 232, 0.35); filter: blur(100px); border-radius: 50%; z-index: -1; }
+        body { background-color: var(--otomax-bg); color: var(--text-main); padding-bottom: 30px; min-height: 100vh; }
 
-        .header { background: var(--glass-base); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); padding: 16px 20px; text-align: center; border-bottom: 1px solid var(--glass-border); box-shadow: 0 4px 15px rgba(148, 163, 184, 0.05); margin-bottom: 16px; position: sticky; top: 0; z-index: 100; display: flex; align-items: center; justify-content: center; }
-        .header h2 { font-size: 1.2rem; color: var(--text-main); font-weight: 800; letter-spacing: -0.3px; }
+        /* HEADER */
+        .header { background: var(--otomax-header); color: #ffffff; padding: 10px 12px; border-bottom: 2px solid #0284c7; position: sticky; top: 0; z-index: 100; display: flex; align-items: center; justify-content: center; }
+        .header h2 { font-size: 0.95rem; font-weight: 800; letter-spacing: 0.3px; color: #f8fafc; }
 
-        .menu-btn { position: absolute; left: 16px; background: transparent; border: none; box-shadow: none; font-size: 1.25rem; color: var(--text-main); cursor: pointer; padding: 6px 10px; border-radius: 10px; transition: background 0.2s; }
-        .menu-btn:hover { background: rgba(255, 255, 255, 0.6); }
+        .menu-btn { position: absolute; left: 10px; background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.2); font-size: 1rem; color: #ffffff; cursor: pointer; padding: 4px 8px; border-radius: 4px; }
 
-        .dropdown-menu { display: none; position: absolute; top: 55px; left: 16px; background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border: 1px solid var(--glass-border); border-radius: 16px; box-shadow: 0 10px 30px rgba(148, 163, 184, 0.25); width: 220px; z-index: 1000; overflow: hidden; flex-direction: column; padding: 6px 0; }
+        .dropdown-menu { display: none; position: absolute; top: 42px; left: 10px; background: #ffffff; border: 1px solid var(--otomax-border); border-radius: 4px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15); width: 220px; z-index: 1000; flex-direction: column; }
         .dropdown-menu.show { display: flex; }
-        .dropdown-item { padding: 10px 16px; color: var(--text-main); text-decoration: none; font-size: 0.82rem; font-weight: 700; display: flex; align-items: center; gap: 10px; transition: all 0.2s ease; cursor: pointer; }
-        .dropdown-item i { width: 18px; text-align: center; color: var(--primary); }
-        .dropdown-item:hover { background: var(--primary-light); color: var(--primary); }
-        .dropdown-divider { height: 1px; background: var(--glass-border-subtle); margin: 4px 0; }
+        .dropdown-item { padding: 8px 12px; color: var(--text-main); text-decoration: none; font-size: 0.78rem; font-weight: 700; display: flex; align-items: center; gap: 8px; border-bottom: 1px solid #f1f5f9; }
+        .dropdown-item i { width: 16px; text-align: center; color: var(--primary); }
+        .dropdown-item:hover { background: #e0e7ff; }
 
-        .container { max-width: 1000px; margin: 0 auto; padding: 0 12px; }
-        .glass-card { background: var(--glass-card); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border: 1px solid var(--glass-border); border-radius: 20px; padding: 16px; margin-bottom: 14px; box-shadow: var(--shadow-card); transition: all 0.25s ease; }
+        .container { max-width: 900px; margin: 8px auto 0 auto; padding: 0 8px; }
+        
+        /* CARD PANELS */
+        .glass-card { background: var(--otomax-card-bg); border: 1px solid var(--otomax-border); border-radius: 6px; padding: 10px; margin-bottom: 8px; }
 
-        .main-balance-card { text-align: center; background: linear-gradient(135deg, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.65)); padding: 18px; border: 1px solid var(--glass-border); box-shadow: 0 10px 25px -5px rgba(148, 163, 184, 0.12), inset 0 1px 0 rgba(255, 255, 255, 1); }
-        .main-balance-card .title { font-size: 0.78rem; color: var(--text-sub); font-weight: 800; letter-spacing: 0.6px; text-transform: uppercase; }
-        .main-balance-card .value { font-size: 1.8rem; font-weight: 900; color: var(--primary); margin-top: 4px; text-shadow: 0 2px 4px rgba(79, 70, 229, 0.1); }
+        .main-balance-card { text-align: center; background: #ffffff; padding: 10px; border: 1px solid var(--otomax-border); border-top: 3px solid var(--primary); border-radius: 6px; }
+        .main-balance-card .title { font-size: 0.7rem; color: var(--text-sub); font-weight: 800; text-transform: uppercase; }
+        .main-balance-card .value { font-size: 1.5rem; font-weight: 900; color: var(--primary); font-family: monospace; margin: 2px 0; }
 
-        .nav-tabs { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin-bottom: 14px; }
-        .tab-btn { background: var(--glass-base); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border: 1px solid var(--glass-border); padding: 10px 4px; border-radius: 14px; font-weight: 700; color: var(--text-sub); cursor: pointer; box-shadow: var(--shadow-button); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; transition: all 0.25s ease; font-size: 0.75rem; }
-        .tab-btn i { font-size: 1rem; }
-        .tab-btn.active { background: #ffffff; color: var(--primary); border-color: rgba(79, 70, 229, 0.4); box-shadow: 0 6px 20px rgba(79, 70, 229, 0.15), inset 0 0 0 1px rgba(79, 70, 229, 0.1); transform: translateY(-1px); }
+        /* TABS */
+        .nav-tabs { display: grid; grid-template-columns: repeat(2, 1fr); gap: 4px; margin-bottom: 8px; }
+        .tab-btn { background: #e2e8f0; border: 1px solid var(--otomax-border); padding: 7px; border-radius: 4px; font-weight: 800; color: var(--text-sub); cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; font-size: 0.75rem; text-transform: uppercase; }
+        .tab-btn.active { background: #1e293b; color: #ffffff; border-color: #0f172a; }
 
         .tab-content { display: none; }
         .tab-content.active { display: block; }
 
-        h3 { margin-bottom: 12px; color: var(--primary); display: flex; align-items: center; gap: 8px; font-size: 0.95rem; font-weight: 800; }
-        .form-grid-inline { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
-        .form-grid-inline input, .form-grid-inline select { flex: 1 1 130px; padding: 9px 12px; font-size: 0.8rem; border-radius: 12px; }
+        h3 { margin-bottom: 8px; color: #1e293b; display: flex; align-items: center; gap: 6px; font-size: 0.82rem; font-weight: 800; text-transform: uppercase; border-bottom: 1px solid #e2e8f0; padding-bottom: 4px; }
+        
+        .form-grid-inline { display: flex; flex-wrap: wrap; gap: 4px; align-items: center; }
+        .form-grid-inline input, .form-grid-inline select { flex: 1 1 110px; padding: 6px 8px; font-size: 0.75rem; }
 
-        input, select { padding: 10px 14px; border-radius: 12px; border: 1px solid var(--glass-border-subtle); outline: none; font-size: 0.82rem; font-weight: 600; background: var(--glass-input); color: var(--text-main); backdrop-filter: blur(8px); transition: all 0.2s ease; width: 100%; box-shadow: inset 0 2px 4px rgba(148, 163, 184, 0.05); }
-        input:focus, select:focus { background: #ffffff; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.12); }
+        input, select { padding: 6px 8px; border-radius: 4px; border: 1px solid var(--otomax-border); outline: none; font-size: 0.78rem; font-weight: 600; background: #ffffff; color: var(--text-main); width: 100%; }
+        input:focus, select:focus { border-color: var(--primary); }
 
-        button { background: #ffffff; color: var(--primary); border: 1px solid var(--glass-border); padding: 9px 16px; border-radius: 12px; cursor: pointer; font-weight: 800; font-size: 0.8rem; transition: all 0.2s ease; box-shadow: var(--shadow-button); display: inline-flex; align-items: center; justify-content: center; gap: 6px; }
-        button:hover { background: #f8fafc; color: var(--primary-hover); transform: translateY(-1px); }
-        button:active { transform: scale(0.97); }
+        button { background: #f8fafc; color: var(--text-main); border: 1px solid var(--otomax-border); padding: 5px 10px; border-radius: 4px; cursor: pointer; font-weight: 800; font-size: 0.72rem; display: inline-flex; align-items: center; justify-content: center; gap: 4px; text-transform: uppercase; }
+        button:hover { background: #e2e8f0; }
 
-        .btn-success { color: #059669; }
-        .btn-warning { color: #d97706; }
-        .btn-danger { color: #dc2626; }
-        .btn-info { color: #2563eb; }
-        .btn-sm { padding: 5px 10px; font-size: 0.72rem; border-radius: 9px; }
+        .btn-success { background: #16a34a; color: #ffffff; border-color: #15803d; }
+        .btn-warning { background: #d97706; color: #ffffff; border-color: #b45309; }
+        .btn-danger { background: #dc2626; color: #ffffff; border-color: #b91c1c; }
+        .btn-info { background: #2563eb; color: #ffffff; border-color: #1d4ed8; }
+        .btn-sm { padding: 3px 6px; font-size: 0.65rem; border-radius: 3px; }
 
-        .member-list-container { display: flex; flex-direction: column; gap: 8px; }
-        .member-card { background: rgba(255, 255, 255, 0.8); border-radius: 16px; border: 1px solid var(--glass-border); padding: 12px; box-shadow: var(--shadow-card); transition: all 0.2s ease; }
-        .member-header-row { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px dashed rgba(203, 213, 225, 0.8); padding-bottom: 8px; margin-bottom: 8px; }
-        .member-title-info { font-size: 0.84rem; font-weight: 800; color: var(--text-main); display: flex; align-items: center; gap: 6px; flex-wrap: wrap; cursor: pointer; }
-        .member-title-info span.hp { color: var(--primary); font-weight: 800; }
-        .member-title-info span.id { color: var(--text-sub); font-size: 0.72rem; font-weight: 600; }
+        /* MEMBER CARD CLEAN OTOMAX */
+        .member-list-container { display: flex; flex-direction: column; gap: 6px; }
+        .member-card { background: #ffffff; border-radius: 4px; border: 1px solid var(--otomax-border); padding: 8px; }
+        .member-header-row { display: flex; justify-content: space-between; align-items: center; background: #f8fafc; padding: 4px 6px; border-radius: 3px; border: 1px solid #e2e8f0; margin-bottom: 6px; }
+        .member-title-info { font-size: 0.78rem; font-weight: 800; color: var(--text-main); display: flex; align-items: center; gap: 6px; cursor: pointer; flex-wrap: wrap; }
+        .member-title-info span.hp { color: var(--primary); font-family: monospace; }
+        .member-title-info span.id { color: var(--text-sub); font-size: 0.68rem; font-weight: 700; background: #ffffff; padding: 1px 4px; border-radius: 3px; border: 1px solid #cbd5e1; }
 
-        .member-stats-grid { display: flex; gap: 6px; align-items: center; justify-content: space-between; margin-bottom: 8px; }
-        .stat-box { flex: 1; background: rgba(255, 255, 255, 0.65); border: 1px solid var(--glass-border); padding: 6px 8px; border-radius: 10px; text-align: center; display: flex; flex-direction: column; justify-content: center; box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8); }
-        .stat-label { font-size: 0.58rem; color: var(--text-sub); font-weight: 800; text-transform: uppercase; letter-spacing: 0.3px; }
-        .stat-val { font-size: 0.8rem; font-weight: 900; }
-        .stat-val.saldo { color: #059669; }
+        .member-stats-grid { display: flex; gap: 4px; align-items: center; margin-bottom: 6px; }
+        .stat-box { flex: 1; background: #ffffff; border: 1px solid var(--otomax-border); padding: 4px; border-radius: 3px; text-align: center; }
+        .stat-label { font-size: 0.55rem; color: var(--text-sub); font-weight: 800; text-transform: uppercase; }
+        .stat-val { font-size: 0.75rem; font-weight: 900; font-family: monospace; display: block; }
+        .stat-val.saldo { color: var(--success); }
         .stat-val.omset { color: var(--text-main); }
         .stat-val.profit { color: var(--primary); }
 
-        .btn-toggle-trx { background: rgba(255, 255, 255, 0.95); color: var(--text-main); border-radius: 10px; padding: 7px 12px; font-size: 0.72rem; font-weight: 800; cursor: pointer; display: flex; align-items: center; justify-content: space-between; width: 100%; border: 1px solid var(--glass-border); box-shadow: var(--shadow-button); }
-        .btn-toggle-trx .chevron-trx { transition: transform 0.2s ease; font-size: 0.68rem; color: var(--text-sub); }
+        .btn-toggle-trx { background: #f1f5f9; color: var(--text-main); border-radius: 3px; padding: 5px 8px; font-size: 0.7rem; font-weight: 800; cursor: pointer; display: flex; align-items: center; justify-content: space-between; width: 100%; border: 1px solid var(--otomax-border); }
         .member-card.open .btn-toggle-trx .chevron-trx { transform: rotate(180deg); }
 
-        .member-trx-dropdown { display: none; padding-top: 8px; flex-direction: column; gap: 6px; }
+        .member-trx-dropdown { display: none; padding-top: 6px; flex-direction: column; gap: 4px; }
         .member-card.open .member-trx-dropdown { display: flex; }
 
-        .date-folder-card { background: rgba(255, 255, 255, 0.9); border-radius: 10px; border: 1px solid var(--glass-border); margin-top: 2px; overflow: hidden; }
-        .date-folder-header { padding: 8px 10px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; font-size: 0.72rem; font-weight: 800; color: var(--text-main); }
-        .date-folder-body { display: none; padding: 0 8px 8px 8px; flex-direction: column; gap: 6px; }
+        .date-folder-card { background: #ffffff; border-radius: 3px; border: 1px solid var(--otomax-border); margin-top: 2px; }
+        .date-folder-header { padding: 5px 8px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; font-size: 0.7rem; font-weight: 800; background: #f8fafc; }
+        .date-folder-body { display: none; padding: 4px; flex-direction: column; gap: 4px; }
         .date-folder-card.open .date-folder-body { display: flex; }
         .date-folder-card.open .date-chevron { transform: rotate(180deg); }
-        .date-chevron { transition: transform 0.2s ease; font-size: 0.68rem; color: var(--text-sub); }
 
-        .sub-trx-card { background: rgba(255, 255, 255, 0.95); padding: 8px 10px; border-radius: 8px; border: 1px solid var(--glass-border-subtle); display: flex; flex-direction: column; gap: 4px; transition: all 0.2s ease; box-shadow: 0 2px 6px rgba(148, 163, 184, 0.05); }
+        /* TRANSACTION CARD CLEAN & SIMPLIFIED */
+        .sub-trx-card { background: #ffffff; padding: 6px 8px; border-radius: 3px; border: 1px solid var(--otomax-border); border-left: 4px solid #94a3b8; display: flex; flex-direction: column; gap: 4px; }
         .sub-trx-card.clickable { cursor: pointer; }
-        .sub-trx-card.clickable:hover { background: #ffffff; border-color: rgba(79, 70, 229, 0.3); }
+        .sub-trx-card.clickable:hover { background: #f8fafc; border-color: var(--primary); }
 
-        .sub-trx-header { display: flex; justify-content: space-between; font-size: 0.68rem; font-weight: 700; color: var(--text-sub); }
-        .sub-trx-body { display: flex; justify-content: space-between; align-items: flex-end; gap: 6px; }
-        .sub-trx-prod { font-size: 0.78rem; font-weight: 800; color: var(--text-main); }
-        .sub-trx-target { font-size: 0.7rem; color: var(--primary); font-weight: 700; }
-        .sub-trx-price { font-size: 0.78rem; font-weight: 900; color: #059669; }
-        .sub-trx-sn { font-size: 0.65rem; color: var(--text-sub); font-weight: 700; margin-top: 2px; word-break: break-all; }
+        .trx-top-bar { display: flex; justify-content: space-between; align-items: center; font-size: 0.65rem; color: var(--text-sub); border-bottom: 1px dashed #e2e8f0; padding-bottom: 2px; font-weight: 700; }
+        .trx-main-info { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; margin-top: 2px; }
+        .trx-left { flex: 1; }
+        .trx-right { text-align: right; white-space: nowrap; }
+
+        .trx-prod-title { font-size: 0.75rem; font-weight: 800; color: var(--text-main); line-height: 1.2; }
+        .trx-target-no { font-size: 0.7rem; font-weight: 800; color: var(--primary); font-family: monospace; margin-top: 1px; }
+        .trx-sn-box { font-size: 0.63rem; color: #334155; font-weight: 700; background: #f1f5f9; padding: 2px 4px; border-radius: 2px; margin-top: 3px; font-family: monospace; word-break: break-all; border: 1px solid #e2e8f0; }
+
+        .trx-price-sell { font-size: 0.75rem; font-weight: 900; color: var(--success); font-family: monospace; }
+        .trx-price-sub { font-size: 0.62rem; color: var(--text-sub); font-weight: 700; margin-top: 1px; }
+
+        .trx-actions { display: flex; justify-content: flex-end; align-items: center; gap: 3px; margin-top: 4px; border-top: 1px solid #f8fafc; padding-top: 3px; }
         
-        .sub-trx-status { font-size: 0.62rem; font-weight: 800; padding: 2px 6px; border-radius: 6px; text-transform: uppercase; }
-        .sub-trx-status.sukses { background: rgba(16, 185, 129, 0.12); color: #059669; border: 1px solid rgba(16, 185, 129, 0.2); }
-        .sub-trx-status.proses { background: rgba(245, 158, 11, 0.12); color: #d97706; border: 1px solid rgba(245, 158, 11, 0.2); }
-        .sub-trx-status.gagal { background: rgba(239, 68, 68, 0.12); color: #dc2626; border: 1px solid rgba(239, 68, 68, 0.2); }
+        .sub-trx-status { font-size: 0.58rem; font-weight: 800; padding: 1px 4px; border-radius: 2px; text-transform: uppercase; font-family: monospace; }
+        .sub-trx-status.sukses { background: #dcfce7; color: var(--success); border: 1px solid #bbf7d0; }
+        .sub-trx-status.proses { background: #fef3c7; color: var(--warning); border: 1px solid #fde68a; }
+        .sub-trx-status.gagal { background: #fee2e2; color: var(--danger); border: 1px solid #fca5a5; }
+
+        /* MODAL */
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.4); z-index: 9999; justify-content: center; align-items: center; }
+        .modal-box { width: 90%; max-width: 380px; padding: 12px; background: #ffffff; border: 1px solid var(--otomax-border); border-top: 3px solid var(--primary); border-radius: 4px; box-shadow: 0 4px 15px rgba(0,0,0,0.15); }
     </style>
 </head>
 <body>
@@ -154,7 +153,7 @@
         <button class="menu-btn" onclick="toggleDropdownMenu(event)" title="Menu Navigasi">
             <i class="fa-solid fa-bars"></i>
         </button>
-        <h2>⚙️ Panel Admin - Dashboard</h2>
+        <h2>⚙️ OTOMAX PANEL ADMIN - ARCELL</h2>
 
         <div class="dropdown-menu" id="dropdownMenu">
             <a href="#" class="dropdown-item" onclick="navTo('admin.html')">
@@ -185,74 +184,73 @@
 
     <div class="container">
         <div class="nav-tabs">
-            <button class="tab-btn active" onclick="switchTab('tab-saldo', event)"><i class="fa-solid fa-server"></i> Semua Transaksi</button>
+            <button class="tab-btn active" onclick="switchTab('tab-saldo', event)"><i class="fa-solid fa-server"></i> Transaksi</button>
             <button class="tab-btn" onclick="switchTab('tab-member', event)"><i class="fa-solid fa-users"></i> Member</button>
         </div>
 
-        <!-- TAB SALDO & RIWAYAT TRANSAKSI SEMUA MEMBER -->
+        <!-- TAB SALDO & TRANSAKSI -->
         <div id="tab-saldo" class="tab-content active">
             <div class="glass-card main-balance-card">
-                <div class="title"><i class="fa-solid fa-wallet"></i> Saldo Server Digiflazz</div>
+                <div class="title"><i class="fa-solid fa-wallet"></i> Saldo Digiflazz</div>
                 <div class="value" id="dispSaldoDigiflazz">Rp 0</div>
-                <div style="margin-top: 10px;">
-                    <button onclick="loadSaldoInfo()"><i class="fa-solid fa-rotate-right"></i> Refresh</button>
+                <div style="margin-top: 4px;">
+                    <button class="btn-sm" onclick="loadSaldoInfo()"><i class="fa-solid fa-rotate-right"></i> Refresh</button>
                 </div>
             </div>
 
-            <!-- CARD RIWAYAT TRANSAKSI SEMUA MEMBER -->
             <div class="glass-card">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; flex-wrap: wrap; gap: 6px;">
-                    <h3 style="margin:0;"><i class="fa-solid fa-receipt"></i> Riwayat Transaksi Semua Member</h3>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                    <h3 style="margin:0;"><i class="fa-solid fa-list-check"></i> Monitoring Transaksi</h3>
                     <button class="btn-sm" onclick="loadTransactions(true)"><i class="fa-solid fa-rotate-right"></i> Refresh</button>
                 </div>
-                <input type="text" id="searchAllTrx" placeholder="🔍 Cari Ref ID, No HP, Produk..." oninput="filterAllTransactions()" style="width: 100%; margin-bottom: 10px;">
-                <div id="allTrxContainer" style="display: flex; flex-direction: column; gap: 8px;">
-                    <div style="text-align:center; color: var(--text-sub); padding:15px; font-size:0.8rem;">Memuat riwayat transaksi...</div>
+                <input type="text" id="searchAllTrx" placeholder="🔍 Cari Ref ID, No HP, Produk..." oninput="filterAllTransactions()" style="width: 100%; margin-bottom: 6px;">
+                <div id="allTrxContainer" style="display: flex; flex-direction: column; gap: 4px;">
+                    <div style="text-align:center; color: var(--text-sub); padding:10px; font-size:0.75rem;">Memuat riwayat transaksi...</div>
                 </div>
             </div>
         </div>
 
         <!-- TAB MEMBER -->
         <div id="tab-member" class="tab-content">
-            <div class="glass-card" style="padding: 12px;">
+            <div class="glass-card" style="padding: 8px;">
                 <h3><i class="fa-solid fa-hand-holding-dollar"></i> Topup / Potong Saldo</h3>
                 <div class="form-grid-inline">
                     <input type="text" id="saldoNoHp" placeholder="No HP Member">
-                    <select id="saldoAksi" style="max-width: 140px;">
+                    <select id="saldoAksi" style="max-width: 110px;">
                         <option value="tambah">Tambah (+)</option>
                         <option value="potong">Potong (-)</option>
                     </select>
                     <input type="number" id="saldoJumlah" placeholder="Nominal (Rp)">
-                    <button onclick="eksekusiUbahSaldo()"><i class="fa-solid fa-check"></i> Eksekusi</button>
+                    <button onclick="eksekusiUbahSaldo()" class="btn-success"><i class="fa-solid fa-check"></i> Proses</button>
                 </div>
             </div>
 
             <div class="glass-card">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; flex-wrap: wrap; gap: 6px;">
-                    <h3 style="margin:0; font-size:0.88rem;">
-                        <i class="fa-solid fa-user-gear"></i> Member 
-                        Saldo: <span id="dispSaldoMember" style="color: #059669;">Rp 0</span> | 
-                        Profit: <span id="dispTotalProfitMember" style="color: #4f46e5;">Rp 0</span>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                    <h3 style="margin:0; font-size:0.78rem;">
+                        <i class="fa-solid fa-users"></i> Member | 
+                        Saldo: <span id="dispSaldoMember" style="color: var(--success);">Rp 0</span> | 
+                        Profit: <span id="dispTotalProfitMember" style="color: var(--primary);">Rp 0</span>
                     </h3>
                     <button class="btn-success btn-sm" onclick="bukaModalMember()"><i class="fa-solid fa-user-plus"></i> + Member</button>
                 </div>
-                <input type="text" id="searchMember" placeholder="🔍 Cari Nama / No HP Member..." oninput="filterMember()" style="width: 100%; margin-bottom: 10px;">
+                <input type="text" id="searchMember" placeholder="🔍 Cari Member..." oninput="filterMember()" style="width: 100%; margin-bottom: 6px;">
                 <div class="member-list-container" id="tabelMember">
-                    <div style="text-align:center; color: var(--text-sub); padding: 10px; font-size:0.8rem;">Memuat data member...</div>
+                    <div style="text-align:center; color: var(--text-sub); padding: 10px; font-size:0.75rem;">Memuat data member...</div>
                 </div>
             </div>
         </div>
     </div>
 
     <!-- MODAL MEMBER -->
-    <div id="modalMember" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(148, 163, 184, 0.25); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); z-index: 9999; justify-content: center; align-items: center;">
-        <div class="glass-card" style="width: 90%; max-width: 400px; padding: 22px; background: rgba(255, 255, 255, 0.95); box-shadow: 0 20px 40px rgba(0,0,0,0.12);">
-            <h3><i class="fa-solid fa-user-plus"></i> Tambah Member Baru</h3>
-            <div style="display: flex; flex-direction: column; gap: 10px; margin-top: 10px;">
+    <div id="modalMember" class="modal-overlay">
+        <div class="modal-box">
+            <h3><i class="fa-solid fa-user-plus"></i> Member Baru</h3>
+            <div style="display: flex; flex-direction: column; gap: 6px; margin-top: 6px;">
                 <input type="text" id="addNamaMember" placeholder="Nama Member">
-                <input type="tel" id="addPhoneMember" placeholder="Nomor HP (misal: 08123456789)">
-                <input type="number" id="addSaldoMember" placeholder="Saldo Awal (Rp)" value="0">
-                <div style="display: flex; gap: 8px; margin-top: 6px;">
+                <input type="tel" id="addPhoneMember" placeholder="Nomor HP">
+                <input type="number" id="addSaldoMember" placeholder="Saldo Awal" value="0">
+                <div style="display: flex; gap: 4px; margin-top: 4px;">
                     <button onclick="simpanMemberBaru()" class="btn-success" style="flex: 1;"><i class="fa-solid fa-check"></i> Simpan</button>
                     <button onclick="tutupModalMember()" class="btn-danger"><i class="fa-solid fa-xmark"></i> Batal</button>
                 </div>
@@ -260,17 +258,17 @@
         </div>
     </div>
 
-    <!-- MODAL EDIT STATUS TRANSAKSI & SN / RESI -->
-    <div id="modalEditStatusTrx" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(148, 163, 184, 0.25); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); z-index: 9999; justify-content: center; align-items: center;">
-        <div class="glass-card" style="width: 90%; max-width: 420px; padding: 22px; background: rgba(255, 255, 255, 0.95); box-shadow: 0 20px 40px rgba(0,0,0,0.12);">
-            <h3><i class="fa-solid fa-list-check"></i> Edit Status & SN Transaksi</h3>
-            <div style="display: flex; flex-direction: column; gap: 10px; margin-top: 10px;">
+    <!-- MODAL EDIT STATUS -->
+    <div id="modalEditStatusTrx" class="modal-overlay">
+        <div class="modal-box">
+            <h3><i class="fa-solid fa-list-check"></i> Edit Status & SN</h3>
+            <div style="display: flex; flex-direction: column; gap: 6px; margin-top: 6px;">
                 <div>
-                    <label style="font-size: 0.7rem; font-weight: 800; color: var(--text-sub);">REF ID TRANSAKSI</label>
-                    <input type="text" id="editTrxRefId" readonly style="background: rgba(241,245,249,0.8); color: var(--text-sub);">
+                    <label style="font-size: 0.63rem; font-weight: 800; color: var(--text-sub);">REF ID</label>
+                    <input type="text" id="editTrxRefId" readonly style="background: #f1f5f9; font-family: monospace;">
                 </div>
                 <div>
-                    <label style="font-size: 0.7rem; font-weight: 800; color: var(--text-sub);">STATUS PESANAN</label>
+                    <label style="font-size: 0.63rem; font-weight: 800; color: var(--text-sub);">STATUS</label>
                     <select id="editTrxStatusSelect">
                         <option value="PROSES">PROSES</option>
                         <option value="SUKSES">SUKSES</option>
@@ -278,11 +276,11 @@
                     </select>
                 </div>
                 <div>
-                    <label style="font-size: 0.7rem; font-weight: 800; color: var(--text-sub);">SN / NOMOR RESI / CATATAN</label>
-                    <input type="text" id="editTrxSn" placeholder="Masukkan Serial Number atau No Resi">
+                    <label style="font-size: 0.63rem; font-weight: 800; color: var(--text-sub);">SN / RESI</label>
+                    <input type="text" id="editTrxSn" placeholder="Serial Number / Resi">
                 </div>
-                <div style="display: flex; gap: 8px; margin-top: 6px;">
-                    <button onclick="simpanEditStatusTrx()" class="btn-success" style="flex: 1;"><i class="fa-solid fa-check"></i> Simpan Status</button>
+                <div style="display: flex; gap: 4px; margin-top: 4px;">
+                    <button onclick="simpanEditStatusTrx()" class="btn-success" style="flex: 1;"><i class="fa-solid fa-check"></i> Simpan</button>
                     <button onclick="tutupModalEditStatusTrx()" class="btn-danger"><i class="fa-solid fa-xmark"></i> Batal</button>
                 </div>
             </div>
@@ -299,7 +297,7 @@
         function navTo(url) { window.location.replace(url); }
         function toggleDropdownMenu(evt) { evt.stopPropagation(); document.getElementById('dropdownMenu').classList.toggle('show'); }
         window.addEventListener('click', () => { const d = document.getElementById('dropdownMenu'); if (d && d.classList.contains('show')) d.classList.remove('show'); });
-        function prosesKeluar() { if (confirm("Yakin ingin keluar dari Panel Admin?")) window.location.replace("login.html"); }
+        function prosesKeluar() { if (confirm("Yakin ingin keluar?")) window.location.replace("login.html"); }
 
         function keDetailMember(identifier, isRefId = false) {
             if (!identifier || identifier === '-') return;
@@ -361,7 +359,7 @@
         function renderAllTransactions(list) {
             const container = document.getElementById('allTrxContainer');
             if (!list || list.length === 0) {
-                container.innerHTML = `<div style="text-align:center; color: var(--text-sub); padding:15px; font-size:0.8rem;">Belum ada riwayat transaksi.</div>`;
+                container.innerHTML = `<div style="text-align:center; color: var(--text-sub); padding:10px; font-size:0.75rem;">Belum ada riwayat transaksi.</div>`;
                 return;
             }
 
@@ -386,33 +384,39 @@
                 const statusStr = String(t.status || 'PROSES').toUpperCase();
 
                 let statusClass = 'proses';
-                if (['SUKSES', 'SUCCESS', 'SELESAI', 'LUNAS', '1'].includes(statusStr)) statusClass = 'sukses';
-                else if (['GAGAL', 'FAILED', 'BATAL', '0'].includes(statusStr)) statusClass = 'gagal';
+                let borderLeftColor = '#f59e0b';
+                if (['SUKSES', 'SUCCESS', 'SELESAI', 'LUNAS', '1'].includes(statusStr)) {
+                    statusClass = 'sukses';
+                    borderLeftColor = '#16a34a';
+                } else if (['GAGAL', 'FAILED', 'BATAL', '0'].includes(statusStr)) {
+                    statusClass = 'gagal';
+                    borderLeftColor = '#dc2626';
+                }
 
                 const safeSn = snVal.replace(/'/g, "\\'").replace(/"/g, "&quot;");
 
                 html += `
-                    <div class="sub-trx-card clickable" onclick="keDetailMember('${refId}', true)">
-                        <div class="sub-trx-header">
-                            <span><b>#${refId}</b> | Member: <b style="color:var(--primary);">${userName}</b> (${userHp})</span>
+                    <div class="sub-trx-card clickable" style="border-left-color: ${borderLeftColor};" onclick="keDetailMember('${refId}', true)">
+                        <div class="trx-top-bar">
+                            <span><b>#${refId}</b> (${userName})</span>
                             <span><i class="fa-regular fa-clock"></i> ${parsedTime.full}</span>
                         </div>
-                        <div class="sub-trx-body">
-                            <div>
-                                <div class="sub-trx-prod">${produk}</div>
-                                <div class="sub-trx-target"><i class="fa-solid fa-mobile-screen-button"></i> ${targetNo}</div>
-                                ${snVal ? `<div class="sub-trx-sn"><i class="fa-solid fa-key"></i> SN/Resi: <b>${snVal}</b></div>` : ''}
+                        <div class="trx-main-info">
+                            <div class="trx-left">
+                                <div class="trx-prod-title">${produk}</div>
+                                <div class="trx-target-no"><i class="fa-solid fa-mobile-screen-button"></i> ${targetNo}</div>
+                                ${snVal ? `<div class="trx-sn-box">SN: ${snVal}</div>` : ''}
                             </div>
-                            <div style="text-align:right;">
-                                <div class="sub-trx-price">Jual: Rp ${hJual.toLocaleString('id-ID')}</div>
-                                <div style="font-size: 0.68rem; color: var(--text-sub); font-weight:700;">Modal: Rp ${hModal.toLocaleString('id-ID')} | <b style="color:${laba >= 0 ? '#4f46e5' : '#ef4444'};">Untung: Rp ${laba.toLocaleString('id-ID')}</b></div>
-                                <div style="display:flex; gap:4px; justify-content:flex-end; margin-top:3px; flex-wrap:wrap;" onclick="event.stopPropagation();">
-                                    <span class="sub-trx-status ${statusClass}">${statusStr}</span>
-                                    <button class="btn-sm btn-info" style="padding:1px 5px; font-size:0.62rem;" onclick="keDetailMember('${refId}', true)"><i class="fa-solid fa-receipt"></i> Detail</button>
-                                    <button class="btn-sm btn-success" style="padding:1px 5px; font-size:0.62rem;" onclick="bukaModalEditStatusTrx('${refId}', '${statusStr}', '${safeSn}')"><i class="fa-solid fa-list-check"></i> Status</button>
-                                    <button class="btn-sm btn-warning" style="padding:1px 5px; font-size:0.62rem;" onclick="editHargaTransaksi('${refId}', ${hModal}, ${hJual})"><i class="fa-solid fa-pen"></i> Harga</button>
-                                </div>
+                            <div class="trx-right">
+                                <div class="trx-price-sell">Rp ${hJual.toLocaleString('id-ID')}</div>
+                                <div class="trx-price-sub">Modal: ${hModal.toLocaleString('id-ID')} | Laba: <b style="color:${laba >= 0 ? 'var(--primary)' : 'var(--danger)'};">${laba.toLocaleString('id-ID')}</b></div>
                             </div>
+                        </div>
+                        <div class="trx-actions" onclick="event.stopPropagation();">
+                            <span class="sub-trx-status ${statusClass}">${statusStr}</span>
+                            <button class="btn-sm btn-info" onclick="keDetailMember('${refId}', true)"><i class="fa-solid fa-receipt"></i> Detail</button>
+                            <button class="btn-sm btn-success" onclick="bukaModalEditStatusTrx('${refId}', '${statusStr}', '${safeSn}')"><i class="fa-solid fa-list-check"></i> Status</button>
+                            <button class="btn-sm btn-warning" onclick="editHargaTransaksi('${refId}', ${hModal}, ${hJual})"><i class="fa-solid fa-pen"></i> Harga</button>
                         </div>
                     </div>
                 `;
@@ -436,7 +440,7 @@
 
         function renderTabelMember(list) {
             const el = document.getElementById('tabelMember');
-            if (!list || list.length === 0) { el.innerHTML = `<div style="text-align:center; color: var(--text-sub); padding:10px; font-size:0.8rem;">Belum ada member.</div>`; return; }
+            if (!list || list.length === 0) { el.innerHTML = `<div style="text-align:center; color: var(--text-sub); padding:10px; font-size:0.75rem;">Belum ada member.</div>`; return; }
 
             const now = new Date();
             const todayStr = `${String(now.getDate()).padStart(2, '0')}/${String(now.getMonth() + 1).padStart(2, '0')}/${now.getFullYear()}`;
@@ -484,24 +488,22 @@
                     <div class="member-card ${isMemberOpen ? 'open' : ''}" id="member-card-${noHp}">
                         <div class="member-header-row">
                             <div class="member-title-info" onclick="keDetailMember('${noHp}')">
-                                <span><i class="fa-solid fa-user-circle" style="color:var(--primary);"></i> <b>${m.name || m.nama || '-'}</b></span>
-                                <span>—</span>
+                                <span><i class="fa-solid fa-user" style="color:var(--primary);"></i> <b>${m.name || m.nama || '-'}</b></span>
                                 <span class="hp">${noHp}</span>
-                                <span>—</span>
-                                <span class="id">ID: ${idMem}</span>
+                                <span class="id">${idMem}</span>
                             </div>
-                            <div style="display:flex; gap:4px;">
-                                <button class="btn-sm btn-info" style="padding:2px 6px; font-size:0.62rem;" onclick="keDetailMember('${noHp}')"><i class="fa-solid fa-arrow-right-to-bracket"></i> Detail</button>
-                                <button class="btn-sm btn-danger" style="padding:2px 6px; font-size:0.62rem;" onclick="hapusMember('${noHp}')"><i class="fa-solid fa-trash"></i></button>
+                            <div style="display:flex; gap:2px;">
+                                <button class="btn-sm btn-info" onclick="keDetailMember('${noHp}')"><i class="fa-solid fa-arrow-right-to-bracket"></i></button>
+                                <button class="btn-sm btn-danger" onclick="hapusMember('${noHp}')"><i class="fa-solid fa-trash"></i></button>
                             </div>
                         </div>
                         <div class="member-stats-grid">
-                            <div class="stat-box" style="flex:0.8; cursor:pointer;" onclick="pilihUbahSaldo('${noHp}')">
-                                <span class="stat-label"><i class="fa-solid fa-wallet" style="color:#059669;"></i> Saldo</span>
+                            <div class="stat-box" style="cursor:pointer;" onclick="pilihUbahSaldo('${noHp}')">
+                                <span class="stat-label">Saldo</span>
                                 <span class="stat-val saldo">Rp ${saldo.toLocaleString('id-ID')}</span>
                             </div>
                             <div class="stat-box">
-                                <span class="stat-label">Hari Ini</span>
+                                <span class="stat-label">Omset Hari Ini</span>
                                 <span class="stat-val omset">Rp ${totalHarian.toLocaleString('id-ID')}</span>
                             </div>
                             <div class="stat-box">
@@ -511,7 +513,7 @@
                         </div>
                         <div>
                             <button class="btn-toggle-trx" onclick="toggleMemberTrx('${noHp}')">
-                                <span><i class="fa-solid fa-chart-pie"></i> Rekap Sukses: <b>${memberTrxSukses.length} Trx</b> (Total Profit: Rp ${profitMemberIni.toLocaleString('id-ID')})</span>
+                                <span><i class="fa-solid fa-chart-line"></i> Rekap: <b>${memberTrxSukses.length} Trx</b> (Profit: Rp ${profitMemberIni.toLocaleString('id-ID')})</span>
                                 <i class="fa-solid fa-chevron-down chevron-trx"></i>
                             </button>
                         </div>
@@ -519,7 +521,7 @@
                 `;
 
                 if (sortedDateGroups.length === 0) {
-                    html += `<div style="font-size:0.72rem; color:var(--text-sub); padding:6px 0; text-align:center;">Belum ada rekap transaksi sukses.</div>`;
+                    html += `<div style="font-size:0.68rem; color:var(--text-sub); padding:4px 0; text-align:center;">Belum ada rekap transaksi sukses.</div>`;
                 } else {
                     sortedDateGroups.forEach(group => {
                         const trxsInDate = group.trxs;
@@ -531,7 +533,7 @@
                             <div class="date-folder-card ${isDateOpen ? 'open' : ''}" data-key="${dateFolderKey}">
                                 <div class="date-folder-header" onclick="toggleDateFolder(this, '${dateFolderKey}')">
                                     <span><i class="fa-regular fa-calendar-check" style="color:var(--primary); margin-right:4px;"></i> ${group.dateStr} (${trxsInDate.length})</span>
-                                    <div><span style="color:#059669; font-weight:900; margin-right:4px;">Rp ${totalDateNominal.toLocaleString('id-ID')}</span><i class="fa-solid fa-chevron-down date-chevron"></i></div>
+                                    <div><span style="color:var(--success); font-weight:900; margin-right:4px; font-family:monospace;">Rp ${totalDateNominal.toLocaleString('id-ID')}</span><i class="fa-solid fa-chevron-down date-chevron"></i></div>
                                 </div>
                                 <div class="date-folder-body">
                         `;
@@ -544,23 +546,26 @@
                             const safeSn = snVal.replace(/'/g, "\\'").replace(/"/g, "&quot;");
 
                             html += `
-                                <div class="sub-trx-card clickable" onclick="keDetailMember('${refId}', true)">
-                                    <div class="sub-trx-header"><span>#${refId}</span><span><i class="fa-regular fa-clock"></i> ${t.parsedTime.full}</span></div>
-                                    <div class="sub-trx-body">
-                                        <div>
-                                            <div class="sub-trx-prod">${t.produk || t.product_name || 'Produk PPOB'}</div>
-                                            <div class="sub-trx-target"><i class="fa-solid fa-mobile-screen-button"></i> ${t.no_tujuan || t.customer_no || '-'}</div>
-                                            ${snVal ? `<div class="sub-trx-sn"><i class="fa-solid fa-key"></i> SN/Resi: <b>${snVal}</b></div>` : ''}
+                                <div class="sub-trx-card clickable" style="border-left-color: #16a34a;" onclick="keDetailMember('${refId}', true)">
+                                    <div class="trx-top-bar">
+                                        <span>#${refId}</span>
+                                        <span><i class="fa-regular fa-clock"></i> ${t.parsedTime.full}</span>
+                                    </div>
+                                    <div class="trx-main-info">
+                                        <div class="trx-left">
+                                            <div class="trx-prod-title">${t.produk || t.product_name || 'Produk PPOB'}</div>
+                                            <div class="trx-target-no"><i class="fa-solid fa-mobile-screen-button"></i> ${t.no_tujuan || t.customer_no || '-'}</div>
+                                            ${snVal ? `<div class="trx-sn-box">SN: ${snVal}</div>` : ''}
                                         </div>
-                                        <div style="text-align:right;">
-                                            <div class="sub-trx-price">Jual: Rp ${hJ.toLocaleString('id-ID')}</div>
-                                            <div style="font-size:0.65rem; color:var(--text-sub);">Modal: Rp ${hM.toLocaleString('id-ID')} | <b style="color:${untung >= 0 ? '#4f46e5' : '#ef4444'};">Untung: Rp ${untung.toLocaleString('id-ID')}</b></div>
-                                            <div style="display:flex; gap:4px; justify-content:flex-end; margin-top:3px; flex-wrap:wrap;" onclick="event.stopPropagation();">
-                                                <span class="sub-trx-status sukses">SUKSES</span>
-                                                <button class="btn-sm btn-success" style="padding:1px 5px; font-size:0.62rem;" onclick="bukaModalEditStatusTrx('${refId}', 'SUKSES', '${safeSn}')"><i class="fa-solid fa-list-check"></i> Status</button>
-                                                <button class="btn-sm btn-warning" style="padding:1px 5px; font-size:0.62rem;" onclick="editHargaTransaksi('${refId}', ${hM}, ${hJ})"><i class="fa-solid fa-pen"></i> Harga</button>
-                                            </div>
+                                        <div class="trx-right">
+                                            <div class="trx-price-sell">Rp ${hJ.toLocaleString('id-ID')}</div>
+                                            <div class="trx-price-sub">Modal: ${hM.toLocaleString('id-ID')} | Laba: <b style="color:${untung >= 0 ? 'var(--primary)' : 'var(--danger)'};">${untung.toLocaleString('id-ID')}</b></div>
                                         </div>
+                                    </div>
+                                    <div class="trx-actions" onclick="event.stopPropagation();">
+                                        <span class="sub-trx-status sukses">SUKSES</span>
+                                        <button class="btn-sm btn-success" onclick="bukaModalEditStatusTrx('${refId}', 'SUKSES', '${safeSn}')"><i class="fa-solid fa-list-check"></i> Status</button>
+                                        <button class="btn-sm btn-warning" onclick="editHargaTransaksi('${refId}', ${hM}, ${hJ})"><i class="fa-solid fa-pen"></i> Harga</button>
                                     </div>
                                 </div>`;
                         });
@@ -630,13 +635,14 @@
             } catch (err) { alert('Error jaringan'); }
         }
 
-        async function hapusMember(phoneOrId) {
+        function hapusMember(phoneOrId) {
             if (!confirm(`Hapus member ${phoneOrId}?`)) return;
-            try {
-                const res = await fetch('/api/admin/members/' + phoneOrId, { method: 'DELETE' });
-                const result = await res.json();
+            fetch('/api/admin/members/' + phoneOrId, { method: 'DELETE' })
+            .then(res => res.json())
+            .then(result => {
                 if (result.status === 'success') loadMembers(); else alert('Gagal: ' + result.message);
-            } catch (err) { alert('Error jaringan'); }
+            })
+            .catch(() => alert('Error jaringan'));
         }
 
         function pilihUbahSaldo(phone) { document.getElementById('saldoNoHp').value = phone; window.scrollTo({ top: 0, behavior: 'smooth' }); }

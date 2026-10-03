@@ -3,87 +3,99 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kategori Custom Produk - Arcell Komunika</title>
+    <title>Kategori Custom Produk - Arcell Komunika (OtoMaX Style)</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="manifest" href="/manifest-admin.json">
+
     <style>
         :root {
-            --bg-gradient: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 50%, #f1f5f9 100%);
-            --glass-base: rgba(255, 255, 255, 0.55);
-            --glass-card: rgba(255, 255, 255, 0.72);
-            --glass-input: rgba(255, 255, 255, 0.85);
-            --glass-border: rgba(255, 255, 255, 0.95);
-            --glass-border-subtle: rgba(226, 232, 240, 0.6);
-            --shadow-card: 0 4px 20px -2px rgba(100, 116, 139, 0.08), inset 0 1px 0 0 rgba(255, 255, 255, 0.9);
-            --shadow-button: 0 4px 12px rgba(148, 163, 184, 0.2), inset 0 1px 0 rgba(255, 255, 255, 1);
-            --text-main: #1e293b;
+            --otomax-bg: #f1f5f9;
+            --otomax-header: #1e293b;
+            --otomax-card-bg: #ffffff;
+            --otomax-border: #cbd5e1;
+            --text-main: #0f172a;
             --text-sub: #64748b;
-            --primary: #4f46e5;
+            --primary: #1d4ed8;
             --pink-accent: #db2777;
-            --success: #10b981;
-            --warning: #f59e0b;
-            --danger: #ef4444;
+            --success: #16a34a;
+            --warning: #d97706;
+            --danger: #dc2626;
         }
 
         * { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; margin: 0; padding: 0; }
-        body { background: var(--bg-gradient); background-attachment: fixed; color: var(--text-main); padding-bottom: 40px; min-height: 100vh; }
-        .header { background: var(--glass-base); backdrop-filter: blur(16px); padding: 16px 20px; text-align: center; border-bottom: 1px solid var(--glass-border); margin-bottom: 16px; position: sticky; top: 0; z-index: 100; display: flex; align-items: center; justify-content: center; }
-        .header h2 { font-size: 1.2rem; color: var(--text-main); font-weight: 800; }
+        body { background-color: var(--otomax-bg); color: var(--text-main); padding-bottom: 30px; min-height: 100vh; }
 
-        .menu-btn { position: absolute; left: 16px; background: transparent; border: none; font-size: 1.25rem; color: var(--text-main); cursor: pointer; padding: 6px 10px; }
-        .dropdown-menu { display: none; position: absolute; top: 55px; left: 16px; background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(20px); border: 1px solid var(--glass-border); border-radius: 16px; box-shadow: 0 10px 30px rgba(148, 163, 184, 0.25); width: 220px; z-index: 1000; flex-direction: column; padding: 6px 0; }
+        /* HEADER */
+        .header { background: var(--otomax-header); color: #ffffff; padding: 10px 12px; border-bottom: 2px solid #0284c7; position: sticky; top: 0; z-index: 100; display: flex; align-items: center; justify-content: center; }
+        .header h2 { font-size: 0.95rem; font-weight: 800; letter-spacing: 0.3px; color: #f8fafc; }
+
+        .menu-btn { position: absolute; left: 10px; background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.2); font-size: 1rem; color: #ffffff; cursor: pointer; padding: 4px 8px; border-radius: 4px; }
+
+        .dropdown-menu { display: none; position: absolute; top: 42px; left: 10px; background: #ffffff; border: 1px solid var(--otomax-border); border-radius: 4px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15); width: 220px; z-index: 1000; flex-direction: column; }
         .dropdown-menu.show { display: flex; }
-        .dropdown-item { padding: 10px 16px; color: var(--text-main); text-decoration: none; font-size: 0.82rem; font-weight: 700; display: flex; align-items: center; gap: 10px; cursor: pointer; }
-        .dropdown-item i { width: 18px; text-align: center; color: var(--primary); }
-        .dropdown-divider { height: 1px; background: var(--glass-border-subtle); margin: 4px 0; }
+        .dropdown-item { padding: 8px 12px; color: var(--text-main); text-decoration: none; font-size: 0.78rem; font-weight: 700; display: flex; align-items: center; gap: 8px; border-bottom: 1px solid #f1f5f9; }
+        .dropdown-item i { width: 16px; text-align: center; color: var(--primary); }
+        .dropdown-item:hover { background: #e0e7ff; }
 
-        .container { max-width: 1000px; margin: 0 auto; padding: 0 12px; }
-        .glass-card { background: var(--glass-card); backdrop-filter: blur(20px); border: 1px solid var(--glass-border); border-radius: 20px; padding: 16px; margin-bottom: 14px; box-shadow: var(--shadow-card); }
+        .container { max-width: 900px; margin: 8px auto 0 auto; padding: 0 8px; }
+        
+        /* CARD PANELS */
+        .glass-card { background: var(--otomax-card-bg); border: 1px solid var(--otomax-border); border-radius: 6px; padding: 10px; margin-bottom: 8px; }
 
-        h3 { margin-bottom: 12px; color: var(--primary); display: flex; align-items: center; gap: 8px; font-size: 0.95rem; font-weight: 800; }
-        .form-grid-inline { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
-        .form-grid-inline input, .form-grid-inline select { flex: 1 1 130px; padding: 9px 12px; font-size: 0.8rem; border-radius: 12px; }
+        h3 { margin-bottom: 8px; color: #1e293b; display: flex; align-items: center; gap: 6px; font-size: 0.82rem; font-weight: 800; text-transform: uppercase; border-bottom: 1px solid #e2e8f0; padding-bottom: 4px; }
+        
+        .form-grid-inline { display: flex; flex-wrap: wrap; gap: 4px; align-items: center; }
+        .form-grid-inline input, .form-grid-inline select { flex: 1 1 110px; padding: 6px 8px; font-size: 0.75rem; }
 
-        input, select { padding: 10px 14px; border-radius: 12px; border: 1px solid var(--glass-border-subtle); outline: none; font-size: 0.82rem; font-weight: 600; background: var(--glass-input); color: var(--text-main); width: 100%; }
-        button { background: #ffffff; color: var(--primary); border: 1px solid var(--glass-border); padding: 9px 16px; border-radius: 12px; cursor: pointer; font-weight: 800; font-size: 0.8rem; box-shadow: var(--shadow-button); display: inline-flex; align-items: center; justify-content: center; gap: 6px; }
+        input, select { padding: 6px 8px; border-radius: 4px; border: 1px solid var(--otomax-border); outline: none; font-size: 0.78rem; font-weight: 600; background: #ffffff; color: var(--text-main); width: 100%; }
+        input:focus, select:focus { border-color: var(--primary); }
 
-        .btn-success { color: #059669; }
-        .btn-warning { color: #d97706; }
-        .btn-danger { color: #dc2626; }
-        .btn-sm { padding: 5px 10px; font-size: 0.72rem; border-radius: 9px; }
+        button { background: #f8fafc; color: var(--text-main); border: 1px solid var(--otomax-border); padding: 5px 10px; border-radius: 4px; cursor: pointer; font-weight: 800; font-size: 0.72rem; display: inline-flex; align-items: center; justify-content: center; gap: 4px; text-transform: uppercase; }
+        button:hover { background: #e2e8f0; }
 
-        .brand-block { background: rgba(255, 255, 255, 0.8); border-radius: 14px; border: 1px solid var(--glass-border); margin-bottom: 8px; overflow: hidden; }
-        .brand-header { padding: 10px 12px; background: rgba(255, 255, 255, 0.9); display: flex; align-items: center; justify-content: space-between; cursor: pointer; font-weight: 800; font-size: 0.85rem; color: var(--primary); }
-        .brand-body { display: none; padding: 8px; flex-direction: column; gap: 6px; }
+        .btn-success { background: #16a34a; color: #ffffff; border-color: #15803d; }
+        .btn-warning { background: #d97706; color: #ffffff; border-color: #b45309; }
+        .btn-danger { background: #dc2626; color: #ffffff; border-color: #b91c1c; }
+        .btn-info { background: #2563eb; color: #ffffff; border-color: #1d4ed8; }
+        .btn-sm { padding: 3px 6px; font-size: 0.65rem; border-radius: 3px; }
+
+        /* ACCORDIONS & LISTS (OTOMAX COMPACT) */
+        .brand-block { background: #ffffff; border-radius: 4px; border: 1px solid var(--otomax-border); margin-bottom: 6px; overflow: hidden; }
+        .brand-header { padding: 6px 8px; background: #f8fafc; display: flex; align-items: center; justify-content: space-between; cursor: pointer; font-weight: 800; font-size: 0.75rem; color: var(--primary); border-bottom: 1px solid #e2e8f0; }
+        .brand-body { display: none; padding: 4px; flex-direction: column; gap: 4px; }
         .brand-block.open .brand-body { display: flex; }
         .brand-block.open .brand-chevron { transform: rotate(180deg); }
-        .brand-chevron { transition: transform 0.2s; font-size: 0.75rem; color: var(--text-sub); }
+        .brand-chevron { transition: transform 0.2s; font-size: 0.68rem; color: var(--text-sub); }
 
-        .sub-cat-card { background: rgba(255, 255, 255, 0.9); border-radius: 12px; border: 1px solid var(--glass-border); overflow: hidden; }
-        .sub-cat-header { padding: 9px 12px; display: flex; align-items: center; justify-content: space-between; cursor: pointer; font-weight: 800; font-size: 0.8rem; color: var(--pink-accent); }
-        .sub-cat-body { display: none; padding: 8px; flex-direction: column; gap: 6px; background: rgba(248, 250, 252, 0.6); }
+        .sub-cat-card { background: #ffffff; border-radius: 3px; border: 1px solid var(--otomax-border); overflow: hidden; }
+        .sub-cat-header { padding: 5px 8px; display: flex; align-items: center; justify-content: space-between; cursor: pointer; font-weight: 800; font-size: 0.72rem; color: var(--pink-accent); background: #ffffff; }
+        .sub-cat-body { display: none; padding: 4px; flex-direction: column; gap: 4px; background: #f8fafc; border-top: 1px dashed #e2e8f0; }
         .sub-cat-card.open .sub-cat-body { display: flex; }
         .sub-cat-card.open .sub-chevron { transform: rotate(180deg); }
-        .sub-chevron { transition: transform 0.2s; font-size: 0.7rem; color: var(--text-sub); }
+        .sub-chevron { transition: transform 0.2s; font-size: 0.65rem; color: var(--text-sub); }
 
-        .prod-item { background: rgba(255, 255, 255, 0.95); padding: 9px 12px; border-radius: 12px; border: 1px solid var(--glass-border-subtle); display: flex; align-items: center; justify-content: space-between; }
-        .prod-name { font-size: 0.8rem; font-weight: 800; color: var(--text-main); display: inline-flex; align-items: center; gap: 4px; }
-        .prod-sku { font-size: 0.68rem; color: var(--text-sub); font-weight: 700; margin-top: 1px; }
+        .prod-item { background: #ffffff; padding: 6px 8px; border-radius: 3px; border: 1px solid var(--otomax-border); display: flex; align-items: center; justify-content: space-between; gap: 6px; }
+        .prod-name { font-size: 0.75rem; font-weight: 800; color: var(--text-main); display: inline-flex; align-items: center; gap: 4px; }
+        .prod-sku { font-size: 0.63rem; color: var(--text-sub); font-weight: 700; margin-top: 1px; font-family: monospace; }
         .prod-sku span { color: var(--primary); }
-        .prod-price { font-size: 0.82rem; font-weight: 900; color: #059669; }
-        .prod-modal { font-size: 0.68rem; color: var(--text-sub); font-weight: 700; }
+        .prod-price { font-size: 0.75rem; font-weight: 900; color: var(--success); font-family: monospace; }
+        .prod-modal { font-size: 0.63rem; color: var(--text-sub); font-weight: 700; }
 
-        .dot-indicator { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-left: 4px; vertical-align: middle; flex-shrink: 0; }
+        .dot-indicator { display: inline-block; width: 6px; height: 6px; border-radius: 50%; vertical-align: middle; flex-shrink: 0; }
         .dot-digiflazz { background-color: #6366f1; }
         .dot-okeconnect { background-color: #10b981; }
-        .badge-count { background: rgba(224, 231, 255, 0.8); color: var(--primary); padding: 3px 9px; border-radius: 12px; font-size: 0.68rem; font-weight: 800; }
+        .badge-count { background: #e0e7ff; color: var(--primary); padding: 1px 6px; border-radius: 3px; font-size: 0.63rem; font-weight: 800; font-family: monospace; }
+
+        /* MODAL */
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.4); z-index: 9999; justify-content: center; align-items: center; }
+        .modal-box { width: 90%; max-width: 380px; padding: 12px; background: #ffffff; border: 1px solid var(--otomax-border); border-top: 3px solid var(--primary); border-radius: 4px; box-shadow: 0 4px 15px rgba(0,0,0,0.15); }
     </style>
 </head>
 <body>
 
     <div class="header">
         <button class="menu-btn" onclick="toggleDropdownMenu(event)"><i class="fa-solid fa-bars"></i></button>
-        <h2>📁 Kategori Custom Produk</h2>
+        <h2>📁 KATEGORI CUSTOM PRODUK</h2>
 
         <div class="dropdown-menu" id="dropdownMenu">
             <a href="#" class="dropdown-item" onclick="navTo('admin.html')">
@@ -112,8 +124,8 @@
         <!-- FORM EDIT / TAMBAH PRODUK CUSTOM UNIFIED -->
         <div class="glass-card">
             <h3 id="formTitle"><i class="fa-solid fa-pen-to-square"></i> Tambah / Edit Produk Custom</h3>
-            <div class="form-grid-inline" style="margin-bottom: 8px;">
-                <select id="providerSelect" style="max-width: 140px;">
+            <div class="form-grid-inline" style="margin-bottom: 6px;">
+                <select id="providerSelect" style="max-width: 120px;">
                     <option value="digiflazz">Digiflazz</option>
                     <option value="okeconnect">OkeConnect</option>
                 </select>
@@ -132,25 +144,25 @@
                     <option value="GAMING">GAMING</option>
                 </select>
                 <select id="typeSelect">
-                    <option value="Umum">-- Pilih Kategori --</option>
+                    <option value="Umum">-- Kategori --</option>
                 </select>
                 <input type="number" id="harga" placeholder="Harga Jual (Rp)">
-                <select id="statusSelect" style="max-width: 150px;">
+                <select id="statusSelect" style="max-width: 130px;">
                     <option value="1">Tampilkan (Aktif)</option>
                     <option value="0">Sembunyikan</option>
                 </select>
             </div>
-            <div style="display: flex; gap: 8px;">
-                <button onclick="simpanProduk()" style="flex: 1;"><i class="fa-solid fa-floppy-disk"></i> Simpan Produk</button>
+            <div style="display: flex; gap: 4px;">
+                <button onclick="simpanProduk()" class="btn-success" style="flex: 1;"><i class="fa-solid fa-floppy-disk"></i> Simpan Produk</button>
                 <button onclick="resetForm()" class="btn-warning" id="btnReset" style="display: none;">Batal</button>
             </div>
         </div>
 
         <div class="glass-card">
             <h3><i class="fa-solid fa-folder-plus"></i> Buat Kategori Baru</h3>
-            <div style="display: flex; gap: 6px; flex-wrap: wrap;">
-                <input type="text" id="namaKategoriBaru" placeholder="Nama Kategori (misal: Freedom Sensasi)" style="flex: 2; min-width: 150px;">
-                <select id="brandKategoriBaru" style="flex: 1; min-width: 110px;">
+            <div style="display: flex; gap: 4px; flex-wrap: wrap;">
+                <input type="text" id="namaKategoriBaru" placeholder="Nama Kategori (misal: Freedom Sensasi)" style="flex: 2; min-width: 140px;">
+                <select id="brandKategoriBaru" style="flex: 1; min-width: 100px;">
                     <option value="INDOSAT">INDOSAT</option>
                     <option value="TELKOMSEL">TELKOMSEL</option>
                     <option value="XL">XL</option>
@@ -162,44 +174,44 @@
                     <option value="PLN">TAGIHAN PLN</option>
                     <option value="GAMING">GAMING</option>
                 </select>
-                <button onclick="tambahKategoriBaru()"><i class="fa-solid fa-plus"></i> Buat</button>
+                <button onclick="tambahKategoriBaru()" class="btn-info"><i class="fa-solid fa-plus"></i> Buat</button>
             </div>
         </div>
 
         <div class="glass-card">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
                 <h3 style="margin: 0;"><i class="fa-solid fa-folder-tree"></i> Custom Produk</h3>
                 <button onclick="loadCustomCategoriesFromDB()" class="btn-sm"><i class="fa-solid fa-rotate-right"></i> Refresh DB</button>
             </div>
-            <div style="font-size: 0.72rem; color: var(--text-sub); margin-bottom: 12px; background: rgba(255,255,255,0.6); padding: 8px 12px; border-radius: 10px; border: 1px solid var(--glass-border-subtle);">
-                💡 <b>Harga Modal</b> akan terus otomatis diperbarui saat Sync. Gunakan panah (▲ / ▼) untuk mengubah posisi urutan sub-kategori secara manual.
+            <div style="font-size: 0.68rem; color: var(--text-sub); margin-bottom: 8px; background: #f8fafc; padding: 6px 8px; border-radius: 4px; border: 1px solid #e2e8f0;">
+                💡 <b>Harga Modal</b> akan otomatis diperbarui saat Sync. Gunakan panah (▲ / ▼) untuk menggeser posisi kategori.
             </div>
             <div id="customCategoryContainer">
-                <div style="text-align: center; color: var(--text-sub); padding: 15px; font-size: 0.8rem;">Memuat daftar kategori kustom...</div>
+                <div style="text-align: center; color: var(--text-sub); padding: 10px; font-size: 0.75rem;">Memuat daftar kategori kustom...</div>
             </div>
         </div>
     </div>
 
     <!-- MODAL EDIT PRODUK CUSTOM -->
-    <div id="modalEditCustomProduct" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(148, 163, 184, 0.25); backdrop-filter: blur(12px); z-index: 9999; justify-content: center; align-items: center;">
-        <div class="glass-card" style="width: 90%; max-width: 420px; padding: 22px; background: rgba(255, 255, 255, 0.95);">
+    <div id="modalEditCustomProduct" class="modal-overlay">
+        <div class="modal-box">
             <h3><i class="fa-solid fa-pen-to-square"></i> Edit Produk Custom</h3>
-            <div style="display: flex; flex-direction: column; gap: 10px; margin-top: 10px;">
+            <div style="display: flex; flex-direction: column; gap: 6px; margin-top: 6px;">
                 <input type="hidden" id="editCustomCatId">
                 <input type="hidden" id="editCustomProvider">
                 <div>
-                    <label style="font-size: 0.7rem; font-weight: 800; color: var(--text-sub);">SKU / KODE PRODUK</label>
-                    <input type="text" id="editCustomSku" readonly style="background: rgba(241,245,249,0.8); color: var(--text-sub);">
+                    <label style="font-size: 0.63rem; font-weight: 800; color: var(--text-sub);">SKU / KODE PRODUK</label>
+                    <input type="text" id="editCustomSku" readonly style="background: #f1f5f9; font-family: monospace;">
                 </div>
                 <div>
-                    <label style="font-size: 0.7rem; font-weight: 800; color: var(--text-sub);">NAMA PRODUK CUSTOM</label>
+                    <label style="font-size: 0.63rem; font-weight: 800; color: var(--text-sub);">NAMA PRODUK CUSTOM</label>
                     <input type="text" id="editCustomName" placeholder="Nama Produk">
                 </div>
                 <div>
-                    <label style="font-size: 0.7rem; font-weight: 800; color: var(--text-sub);">HARGA JUAL CUSTOM (RP)</label>
+                    <label style="font-size: 0.63rem; font-weight: 800; color: var(--text-sub);">HARGA JUAL CUSTOM (RP)</label>
                     <input type="number" id="editCustomPrice" placeholder="Harga Jual (Rp)">
                 </div>
-                <div style="display: flex; gap: 8px; margin-top: 6px;">
+                <div style="display: flex; gap: 4px; margin-top: 4px;">
                     <button onclick="simpanEditCustomProduct()" class="btn-success" style="flex: 1;"><i class="fa-solid fa-check"></i> Simpan</button>
                     <button onclick="tutupModalEditCustomProduct()" class="btn-danger"><i class="fa-solid fa-xmark"></i> Batal</button>
                 </div>
@@ -249,7 +261,7 @@
         function renderCustomCategoriesTab() {
             const container = document.getElementById('customCategoryContainer');
             if(!dbCustomCategories || dbCustomCategories.length === 0) {
-                container.innerHTML = `<div style="text-align:center; color: var(--text-sub); padding: 15px; font-size:0.8rem;">Belum ada kategori custom. Buat di atas!</div>`;
+                container.innerHTML = `<div style="text-align:center; color: var(--text-sub); padding: 10px; font-size:0.75rem;">Belum ada kategori custom. Buat di atas!</div>`;
                 return;
             }
 
@@ -268,8 +280,8 @@
                 html += `
                     <div class="brand-block ${isBrandOpen ? 'open' : ''}" data-brand="${brand}">
                         <div class="brand-header" onclick="toggleBrandAccordion(this, '${brand}')">
-                            <span><i class="fa-solid fa-mobile-screen" style="margin-right: 6px;"></i>${brand}</span>
-                            <div style="display: flex; align-items: center; gap: 8px;">
+                            <span><i class="fa-solid fa-mobile-screen" style="margin-right: 4px;"></i>${brand}</span>
+                            <div style="display: flex; align-items: center; gap: 6px;">
                                 <span class="badge-count">${categories.length} Kategori</span>
                                 <i class="fa-solid fa-chevron-down brand-chevron"></i>
                             </div>
@@ -285,16 +297,16 @@
                     html += `
                         <div class="sub-cat-card ${isSubCatOpen ? 'open' : ''}" id="sub-cat-${cat.id}">
                             <div class="sub-cat-header" onclick="toggleSubCatAccordion(this, '${cat.id}')">
-                                <div style="display: flex; align-items: center; gap: 6px;">
-                                    <div style="display: flex; flex-direction: column; gap: 2px;" onclick="event.stopPropagation();">
-                                        <button class="btn-sm" style="padding: 1px 4px; font-size: 0.55rem;" onclick="geserPosisiKategori('${brand}', ${cat.id}, 'up')"><i class="fa-solid fa-chevron-up"></i></button>
-                                        <button class="btn-sm" style="padding: 1px 4px; font-size: 0.55rem;" onclick="geserPosisiKategori('${brand}', ${cat.id}, 'down')"><i class="fa-solid fa-chevron-down"></i></button>
+                                <div style="display: flex; align-items: center; gap: 4px;">
+                                    <div style="display: flex; flex-direction: column; gap: 1px;" onclick="event.stopPropagation();">
+                                        <button class="btn-sm" style="padding: 1px 3px; font-size: 0.5rem;" onclick="geserPosisiKategori('${brand}', ${cat.id}, 'up')"><i class="fa-solid fa-chevron-up"></i></button>
+                                        <button class="btn-sm" style="padding: 1px 3px; font-size: 0.5rem;" onclick="geserPosisiKategori('${brand}', ${cat.id}, 'down')"><i class="fa-solid fa-chevron-down"></i></button>
                                     </div>
-                                    <span><i class="fa-solid fa-folder-open" style="margin-right: 4px;"></i> ${cat.name}</span>
+                                    <span><i class="fa-solid fa-folder-open" style="margin-right: 2px;"></i> ${cat.name}</span>
                                 </div>
-                                <div style="display: flex; align-items: center; gap: 6px;">
-                                    <span class="badge-count" style="font-size: 0.62rem;">${prods.length} Item</span>
-                                    <button class="btn-sm btn-danger" style="padding: 2px 6px;" onclick="event.stopPropagation(); hapusCustomCategoryDB(${cat.id}, '${cat.name}')"><i class="fa-solid fa-trash"></i></button>
+                                <div style="display: flex; align-items: center; gap: 4px;">
+                                    <span class="badge-count">${prods.length} Item</span>
+                                    <button class="btn-sm btn-danger" style="padding: 1px 4px;" onclick="event.stopPropagation(); hapusCustomCategoryDB(${cat.id}, '${cat.name}')"><i class="fa-solid fa-trash"></i></button>
                                     <i class="fa-solid fa-chevron-down sub-chevron"></i>
                                 </div>
                             </div>
@@ -302,7 +314,7 @@
                     `;
 
                     if(prods.length === 0) {
-                        html += `<div style="font-size:0.72rem; color:var(--text-sub); padding:6px; text-align:center;">Belum ada produk dipetakan ke folder ini.</div>`;
+                        html += `<div style="font-size:0.68rem; color:var(--text-sub); padding:4px; text-align:center;">Belum ada produk dipetakan ke folder ini.</div>`;
                     } else {
                         prods.forEach(p => {
                             const dotClass = p.provider === 'okeconnect' ? 'dot-okeconnect' : 'dot-digiflazz';
@@ -318,9 +330,9 @@
                                     <div style="text-align:right;">
                                         <div class="prod-price">Rp ${hargaJual.toLocaleString('id-ID')}</div>
                                         <div class="prod-modal">Modal: Rp ${hargaModal.toLocaleString('id-ID')}</div>
-                                        <div style="display:flex; gap:4px; justify-content:flex-end; margin-top:2px;">
-                                            <button class="btn-sm btn-warning" style="padding:2px 6px;" onclick="bukaModalEditCustomProduct(${cat.id}, '${p.buyer_sku_code}', '${p.product_name.replace(/'/g, "\\'")}', ${hargaJual}, '${p.provider}')"><i class="fa-solid fa-pen"></i> Edit</button>
-                                            <button class="btn-sm btn-danger" style="padding:2px 6px;" onclick="hapusMappingProduk(${cat.id}, '${p.buyer_sku_code}', '${p.provider}', this)"><i class="fa-solid fa-xmark"></i> Lepas</button>
+                                        <div style="display:flex; gap:2px; justify-content:flex-end; margin-top:2px;">
+                                            <button class="btn-sm btn-warning" style="padding:1px 4px;" onclick="bukaModalEditCustomProduct(${cat.id}, '${p.buyer_sku_code}', '${p.product_name.replace(/'/g, "\\'")}', ${hargaJual}, '${p.provider}')"><i class="fa-solid fa-pen"></i> Edit</button>
+                                            <button class="btn-sm btn-danger" style="padding:1px 4px;" onclick="hapusMappingProduk(${cat.id}, '${p.buyer_sku_code}', '${p.provider}', this)"><i class="fa-solid fa-xmark"></i> Lepas</button>
                                         </div>
                                     </div>
                                 </div>

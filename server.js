@@ -323,6 +323,9 @@ function initTables() {
 }
 
 function initScheduler() {
+    // =========================================================================
+    // 1. SCHEDULER TRANSAKSI TERJADWAL (Jalan Setiap Menit)
+    // =========================================================================
     cron.schedule('* * * * *', () => {
         const localNowStr = getWibDateTimeString();
 
@@ -365,9 +368,33 @@ function initScheduler() {
             }
         );
     });
-    console.log('⏰ Scheduler Transaksi Terjadwal Aktif');
-}
 
+// =========================================================================
+// 2. SCHEDULER SYNC PRODUK & HARGA AUTOMATIS (Jalan Setiap 15 Menit)
+// =========================================================================
+    cron.schedule('*/15 * * * *', async () => {
+        const waktuSync = getWibDateTimeString();
+        console.log(`🔄 [CRON SYNC] Mengakses API Sync Otomatis Produk (Digiflazz & Okeconnect): ${waktuSync}`);
+
+        // A. Sync Otomatis Digiflazz
+        try {
+            await axios.post(`http://127.0.0.1:${PORT}/api/digiflazz/price-list`, {}, { timeout: 45000 });
+            console.log(`✅ [CRON SYNC] Sync Digiflazz Berhasil`);
+        } catch (errDigi) {
+            console.error(`❌ [CRON SYNC] Sync Digiflazz Gagal:`, errDigi.message);
+        }
+
+        // B. Sync Otomatis Okeconnect
+        try {
+            const resOkec = await axios.post(`http://127.0.0.1:${PORT}/api/admin/sync-okeconnect`, {}, { timeout: 45000 });
+            console.log(`✅ [CRON SYNC] Sync Okeconnect Berhasil (${resOkec.data?.adjusted || 0} harga disesuaikan)`);
+        } catch (errOkec) {
+            console.error(`❌ [CRON SYNC] Sync Okeconnect Gagal:`, errOkec.message);
+        }
+    });
+
+    console.log('⏰ Scheduler Active: Transaksi Terjadwal (1 m) & Auto-Sync Harga (15 m)');
+}
 // =========================================================================
 // 5. ROUTE VIEW / PAGE SERVING
 // =========================================================================
@@ -701,7 +728,7 @@ app.post('/api/okeconnect/checkout', async (req, res) => {
                 console.warn(`[ANTI-NOMBOK OKECONNECT] Dibatal: ${cleanSku} | Modal: Rp ${finalModal} >= Jual: Rp ${finalJual}`);
                 return res.status(400).json({
                     status: 'failed',
-                    message: `Gagal: Ada kenaikan modal supplier (Modal: Rp ${finalModal.toLocaleString('id-ID')}, Jual: Rp ${finalJual.toLocaleString('id-ID')}). Silakan hubungi Admin.`
+                    message: `Gagal: Ada kenaikan harga supplier. Silakan hubungi Admin.`
                 });
             }
 
@@ -936,7 +963,7 @@ app.post('/api/digiflazz/price-list', async (req, res) => {
     }
 });
 
-// 🔄 SYNC OKECONNECT DENGAN AUTO-MARGIN ANTI-NOMBOK
+// 🔄 SYNC OKECONNECT DENGAN AUTO-MARGIN 
 app.post('/api/admin/sync-okeconnect', async (req, res) => {
     try {
         const response = await axios.get(OKECONNECT_CONFIG.pricelistUrl, { timeout: 30000, headers: { 'User-Agent': 'Mozilla/5.0' } });
@@ -977,10 +1004,10 @@ app.post('/api/admin/sync-okeconnect', async (req, res) => {
 
                     // 🛠️ LOGIKA AUTO-ADJUST MARGIN JIKA MODAL NAIK >= HARGA JUAL
                     if (existing && hargaModal >= hargaJual) {
-                        hargaJual = hargaModal + 2000; // Beri margin otomatis Rp 2.000 jika nombok
+                        hargaJual = hargaModal + 0; // Beri margin otomatis Rp 2.000 jika nombok
                         adjustedPriceCount++;
                     } else if (!existing) {
-                        hargaJual = hargaModal + 2000; // Margin awal jika produk baru
+                        hargaJual = hargaModal + 0; // Margin awal jika produk baru
                     }
 
                     stmt.run(sku, String(item.nama || '').trim(), String(item.brand || '').trim(), String(item.type || '').trim(), String(item.category || item.type || 'LAINNYA').trim().toUpperCase(), String(item.sub_category || item.brand || 'REGULER').trim(), hargaModal, hargaJual, String(item.status || '1'));
