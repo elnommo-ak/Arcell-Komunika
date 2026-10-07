@@ -64,7 +64,6 @@
       padding: 6px 6px 6px 14px;
       display: flex;
       align-items: center;
-      /* Soft Neumorphic Inset Shadow */
       box-shadow: inset 4px 4px 8px var(--shadow-dark), 
                   inset -4px -4px 8px var(--shadow-light);
       transition: all 0.25s ease;
@@ -543,7 +542,7 @@
 </head>
 <body>
 
-  <!-- Input Area Sticky Sesuai Desain Neumorphism Soft White -->
+  <!-- Input Area Sticky -->
   <div class="card-wrapper">
     <div class="input-pill-container">
       <div class="input-icon-left">
@@ -588,7 +587,7 @@
       </div>
     </div>
 
-    <!-- Kontainer Produk dengan Neumorphism Outer Card -->
+    <!-- Kontainer Produk -->
     <div class="product-inset-wrapper">
       <div class="product-list" id="productList"></div>
     </div>
@@ -598,7 +597,6 @@
   <div class="modal-overlay" id="modalOverlay" onclick="closeBottomSheet()"></div>
 
   <div class="checkout-page" id="checkoutSheet">
-    <!-- Handle Area yang dapat di-drag/swipe -->
     <div class="drag-zone" id="dragZone">
       <div class="bottom-sheet-handle"></div>
     </div>
@@ -611,7 +609,6 @@
     </div>
 
     <div class="checkout-content" id="sheetContent">
-      <!-- Card Detail Produk -->
       <div class="simple-card">
         <div class="simple-card-header">
           <i class="bi bi-box-seam me-2" style="color: var(--accent-blue);"></i>Detail Produk
@@ -621,7 +618,6 @@
         </div>
       </div>
 
-      <!-- Kolom Saldo Minimalis -->
       <div class="simple-card">
         <div class="simple-card-header">
           <i class="bi bi-wallet2 me-2" style="color: var(--accent-blue);"></i>Metode Pembayaran
@@ -641,20 +637,16 @@
     </div>
 
     <div class="sticky-info-bar">
-      <i class="bi bi-info-circle me-1" style="color: var(--accent-blue);"></i> Periksa kembali No. Meter / ID Pelanggan sebelum konfirmasi
+      <i class="bi bi-info-circle me-1" style="color: var(--accent-blue);"></i> Periksa kembali No. Meter / ID Pelanggan sebelum transaksi
     </div>
 
-    <!-- Footer: Total Belanja & Slide Bar -->
     <div class="checkout-footer">
       <div class="d-flex align-items-center gap-2" style="display: flex; align-items: center; gap: 10px;">
-        
-        <!-- Total Belanja Sebelah Kiri -->
         <div style="min-width: 95px;" class="d-flex flex-column justify-content-center">
           <span style="font-size: 9px; color: var(--text-muted); font-weight:600; line-height: 1;">Total Belanja</span>
           <span style="font-size: 13.5px; font-weight: 700; color: var(--accent-blue); margin-top: 2px;" id="totalBayarText">Rp 0</span>
         </div>
 
-        <!-- Slide to Pay Bar -->
         <div class="slide-pay-container" style="flex: 1;" id="slidePayContainer">
           <div class="slide-pay-text" id="slidePayText">
             <span>Geser Untuk Membayar</span> <i class="bi bi-chevrons-right ms-1" style="color:var(--accent-pink);"></i>
@@ -663,7 +655,6 @@
             <i class="bi bi-arrow-right-short" style="font-size: 20px;"></i>
           </div>
         </div>
-
       </div>
     </div>
   </div>
@@ -685,9 +676,9 @@
     let selectedProduct = null;
     let isTransactionLocked = false;
 
-    // Otomatis Muat Produk Token PLN Saat Halaman Selesai Di-load
+    // Direct Load saat Halaman Dibuka Tanpa Perlu Ketik Nomor
     document.addEventListener("DOMContentLoaded", function() {
-      loadPLNProducts();
+      loadPLNProductsFromDatabase();
     });
 
     function showLoading(text) {
@@ -697,66 +688,27 @@
       emptyText.innerHTML = text;
     }
 
-    // 🔹 PANGGIL API DIGIFLAZZ KHUSUS TOKEN PLN
-    async function loadPLNProducts() {
-      showLoading("Mencari daftar nominal <b>Token PLN</b>...");
+    // 🔹 MENYESUAIKAN API DENGAN BACKEND DATABASE SQLITE (`/api/user/products-by-prefix?brand=PLN`)
+    async function loadPLNProductsFromDatabase() {
+      showLoading("Memuat produk Token PLN dari Database...");
 
       try {
-        const response = await fetch('/api/digiflazz/price-list', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ brand: "PLN" })
-        });
-        
+        const response = await fetch('/api/user/products-by-prefix?brand=PLN');
         const res = await response.json();
 
-        if (res.status === 'success' && res.data && res.data.length > 0) {
-          
-          // Filter Produk Khusus PLN Prepaid / Token PLN
-          const plnProducts = res.data.filter(p => {
-            if (!p.buyer_product_status || !p.seller_product_status) return false;
-            
-            const categoryLower = (p.category || "").toLowerCase();
-            const brandLower = (p.brand || "").toLowerCase();
-            const nameLower = (p.product_name || "").toLowerCase();
-
-            // Memastikan Hanya Token PLN (Bukan Tagihan Pascapayar / Taglis)
-            const isPLN = categoryLower.includes("pln") || brandLower.includes("pln") || nameLower.includes("pln");
-            const isPasca = nameLower.includes("pasca") || nameLower.includes("tagihan");
-
-            return isPLN && !isPasca;
-          });
-
-          if (plnProducts.length === 0) {
-            stateIcon.className = "fa-solid fa-box-open";
-            emptyText.innerText = "Produk Token PLN sedang tidak tersedia.";
-            return;
-          }
-
-          // Kelompokkan Produk ke Sub-Tab (Misal: Token PLN Promo, Token PLN Reguler)
-          groupedProducts = {};
-          plnProducts.forEach(prod => {
-            let tabGroup = "Token PLN";
-            const nameLower = prod.product_name.toLowerCase();
-            if (nameLower.includes("promo")) {
-              tabGroup = "PLN Promo";
-            }
-
-            if (!groupedProducts[tabGroup]) groupedProducts[tabGroup] = [];
-            groupedProducts[tabGroup].push(prod);
-          });
-
+        if (res.status === 'success' && res.data && Object.keys(res.data).length > 0) {
+          groupedProducts = res.data;
           const tabKeys = Object.keys(groupedProducts);
-          renderTabs(tabKeys);
 
+          renderTabs(tabKeys);
         } else {
-          stateIcon.className = "fa-solid fa-triangle-exclamation";
-          emptyText.innerText = "Gagal memuat produk dari server.";
+          stateIcon.className = "fa-solid fa-box-open";
+          emptyText.innerText = "Produk PLN belum dimapping pada Database Admin.";
         }
       } catch (err) {
         console.error(err);
         stateIcon.className = "fa-solid fa-triangle-exclamation";
-        emptyText.innerText = "Gagal terhubung ke server backend VPS.";
+        emptyText.innerText = "Gagal terhubung ke database server.";
       }
     }
 
@@ -793,8 +745,8 @@
       var sortedProducts = [...currentRawProducts];
 
       sortedProducts.sort(function(a, b) {
-        var hargaA = parseFloat(a.price || 0);
-        var hargaB = parseFloat(b.price || 0);
+        var hargaA = parseFloat(a.jual || a.price || 0);
+        var hargaB = parseFloat(b.jual || b.price || 0);
         return sortValue === 'asc' ? hargaA - hargaB : hargaB - hargaA;
       });
 
@@ -804,7 +756,8 @@
     function renderProdukCards(produkList) {
       var html = "";
       produkList.forEach(function(prod, index) {
-        var hargaFormatted = formatRupiah(prod.price || 0);
+        var hargaJual = parseFloat(prod.jual || prod.price || 0);
+        var hargaFormatted = formatRupiah(hargaJual);
         
         html += `
           <div class="product-card" onclick="openBottomSheetByIndex(${index})">
@@ -829,15 +782,16 @@
       if (!prod) return;
 
       var nomorTujuan = inputPhone.value.replace(/[^0-9]/g, '');
-      if(nomorTujuan.length < 6) {
-        alert('Silakan masukkan ID Pelanggan / No. Meter PLN yang valid terlebih dahulu.');
+      if (nomorTujuan.length < 6) {
+        alert('Silakan masukkan ID Pelanggan / No. Meter PLN yang valid terlebih dahulu pada kolom atas.');
         inputPhone.focus();
         return;
       }
 
       selectedProduct = prod;
 
-      var deskripsiText = prod.desc || "Token Listrik Prabayar PLN";
+      var hargaJual = parseFloat(prod.jual || prod.price || 0);
+      var providerName = (prod._provider || 'digiflazz').toUpperCase();
 
       var detailHtml = `
         <div class="d-flex justify-content-between align-items-center item-row-divider" style="display:flex; justify-content:space-between; margin-bottom:6px;">
@@ -854,13 +808,12 @@
         </div>
         <div class="d-flex justify-content-between align-items-center" style="display:flex; justify-content:space-between;">
           <span class="ukuran_teks_detail text-secondary fw-semibold">Harga</span>
-          <span class="fw-bold ukuran_teks_detail" style="color:var(--accent-blue);">${formatRupiah(prod.price || 0)}</span>
+          <span class="fw-bold ukuran_teks_detail" style="color:var(--accent-blue);">${formatRupiah(hargaJual)}</span>
         </div>
-        ${deskripsiText ? `<div class="deskripsi-produk-box"><b>Keterangan:</b> ${deskripsiText}</div>` : ''}
       `;
 
       document.getElementById('detailProdukBox').innerHTML = detailHtml;
-      document.getElementById('totalBayarText').innerText = formatRupiah(prod.price || 0);
+      document.getElementById('totalBayarText').innerText = formatRupiah(hargaJual);
 
       document.body.classList.add('no-scroll');
 
@@ -996,7 +949,7 @@
           text.style.opacity = '0';
           updateBgFill(maxSlide);
           
-          prosesTransaksiDigiflazz();
+          prosesTransaksiBackend();
         } else {
           handle.style.transition = 'transform 0.2s ease-out';
           handle.style.transform = 'translateX(0px)';
@@ -1014,8 +967,8 @@
       window.ontouchend = onEnd;
     }
 
-    // 🔹 PROSES CHECKOUT DIGIFLAZZ KE BACKEND VPS
-    async function prosesTransaksiDigiflazz() {
+    // 🔹 PROSES CHECKOUT DENGAN DUKUNGAN MULTI-PROVIDER (Digiflazz / Okeconnect)
+    async function prosesTransaksiBackend() {
       if (!selectedProduct) return;
       isTransactionLocked = true;
 
@@ -1025,15 +978,20 @@
 
       const nomorTujuan = inputPhone.value.replace(/[^0-9]/g, '');
       const userSession = JSON.parse(localStorage.getItem('arcell_user') || '{}');
+      
+      const provider = (selectedProduct._provider || 'digiflazz').toLowerCase();
+      const endpoint = provider === 'okeconnect' ? '/api/okeconnect/checkout' : '/api/digiflazz/checkout';
 
       try {
-        const response = await fetch('/api/digiflazz/checkout', {
+        const response = await fetch(endpoint, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             buyer_sku_code: selectedProduct.buyer_sku_code,
             customer_no: nomorTujuan,
-            user_hp: userSession.hp || nomorTujuan
+            user_hp: userSession.phone || userSession.hp || nomorTujuan,
+            harga_jual: selectedProduct.jual || selectedProduct.price,
+            nama_produk: selectedProduct.product_name
           })
         });
 

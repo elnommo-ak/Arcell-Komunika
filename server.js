@@ -195,7 +195,7 @@ async function kirimPushNotifAdmin(pesanTitle, pesanBody, options = {}) {
 
         console.log("🔔 Admin Push Notif (External ID) Success:", response.data?.id || "OK");
     } catch (err) {
-        console.warn("⚠️ External ID Admin tidak merespons, mengirim via Broadcast Subscribed Users...");
+        console.warn("⚠️️ External ID Admin tidak merespons, mengirim via Broadcast Subscribed Users...");
 
         try {
             const payloadBroadcast = {
@@ -323,9 +323,6 @@ function initTables() {
 }
 
 function initScheduler() {
-    // =========================================================================
-    // 1. SCHEDULER TRANSAKSI TERJADWAL (Jalan Setiap Menit)
-    // =========================================================================
     cron.schedule('* * * * *', () => {
         const localNowStr = getWibDateTimeString();
 
@@ -369,14 +366,10 @@ function initScheduler() {
         );
     });
 
-// =========================================================================
-// 2. SCHEDULER SYNC PRODUK & HARGA AUTOMATIS (Jalan Setiap 15 Menit)
-// =========================================================================
     cron.schedule('*/15 * * * *', async () => {
         const waktuSync = getWibDateTimeString();
         console.log(`🔄 [CRON SYNC] Mengakses API Sync Otomatis Produk (Digiflazz & Okeconnect): ${waktuSync}`);
 
-        // A. Sync Otomatis Digiflazz
         try {
             await axios.post(`http://127.0.0.1:${PORT}/api/digiflazz/price-list`, {}, { timeout: 45000 });
             console.log(`✅ [CRON SYNC] Sync Digiflazz Berhasil`);
@@ -384,7 +377,6 @@ function initScheduler() {
             console.error(`❌ [CRON SYNC] Sync Digiflazz Gagal:`, errDigi.message);
         }
 
-        // B. Sync Otomatis Okeconnect
         try {
             const resOkec = await axios.post(`http://127.0.0.1:${PORT}/api/admin/sync-okeconnect`, {}, { timeout: 45000 });
             console.log(`✅ [CRON SYNC] Sync Okeconnect Berhasil (${resOkec.data?.adjusted || 0} harga disesuaikan)`);
@@ -395,6 +387,7 @@ function initScheduler() {
 
     console.log('⏰ Scheduler Active: Transaksi Terjadwal (1 m) & Auto-Sync Harga (15 m)');
 }
+
 // =========================================================================
 // 5. ROUTE VIEW / PAGE SERVING
 // =========================================================================
@@ -414,7 +407,6 @@ app.get('/admin', (req, res) => {
 // 6. CLIENT & USER API ROUTES
 // =========================================================================
 
-// Auth Login Member
 app.post('/api/member/login', (req, res) => {
     const { name, phone } = req.body;
     if (!phone) return res.status(400).json({ status: 'error', message: 'Nomor HP wajib diisi!' });
@@ -442,7 +434,6 @@ app.post('/api/member/login', (req, res) => {
     });
 });
 
-// Fetch Products
 app.get('/api/products', (req, res) => {
     db.all(`SELECT * FROM products WHERE provider = 'digiflazz' OR provider IS NULL OR provider = ''`, [], (err, rows) => {
         if (err) return res.status(500).json({ status: 'error', message: err.message });
@@ -492,7 +483,6 @@ app.get('/api/user/products-by-prefix', (req, res) => {
     });
 });
 
-// History & Transaction Detail Member
 app.get('/api/transaction/detail', (req, res) => {
     const trxId = (req.query.id || req.query.ref_id || '').trim();
     if (!trxId) return res.status(400).json({ status: 'error', message: 'ID Transaksi kosong' });
@@ -524,7 +514,6 @@ app.get('/api/history', (req, res) => {
         });
 });
 
-// Penjadwalan Transaksi
 app.post('/api/user/schedule-transaction', (req, res) => {
     const { user_hp, username, buyer_sku_code, customer_no, nama_produk, harga_jual, provider, schedule_time } = req.body;
     if (!schedule_time || !customer_no || !buyer_sku_code) return res.status(400).json({ status: 'failed', message: 'Data penjadwalan tidak lengkap' });
@@ -562,7 +551,6 @@ app.delete('/api/user/scheduled-transactions/:id', (req, res) => {
 // 7. PROVIDER TRANSACTIONS & WEBHOOKS
 // =========================================================================
 
-// A. DIGIFLAZZ CHECKOUT & WEBHOOK
 app.post('/api/digiflazz/checkout', async (req, res) => {
     const { buyer_sku_code, customer_no, user_hp, username, harga_jual, harga_modal, nama_produk, subscription_id } = req.body;
     const targetNo = customer_no || user_hp;
@@ -603,7 +591,6 @@ app.post('/api/digiflazz/checkout', async (req, res) => {
                         return res.status(500).json({ status: 'error', message: 'Gagal simpan transaksi' });
                     }
 
-                    // 🔔 PUSH NOTIFIKASI KE ADMIN: Transaksi Digiflazz Baru Dibuat!
                     kirimPushNotifAdmin(
                         `📲 Transaksi Baru: ${memberName}`,
                         `${productName} (${targetNo})\nRef ID: ${refId}`,
@@ -696,7 +683,6 @@ app.post('/api/digiflazz/webhook', (req, res) => {
     }
 });
 
-// B. OKECONNECT CHECKOUT & CALLBACK
 app.post('/api/okeconnect/checkout', async (req, res) => {
     try {
         const { buyer_sku_code, customer_no, user_hp, username, harga_jual, harga_modal, nama_produk, subscription_id } = req.body;
@@ -723,12 +709,11 @@ app.post('/api/okeconnect/checkout', async (req, res) => {
             const finalJual  = reqJual > 0 ? reqJual : (dbProd ? dbProd.jual_db : finalModal);
             const productName = nama_produk || (dbProd ? dbProd.nama_db : cleanSku);
 
-            // 🛡️ PROTEKSI ANTI-NOMBOK UNTUK OKECONNECT
             if (finalModal >= finalJual) {
                 console.warn(`[ANTI-NOMBOK OKECONNECT] Dibatal: ${cleanSku} | Modal: Rp ${finalModal} >= Jual: Rp ${finalJual}`);
                 return res.status(400).json({
                     status: 'failed',
-                    message: `Gagal: Ada kenaikan harga supplier. Silakan hubungi Admin.`
+                    message: `Gagal: Ada kenaikan modal supplier (Modal: Rp ${finalModal.toLocaleString('id-ID')}, Jual: Rp ${finalJual.toLocaleString('id-ID')}). Silakan hubungi Admin.`
                 });
             }
 
@@ -752,7 +737,6 @@ app.post('/api/okeconnect/checkout', async (req, res) => {
                             return res.status(500).json({ status: 'failed', message: 'Gagal menyimpan transaksi ke database' });
                         }
 
-                        // 🔔 PUSH NOTIFIKASI KE ADMIN
                         kirimPushNotifAdmin(
                             `📲 Transaksi Baru: ${memberName}`,
                             `${productName} (${cleanDest})\nRef ID: ${refId}`,
@@ -897,7 +881,6 @@ app.all(['/callback/okeconnect/event', '/api/okeconnect/callback', '/api/webhook
 // 8. ADMIN MANAGEMENT API ROUTES
 // =========================================================================
 
-// Saldo Provider
 app.get('/api/saldo', async (req, res) => {
     try {
         if (!USERNAME_DIGI || !API_KEY_DIGI) return res.json({ deposit: 0 });
@@ -921,7 +904,6 @@ app.get('/api/admin/okeconnect-saldo', async (req, res) => {
     }
 });
 
-// Sync Produk
 app.post('/api/digiflazz/price-list', async (req, res) => {
     try {
         const username = USERNAME_DIGI.trim();
@@ -963,7 +945,6 @@ app.post('/api/digiflazz/price-list', async (req, res) => {
     }
 });
 
-// 🔄 SYNC OKECONNECT DENGAN AUTO-MARGIN 
 app.post('/api/admin/sync-okeconnect', async (req, res) => {
     try {
         const response = await axios.get(OKECONNECT_CONFIG.pricelistUrl, { timeout: 30000, headers: { 'User-Agent': 'Mozilla/5.0' } });
@@ -971,7 +952,6 @@ app.post('/api/admin/sync-okeconnect', async (req, res) => {
 
         if (!productsList || productsList.length === 0) return res.status(400).json({ status: 'error', message: 'SKU kosong atau format salah.' });
 
-        // Ambil data harga lama dari SQLite untuk perbandingan
         const existingProductsMap = new Map();
         await new Promise((resolve) => {
             db.all("SELECT buyer_sku_code, price, jual FROM products WHERE provider = 'okeconnect'", [], (err, rows) => {
@@ -1002,12 +982,11 @@ app.post('/api/admin/sync-okeconnect', async (req, res) => {
 
                     let hargaJual = existing ? parseFloat(existing.jual || 0) : hargaModal;
 
-                    // 🛠️ LOGIKA AUTO-ADJUST MARGIN JIKA MODAL NAIK >= HARGA JUAL
                     if (existing && hargaModal >= hargaJual) {
-                        hargaJual = hargaModal + 0; // Beri margin otomatis Rp 2.000 jika nombok
+                        hargaJual = hargaModal + 2000;
                         adjustedPriceCount++;
                     } else if (!existing) {
-                        hargaJual = hargaModal + 0; // Margin awal jika produk baru
+                        hargaJual = hargaModal + 2000;
                     }
 
                     stmt.run(sku, String(item.nama || '').trim(), String(item.brand || '').trim(), String(item.type || '').trim(), String(item.category || item.type || 'LAINNYA').trim().toUpperCase(), String(item.sub_category || item.brand || 'REGULER').trim(), hargaModal, hargaJual, String(item.status || '1'));
@@ -1030,7 +1009,6 @@ app.post('/api/admin/sync-okeconnect', async (req, res) => {
     }
 });
 
-// Admin Product & Mapping Management
 app.get('/api/admin/products', (req, res) => {
     const sqlMappedProducts = `
         SELECT cp.buyer_sku_code, cp.provider, COALESCE(cp.custom_name, p.product_name) AS product_name,
@@ -1089,7 +1067,7 @@ app.delete('/api/admin/products/okeconnect/:code', (req, res) => {
     });
 });
 
-// Custom Kategori & Mapping
+// 🟢 GET CUSTOM CATEGORIES (DITAMBAHKAN COLUMN p.status as status)
 app.get('/api/admin/custom-categories', (req, res) => {
     db.all(`SELECT * FROM custom_categories ORDER BY sort_order ASC, id DESC`, [], (err, categories) => {
         if (err) return res.status(500).json({ status: 'error', message: err.message });
@@ -1097,7 +1075,9 @@ app.get('/api/admin/custom-categories', (req, res) => {
         db.all(`
             SELECT cp.category_id, cp.buyer_sku_code, cp.provider, 
                    COALESCE(cp.custom_name, p.product_name) as product_name, 
-                   COALESCE(cp.custom_jual, p.jual, p.price) as jual, p.price as harga_modal
+                   COALESCE(cp.custom_jual, p.jual, p.price) as jual, 
+                   p.price as harga_modal,
+                   p.status as status
             FROM category_products cp
             JOIN products p ON cp.buyer_sku_code = p.buyer_sku_code AND LOWER(cp.provider) = LOWER(p.provider)
         `, [], (err2, products) => {
@@ -1106,6 +1086,16 @@ app.get('/api/admin/custom-categories', (req, res) => {
             const result = categories.map(cat => ({ ...cat, products: products.filter(p => p.category_id === cat.id) }));
             res.json({ status: 'success', data: result });
         });
+    });
+});
+
+app.post('/api/admin/custom-categories/update-name', (req, res) => {
+    const { id, name } = req.body;
+    if (!id || !name) return res.status(400).json({ status: 'error', message: 'ID dan Nama Wajib diisi' });
+
+    db.run(`UPDATE custom_categories SET name = ? WHERE id = ?`, [name, id], function(err) {
+        if (err) return res.status(500).json({ status: 'error', message: err.message });
+        res.json({ status: 'success', message: 'Nama subkategori berhasil diperbarui' });
     });
 });
 
@@ -1143,15 +1133,42 @@ app.post('/api/admin/unmap-category-product', (req, res) => {
         });
 });
 
+// 🟢 UPDATE CUSTOM PRODUCT (TERMASUK STATUS TAMPILAN)
 app.post('/api/admin/update-custom-product', (req, res) => {
-    const { category_id, buyer_sku_code, product_name, price, provider } = req.body;
-    if (!buyer_sku_code || !product_name || price === undefined) return res.status(400).json({ status: 'error', message: 'Semua field wajib diisi!' });
+    const { category_id, buyer_sku_code, product_name, price, provider, status } = req.body;
+    if (!buyer_sku_code || !product_name || price === undefined) {
+        return res.status(400).json({ status: 'error', message: 'Semua field wajib diisi!' });
+    }
 
-    db.run(`UPDATE category_products SET custom_name = ?, custom_jual = ? WHERE category_id = ? AND buyer_sku_code = ? AND LOWER(provider) = ?`,
-        [product_name, parseFloat(price) || 0, category_id, buyer_sku_code, (provider || 'digiflazz').toLowerCase()], function(err) {
+    const cleanProvider = (provider || 'digiflazz').toLowerCase();
+    const statusVal = status !== undefined ? String(status) : '1';
+
+    db.run(
+        `UPDATE category_products 
+         SET custom_name = ?, custom_jual = ? 
+         WHERE category_id = ? AND buyer_sku_code = ? AND LOWER(provider) = ?`,
+        [product_name, parseFloat(price) || 0, category_id, buyer_sku_code, cleanProvider],
+        function (err) {
             if (err) return res.status(500).json({ status: 'error', message: err.message });
-            res.json({ status: 'success', message: 'Harga Jual berhasil diperbarui!' });
-        });
+
+            db.run(
+                `UPDATE products 
+                 SET status = ? 
+                 WHERE buyer_sku_code = ? AND LOWER(provider) = ?`,
+                [statusVal, buyer_sku_code, cleanProvider],
+                function (errStatus) {
+                    if (errStatus) {
+                        return res.status(500).json({ status: 'error', message: 'Gagal memperbarui status produk: ' + errStatus.message });
+                    }
+
+                    res.json({ 
+                        status: 'success', 
+                        message: 'Produk custom & status berhasil diperbarui!' 
+                    });
+                }
+            );
+        }
+    );
 });
 
 // Manajemen Member
@@ -1241,6 +1258,42 @@ app.post('/api/admin/update-transaction-status', (req, res) => {
 
             res.json({ status: 'success', message: `Status transaksi #${ref_id} berhasil diubah menjadi ${status}` });
         });
+});
+
+// 🔄 ENDPOINT REORDER SUBKATEGORI CUSTOM
+app.post('/api/admin/reorder-custom-categories', (req, res) => {
+    const orderList = req.body.order || req.body.categories || (Array.isArray(req.body) ? req.body : null);
+
+    if (!orderList || !Array.isArray(orderList) || orderList.length === 0) {
+        return res.status(400).json({ status: 'error', message: 'Data urutan tidak valid!' });
+    }
+
+    db.serialize(() => {
+        db.run("BEGIN TRANSACTION");
+
+        const stmt = db.prepare(`UPDATE custom_categories SET sort_order = ? WHERE id = ?`);
+
+        let updatedCount = 0;
+        orderList.forEach(item => {
+            const catId = parseInt(item.id, 10);
+            const position = parseInt(item.sort_order !== undefined ? item.sort_order : item.position, 10);
+
+            if (!isNaN(catId) && !isNaN(position)) {
+                stmt.run(position, catId);
+                updatedCount++;
+            }
+        });
+
+        stmt.finalize();
+
+        db.run("COMMIT", (err) => {
+            if (err) {
+                db.run("ROLLBACK");
+                return res.status(500).json({ status: 'error', message: 'Gagal memperbarui urutan ke database: ' + err.message });
+            }
+            res.json({ status: 'success', message: `Berhasil memperbarui urutan ${updatedCount} subkategori!`, total: updatedCount });
+        });
+    });
 });
 
 // =========================================================================

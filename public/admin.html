@@ -39,6 +39,7 @@
             --success: #16a34a;
             --warning: #d97706;
             --danger: #dc2626;
+            --purple-accent: #7c3aed;
         }
 
         * { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; margin: 0; padding: 0; }
@@ -90,7 +91,7 @@
         .btn-info { background: #2563eb; color: #ffffff; border-color: #1d4ed8; }
         .btn-sm { padding: 3px 6px; font-size: 0.65rem; border-radius: 3px; }
 
-        /* MEMBER CARD CLEAN OTOMAX */
+        /* MEMBER CARD OTOMAX */
         .member-list-container { display: flex; flex-direction: column; gap: 6px; }
         .member-card { background: #ffffff; border-radius: 4px; border: 1px solid var(--otomax-border); padding: 8px; }
         .member-header-row { display: flex; justify-content: space-between; align-items: center; background: #f8fafc; padding: 4px 6px; border-radius: 3px; border: 1px solid #e2e8f0; margin-bottom: 6px; }
@@ -112,13 +113,21 @@
         .member-trx-dropdown { display: none; padding-top: 6px; flex-direction: column; gap: 4px; }
         .member-card.open .member-trx-dropdown { display: flex; }
 
-        .date-folder-card { background: #ffffff; border-radius: 3px; border: 1px solid var(--otomax-border); margin-top: 2px; }
-        .date-folder-header { padding: 5px 8px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; font-size: 0.7rem; font-weight: 800; background: #f8fafc; }
-        .date-folder-body { display: none; padding: 4px; flex-direction: column; gap: 4px; }
+        /* MONTHLY FOLDER ACCORDION */
+        .month-folder-card { background: #ffffff; border-radius: 4px; border: 1px solid #cbd5e1; margin-top: 2px; overflow: hidden; }
+        .month-folder-header { padding: 6px 8px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; font-size: 0.72rem; font-weight: 800; background: #f1f5f9; color: #1e293b; border-left: 3px solid var(--purple-accent); }
+        .month-folder-body { display: none; padding: 4px; flex-direction: column; gap: 4px; background: #fafafa; }
+        .month-folder-card.open .month-folder-body { display: flex; }
+        .month-folder-card.open .month-chevron { transform: rotate(180deg); }
+
+        /* DAILY FOLDER ACCORDION */
+        .date-folder-card { background: #ffffff; border-radius: 3px; border: 1px solid var(--otomax-border); }
+        .date-folder-header { padding: 5px 8px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; font-size: 0.68rem; font-weight: 800; background: #ffffff; border-left: 2px solid var(--primary); }
+        .date-folder-body { display: none; padding: 4px; flex-direction: column; gap: 4px; background: #f8fafc; }
         .date-folder-card.open .date-folder-body { display: flex; }
         .date-folder-card.open .date-chevron { transform: rotate(180deg); }
 
-        /* TRANSACTION CARD CLEAN & SIMPLIFIED */
+        /* TRANSACTION CARD */
         .sub-trx-card { background: #ffffff; padding: 6px 8px; border-radius: 3px; border: 1px solid var(--otomax-border); border-left: 4px solid #94a3b8; display: flex; flex-direction: column; gap: 4px; }
         .sub-trx-card.clickable { cursor: pointer; }
         .sub-trx-card.clickable:hover { background: #f8fafc; border-color: var(--primary); }
@@ -291,8 +300,11 @@
         let rawMembers = [];
         let rawTransactions = [];
         let openMemberCards = new Set();
+        let openMonthFolders = new Set();
         let openDateFolders = new Set();
         let isFirstLoadTrx = true;
+
+        const namaBulanIndo = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
 
         function navTo(url) { window.location.replace(url); }
         function toggleDropdownMenu(evt) { evt.stopPropagation(); document.getElementById('dropdownMenu').classList.toggle('show'); }
@@ -305,26 +317,34 @@
         }
 
         function parseWaktu(strWaktu) {
-            if (!strWaktu) return { tanggal: '', jam: '', full: '', dateObj: new Date() };
+            if (!strWaktu) return { tanggal: '', jam: '', full: '', monthKey: '', monthName: '', dateObj: new Date() };
             let str = String(strWaktu).trim();
+            let d;
             if (!isNaN(str) && str !== '') {
                 let num = Number(str);
                 if (String(Math.floor(num)).length === 10) num *= 1000;
-                const d = new Date(num);
-                const dd = String(d.getDate()).padStart(2, '0');
-                const mm = String(d.getMonth() + 1).padStart(2, '0');
-                return { tanggal: `${dd}/${mm}/${d.getFullYear()}`, jam: `${String(d.getHours()).padStart(2, '0')}.${String(d.getMinutes()).padStart(2, '0')}.${String(d.getSeconds()).padStart(2, '0')}`, full: `${dd}/${mm}/${d.getFullYear()} ${String(d.getHours()).padStart(2, '0')}.${String(d.getMinutes()).padStart(2, '0')} WIB`, dateObj: d };
+                d = new Date(num);
+            } else {
+                let formattedStr = str.replace(' ', 'T');
+                if (!formattedStr.endsWith('Z') && !formattedStr.includes('+')) formattedStr += 'Z';
+                d = new Date(formattedStr);
             }
-            let formattedStr = str.replace(' ', 'T');
-            if (!formattedStr.endsWith('Z') && !formattedStr.includes('+')) formattedStr += 'Z';
-            const d = new Date(formattedStr);
+
             if (!isNaN(d.getTime())) {
                 const dd = String(d.getDate()).padStart(2, '0');
                 const mm = String(d.getMonth() + 1).padStart(2, '0');
-                return { tanggal: `${dd}/${mm}/${d.getFullYear()}`, jam: `${String(d.getHours()).padStart(2, '0')}.${String(d.getMinutes()).padStart(2, '0')}.${String(d.getSeconds()).padStart(2, '0')}`, full: `${dd}/${mm}/${d.getFullYear()} ${String(d.getHours()).padStart(2, '0')}.${String(d.getMinutes()).padStart(2, '0')} WIB`, dateObj: d };
+                const yyyy = d.getFullYear();
+                const mName = namaBulanIndo[d.getMonth()] || 'Januari';
+                return {
+                    tanggal: `${dd}/${mm}/${yyyy}`,
+                    jam: `${String(d.getHours()).padStart(2, '0')}.${String(d.getMinutes()).padStart(2, '0')}.${String(d.getSeconds()).padStart(2, '0')}`,
+                    full: `${dd}/${mm}/${yyyy} ${String(d.getHours()).padStart(2, '0')}.${String(d.getMinutes()).padStart(2, '0')} WIB`,
+                    monthKey: `${yyyy}-${mm}`,
+                    monthName: `${mName} ${yyyy}`,
+                    dateObj: d
+                };
             }
-            const parts = str.split(/[\s,T]+/);
-            return { tanggal: parts[0] || '', jam: parts[1] || '', full: str + ' WIB', dateObj: new Date() };
+            return { tanggal: '', jam: '', full: str + ' WIB', monthKey: 'LAINNYA', monthName: 'Lainnya', dateObj: new Date() };
         }
 
         function switchTab(tabId, evt) {
@@ -458,30 +478,42 @@
                     return hpMatch && (st.includes('sukses') || st.includes('success') || st === '1' || st === 'berhasil');
                 });
 
-                const groupedByDate = {};
+                // HIERARKI KELOMPOK: BULAN -> TANGGAL -> TRANSAKSI
+                const groupedByMonth = {};
                 let totalHarian = 0; 
                 let profitHariIni = 0;
                 let profitMemberIni = 0;
 
                 memberTrxSukses.forEach(t => {
                     const parsed = parseWaktu(t.waktu || t.date || t.created_at || t.timestamp || '');
+                    const mKey = parsed.monthKey;
+                    const mName = parsed.monthName;
                     const dateKey = parsed.tanggal;
                     const hModal = parseFloat(t.harga) || 0;
                     const hJual = parseFloat(t.harga_jual || t.price) || hModal;
                     const labaTrx = hJual - hModal;
 
-                    if (!groupedByDate[dateKey]) groupedByDate[dateKey] = { dateStr: dateKey, trxs: [], timestamp: parsed.dateObj.getTime() };
-                    groupedByDate[dateKey].trxs.push({ ...t, parsedTime: parsed });
-                    
                     profitMemberIni += labaTrx;
                     if (dateKey === todayStr) {
                         totalHarian += hJual;
                         profitHariIni += labaTrx;
                     }
+
+                    if (!groupedByMonth[mKey]) {
+                        groupedByMonth[mKey] = { monthKey: mKey, monthName: mName, totalOmsetMonth: 0, totalProfitMonth: 0, totalTrxMonth: 0, dates: {} };
+                    }
+                    groupedByMonth[mKey].totalOmsetMonth += hJual;
+                    groupedByMonth[mKey].totalProfitMonth += labaTrx;
+                    groupedByMonth[mKey].totalTrxMonth += 1;
+
+                    if (!groupedByMonth[mKey].dates[dateKey]) {
+                        groupedByMonth[mKey].dates[dateKey] = { dateStr: dateKey, trxs: [], timestamp: parsed.dateObj.getTime() };
+                    }
+                    groupedByMonth[mKey].dates[dateKey].trxs.push({ ...t, parsedTime: parsed });
                 });
 
                 totalProfitSemuaMember += profitMemberIni;
-                const sortedDateGroups = Object.values(groupedByDate).sort((a, b) => b.timestamp - a.timestamp);
+                const sortedMonths = Object.values(groupedByMonth).sort((a, b) => b.monthKey.localeCompare(a.monthKey));
                 const isMemberOpen = openMemberCards.has(String(noHp));
 
                 html += `
@@ -513,62 +545,85 @@
                         </div>
                         <div>
                             <button class="btn-toggle-trx" onclick="toggleMemberTrx('${noHp}')">
-                                <span><i class="fa-solid fa-chart-line"></i> Rekap: <b>${memberTrxSukses.length} Trx</b> (Profit: Rp ${profitMemberIni.toLocaleString('id-ID')})</span>
+                                <span><i class="fa-solid fa-chart-line"></i> Rekap: <b>${memberTrxSukses.length} Trx</b> (Profit Total: Rp ${profitMemberIni.toLocaleString('id-ID')})</span>
                                 <i class="fa-solid fa-chevron-down chevron-trx"></i>
                             </button>
                         </div>
                         <div class="member-trx-dropdown">
                 `;
 
-                if (sortedDateGroups.length === 0) {
+                if (sortedMonths.length === 0) {
                     html += `<div style="font-size:0.68rem; color:var(--text-sub); padding:4px 0; text-align:center;">Belum ada rekap transaksi sukses.</div>`;
                 } else {
-                    sortedDateGroups.forEach(group => {
-                        const trxsInDate = group.trxs;
-                        const totalDateNominal = trxsInDate.reduce((a, b) => a + parseFloat(b.harga_jual || b.price || b.harga || 0), 0);
-                        const dateFolderKey = `${noHp}_${group.dateStr}`;
-                        const isDateOpen = openDateFolders.has(dateFolderKey);
+                    sortedMonths.forEach(mGroup => {
+                        const monthFolderKey = `${noHp}_MONTH_${mGroup.monthKey}`;
+                        const isMonthOpen = openMonthFolders.has(monthFolderKey);
+                        const sortedDateGroups = Object.values(mGroup.dates).sort((a, b) => b.timestamp - a.timestamp);
 
                         html += `
-                            <div class="date-folder-card ${isDateOpen ? 'open' : ''}" data-key="${dateFolderKey}">
-                                <div class="date-folder-header" onclick="toggleDateFolder(this, '${dateFolderKey}')">
-                                    <span><i class="fa-regular fa-calendar-check" style="color:var(--primary); margin-right:4px;"></i> ${group.dateStr} (${trxsInDate.length})</span>
-                                    <div><span style="color:var(--success); font-weight:900; margin-right:4px; font-family:monospace;">Rp ${totalDateNominal.toLocaleString('id-ID')}</span><i class="fa-solid fa-chevron-down date-chevron"></i></div>
+                            <div class="month-folder-card ${isMonthOpen ? 'open' : ''}" data-key="${monthFolderKey}">
+                                <div class="month-folder-header" onclick="toggleMonthFolder(this, '${monthFolderKey}')">
+                                    <span><i class="fa-solid fa-calendar-days" style="color:var(--purple-accent); margin-right:4px;"></i> <b>${mGroup.monthName}</b> (${mGroup.totalTrxMonth} Trx)</span>
+                                    <div style="text-align:right;">
+                                        <span style="font-size:0.62rem; color:var(--text-sub);">Omset: Rp ${mGroup.totalOmsetMonth.toLocaleString('id-ID')} | </span>
+                                        <span style="color:var(--primary); font-weight:900; margin-right:4px; font-family:monospace;">Profit: Rp ${mGroup.totalProfitMonth.toLocaleString('id-ID')}</span>
+                                        <i class="fa-solid fa-chevron-down month-chevron" style="font-size:0.65rem; color:var(--text-sub);"></i>
+                                    </div>
                                 </div>
-                                <div class="date-folder-body">
+                                <div class="month-folder-body">
                         `;
-                        trxsInDate.forEach(t => {
-                            const hM = parseFloat(t.harga) || 0;
-                            const hJ = parseFloat(t.harga_jual || t.price) || hM;
-                            const untung = hJ - hM;
-                            const refId = t.ref_id || t.id || '-';
-                            const snVal = t.sn || t.sn_code || t.resi || '';
-                            const safeSn = snVal.replace(/'/g, "\\'").replace(/"/g, "&quot;");
+
+                        sortedDateGroups.forEach(group => {
+                            const trxsInDate = group.trxs;
+                            const totalDateNominal = trxsInDate.reduce((a, b) => a + parseFloat(b.harga_jual || b.price || b.harga || 0), 0);
+                            const dateFolderKey = `${noHp}_DATE_${group.dateStr}`;
+                            const isDateOpen = openDateFolders.has(dateFolderKey);
 
                             html += `
-                                <div class="sub-trx-card clickable" style="border-left-color: #16a34a;" onclick="keDetailMember('${refId}', true)">
-                                    <div class="trx-top-bar">
-                                        <span>#${refId}</span>
-                                        <span><i class="fa-regular fa-clock"></i> ${t.parsedTime.full}</span>
+                                <div class="date-folder-card ${isDateOpen ? 'open' : ''}" data-key="${dateFolderKey}">
+                                    <div class="date-folder-header" onclick="toggleDateFolder(this, '${dateFolderKey}')">
+                                        <span><i class="fa-regular fa-calendar-check" style="color:var(--primary); margin-right:4px;"></i> ${group.dateStr} (${trxsInDate.length})</span>
+                                        <div><span style="color:var(--success); font-weight:900; margin-right:4px; font-family:monospace;">Rp ${totalDateNominal.toLocaleString('id-ID')}</span><i class="fa-solid fa-chevron-down date-chevron"></i></div>
                                     </div>
-                                    <div class="trx-main-info">
-                                        <div class="trx-left">
-                                            <div class="trx-prod-title">${t.produk || t.product_name || 'Produk PPOB'}</div>
-                                            <div class="trx-target-no"><i class="fa-solid fa-mobile-screen-button"></i> ${t.no_tujuan || t.customer_no || '-'}</div>
-                                            ${snVal ? `<div class="trx-sn-box">SN: ${snVal}</div>` : ''}
+                                    <div class="date-folder-body">
+                            `;
+
+                            trxsInDate.forEach(t => {
+                                const hM = parseFloat(t.harga) || 0;
+                                const hJ = parseFloat(t.harga_jual || t.price) || hM;
+                                const untung = hJ - hM;
+                                const refId = t.ref_id || t.id || '-';
+                                const snVal = t.sn || t.sn_code || t.resi || '';
+                                const safeSn = snVal.replace(/'/g, "\\'").replace(/"/g, "&quot;");
+
+                                html += `
+                                    <div class="sub-trx-card clickable" style="border-left-color: #16a34a;" onclick="keDetailMember('${refId}', true)">
+                                        <div class="trx-top-bar">
+                                            <span>#${refId}</span>
+                                            <span><i class="fa-regular fa-clock"></i> ${t.parsedTime.full}</span>
                                         </div>
-                                        <div class="trx-right">
-                                            <div class="trx-price-sell">Rp ${hJ.toLocaleString('id-ID')}</div>
-                                            <div class="trx-price-sub">Modal: ${hM.toLocaleString('id-ID')} | Laba: <b style="color:${untung >= 0 ? 'var(--primary)' : 'var(--danger)'};">${untung.toLocaleString('id-ID')}</b></div>
+                                        <div class="trx-main-info">
+                                            <div class="trx-left">
+                                                <div class="trx-prod-title">${t.produk || t.product_name || 'Produk PPOB'}</div>
+                                                <div class="trx-target-no"><i class="fa-solid fa-mobile-screen-button"></i> ${t.no_tujuan || t.customer_no || '-'}</div>
+                                                ${snVal ? `<div class="trx-sn-box">SN: ${snVal}</div>` : ''}
+                                            </div>
+                                            <div class="trx-right">
+                                                <div class="trx-price-sell">Rp ${hJ.toLocaleString('id-ID')}</div>
+                                                <div class="trx-price-sub">Modal: ${hM.toLocaleString('id-ID')} | Laba: <b style="color:${untung >= 0 ? 'var(--primary)' : 'var(--danger)'};">${untung.toLocaleString('id-ID')}</b></div>
+                                            </div>
                                         </div>
-                                    </div>
-                                    <div class="trx-actions" onclick="event.stopPropagation();">
-                                        <span class="sub-trx-status sukses">SUKSES</span>
-                                        <button class="btn-sm btn-success" onclick="bukaModalEditStatusTrx('${refId}', 'SUKSES', '${safeSn}')"><i class="fa-solid fa-list-check"></i> Status</button>
-                                        <button class="btn-sm btn-warning" onclick="editHargaTransaksi('${refId}', ${hM}, ${hJ})"><i class="fa-solid fa-pen"></i> Harga</button>
-                                    </div>
-                                </div>`;
+                                        <div class="trx-actions" onclick="event.stopPropagation();">
+                                            <span class="sub-trx-status sukses">SUKSES</span>
+                                            <button class="btn-sm btn-success" onclick="bukaModalEditStatusTrx('${refId}', 'SUKSES', '${safeSn}')"><i class="fa-solid fa-list-check"></i> Status</button>
+                                            <button class="btn-sm btn-warning" onclick="editHargaTransaksi('${refId}', ${hM}, ${hJ})"><i class="fa-solid fa-pen"></i> Harga</button>
+                                        </div>
+                                    </div>`;
+                            });
+
+                            html += `</div></div>`;
                         });
+
                         html += `</div></div>`;
                     });
                 }
@@ -581,6 +636,7 @@
         }
 
         function toggleMemberTrx(noHp) { const card = document.getElementById(`member-card-${noHp}`); if(card) { card.classList.toggle('open'); card.classList.contains('open') ? openMemberCards.add(String(noHp)) : openMemberCards.delete(String(noHp)); } }
+        function toggleMonthFolder(el, monthFolderKey) { const monthCard = el.closest('.month-folder-card'); if(monthCard) { monthCard.classList.toggle('open'); monthCard.classList.contains('open') ? openMonthFolders.add(monthFolderKey) : openMonthFolders.delete(monthFolderKey); } }
         function toggleDateFolder(el, dateFolderKey) { const dateCard = el.closest('.date-folder-card'); if(dateCard) { dateCard.classList.toggle('open'); dateCard.classList.contains('open') ? openDateFolders.add(dateFolderKey) : openDateFolders.delete(dateFolderKey); } }
 
         function bukaModalEditStatusTrx(refId, currentStatus, currentSn) {

@@ -43,9 +43,6 @@
         .glass-card { background: var(--otomax-card-bg); border: 1px solid var(--otomax-border); border-radius: 6px; padding: 10px; margin-bottom: 8px; }
 
         h3 { margin-bottom: 8px; color: #1e293b; display: flex; align-items: center; gap: 6px; font-size: 0.82rem; font-weight: 800; text-transform: uppercase; border-bottom: 1px solid #e2e8f0; padding-bottom: 4px; }
-        
-        .form-grid-inline { display: flex; flex-wrap: wrap; gap: 4px; align-items: center; }
-        .form-grid-inline input, .form-grid-inline select { flex: 1 1 110px; padding: 6px 8px; font-size: 0.75rem; }
 
         input, select { padding: 6px 8px; border-radius: 4px; border: 1px solid var(--otomax-border); outline: none; font-size: 0.78rem; font-weight: 600; background: #ffffff; color: var(--text-main); width: 100%; }
         input:focus, select:focus { border-color: var(--primary); }
@@ -86,6 +83,11 @@
         .dot-okeconnect { background-color: #10b981; }
         .badge-count { background: #e0e7ff; color: var(--primary); padding: 1px 6px; border-radius: 3px; font-size: 0.63rem; font-weight: 800; font-family: monospace; }
 
+        /* BADGES STATUS PRODUK */
+        .status-badge { font-size: 0.58rem; font-weight: 800; padding: 1px 4px; border-radius: 2px; text-transform: uppercase; font-family: monospace; }
+        .status-badge.active { background: #dcfce7; color: var(--success); border: 1px solid #bbf7d0; }
+        .status-badge.hidden { background: #fee2e2; color: var(--danger); border: 1px solid #fca5a5; }
+
         /* MODAL */
         .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.4); z-index: 9999; justify-content: center; align-items: center; }
         .modal-box { width: 90%; max-width: 380px; padding: 12px; background: #ffffff; border: 1px solid var(--otomax-border); border-top: 3px solid var(--primary); border-radius: 4px; box-shadow: 0 4px 15px rgba(0,0,0,0.15); }
@@ -121,47 +123,20 @@
     </div>
 
     <div class="container">
-        <!-- FORM EDIT / TAMBAH PRODUK CUSTOM UNIFIED -->
+        <!-- FORM BUAT KATEGORI UTAMA -->
         <div class="glass-card">
-            <h3 id="formTitle"><i class="fa-solid fa-pen-to-square"></i> Tambah / Edit Produk Custom</h3>
-            <div class="form-grid-inline" style="margin-bottom: 6px;">
-                <select id="providerSelect" style="max-width: 120px;">
-                    <option value="digiflazz">Digiflazz</option>
-                    <option value="okeconnect">OkeConnect</option>
-                </select>
-                <input type="text" id="sku" placeholder="SKU Kode / Kode Produk">
-                <input type="text" id="nama" placeholder="Nama Produk">
-                <select id="brand">
-                    <option value="INDOSAT">INDOSAT</option>
-                    <option value="TELKOMSEL">TELKOMSEL</option>
-                    <option value="XL">XL</option>
-                    <option value="AXIS">AXIS</option>
-                    <option value="TRI">TRI</option>
-                    <option value="SMARTFREN">SMARTFREN</option>
-                    <option value="E-WALLET">E-WALLET</option>
-                    <option value="TOKEN">TOKEN PLN</option>
-                    <option value="PLN">TAGIHAN PLN</option>
-                    <option value="GAMING">GAMING</option>
-                </select>
-                <select id="typeSelect">
-                    <option value="Umum">-- Kategori --</option>
-                </select>
-                <input type="number" id="harga" placeholder="Harga Jual (Rp)">
-                <select id="statusSelect" style="max-width: 130px;">
-                    <option value="1">Tampilkan (Aktif)</option>
-                    <option value="0">Sembunyikan</option>
-                </select>
-            </div>
-            <div style="display: flex; gap: 4px;">
-                <button onclick="simpanProduk()" class="btn-success" style="flex: 1;"><i class="fa-solid fa-floppy-disk"></i> Simpan Produk</button>
-                <button onclick="resetForm()" class="btn-warning" id="btnReset" style="display: none;">Batal</button>
+            <h3><i class="fa-solid fa-layer-group"></i> Buat Kategori Utama</h3>
+            <div style="display: flex; gap: 4px; flex-wrap: wrap;">
+                <input type="text" id="namaKategoriUtama" placeholder="Nama Kategori Utama (misal: BY.U, VOUCHER, APLIKASI)" style="flex: 2; min-width: 160px;">
+                <button onclick="tambahKategoriUtama()" class="btn-success"><i class="fa-solid fa-plus"></i> Simpan Utama</button>
             </div>
         </div>
 
+        <!-- FORM BUAT SUBKATEGORI -->
         <div class="glass-card">
-            <h3><i class="fa-solid fa-folder-plus"></i> Buat Kategori Baru</h3>
+            <h3><i class="fa-solid fa-folder-plus"></i> Buat Subkategori</h3>
             <div style="display: flex; gap: 4px; flex-wrap: wrap;">
-                <input type="text" id="namaKategoriBaru" placeholder="Nama Kategori (misal: Freedom Sensasi)" style="flex: 2; min-width: 140px;">
+                <input type="text" id="namaKategoriBaru" placeholder="Nama Subkategori (misal: Freedom Sensasi)" style="flex: 2; min-width: 140px;">
                 <select id="brandKategoriBaru" style="flex: 1; min-width: 100px;">
                     <option value="INDOSAT">INDOSAT</option>
                     <option value="TELKOMSEL">TELKOMSEL</option>
@@ -174,7 +149,7 @@
                     <option value="PLN">TAGIHAN PLN</option>
                     <option value="GAMING">GAMING</option>
                 </select>
-                <button onclick="tambahKategoriBaru()" class="btn-info"><i class="fa-solid fa-plus"></i> Buat</button>
+                <button onclick="tambahKategoriBaru()" class="btn-info"><i class="fa-solid fa-plus"></i> Buat Subkategori</button>
             </div>
         </div>
 
@@ -188,6 +163,24 @@
             </div>
             <div id="customCategoryContainer">
                 <div style="text-align: center; color: var(--text-sub); padding: 10px; font-size: 0.75rem;">Memuat daftar kategori kustom...</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL EDIT NAMA SUBKATEGORI -->
+    <div id="modalEditCategoryName" class="modal-overlay">
+        <div class="modal-box">
+            <h3><i class="fa-solid fa-pen-to-square"></i> Edit Nama Subkategori</h3>
+            <div style="display: flex; flex-direction: column; gap: 6px; margin-top: 6px;">
+                <input type="hidden" id="editCategoryCatId">
+                <div>
+                    <label style="font-size: 0.63rem; font-weight: 800; color: var(--text-sub);">NAMA SUBKATEGORI BARU</label>
+                    <input type="text" id="editCategoryNameInput" placeholder="Masukkan nama subkategori baru">
+                </div>
+                <div style="display: flex; gap: 4px; margin-top: 4px;">
+                    <button onclick="simpanEditCategoryName()" class="btn-success" style="flex: 1;"><i class="fa-solid fa-check"></i> Simpan</button>
+                    <button onclick="tutupModalEditCategoryName()" class="btn-danger"><i class="fa-solid fa-xmark"></i> Batal</button>
+                </div>
             </div>
         </div>
     </div>
@@ -210,6 +203,13 @@
                 <div>
                     <label style="font-size: 0.63rem; font-weight: 800; color: var(--text-sub);">HARGA JUAL CUSTOM (RP)</label>
                     <input type="number" id="editCustomPrice" placeholder="Harga Jual (Rp)">
+                </div>
+                <div>
+                    <label style="font-size: 0.63rem; font-weight: 800; color: var(--text-sub);">STATUS TAMPILAN PRODUK</label>
+                    <select id="editCustomStatus">
+                        <option value="1">Tampilkan (Aktif)</option>
+                        <option value="0">Sembunyikan (Nonaktif)</option>
+                    </select>
                 </div>
                 <div style="display: flex; gap: 4px; margin-top: 4px;">
                     <button onclick="simpanEditCustomProduct()" class="btn-success" style="flex: 1;"><i class="fa-solid fa-check"></i> Simpan</button>
@@ -237,11 +237,39 @@
             } catch (err) {}
         }
 
+        async function tambahKategoriUtama() {
+            const input = document.getElementById('namaKategoriUtama');
+            const mainName = input.value.trim().toUpperCase();
+            if(!mainName) return alert('Ketik nama kategori utama!');
+
+            const selectBrand = document.getElementById('brandKategoriBaru');
+            let exists = false;
+            for(let i=0; i<selectBrand.options.length; i++) {
+                if(selectBrand.options[i].value === mainName) exists = true;
+            }
+            if(!exists) {
+                const newOpt = document.createElement('option');
+                newOpt.value = mainName;
+                newOpt.innerText = mainName;
+                selectBrand.appendChild(newOpt);
+            }
+
+            try {
+                const res = await fetch('/api/admin/custom-categories', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name: 'Umum', brand: mainName }) });
+                const result = await res.json();
+                if(result.status === 'success') { 
+                    input.value = ''; 
+                    loadCustomCategoriesFromDB(); 
+                    alert(`Kategori Utama "${mainName}" berhasil dibuat!`);
+                } else alert('Gagal: ' + result.message);
+            } catch(e) { alert('Gagal terhubung ke server'); }
+        }
+
         async function tambahKategoriBaru() {
             const input = document.getElementById('namaKategoriBaru');
             const brandSelect = document.getElementById('brandKategoriBaru');
             const catName = input.value.trim();
-            if(!catName) return alert('Ketik nama kategori!');
+            if(!catName) return alert('Ketik nama subkategori!');
             try {
                 const res = await fetch('/api/admin/custom-categories', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name: catName, brand: brandSelect.value }) });
                 const result = await res.json();
@@ -249,8 +277,36 @@
             } catch(e) { alert('Gagal terhubung ke server'); }
         }
 
+        function bukaModalEditCategoryName(id, currentName) {
+            document.getElementById('editCategoryCatId').value = id;
+            document.getElementById('editCategoryNameInput').value = currentName;
+            document.getElementById('modalEditCategoryName').style.display = 'flex';
+        }
+        function tutupModalEditCategoryName() {
+            document.getElementById('modalEditCategoryName').style.display = 'none';
+        }
+
+        async function simpanEditCategoryName() {
+            const catId = document.getElementById('editCategoryCatId').value;
+            const newName = document.getElementById('editCategoryNameInput').value.trim();
+            if(!newName) return alert('Nama subkategori tidak boleh kosong!');
+
+            try {
+                const res = await fetch('/api/admin/custom-categories/update-name', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ id: catId, name: newName })
+                });
+                const result = await res.json();
+                if(result.status === 'success') {
+                    tutupModalEditCategoryName();
+                    loadCustomCategoriesFromDB();
+                } else alert('Gagal: ' + (result.message || 'Gagal mengubah nama subkategori'));
+            } catch(e) { alert('Error jaringan'); }
+        }
+
         async function hapusCustomCategoryDB(id, catName) {
-            if (!confirm(`Hapus kategori custom "${catName}"?`)) return;
+            if (!confirm(`Hapus subkategori "${catName}"?`)) return;
             try {
                 const res = await fetch(`/api/admin/custom-categories/${id}`, { method: 'DELETE' });
                 const result = await res.json();
@@ -272,6 +328,20 @@
                 groupedByBrand[brand].push(cat);
             });
 
+            const selectBrand = document.getElementById('brandKategoriBaru');
+            Object.keys(groupedByBrand).forEach(b => {
+                let exists = false;
+                for(let i=0; i<selectBrand.options.length; i++) {
+                    if(selectBrand.options[i].value === b) exists = true;
+                }
+                if(!exists) {
+                    const newOpt = document.createElement('option');
+                    newOpt.value = b;
+                    newOpt.innerText = b;
+                    selectBrand.appendChild(newOpt);
+                }
+            });
+
             let html = '';
             Object.keys(groupedByBrand).forEach(brand => {
                 const categories = groupedByBrand[brand].sort((a, b) => (a.sort_order || a.id) - (b.sort_order || b.id));
@@ -282,7 +352,7 @@
                         <div class="brand-header" onclick="toggleBrandAccordion(this, '${brand}')">
                             <span><i class="fa-solid fa-mobile-screen" style="margin-right: 4px;"></i>${brand}</span>
                             <div style="display: flex; align-items: center; gap: 6px;">
-                                <span class="badge-count">${categories.length} Kategori</span>
+                                <span class="badge-count">${categories.length} Subkategori</span>
                                 <i class="fa-solid fa-chevron-down brand-chevron"></i>
                             </div>
                         </div>
@@ -293,6 +363,7 @@
                     const prods = [...(cat.products || [])];
                     prods.sort((a, b) => parseFloat(a.jual || 0) - parseFloat(b.jual || 0));
                     const isSubCatOpen = openCustomSubCats.has(String(cat.id));
+                    const safeCatName = cat.name.replace(/'/g, "\\'").replace(/"/g, "&quot;");
 
                     html += `
                         <div class="sub-cat-card ${isSubCatOpen ? 'open' : ''}" id="sub-cat-${cat.id}">
@@ -306,7 +377,8 @@
                                 </div>
                                 <div style="display: flex; align-items: center; gap: 4px;">
                                     <span class="badge-count">${prods.length} Item</span>
-                                    <button class="btn-sm btn-danger" style="padding: 1px 4px;" onclick="event.stopPropagation(); hapusCustomCategoryDB(${cat.id}, '${cat.name}')"><i class="fa-solid fa-trash"></i></button>
+                                    <button class="btn-sm btn-warning" style="padding: 1px 4px;" onclick="event.stopPropagation(); bukaModalEditCategoryName(${cat.id}, '${safeCatName}')"><i class="fa-solid fa-pen"></i></button>
+                                    <button class="btn-sm btn-danger" style="padding: 1px 4px;" onclick="event.stopPropagation(); hapusCustomCategoryDB(${cat.id}, '${safeCatName}')"><i class="fa-solid fa-trash"></i></button>
                                     <i class="fa-solid fa-chevron-down sub-chevron"></i>
                                 </div>
                             </div>
@@ -320,6 +392,16 @@
                             const dotClass = p.provider === 'okeconnect' ? 'dot-okeconnect' : 'dot-digiflazz';
                             const hargaModal = parseFloat(p.harga_modal || 0);
                             const hargaJual = parseFloat(p.jual || 0);
+                            
+                            // PREP PEMBACAAN STATUS PRESISI
+                            const prodStatus = String(p.status !== undefined ? p.status : (p.status_product !== undefined ? p.status_product : '1')).trim();
+                            const isHidden = prodStatus === '0' || prodStatus.toLowerCase() === 'false' || prodStatus.toLowerCase() === 'nonaktif';
+                            
+                            const statusBadgeHtml = isHidden 
+                                ? `<span class="status-badge hidden">SEMBUNYI</span>`
+                                : `<span class="status-badge active">AKTIF</span>`;
+
+                            const safeProdName = p.product_name.replace(/'/g, "\\'").replace(/"/g, "&quot;");
 
                             html += `
                                 <div class="prod-item" id="prod-item-${cat.id}-${p.buyer_sku_code}">
@@ -328,10 +410,13 @@
                                         <div class="prod-sku">SKU: <span>${p.buyer_sku_code}</span></div>
                                     </div>
                                     <div style="text-align:right;">
-                                        <div class="prod-price">Rp ${hargaJual.toLocaleString('id-ID')}</div>
+                                        <div style="display:flex; align-items:center; justify-content:flex-end; gap:4px;">
+                                            <div class="prod-price">Rp ${hargaJual.toLocaleString('id-ID')}</div>
+                                            ${statusBadgeHtml}
+                                        </div>
                                         <div class="prod-modal">Modal: Rp ${hargaModal.toLocaleString('id-ID')}</div>
                                         <div style="display:flex; gap:2px; justify-content:flex-end; margin-top:2px;">
-                                            <button class="btn-sm btn-warning" style="padding:1px 4px;" onclick="bukaModalEditCustomProduct(${cat.id}, '${p.buyer_sku_code}', '${p.product_name.replace(/'/g, "\\'")}', ${hargaJual}, '${p.provider}')"><i class="fa-solid fa-pen"></i> Edit</button>
+                                            <button class="btn-sm btn-warning" style="padding:1px 4px;" onclick="bukaModalEditCustomProduct(${cat.id}, '${p.buyer_sku_code}', '${safeProdName}', ${hargaJual}, '${p.provider}', '${prodStatus}')"><i class="fa-solid fa-pen"></i> Edit</button>
                                             <button class="btn-sm btn-danger" style="padding:1px 4px;" onclick="hapusMappingProduk(${cat.id}, '${p.buyer_sku_code}', '${p.provider}', this)"><i class="fa-solid fa-xmark"></i> Lepas</button>
                                         </div>
                                     </div>
@@ -356,15 +441,28 @@
 
             catList.forEach((c, i) => c.sort_order = i + 1);
             renderCustomCategoriesTab();
-            try { await fetch('/api/admin/reorder-custom-categories', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ order: catList.map(c => ({ id: c.id, position: c.sort_order })) }) }); } catch (err) {}
+
+            try {
+                const payload = catList.map(c => ({ id: c.id, sort_order: c.sort_order }));
+                await fetch('/api/admin/reorder-custom-categories', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ order: payload })
+                });
+            } catch (err) {}
         }
 
-        function bukaModalEditCustomProduct(catId, sku, name, price, provider) {
+        function bukaModalEditCustomProduct(catId, sku, name, price, provider, status = '1') {
             document.getElementById('editCustomCatId').value = catId;
             document.getElementById('editCustomSku').value = sku;
             document.getElementById('editCustomName').value = name;
             document.getElementById('editCustomPrice').value = price;
             document.getElementById('editCustomProvider').value = provider;
+            
+            // Konversi presisi agar select selalu memilih pilihan yang benar
+            const stStr = String(status).trim();
+            document.getElementById('editCustomStatus').value = (stStr === '0' || stStr.toLowerCase() === 'false') ? '0' : '1';
+            
             document.getElementById('modalEditCustomProduct').style.display = 'flex';
         }
         function tutupModalEditCustomProduct() { document.getElementById('modalEditCustomProduct').style.display = 'none'; }
@@ -375,9 +473,15 @@
             const name = document.getElementById('editCustomName').value.trim();
             const price = parseInt(document.getElementById('editCustomPrice').value) || 0;
             const provider = document.getElementById('editCustomProvider').value;
+            const status = document.getElementById('editCustomStatus').value;
+
             if(!name || price < 0) return alert('Input tidak valid!');
             try {
-                const res = await fetch('/api/admin/update-custom-product', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ category_id: catId, buyer_sku_code: sku, product_name: name, price, provider }) });
+                const res = await fetch('/api/admin/update-custom-product', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ category_id: catId, buyer_sku_code: sku, product_name: name, price, provider, status })
+                });
                 const result = await res.json();
                 if(result.status === 'success') { tutupModalEditCustomProduct(); loadCustomCategoriesFromDB(); } else alert('Gagal: ' + result.message);
             } catch(e) { alert('Error jaringan'); }
@@ -392,23 +496,6 @@
                 const result = await res.json();
                 if(result.status === 'success') loadCustomCategoriesFromDB(); else alert('Gagal melepas produk');
             } catch(e) { alert('Error jaringan'); }
-        }
-
-        function resetForm() {
-            document.getElementById('providerSelect').value = 'digiflazz'; document.getElementById('sku').value = ''; document.getElementById('sku').readOnly = false; document.getElementById('nama').value = ''; document.getElementById('harga').value = ''; document.getElementById('statusSelect').value = '1'; document.getElementById('formTitle').innerHTML = '<i class="fa-solid fa-pen-to-square"></i> Tambah / Edit Produk Custom'; document.getElementById('btnReset').style.display = 'none';
-        }
-
-        async function simpanProduk() {
-            const providerVal = document.getElementById('providerSelect').value;
-            const skuVal = document.getElementById('sku').value.trim();
-            const namaVal = document.getElementById('nama').value.trim();
-            const hargaVal = parseInt(document.getElementById('harga').value) || 0;
-            const statusVal = document.getElementById('statusSelect').value;
-            if(!skuVal || !namaVal) return alert('SKU Kode dan Nama Produk wajib diisi!');
-            const body = { buyer_sku_code: skuVal, product_name: namaVal, brand: document.getElementById('brand').value, type: document.getElementById('typeSelect').value || 'Umum', price: hargaVal, jual: hargaVal, status: statusVal, provider: providerVal };
-            await fetch('/api/admin/products', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
-            resetForm();
-            loadCustomCategoriesFromDB();
         }
 
         window.onload = () => { loadCustomCategoriesFromDB(); };
