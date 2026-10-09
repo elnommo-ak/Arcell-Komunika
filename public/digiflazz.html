@@ -171,12 +171,27 @@
         }
 
         async function syncDigiflazzToDB() {
-            document.getElementById('folderContainer').innerHTML = `<div style="text-align:center; color: var(--primary); padding: 10px; font-size:0.75rem;"><i class="fa-solid fa-sync fa-spin"></i> Menyinkronkan data Digiflazz...</div>`;
+            const container = document.getElementById('folderContainer');
+            container.innerHTML = `<div style="text-align:center; color: var(--primary); padding: 15px; font-size:0.75rem;"><i class="fa-solid fa-sync fa-spin"></i> Menyinkronkan data Digiflazz & memperbarui harga Custom Produk...</div>`;
+            
             try {
-                const res = await fetch('/api/digiflazz/price-list', { method: 'POST' });
-                await res.json();
+                // 1. Fetch harga Digiflazz terbaru ke DB
+                const resDigi = await fetch('/api/digiflazz/price-list', { method: 'POST' });
+                await resDigi.json();
+
+                // 2. Trigger pemicu pembaruan harga ke Kategori Custom Produk
+                try {
+                    await fetch('/api/admin/sync-custom-prices', { method: 'POST' });
+                } catch(e) {}
+
+                // 3. Load ulang data terbaru ke UI
+                await loadCustomCategoriesFromDB();
                 await loadProduk();
-            } catch (err) { loadProduk(); }
+                alert('Berhasil menyinkronkan data Digiflazz dan memperbarui harga!');
+            } catch (err) {
+                alert('Gagal menyinkronkan data dari server.');
+                await loadProduk();
+            }
         }
 
         function toggleSelect(sku, checked) {

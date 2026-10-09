@@ -91,6 +91,23 @@
         .btn-info { background: #2563eb; color: #ffffff; border-color: #1d4ed8; }
         .btn-sm { padding: 3px 6px; font-size: 0.65rem; border-radius: 3px; }
 
+        /* DESAIN REKAP MEMBER SALDO & PROFIT (3 BARIS RAPI) */
+        .summary-header-card { background: #ffffff; border: 1px solid var(--otomax-border); border-radius: 6px; padding: 8px 10px; margin-bottom: 8px; }
+        .summary-row-1 { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e2e8f0; padding-bottom: 6px; margin-bottom: 6px; }
+        .summary-title { font-size: 0.75rem; font-weight: 800; color: #1e293b; display: flex; align-items: center; gap: 6px; text-transform: uppercase; }
+
+        .summary-row-2 { display: flex; justify-content: space-between; align-items: center; padding: 4px 0; font-size: 0.75rem; }
+        .summary-label { font-weight: 700; color: var(--text-sub); }
+        .summary-val-saldo { font-size: 0.82rem; font-weight: 900; color: var(--success); font-family: monospace; }
+
+        .summary-row-3 { border-top: 1px dashed #e2e8f0; margin-top: 4px; padding-top: 4px; }
+        .profit-accordion-btn { display: flex; justify-content: space-between; align-items: center; width: 100%; background: #f8fafc; border: 1px solid #e2e8f0; padding: 6px 8px; border-radius: 4px; cursor: pointer; font-size: 0.75rem; }
+        .profit-accordion-btn:hover { background: #f1f5f9; }
+        .summary-val-profit { font-size: 0.82rem; font-weight: 900; color: var(--primary); font-family: monospace; }
+        .profit-dropdown-content { display: none; flex-direction: column; gap: 4px; background: #fafafa; border: 1px solid #e2e8f0; border-top: none; padding: 6px 8px; border-radius: 0 0 4px 4px; }
+        .profit-dropdown-content.show { display: flex; }
+        .profit-sub-row { display: flex; justify-content: space-between; align-items: center; font-size: 0.7rem; }
+
         /* MEMBER CARD OTOMAX */
         .member-list-container { display: flex; flex-direction: column; gap: 6px; }
         .member-card { background: #ffffff; border-radius: 4px; border: 1px solid var(--otomax-border); padding: 8px; }
@@ -234,15 +251,45 @@
                 </div>
             </div>
 
-            <div class="glass-card">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
-                    <h3 style="margin:0; font-size:0.78rem;">
-                        <i class="fa-solid fa-users"></i> Member | 
-                        Saldo: <span id="dispSaldoMember" style="color: var(--success);">Rp 0</span> | 
-                        Profit: <span id="dispTotalProfitMember" style="color: var(--primary);">Rp 0</span>
-                    </h3>
+            <!-- PANEL REKAP SALDO & PROFIT MEMBER (3 BARIS) -->
+            <div class="summary-header-card">
+                <!-- BARIS 1: HEADER & TOMBOL +MEMBER -->
+                <div class="summary-row-1">
+                    <div class="summary-title">
+                        <i class="fa-solid fa-users" style="color:var(--primary);"></i> Rekap Saldo & Profit Member
+                    </div>
                     <button class="btn-success btn-sm" onclick="bukaModalMember()"><i class="fa-solid fa-user-plus"></i> + Member</button>
                 </div>
+
+                <!-- BARIS 2: TOTAL SALDO MEMBER (JUSTIFY) -->
+                <div class="summary-row-2">
+                    <span class="summary-label"><i class="fa-solid fa-wallet" style="margin-right:4px;"></i> Total Saldo Semua Member:</span>
+                    <span class="summary-val-saldo" id="dispSaldoMember">Rp 0</span>
+                </div>
+
+                <!-- BARIS 3: TOTAL PROFIT DROPDOWN ACCORDION -->
+                <div class="summary-row-3">
+                    <div class="profit-accordion-btn" onclick="toggleProfitDropdown()">
+                        <span class="summary-label" style="color:#1e293b;"><i class="fa-solid fa-chart-line" style="color:var(--primary); margin-right:4px;"></i> Total Profit Keseluruhan:</span>
+                        <div>
+                            <span class="summary-val-profit" id="dispTotalProfitMember">Rp 0</span>
+                            <i class="fa-solid fa-chevron-down" id="profitChevron" style="font-size:0.65rem; color:var(--text-sub); margin-left:4px;"></i>
+                        </div>
+                    </div>
+                    <div class="profit-dropdown-content" id="profitDropdownContent">
+                        <div class="profit-sub-row">
+                            <span style="color:var(--text-sub); font-weight:700;"><i class="fa-solid fa-calendar-days" style="color:var(--purple-accent); margin-right:4px;"></i> Total Profit Bulanan (Bulan Ini):</span>
+                            <span style="font-weight:900; color:var(--purple-accent); font-family:monospace;" id="dispTotalProfitBulanan">Rp 0</span>
+                        </div>
+                        <div class="profit-sub-row">
+                            <span style="color:var(--text-sub); font-weight:700;"><i class="fa-regular fa-calendar-check" style="color:var(--success); margin-right:4px;"></i> Total Transaksi & Profit Harian (Hari Ini):</span>
+                            <span style="font-weight:900; color:var(--success); font-family:monospace;" id="dispTotalTrxAndProfitHarian">0 Trx | Rp 0</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="glass-card">
                 <input type="text" id="searchMember" placeholder="🔍 Cari Member..." oninput="filterMember()" style="width: 100%; margin-bottom: 6px;">
                 <div class="member-list-container" id="tabelMember">
                     <div style="text-align:center; color: var(--text-sub); padding: 10px; font-size:0.75rem;">Memuat data member...</div>
@@ -251,7 +298,7 @@
         </div>
     </div>
 
-    <!-- MODAL MEMBER -->
+    <!-- MODAL MEMBER BARU -->
     <div id="modalMember" class="modal-overlay">
         <div class="modal-box">
             <h3><i class="fa-solid fa-user-plus"></i> Member Baru</h3>
@@ -267,7 +314,29 @@
         </div>
     </div>
 
-    <!-- MODAL EDIT STATUS -->
+    <!-- MODAL EDIT INFO MEMBER (PERMANEN) -->
+    <div id="modalEditMemberInfo" class="modal-overlay">
+        <div class="modal-box">
+            <h3><i class="fa-solid fa-user-pen"></i> Edit Info Member</h3>
+            <div style="display: flex; flex-direction: column; gap: 6px; margin-top: 6px;">
+                <input type="hidden" id="editMemberPhoneOriginal">
+                <div>
+                    <label style="font-size:0.63rem; font-weight:800; color:var(--text-sub);">NAMA MEMBER</label>
+                    <input type="text" id="editMemberNama" placeholder="Nama Member">
+                </div>
+                <div>
+                    <label style="font-size:0.63rem; font-weight:800; color:var(--text-sub);">ID MEMBER (PERMANEN)</label>
+                    <input type="text" id="editMemberId" placeholder="ID Member Ex: MEM-12345" style="font-family:monospace;">
+                </div>
+                <div style="display: flex; gap: 4px; margin-top: 4px;">
+                    <button onclick="simpanEditMemberInfo()" class="btn-success" style="flex: 1;"><i class="fa-solid fa-check"></i> Simpan Permanen</button>
+                    <button onclick="tutupModalEditMemberInfo()" class="btn-danger"><i class="fa-solid fa-xmark"></i> Batal</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL EDIT STATUS TRANSAKSI -->
     <div id="modalEditStatusTrx" class="modal-overlay">
         <div class="modal-box">
             <h3><i class="fa-solid fa-list-check"></i> Edit Status & SN</h3>
@@ -310,6 +379,13 @@
         function toggleDropdownMenu(evt) { evt.stopPropagation(); document.getElementById('dropdownMenu').classList.toggle('show'); }
         window.addEventListener('click', () => { const d = document.getElementById('dropdownMenu'); if (d && d.classList.contains('show')) d.classList.remove('show'); });
         function prosesKeluar() { if (confirm("Yakin ingin keluar?")) window.location.replace("login.html"); }
+
+        function toggleProfitDropdown() {
+            const content = document.getElementById('profitDropdownContent');
+            const chevron = document.getElementById('profitChevron');
+            content.classList.toggle('show');
+            chevron.style.transform = content.classList.contains('show') ? 'rotate(180deg)' : 'rotate(0deg)';
+        }
 
         function keDetailMember(identifier, isRefId = false) {
             if (!identifier || identifier === '-') return;
@@ -464,12 +540,19 @@
 
             const now = new Date();
             const todayStr = `${String(now.getDate()).padStart(2, '0')}/${String(now.getMonth() + 1).padStart(2, '0')}/${now.getFullYear()}`;
+            const currentMonthKey = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+
             let totalProfitSemuaMember = 0;
+            let totalProfitBulananSemua = 0;
+            let totalTrxHarianSemua = 0;
+            let totalProfitHarianSemua = 0;
+
             let html = '';
 
             list.forEach(m => {
                 const idMem = m.member_id || m.id || '-';
                 const noHp = m.phone || m.nohp || '-';
+                const namaMem = m.name || m.nama || '-';
                 const saldo = parseFloat(m.balance || 0);
 
                 const memberTrxSukses = rawTransactions.filter(t => {
@@ -478,7 +561,6 @@
                     return hpMatch && (st.includes('sukses') || st.includes('success') || st === '1' || st === 'berhasil');
                 });
 
-                // HIERARKI KELOMPOK: BULAN -> TANGGAL -> TRANSAKSI
                 const groupedByMonth = {};
                 let totalHarian = 0; 
                 let profitHariIni = 0;
@@ -494,9 +576,14 @@
                     const labaTrx = hJual - hModal;
 
                     profitMemberIni += labaTrx;
+                    if (mKey === currentMonthKey) {
+                        totalProfitBulananSemua += labaTrx;
+                    }
                     if (dateKey === todayStr) {
                         totalHarian += hJual;
                         profitHariIni += labaTrx;
+                        totalTrxHarianSemua += 1;
+                        totalProfitHarianSemua += labaTrx;
                     }
 
                     if (!groupedByMonth[mKey]) {
@@ -516,17 +603,21 @@
                 const sortedMonths = Object.values(groupedByMonth).sort((a, b) => b.monthKey.localeCompare(a.monthKey));
                 const isMemberOpen = openMemberCards.has(String(noHp));
 
+                const safeName = namaMem.replace(/'/g, "\\'").replace(/"/g, "&quot;");
+                const safeId = String(idMem).replace(/'/g, "\\'").replace(/"/g, "&quot;");
+
                 html += `
                     <div class="member-card ${isMemberOpen ? 'open' : ''}" id="member-card-${noHp}">
                         <div class="member-header-row">
                             <div class="member-title-info" onclick="keDetailMember('${noHp}')">
-                                <span><i class="fa-solid fa-user" style="color:var(--primary);"></i> <b>${m.name || m.nama || '-'}</b></span>
+                                <span><i class="fa-solid fa-user" style="color:var(--primary);"></i> <b>${namaMem}</b></span>
                                 <span class="hp">${noHp}</span>
                                 <span class="id">${idMem}</span>
                             </div>
                             <div style="display:flex; gap:2px;">
-                                <button class="btn-sm btn-info" onclick="keDetailMember('${noHp}')"><i class="fa-solid fa-arrow-right-to-bracket"></i></button>
-                                <button class="btn-sm btn-danger" onclick="hapusMember('${noHp}')"><i class="fa-solid fa-trash"></i></button>
+                                <button class="btn-sm btn-warning" title="Edit Nama & ID Member" onclick="bukaModalEditMemberInfo('${noHp}', '${safeName}', '${safeId}')"><i class="fa-solid fa-pen-to-square"></i></button>
+                                <button class="btn-sm btn-info" title="Detail Member" onclick="keDetailMember('${noHp}')"><i class="fa-solid fa-arrow-right-to-bracket"></i></button>
+                                <button class="btn-sm btn-danger" title="Hapus Member" onclick="hapusMember('${noHp}')"><i class="fa-solid fa-trash"></i></button>
                             </div>
                         </div>
                         <div class="member-stats-grid">
@@ -630,14 +721,54 @@
                 html += `</div></div>`;
             });
             
+            // BINDING DATA KE HEADER SUMMARY PANEL
             const elTotalProfit = document.getElementById('dispTotalProfitMember');
+            const elProfitBulanan = document.getElementById('dispTotalProfitBulanan');
+            const elProfitHarian = document.getElementById('dispTotalTrxAndProfitHarian');
+
             if (elTotalProfit) elTotalProfit.innerText = 'Rp ' + totalProfitSemuaMember.toLocaleString('id-ID');
+            if (elProfitBulanan) elProfitBulanan.innerText = 'Rp ' + totalProfitBulananSemua.toLocaleString('id-ID');
+            if (elProfitHarian) elProfitHarian.innerText = `${totalTrxHarianSemua} Trx | Rp ${totalProfitHarianSemua.toLocaleString('id-ID')}`;
+
             el.innerHTML = html;
         }
 
         function toggleMemberTrx(noHp) { const card = document.getElementById(`member-card-${noHp}`); if(card) { card.classList.toggle('open'); card.classList.contains('open') ? openMemberCards.add(String(noHp)) : openMemberCards.delete(String(noHp)); } }
         function toggleMonthFolder(el, monthFolderKey) { const monthCard = el.closest('.month-folder-card'); if(monthCard) { monthCard.classList.toggle('open'); monthCard.classList.contains('open') ? openMonthFolders.add(monthFolderKey) : openMonthFolders.delete(monthFolderKey); } }
         function toggleDateFolder(el, dateFolderKey) { const dateCard = el.closest('.date-folder-card'); if(dateCard) { dateCard.classList.toggle('open'); dateCard.classList.contains('open') ? openDateFolders.add(dateFolderKey) : openDateFolders.delete(dateFolderKey); } }
+
+        /* EDIT NAMA & ID MEMBER PERMANEN */
+        function bukaModalEditMemberInfo(phone, name, memberId) {
+            document.getElementById('editMemberPhoneOriginal').value = phone;
+            document.getElementById('editMemberNama').value = name;
+            document.getElementById('editMemberId').value = memberId;
+            document.getElementById('modalEditMemberInfo').style.display = 'flex';
+        }
+        function tutupModalEditMemberInfo() { document.getElementById('modalEditMemberInfo').style.display = 'none'; }
+
+        async function simpanEditMemberInfo() {
+            const phone = document.getElementById('editMemberPhoneOriginal').value;
+            const name = document.getElementById('editMemberNama').value.trim();
+            const member_id = document.getElementById('editMemberId').value.trim();
+
+            if (!name || !member_id) return alert('Nama dan ID Member tidak boleh kosong!');
+
+            try {
+                const res = await fetch('/api/admin/members/update-info', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ phone, name, member_id })
+                });
+                const result = await res.json();
+                if (result.status === 'success') {
+                    tutupModalEditMemberInfo();
+                    await loadMembers();
+                    alert('Info member berhasil diperbarui secara permanen!');
+                } else {
+                    alert('Gagal: ' + (result.message || 'Error server'));
+                }
+            } catch (err) { alert('Error jaringan'); }
+        }
 
         function bukaModalEditStatusTrx(refId, currentStatus, currentSn) {
             document.getElementById('editTrxRefId').value = refId;
