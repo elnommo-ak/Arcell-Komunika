@@ -1150,7 +1150,7 @@ app.delete('/api/admin/products/okeconnect/:code', (req, res) => {
 
 // 🟢 GET CUSTOM CATEGORIES (DITAMBAHKAN COLUMN p.status as status)
 // Endpoint untuk memperbarui Nama dan ID Member secara permanen
-app.post('/api/admin/members/update-info', async (req, res) => {
+app.post('/api/admin/members/update-info', (req, res) => {
     try {
         const { phone, name, member_id } = req.body;
 
@@ -1161,19 +1161,45 @@ app.post('/api/admin/members/update-info', async (req, res) => {
             });
         }
 
-        // Contoh query SQLite / Database Anda:
-        // UPDATE members SET name = ?, member_id = ? WHERE phone = ?
-        const stmt = db.prepare(`UPDATE members SET name = ?, member_id = ? WHERE phone = ?`);
-        const result = stmt.run(name, member_id, phone);
+        const cleanPhone = normalizePhone(phone);
 
-        if (result.changes > 0) {
-            return res.json({ status: 'success', message: 'Info member berhasil diperbarui!' });
-        } else {
-            return res.status(404).json({ status: 'error', message: 'Member tidak ditemukan!' });
-        }
+        // Query UPDATE menggunakan callback function sqlite3
+        const sql = `UPDATE members SET name = ?, member_id = ? WHERE phone = ? OR member_id = ?`;
+        
+        db.run(sql, [name.trim(), member_id.trim(), cleanPhone, phone], function (err) {
+            if (err) {
+                console.error('Error DB update member:', err.message);
+                if (err.message.includes('UNIQUE constraint failed')) {
+                    return res.status(400).json({ 
+                        status: 'error', 
+                        message: 'ID Member tersebut sudah digunakan oleh member lain!' 
+                    });
+                }
+                return res.status(500).json({ 
+                    status: 'error', 
+                    message: 'Gagal memperbarui data di database.' 
+                });
+            }
+
+            // this.changes berisi jumlah baris yang berhasil di-update
+            if (this.changes > 0) {
+                return res.json({ 
+                    status: 'success', 
+                    message: 'Info member berhasil diperbarui secara permanen!' 
+                });
+            } else {
+                return res.status(404).json({ 
+                    status: 'error', 
+                    message: 'Member tidak ditemukan di database!' 
+                });
+            }
+        });
     } catch (error) {
         console.error('Error update member info:', error);
-        return res.status(500).json({ status: 'error', message: 'Gagal memperbarui data di database.' });
+        return res.status(500).json({ 
+            status: 'error', 
+            message: 'Terjadi kesalahan sistem.' 
+        });
     }
 });
 

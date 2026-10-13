@@ -3,35 +3,45 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Pembelian Token PLN - Arcell</title>
+  <title>Pembelian Token PLN - Arcell Komunika</title>
   
   <!-- Font Awesome, Google Font & Bootstrap Icons -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 
+  <!-- 🔒 PROTEKSI WAJIB LOGIN -->
+  <script>
+    (function() {
+        const isLoggedIn = localStorage.getItem('isLoggedIn');
+        if (isLoggedIn !== 'true') {
+            window.location.href = 'akun.html';
+        }
+    })();
+  </script>
+
   <style>
     :root {
       /* Neumorphism Clean White Palette */
-      --bg-color: #f0f2f5;
+      --bg-color: #e6eaf0;
       --shadow-light: #ffffff;
-      --shadow-dark: #d1d9e6;
+      --shadow-dark: #babecc;
       
-      --accent-pink: #ec4899;          /* Aksen Pink Soft */
-      --accent-blue: #3b82f6;          /* Aksen Blue Soft */
-      --accent-yellow: #f59e0b;        /* Aksen PLN Yellow */
-      --accent-color: #64748b;         /* Slate Main Accent */
+      --accent-pink: #ec4899;          
+      --accent-blue: #3b82f6;          
+      --accent-yellow: #f59e0b;        
+      --accent-purple: #7052ff;
       
-      --text-main: #64748b;            /* Teks Soft Slate */
-      --text-muted: #94a3b8;           /* Teks Muted Gray */
-      --text-bold: #475569;            /* Teks Gelap Minimalis */
+      --text-main: #4a5568;            
+      --text-muted: #8c98a9;           
+      --text-bold: #2d3748;            
     }
 
     * {
       box-sizing: border-box;
       margin: 0;
       padding: 0;
-      font-family: 'Poppins', sans-serif;
+      font-family: 'Poppins', -apple-system, BlinkMacSystemFont, sans-serif;
       -webkit-tap-highlight-color: transparent;
     }
 
@@ -42,7 +52,6 @@
       padding-bottom: 20px;
     }
 
-    /* Kunci Scroll Saat Pop-Up Aktif */
     body.no-scroll {
       overflow: hidden !important;
       touch-action: none;
@@ -116,28 +125,6 @@
                  -2px -2px 5px var(--shadow-light);
     }
 
-    .input-icon-right {
-      width: 36px;
-      height: 36px;
-      border-radius: 50%;
-      background: var(--bg-color);
-      color: var(--text-bold);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 13px;
-      cursor: pointer;
-      box-shadow: 4px 4px 8px var(--shadow-dark), 
-                 -4px -4px 8px var(--shadow-light);
-      transition: transform 0.2s, box-shadow 0.2s;
-    }
-    
-    .input-icon-right:active {
-      transform: scale(0.92);
-      box-shadow: inset 2px 2px 4px var(--shadow-dark), 
-                  inset -2px -2px 4px var(--shadow-light);
-    }
-
     /* Filter Bar */
     .filter-container {
       display: flex;
@@ -172,7 +159,7 @@
       font-family: 'Font Awesome 6 Free';
       font-weight: 900;
       font-size: 9px;
-      color: var(--accent-blue);
+      color: var(--accent-purple);
       position: absolute;
       right: 12px;
       top: 50%;
@@ -257,7 +244,7 @@
     }
 
     .tab-item.active {
-      color: var(--accent-blue);
+      color: var(--accent-purple);
       box-shadow: inset 3px 3px 6px var(--shadow-dark), 
                   inset -3px -3px 6px var(--shadow-light);
     }
@@ -312,9 +299,21 @@
 
     .product-price {
       font-size: 14px;
-      font-weight: 700;
-      color: var(--accent-blue);
+      font-weight: 800;
+      color: var(--accent-purple);
     }
+
+    .dot-indicator {
+      display: inline-block;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      margin-left: 4px;
+      vertical-align: middle;
+      flex-shrink: 0;
+    }
+    .dot-digiflazz { background-color: #7052ff; box-shadow: 0 0 6px rgba(112, 82, 255, 0.5); }
+    .dot-okeconnect { background-color: #10b981; box-shadow: 0 0 6px rgba(16, 185, 129, 0.5); }
 
     .product-action {
       display: flex;
@@ -323,221 +322,53 @@
       width: 34px;
       height: 34px;
       border-radius: 50%;
-      background: var(--bg-color);
-      color: var(--accent-pink);
+      background: var(--accent-purple);
+      color: #ffffff;
       box-shadow: 3px 3px 6px var(--shadow-dark), 
                  -3px -3px 6px var(--shadow-light);
       font-size: 11px;
     }
 
-    /* POP-UP BOTTOM SHEET NEUMORPHISM */
-    .modal-overlay {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100vh;
-      background: rgba(100, 116, 139, 0.25); 
-      z-index: 1040;
-      display: none;
-      opacity: 0;
+    /* BOTTOM SHEET CHECKOUT */
+    .modal-checkout-backdrop {
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(15, 23, 42, 0.4); 
+      backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px);
+      z-index: 999 !important; display: none; opacity: 0; 
       transition: opacity 0.25s ease;
     }
+    .modal-checkout-backdrop.show { display: block; opacity: 1; }
 
-    .modal-overlay.show {
-      display: block;
-      opacity: 1;
+    .bottom-sheet {
+      position: fixed; bottom: -100%; left: 50%; transform: translateX(-50%);
+      width: 100%; max-width: 480px; background: var(--bg-color);
+      border-top-left-radius: 20px; border-top-right-radius: 20px;
+      box-shadow: 0px -8px 25px rgba(0, 0, 0, 0.12); z-index: 1000 !important;
+      padding: 12px 18px 24px 18px !important;
+      transition: bottom 0.28s cubic-bezier(0.16, 1, 0.3, 1);
     }
+    .bottom-sheet.active { bottom: 0; }
 
-    .checkout-page {
-      position: fixed;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      margin: 0 auto;
-      width: 100%;
-      max-width: 600px;
-      max-height: 85vh;
-      min-height: 380px;
-      background-color: var(--bg-color);
-      display: flex;
-      flex-direction: column;
-      z-index: 1050;
-      overflow: hidden;
-      border-top-left-radius: 32px;
-      border-top-right-radius: 32px;
-      box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.08);
-      transform: translateY(100%);
-      transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-      touch-action: none;
-    }
+    .sheet-drag-handle { width: 36px; height: 4px; background: var(--shadow-dark); border-radius: 10px; margin: 0 auto 10px auto; opacity: 0.7; }
 
-    .checkout-page.show {
-      transform: translateY(0);
+    .sheet-summary-box {
+      background: var(--bg-color); box-shadow: inset 3px 3px 6px var(--shadow-dark), inset -3px -3px 6px var(--shadow-light);
+      border-radius: 14px; padding: 12px 14px; margin-bottom: 14px; display: flex; flex-direction: column; gap: 8px;
     }
+    .sheet-row { display: flex; justify-content: space-between; align-items: center; font-size: 0.78rem; }
+    .sheet-row .label { color: var(--text-muted); font-weight: 600; }
+    .sheet-row .val-title { font-weight: 700; color: var(--text-bold); text-align: right; max-width: 65%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .sheet-row .val-target { font-weight: 800; color: var(--accent-purple); font-family: monospace; font-size: 0.85rem; }
+    .sheet-divider { border: none; border-top: 1px dashed var(--shadow-dark); opacity: 0.8; margin: 2px 0; }
+    .sheet-row .val-price { font-size: 1rem; font-weight: 800; color: var(--accent-purple); }
 
-    .drag-zone {
-      width: 100%;
-      padding: 12px 0 6px 0;
-      cursor: grab;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      background-color: var(--bg-color);
-      flex-shrink: 0;
+    .btn-bayar-now {
+      background: var(--accent-purple); color: #ffffff; font-weight: 800; border-radius: 50px;
+      padding: 12px; border: none; width: 100%;
+      box-shadow: 4px 4px 8px var(--shadow-dark), -4px -4px 8px var(--shadow-light); font-size: 0.82rem; text-transform: uppercase; letter-spacing: 0.5px; cursor: pointer;
+      display: flex; align-items: center; justify-content: center; gap: 8px; transition: all 0.2s ease;
     }
-
-    .bottom-sheet-handle {
-      width: 48px;
-      height: 5px;
-      background-color: #cbd5e1;
-      border-radius: 10px;
-    }
-
-    .checkout-header {
-      flex-shrink: 0;
-      background-color: var(--bg-color);
-      border-bottom: 1px solid rgba(209, 217, 230, 0.5);
-      padding: 4px 18px 12px 18px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
-
-    .checkout-content {
-      flex: 1 1 auto;
-      overflow-y: auto;
-      padding: 14px 18px;
-      display: flex;
-      flex-direction: column;
-      gap: 14px;
-      touch-action: pan-y;
-    }
-
-    .simple-card {
-      background: var(--bg-color);
-      border-radius: 20px;
-      box-shadow: 5px 5px 10px var(--shadow-dark), 
-                 -5px -5px 10px var(--shadow-light);
-      border: none;
-      overflow: hidden;
-      width: 100%;
-    }
-
-    .simple-card-header {
-      padding: 10px 14px;
-      background: var(--bg-color);
-      border-bottom: 1px solid rgba(209, 217, 230, 0.3);
-      color: var(--text-bold);
-      font-size: 11px;
-      font-weight: 700;
-    }
-
-    .neo-inset-box {
-      background: var(--bg-color);
-      border-radius: 16px;
-      padding: 10px 12px;
-      box-shadow: inset 3px 3px 6px var(--shadow-dark), 
-                  inset -3px -3px 6px var(--shadow-light);
-    }
-
-    .saldo-box-minimal {
-      background: var(--bg-color);
-      border-radius: 16px;
-      padding: 10px 12px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      box-shadow: inset 3px 3px 6px var(--shadow-dark), 
-                  inset -3px -3px 6px var(--shadow-light);
-    }
-
-    .ukuran_teks_detail {
-      font-size: 11px;
-      line-height: 1.4;
-    }
-
-    .item-row-divider {
-      border-bottom: 1px dashed rgba(209, 217, 230, 0.8);
-      padding-bottom: 6px;
-      margin-bottom: 6px;
-    }
-
-    .deskripsi-produk-box {
-      font-size: 10.5px;
-      color: var(--text-muted);
-      line-height: 1.4;
-      background: var(--bg-color);
-      padding: 8px 10px;
-      border-radius: 12px;
-      margin-top: 6px;
-      word-break: break-word;
-      box-shadow: inset 2px 2px 4px var(--shadow-dark), 
-                  inset -2px -2px 4px var(--shadow-light);
-    }
-
-    .sticky-info-bar {
-      background: var(--bg-color);
-      border-top: 1px solid rgba(209, 217, 230, 0.4);
-      padding: 8px 12px;
-      text-align: center;
-      font-size: 10px;
-      color: var(--text-muted);
-      flex-shrink: 0;
-    }
-
-    .checkout-footer {
-      background: var(--bg-color);
-      border-top: 1px solid rgba(209, 217, 230, 0.4);
-      padding: 12px 18px;
-      flex-shrink: 0;
-    }
-
-    /* Slide To Pay Component */
-    .slide-pay-container {
-      position: relative;
-      height: 48px;
-      background: var(--bg-color);
-      border-radius: 20px;
-      box-shadow: inset 4px 4px 8px var(--shadow-dark), 
-                  inset -4px -4px 8px var(--shadow-light);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      user-select: none;
-      touch-action: pan-x;
-      overflow: hidden;
-    }
-
-    .slide-pay-text {
-      font-size: 11px;
-      font-weight: 700;
-      color: var(--text-bold);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      pointer-events: none;
-      transition: opacity 0.2s ease;
-      z-index: 1;
-    }
-
-    .slide-pay-handle {
-      position: absolute;
-      left: 4px;
-      top: 4px;
-      width: 40px;
-      height: 40px;
-      background: var(--bg-color);
-      color: var(--accent-pink);
-      border-radius: 16px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      box-shadow: 4px 4px 8px var(--shadow-dark), 
-                 -4px -4px 8px var(--shadow-light);
-      z-index: 3;
-    }
+    .btn-bayar-now:active { box-shadow: inset 3px 3px 6px var(--shadow-dark), inset -3px -3px 6px var(--shadow-light); transform: scale(0.98); }
   </style>
 </head>
 <body>
@@ -551,15 +382,11 @@
       <input 
         type="tel" 
         id="phoneInput" 
-        class="bo_input_nomor"
         placeholder="Ketik ID Pelanggan / No. Meter..." 
         maxlength="20"
         autocomplete="off"
       />
       <span class="operator-badge" id="operatorBadge">PLN</span>
-      <div class="input-icon-right bo_tombol_kontak">
-        <i class="fa-solid fa-address-book"></i>
-      </div>
     </div>
   </div>
 
@@ -594,72 +421,44 @@
   </div>
 
   <!-- MODAL POP-UP BOTTOM SHEET -->
-  <div class="modal-overlay" id="modalOverlay" onclick="closeBottomSheet()"></div>
-
-  <div class="checkout-page" id="checkoutSheet">
-    <div class="drag-zone" id="dragZone">
-      <div class="bottom-sheet-handle"></div>
-    </div>
-
-    <div class="checkout-header">
-      <span class="fw-bold text-dark" style="font-size: 13px; font-weight:700; color: var(--text-bold) !important;">
-        <i class="bi bi-receipt me-2" style="color:var(--accent-pink);"></i>Rincian Pembayaran
-      </span>
-      <i class="bi bi-x-circle-fill text-secondary" style="cursor: pointer; font-size: 18px;" onclick="closeBottomSheet()"></i>
-    </div>
-
-    <div class="checkout-content" id="sheetContent">
-      <div class="simple-card">
-        <div class="simple-card-header">
-          <i class="bi bi-box-seam me-2" style="color: var(--accent-blue);"></i>Detail Produk
-        </div>
-        <div style="padding: 10px;">
-          <div class="neo-inset-box" id="detailProdukBox"></div>
-        </div>
+  <div id="checkoutBackdrop" class="modal-checkout-backdrop" onclick="tutupCheckoutSheet()"></div>
+  <div id="checkoutBottomSheet" class="bottom-sheet">
+      <div class="sheet-drag-handle"></div>
+      
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+          <span style="font-size: 0.85rem; font-weight: 800; color: var(--text-bold);" id="sheet_provider_title">Konfirmasi Pembelian</span>
+          <button type="button" onclick="tutupCheckoutSheet()" style="background: none; border: none; font-size: 1.1rem; color: var(--text-muted); cursor: pointer; padding: 0 4px;">&times;</button>
       </div>
 
-      <div class="simple-card">
-        <div class="simple-card-header">
-          <i class="bi bi-wallet2 me-2" style="color: var(--accent-blue);"></i>Metode Pembayaran
-        </div>
-        <div style="padding: 10px;">
-          <div class="saldo-box-minimal">
-            <div class="d-flex align-items-center gap-2">
-              <i class="bi bi-wallet-fill" style="color: var(--accent-blue); font-size: 14px;"></i>
-              <span style="font-size: 11px; font-weight: 700; color: var(--text-bold);">Saldo Akun</span>
-            </div>
-            <span style="font-size: 10px; font-weight: 600; color: #3b82f6; background: var(--bg-color); padding: 4px 10px; border-radius: 12px; box-shadow: 2px 2px 4px var(--shadow-dark), -2px -2px 4px var(--shadow-light);">
-              Otomatis Potong
-            </span>
+      <div class="sheet-summary-box">
+          <div class="sheet-row">
+              <span class="label">Produk</span>
+              <span class="val-title" id="sheet_nama_produk">-</span>
           </div>
-        </div>
+          <div class="sheet-row">
+              <span class="label">Jalur Server</span>
+              <span class="val-title" id="sheet_provider_label" style="text-transform: uppercase;">-</span>
+          </div>
+          <div class="sheet-row">
+              <span class="label">No. Meter / ID Pel</span>
+              <span class="val-target" id="sheet_no_tujuan">-</span>
+          </div>
+          <!-- INPUT PILIHAN WAKTU TERJADWAL -->
+          <div class="sheet-row" style="margin-top: 4px;">
+              <span class="label">Jadwalkan (Opsional)</span>
+              <input type="datetime-local" id="sheet_schedule_time" style="background: var(--bg-color); border: 1px solid var(--shadow-dark); border-radius: 8px; padding: 4px 8px; font-size: 0.75rem; color: var(--text-bold); outline: none;">
+          </div>
+          <div class="sheet-divider"></div>
+          <div class="sheet-row">
+              <span class="label" style="font-weight: 700; color: var(--text-bold);">Total</span>
+              <span class="val-price" id="sheet_total_harga">Rp 0</span>
+          </div>
       </div>
-    </div>
 
-    <div class="sticky-info-bar">
-      <i class="bi bi-info-circle me-1" style="color: var(--accent-blue);"></i> Periksa kembali No. Meter / ID Pelanggan sebelum transaksi
-    </div>
-
-    <div class="checkout-footer">
-      <div class="d-flex align-items-center gap-2" style="display: flex; align-items: center; gap: 10px;">
-        <div style="min-width: 95px;" class="d-flex flex-column justify-content-center">
-          <span style="font-size: 9px; color: var(--text-muted); font-weight:600; line-height: 1;">Total Belanja</span>
-          <span style="font-size: 13.5px; font-weight: 700; color: var(--accent-blue); margin-top: 2px;" id="totalBayarText">Rp 0</span>
-        </div>
-
-        <div class="slide-pay-container" style="flex: 1;" id="slidePayContainer">
-          <div class="slide-pay-text" id="slidePayText">
-            <span>Geser Untuk Membayar</span> <i class="bi bi-chevrons-right ms-1" style="color:var(--accent-pink);"></i>
-          </div>
-          <div class="slide-pay-handle" id="slidePayHandle">
-            <i class="bi bi-arrow-right-short" style="font-size: 20px;"></i>
-          </div>
-        </div>
-      </div>
-    </div>
+      <button id="btnProsesBayar" onclick="eksekusiCheckoutTerpilih()" class="btn-bayar-now">
+          <i class="fa-solid fa-shield-halved"></i> Bayar Sekarang
+      </button>
   </div>
-
-  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 
   <script>
     const inputPhone = document.getElementById('phoneInput');
@@ -673,13 +472,32 @@
 
     let groupedProducts = {};
     let currentRawProducts = [];
-    let selectedProduct = null;
-    let isTransactionLocked = false;
+    let dataCheckoutAktif = {};
+    let memberSaldoAktif = 0;
 
-    // Direct Load saat Halaman Dibuka Tanpa Perlu Ketik Nomor
+    // Load Data Otomatis Saat Dibuka
     document.addEventListener("DOMContentLoaded", function() {
+      loadSaldoMember();
       loadPLNProductsFromDatabase();
     });
+
+    async function loadSaldoMember() {
+      const userPhone = localStorage.getItem('userPhone') || localStorage.getItem('user_hp');
+      if (!userPhone) return;
+
+      try {
+        const res = await fetch('/api/admin/members?t=' + Date.now());
+        const result = await res.json();
+        const listMember = Array.isArray(result) ? result : (result.data || []);
+        const currentMember = listMember.find(m => String(m.phone || m.nohp || '').trim() === String(userPhone).trim());
+
+        if (currentMember) {
+          memberSaldoAktif = parseFloat(currentMember.balance || 0);
+        }
+      } catch (err) {
+        console.error("Gagal sinkron saldo member:", err);
+      }
+    }
 
     function showLoading(text) {
       contentArea.style.display = 'none';
@@ -688,25 +506,24 @@
       emptyText.innerHTML = text;
     }
 
-    // 🔹 MENYESUAIKAN API DENGAN BACKEND DATABASE SQLITE (`/api/user/products-by-prefix?brand=PLN`)
     async function loadPLNProductsFromDatabase() {
       showLoading("Memuat produk Token PLN dari Database...");
 
       try {
-        const response = await fetch('/api/user/products-by-prefix?brand=PLN');
+        const response = await fetch('/api/user/products-by-prefix?brand=PLN&t=' + Date.now());
         const res = await response.json();
 
         if (res.status === 'success' && res.data && Object.keys(res.data).length > 0) {
           groupedProducts = res.data;
-          const tabKeys = Object.keys(groupedProducts);
-
-          renderTabs(tabKeys);
+          renderTabs(Object.keys(groupedProducts));
         } else {
+          emptyState.style.display = 'flex';
           stateIcon.className = "fa-solid fa-box-open";
           emptyText.innerText = "Produk PLN belum dimapping pada Database Admin.";
         }
       } catch (err) {
         console.error(err);
+        emptyState.style.display = 'flex';
         stateIcon.className = "fa-solid fa-triangle-exclamation";
         emptyText.innerText = "Gagal terhubung ke database server.";
       }
@@ -745,8 +562,8 @@
       var sortedProducts = [...currentRawProducts];
 
       sortedProducts.sort(function(a, b) {
-        var hargaA = parseFloat(a.jual || a.price || 0);
-        var hargaB = parseFloat(b.jual || b.price || 0);
+        var hargaA = parseFloat(a.jual || a.price || a.harga || 0);
+        var hargaB = parseFloat(b.jual || b.price || b.harga || 0);
         return sortValue === 'asc' ? hargaA - hargaB : hargaB - hargaA;
       });
 
@@ -755,14 +572,24 @@
 
     function renderProdukCards(produkList) {
       var html = "";
-      produkList.forEach(function(prod, index) {
-        var hargaJual = parseFloat(prod.jual || prod.price || 0);
-        var hargaFormatted = formatRupiah(hargaJual);
-        
+      produkList.forEach(function(prod) {
+        var harga = parseFloat(prod.jual || prod.price || prod.harga || 0);
+        var hargaFormatted = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(harga);
+        var namaProduk = prod.product_name || prod.nama_produk || 'Token PLN';
+        var skuProduk = prod.buyer_sku_code || prod.code || prod.sku || '';
+        var prov = prod._provider || prod.provider || 'digiflazz';
+
+        var dotHtml = prov === 'okeconnect' 
+            ? `<span class="dot-indicator dot-okeconnect"></span>`
+            : `<span class="dot-indicator dot-digiflazz"></span>`;
+
+        var namaClean = String(namaProduk).replace(/'/g, "\\'").replace(/"/g, '\\"');
+        var skuClean = String(skuProduk).replace(/'/g, "\\'").replace(/"/g, '\\"');
+
         html += `
-          <div class="product-card" onclick="openBottomSheetByIndex(${index})">
+          <div class="product-card" onclick="prosesBeli('${prov}', '${skuClean}', '${namaClean}', ${harga})">
             <div class="product-info">
-              <div class="product-title">${prod.product_name}</div>
+              <div class="product-title">${namaProduk} ${dotHtml}</div>
               <div class="product-price">${hargaFormatted}</div>
             </div>
             <div class="product-action">
@@ -775,246 +602,166 @@
     }
 
     /* ========================================= */
-    /* LOGIKA POP-UP & CHECKOUT SWIPE PAY        */
+    /* LOGIKA BOTTOM SHEET & CHECKOUT            */
     /* ========================================= */
-    function openBottomSheetByIndex(index) {
-      var prod = currentRawProducts[index];
-      if (!prod) return;
+    window.prosesBeli = function(provider, skuCode, productName, price) {
+      let nomorMeterPLN = inputPhone.value.replace(/[^0-9]/g, '');
 
-      var nomorTujuan = inputPhone.value.replace(/[^0-9]/g, '');
-      if (nomorTujuan.length < 6) {
-        alert('Silakan masukkan ID Pelanggan / No. Meter PLN yang valid terlebih dahulu pada kolom atas.');
+      if (nomorMeterPLN.length < 6) {
+        alert('❌ ID Pelanggan / No. Meter PLN tidak valid! Silakan isi minimal 6 digit.');
         inputPhone.focus();
         return;
       }
 
-      selectedProduct = prod;
+      if (memberSaldoAktif > 0 && memberSaldoAktif < price) {
+        return alert(`❌ Saldo Anda Tidak Mencukupi!\n\nHarga Produk: Rp ${price.toLocaleString('id-ID')}\nSaldo Anda: Rp ${memberSaldoAktif.toLocaleString('id-ID')}`);
+      }
 
-      var hargaJual = parseFloat(prod.jual || prod.price || 0);
-      var providerName = (prod._provider || 'digiflazz').toUpperCase();
+      dataCheckoutAktif = {
+        provider: provider,
+        buyer_sku_code: skuCode,
+        product_name: productName,
+        customer_no: nomorMeterPLN,
+        price: price,
+        ref_id: 'TRX-' + Date.now()
+      };
 
-      var detailHtml = `
-        <div class="d-flex justify-content-between align-items-center item-row-divider" style="display:flex; justify-content:space-between; margin-bottom:6px;">
-          <span class="ukuran_teks_detail text-secondary fw-semibold">Nama Produk</span>
-          <span class="fw-bold text-dark text-end ukuran_teks_detail text-break ms-2" style="color:var(--text-bold) !important;">${prod.product_name}</span>
-        </div>
-        <div class="d-flex justify-content-between align-items-center item-row-divider" style="display:flex; justify-content:space-between; margin-bottom:6px;">
-          <span class="ukuran_teks_detail text-secondary fw-semibold">No. Meter / ID Pel</span>
-          <span class="fw-bold ukuran_teks_detail" style="color:var(--accent-blue);">${nomorTujuan}</span>
-        </div>
-        <div class="d-flex justify-content-between align-items-center item-row-divider" style="display:flex; justify-content:space-between; margin-bottom:6px;">
-          <span class="ukuran_teks_detail text-secondary fw-semibold">Kode SKU</span>
-          <span class="fw-semibold text-muted ukuran_teks_detail">#${prod.buyer_sku_code}</span>
-        </div>
-        <div class="d-flex justify-content-between align-items-center" style="display:flex; justify-content:space-between;">
-          <span class="ukuran_teks_detail text-secondary fw-semibold">Harga</span>
-          <span class="fw-bold ukuran_teks_detail" style="color:var(--accent-blue);">${formatRupiah(hargaJual)}</span>
-        </div>
-      `;
+      document.getElementById('sheet_provider_title').innerText = "Konfirmasi Pembelian";
+      document.getElementById('sheet_provider_label').innerText = provider;
+      document.getElementById('sheet_nama_produk').innerText = productName;
+      document.getElementById('sheet_no_tujuan').innerText = nomorMeterPLN;
+      document.getElementById('sheet_total_harga').innerText = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(price);
+      document.getElementById('sheet_schedule_time').value = "";
 
-      document.getElementById('detailProdukBox').innerHTML = detailHtml;
-      document.getElementById('totalBayarText').innerText = formatRupiah(hargaJual);
+      const backdrop = document.getElementById('checkoutBackdrop');
+      const sheet = document.getElementById('checkoutBottomSheet');
 
       document.body.classList.add('no-scroll');
+      backdrop.classList.add('show');
+      setTimeout(() => { sheet.classList.add('active'); }, 10);
+    };
 
-      document.getElementById('modalOverlay').classList.add('show');
-      document.getElementById('checkoutSheet').classList.add('show');
-      document.getElementById('checkoutSheet').style.transform = "translateY(0)";
-
-      initSlideToPay();
-      setupSwipeGesture();
-    }
-
-    function closeBottomSheet() {
-      var sheet = document.getElementById('checkoutSheet');
-      sheet.style.transform = "translateY(100%)";
-      
-      document.getElementById('modalOverlay').classList.remove('show');
-      document.body.classList.remove('no-scroll');
-
-      setTimeout(() => {
-        sheet.classList.remove('show');
+    function tutupCheckoutSheet() {
+      const backdrop = document.getElementById('checkoutBackdrop');
+      const sheet = document.getElementById('checkoutBottomSheet');
+      sheet.classList.remove('active');
+      setTimeout(() => { 
+        backdrop.classList.remove('show'); 
+        document.body.classList.remove('no-scroll');
       }, 300);
     }
 
-    function setupSwipeGesture() {
-      const sheet = document.getElementById('checkoutSheet');
-      const dragZone = document.getElementById('dragZone');
-      const content = document.getElementById('sheetContent');
+    async function eksekusiCheckoutTerpilih() {
+      const btn = document.getElementById('btnProsesBayar');
+      const scheduleTime = document.getElementById('sheet_schedule_time').value;
 
-      let startY = 0;
-      let currentY = 0;
-      let isDragging = false;
+      btn.disabled = true;
+      btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Memproses...';
 
-      function onTouchStart(e) {
-        if (content.scrollTop > 0 && e.target !== dragZone) return;
-        startY = e.touches ? e.touches[0].clientY : e.clientY;
-        isDragging = true;
-        sheet.style.transition = 'none';
+      // 🔹 AMBIL OTOMATIS HP MEMBER LOGIN DARI VARIASI LOCALSTORAGE
+      const rawUserSession = localStorage.getItem('arcell_user') || localStorage.getItem('user') || '{}';
+      let parsedUser = {};
+      try { parsedUser = JSON.parse(rawUserSession); } catch(e){}
+
+      const userHp = localStorage.getItem('userPhone') || 
+                     localStorage.getItem('user_hp') || 
+                     parsedUser.phone || 
+                     parsedUser.hp || 
+                     parsedUser.user_hp || '';
+
+      const userName = localStorage.getItem('userName') || 
+                      localStorage.getItem('username') || 
+                      parsedUser.name || 'Member';
+
+      const subId = localStorage.getItem('onesignal_subscription_id') || '';
+
+      if (!userHp) {
+        alert('❌ Session login tidak valid. Silakan login kembali!');
+        window.location.href = 'akun.html';
+        return;
       }
 
-      function onTouchMove(e) {
-        if (!isDragging) return;
-        currentY = e.touches ? e.touches[0].clientY : e.clientY;
-        let deltaY = currentY - startY;
+      // 1. Eksekusi Transaksi Terjadwal Jika Diisi
+      if (scheduleTime) {
+        const formattedSchedule = scheduleTime.replace('T', ' ') + ':00';
 
-        if (deltaY > 0) {
-          sheet.style.transform = `translateY(${deltaY}px)`;
-        } else if (deltaY < 0 && deltaY > -60) {
-          sheet.style.transform = `translateY(${deltaY * 0.2}px)`;
+        const schedulePayload = {
+          user_hp: userHp,
+          username: userName,
+          buyer_sku_code: dataCheckoutAktif.buyer_sku_code,
+          customer_no: dataCheckoutAktif.customer_no, // ID Pelanggan PLN
+          nama_produk: dataCheckoutAktif.product_name,
+          harga_jual: dataCheckoutAktif.price,
+          provider: dataCheckoutAktif.provider,
+          schedule_time: formattedSchedule
+        };
+
+        try {
+          const response = await fetch('/api/user/schedule-transaction', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(schedulePayload)
+          });
+          const res = await response.json();
+
+          if (res.status === 'success') {
+            tutupCheckoutSheet();
+            alert('⏰ Transaksi PLN berhasil dijadwalkan untuk: ' + formattedSchedule);
+            window.location.href = 'history.html';
+          } else {
+            alert('❌ Gagal menjadwalkan: ' + (res.message || 'Terjadi kesalahan'));
+          }
+        } catch (err) {
+          console.error(err);
+          alert('❌ Gagal terhubung ke Server');
+        } finally {
+          btn.disabled = false;
+          btn.innerHTML = '<i class="fa-solid fa-shield-halved"></i> Bayar Sekarang';
         }
+        return;
       }
 
-      function onTouchEnd() {
-        if (!isDragging) return;
-        isDragging = false;
-        sheet.style.transition = 'transform 0.3s cubic-bezier(0.16, 1, 0.3, 1)';
-        let deltaY = currentY - startY;
+      // 2. Eksekusi Transaksi Langsung
+      const payload = {
+        buyer_sku_code: dataCheckoutAktif.buyer_sku_code,
+        customer_no: dataCheckoutAktif.customer_no, // ID Pelanggan PLN (Tujuan)
+        user_hp: userHp,                             // No. HP Member Login (Potong Saldo)
+        username: userName,
+        nama_produk: dataCheckoutAktif.product_name,
+        harga_jual: dataCheckoutAktif.price,
+        subscription_id: subId
+      };
 
-        if (deltaY > 120) {
-          closeBottomSheet();
-        } else {
-          sheet.style.transform = 'translateY(0)';
-        }
-      }
-
-      dragZone.ontouchstart = onTouchStart;
-      dragZone.ontouchmove = onTouchMove;
-      dragZone.ontouchend = onTouchEnd;
-
-      sheet.ontouchstart = onTouchStart;
-      sheet.ontouchmove = onTouchMove;
-      sheet.ontouchend = onTouchEnd;
-    }
-
-    function initSlideToPay() {
-      const container = document.getElementById('slidePayContainer');
-      const handle = document.getElementById('slidePayHandle');
-      const text = document.getElementById('slidePayText');
-      
-      if(!container || !handle) return;
-
-      let isDragging = false;
-      let startX = 0;
-      let currentX = 0;
-      let maxSlide = 0;
-
-      function updateMaxSlide() {
-        maxSlide = container.clientWidth - handle.clientWidth - 8;
-      }
-      updateMaxSlide();
-
-      handle.style.transform = 'translateX(0px)';
-      text.style.opacity = '1';
-
-      function updateBgFill(deltaX) {
-        let percentage = Math.min(100, Math.max(0, ((deltaX + 20) / container.clientWidth) * 100));
-        container.style.background = `linear-gradient(to right, rgba(236, 72, 153, 0.15) ${percentage}%, var(--bg-color) ${percentage}%)`;
-      }
-
-      function resetBgFill() {
-        container.style.background = 'var(--bg-color)';
-      }
-
-      function onStart(e) {
-        if(isTransactionLocked) return;
-        isDragging = true;
-        startX = e.type.includes('touch') ? e.touches[0].clientX : e.clientX;
-        handle.style.transition = 'none';
-      }
-
-      function onMove(e) {
-        if (!isDragging) return;
-        const clientX = e.type.includes('touch') ? e.touches[0].clientX : e.clientX;
-        let deltaX = clientX - startX;
-        
-        if (deltaX < 0) deltaX = 0;
-        if (deltaX > maxSlide) deltaX = maxSlide;
-
-        currentX = deltaX;
-        handle.style.transform = `translateX(${deltaX}px)`;
-        updateBgFill(deltaX);
-
-        let opacity = 1 - (deltaX / maxSlide);
-        text.style.opacity = opacity;
-      }
-
-      function onEnd() {
-        if (!isDragging) return;
-        isDragging = false;
-
-        if (currentX >= maxSlide * 0.85) {
-          handle.style.transition = 'transform 0.15s ease-out';
-          handle.style.transform = `translateX(${maxSlide}px)`;
-          text.style.opacity = '0';
-          updateBgFill(maxSlide);
-          
-          prosesTransaksiBackend();
-        } else {
-          handle.style.transition = 'transform 0.2s ease-out';
-          handle.style.transform = 'translateX(0px)';
-          text.style.opacity = '1';
-          resetBgFill();
-        }
-      }
-
-      handle.onmousedown = onStart;
-      window.onmousemove = onMove;
-      window.onmouseup = onEnd;
-
-      handle.ontouchstart = onStart;
-      window.ontouchmove = onMove;
-      window.ontouchend = onEnd;
-    }
-
-    // 🔹 PROSES CHECKOUT DENGAN DUKUNGAN MULTI-PROVIDER (Digiflazz / Okeconnect)
-    async function prosesTransaksiBackend() {
-      if (!selectedProduct) return;
-      isTransactionLocked = true;
-
-      const slideText = document.getElementById('slidePayText');
-      slideText.innerHTML = '<span>Memproses...</span>';
-      slideText.style.opacity = '1';
-
-      const nomorTujuan = inputPhone.value.replace(/[^0-9]/g, '');
-      const userSession = JSON.parse(localStorage.getItem('arcell_user') || '{}');
-      
-      const provider = (selectedProduct._provider || 'digiflazz').toLowerCase();
-      const endpoint = provider === 'okeconnect' ? '/api/okeconnect/checkout' : '/api/digiflazz/checkout';
+      const endpointUrl = dataCheckoutAktif.provider === 'okeconnect' ? '/api/okeconnect/checkout' : '/api/digiflazz/checkout';
 
       try {
-        const response = await fetch(endpoint, {
+        const response = await fetch(endpointUrl, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            buyer_sku_code: selectedProduct.buyer_sku_code,
-            customer_no: nomorTujuan,
-            user_hp: userSession.phone || userSession.hp || nomorTujuan,
-            harga_jual: selectedProduct.jual || selectedProduct.price,
-            nama_produk: selectedProduct.product_name
-          })
+          body: JSON.stringify(payload)
         });
 
         const res = await response.json();
 
-        if (res.status === 'success') {
-          alert(`✅ Transaksi Berhasil!\n\nProduk: ${selectedProduct.product_name}\nID Pelanggan: ${nomorTujuan}\nStatus: Diproses/Sukses`);
-          closeBottomSheet();
-          window.location.href = '/history.html';
+        if (res.status === 'success' || res.status === 200 || response.ok) {
+          tutupCheckoutSheet();
+          
+          var refIdResult = (res.data && (res.data.ref_id || res.data.id || res.data.trx_id)) 
+                            ? (res.data.ref_id || res.data.id || res.data.trx_id) 
+                            : (res.ref_id || dataCheckoutAktif.ref_id);
+
+          window.location.href = 'detail.html?id=' + encodeURIComponent(refIdResult);
         } else {
-          alert('❌ Gagal Transaksi: ' + (res.message || 'Terjadi kesalahan sistem'));
-          isTransactionLocked = false;
-          initSlideToPay();
+          alert('❌ Gagal Transaksi: ' + (res.message || 'Terjadi kesalahan'));
+          btn.disabled = false;
+          btn.innerHTML = '<i class="fa-solid fa-shield-halved"></i> Bayar Sekarang';
         }
       } catch (err) {
-        alert('❌ Terjadi kesalahan koneksi ke server.');
-        isTransactionLocked = false;
-        initSlideToPay();
+        console.error(err);
+        alert('❌ Gagal terhubung ke Server');
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fa-solid fa-shield-halved"></i> Bayar Sekarang';
       }
-    }
-
-    function formatRupiah(angka) {
-      return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(angka);
     }
   </script>
 </body>
