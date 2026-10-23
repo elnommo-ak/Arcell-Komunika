@@ -398,8 +398,24 @@
             box-shadow: var(--neu-shadow-sm); transition: all 0.2s ease; position: relative;
         }
         .product-card:active { box-shadow: var(--neu-shadow-inset); transform: scale(0.98); }
+        .product-card.promo-card {
+            border: 1px solid rgba(239, 68, 68, 0.25);
+        }
+        .promo-badge {
+            display: inline-block;
+            background: linear-gradient(135deg, #ef4444, #f97316);
+            color: #ffffff;
+            font-size: 0.58rem;
+            font-weight: 800;
+            padding: 2px 7px;
+            border-radius: var(--border-radius-pill);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            box-shadow: 2px 2px 5px rgba(239, 68, 68, 0.35);
+            margin-bottom: 3px;
+        }
         .product-info { flex: 1; padding-right: 8px; }
-        .product-title { font-size: 0.8rem; font-weight: 700; color: var(--text-main); line-height: 1.3; margin-bottom: 4px; display: flex; align-items: center; gap: 4px; }
+        .product-title { font-size: 0.8rem; font-weight: 700; color: var(--text-main); line-height: 1.3; margin-bottom: 4px; display: flex; align-items: center; gap: 4px; flex-wrap: wrap; }
         .product-price { font-size: 0.88rem; font-weight: 800; color: var(--accent-purple); }
         
         .dot-indicator {
@@ -978,12 +994,17 @@
                     ? `<span class="dot-indicator dot-okeconnect"></span>`
                     : `<span class="dot-indicator dot-digiflazz"></span>`;
 
+                let isPromo = /promo|🔥/i.test(namaProduk);
+                let promoBadgeHtml = isPromo ? `<span class="promo-badge">PROMO</span>` : '';
+                let promoCardClass = isPromo ? 'promo-card' : '';
+
                 let namaClean = String(namaProduk).replace(/'/g, "\\'").replace(/"/g, '\\"');
                 let skuClean = String(skuProduk).replace(/'/g, "\\'").replace(/"/g, '\\"');
 
                 html += `
-                    <div class="product-card" onclick="prosesBeli('${prov}', '${skuClean}', '${namaClean}', ${harga})">
+                    <div class="product-card ${promoCardClass}" onclick="prosesBeli('${prov}', '${skuClean}', '${namaClean}', ${harga})">
                         <div class="product-info">
+                            ${promoBadgeHtml}
                             <div class="product-title">${namaProduk} ${dotHtml}</div>
                             <div class="product-price">${hargaFormatted}</div>
                         </div>

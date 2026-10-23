@@ -91,6 +91,17 @@
         .btn-info { background: #2563eb; color: #ffffff; border-color: #1d4ed8; }
         .btn-sm { padding: 3px 6px; font-size: 0.65rem; border-radius: 3px; }
 
+        /* AKORDION DAFTAR PRODUK TERJUAL */
+        .sold-products-card { background: #ffffff; border: 1px solid var(--otomax-border); border-radius: 6px; padding: 8px 10px; margin-bottom: 8px; }
+        .sold-products-btn { display: flex; justify-content: space-between; align-items: center; width: 100%; background: #f8fafc; border: 1px solid #e2e8f0; padding: 6px 8px; border-radius: 4px; cursor: pointer; font-size: 0.75rem; font-weight: 800; color: #1e293b; }
+        .sold-products-btn:hover { background: #f1f5f9; }
+        .sold-dropdown-content { display: none; flex-direction: column; gap: 6px; background: #fafafa; border: 1px solid #e2e8f0; border-top: none; padding: 8px; border-radius: 0 0 4px 4px; margin-top: -2px; }
+        .sold-dropdown-content.show { display: flex; }
+
+        .sold-item-card { background: #ffffff; padding: 6px 8px; border-radius: 4px; border: 1px solid var(--otomax-border); display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+        .sold-item-title { font-size: 0.75rem; font-weight: 800; color: var(--text-main); }
+        .sold-item-badge { background: #e0e7ff; color: var(--primary); font-size: 0.63rem; font-weight: 900; padding: 1px 6px; border-radius: 3px; font-family: monospace; }
+
         /* DESAIN REKAP MEMBER SALDO & PROFIT (3 BARIS RAPI) */
         .summary-header-card { background: #ffffff; border: 1px solid var(--otomax-border); border-radius: 6px; padding: 8px 10px; margin-bottom: 8px; }
         .summary-row-1 { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e2e8f0; padding-bottom: 6px; margin-bottom: 6px; }
@@ -195,8 +206,8 @@
                 <i class="fa-solid fa-box-open"></i> Produk Digiflazz
             </a>
             <div class="dropdown-divider"></div>
-            <a href="#" class="dropdown-item" onclick="navTo('hutang.html')">
-                <i class="fa-solid fa-book-bookmark"></i> Catatan Hutang
+            <a href="#" class="dropdown-item" onclick="navTo('catatan.html')">
+                <i class="fa-solid fa-book-bookmark"></i> Catatan
             </a>
             <a href="#" class="dropdown-item" onclick="navTo('kasir.html')">
                 <i class="fa-solid fa-cash-register"></i> Kasir
@@ -221,6 +232,37 @@
                 <div class="value" id="dispSaldoDigiflazz">Rp 0</div>
                 <div style="margin-top: 4px;">
                     <button class="btn-sm" onclick="loadSaldoInfo()"><i class="fa-solid fa-rotate-right"></i> Refresh</button>
+                </div>
+            </div>
+
+            <!-- DROPDOWN DAFTAR PRODUK TERJUAL (REKAP DETAIL) -->
+            <div class="sold-products-card">
+                <div class="sold-products-btn" onclick="toggleSoldProductsDropdown()">
+                    <span><i class="fa-solid fa-boxes-packing" style="color:var(--primary); margin-right:4px;"></i> <b>DAFTAR PRODUK TERJUAL</b></span>
+                    <div>
+                        <span style="color:var(--success); font-family:monospace; font-weight:900;" id="dispTotalOmsetTerjual">Rp 0</span>
+                        <i class="fa-solid fa-chevron-down" id="soldChevron" style="font-size:0.65rem; color:var(--text-sub); margin-left:4px;"></i>
+                    </div>
+                </div>
+                <div class="sold-dropdown-content" id="soldDropdownContent">
+                    <div style="display:flex; gap:4px; align-items:center; flex-wrap:wrap;">
+                        <select id="soldFilterDateType" style="flex:1;" onchange="onSoldFilterChange()">
+                            <option value="ALL">Semua Waktu</option>
+                            <option value="TODAY" selected>Hari Ini</option>
+                            <option value="THIS_MONTH">Bulan Ini</option>
+                            <option value="CUSTOM">Pilih Tanggal Spesifik...</option>
+                        </select>
+                        <input type="date" id="soldCustomDate" style="display:none; flex:1;" onchange="renderDaftarProdukTerjual()">
+                    </div>
+
+                    <div style="display:flex; justify-content:space-between; align-items:center; background:#e2e8f0; padding:4px 6px; border-radius:3px; font-size:0.68rem; font-weight:800;">
+                        <span>TOTAL PENJUALAN: <b style="color:var(--primary);" id="dispSoldTotalQty">0 Item</b></span>
+                        <span>NOMINAL: <b style="color:var(--success); font-family:monospace;" id="dispSoldTotalNominal">Rp 0</b></span>
+                    </div>
+
+                    <div id="soldProductsListContainer" style="display:flex; flex-direction:column; gap:4px; max-height:300px; overflow-y:auto;">
+                        <div style="text-align:center; color:var(--text-sub); padding:10px; font-size:0.7rem;">Memuat daftar produk...</div>
+                    </div>
                 </div>
             </div>
 
@@ -385,6 +427,115 @@
             const chevron = document.getElementById('profitChevron');
             content.classList.toggle('show');
             chevron.style.transform = content.classList.contains('show') ? 'rotate(180deg)' : 'rotate(0deg)';
+        }
+
+        /* AKORDION DAFTAR PRODUK TERJUAL */
+        function toggleSoldProductsDropdown() {
+            const content = document.getElementById('soldDropdownContent');
+            const chevron = document.getElementById('soldChevron');
+            content.classList.toggle('show');
+            chevron.style.transform = content.classList.contains('show') ? 'rotate(180deg)' : 'rotate(0deg)';
+            if (content.classList.contains('show')) {
+                renderDaftarProdukTerjual();
+            }
+        }
+
+        function onSoldFilterChange() {
+            const filterType = document.getElementById('soldFilterDateType').value;
+            const dateInput = document.getElementById('soldCustomDate');
+            dateInput.style.display = filterType === 'CUSTOM' ? 'inline-block' : 'none';
+            renderDaftarProdukTerjual();
+        }
+
+        function renderDaftarProdukTerjual() {
+            const filterType = document.getElementById('soldFilterDateType').value;
+            const customDateVal = document.getElementById('soldCustomDate').value; // YYYY-MM-DD
+            const container = document.getElementById('soldProductsListContainer');
+
+            const now = new Date();
+            const todayStr = `${String(now.getDate()).padStart(2, '0')}/${String(now.getMonth() + 1).padStart(2, '0')}/${now.getFullYear()}`;
+            const currentMonthKey = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+
+            // Filter transaksi yang hanya berstatus SUKSES
+            const trxsSukses = rawTransactions.filter(t => {
+                const st = String(t.status || '').toLowerCase();
+                return st.includes('sukses') || st.includes('success') || st === '1' || st === 'berhasil';
+            });
+
+            // Filter berdasarkan tanggal pilihan
+            const filteredTrx = trxsSukses.filter(t => {
+                const parsed = parseWaktu(t.waktu || t.date || t.created_at || t.timestamp || '');
+                
+                if (filterType === 'TODAY') {
+                    return parsed.tanggal === todayStr;
+                } else if (filterType === 'THIS_MONTH') {
+                    return parsed.monthKey === currentMonthKey;
+                } else if (filterType === 'CUSTOM' && customDateVal) {
+                    const [y, m, d] = customDateVal.split('-');
+                    const targetFormat = `${d}/${m}/${y}`;
+                    return parsed.tanggal === targetFormat;
+                }
+                return true; // ALL
+            });
+
+            // Hitung akumulasi per produk
+            const productMap = {};
+            let grandTotalNominal = 0;
+            let grandTotalQty = 0;
+
+            filteredTrx.forEach(t => {
+                const prodName = t.produk || t.product_name || 'Produk Lainnya';
+                const hModal = parseFloat(t.harga) || 0;
+                const hJual = parseFloat(t.harga_jual || t.price) || hModal;
+                const profit = hJual - hModal;
+
+                grandTotalNominal += hJual;
+                grandTotalQty += 1;
+
+                if (!productMap[prodName]) {
+                    productMap[prodName] = {
+                        name: prodName,
+                        qty: 0,
+                        totalOmset: 0,
+                        totalProfit: 0
+                    };
+                }
+
+                productMap[prodName].qty += 1;
+                productMap[prodName].totalOmset += hJual;
+                productMap[prodName].totalProfit += profit;
+            });
+
+            // Update badge ringkasan header
+            document.getElementById('dispTotalOmsetTerjual').innerText = 'Rp ' + grandTotalNominal.toLocaleString('id-ID');
+            document.getElementById('dispSoldTotalQty').innerText = grandTotalQty + ' Item';
+            document.getElementById('dispSoldTotalNominal').innerText = 'Rp ' + grandTotalNominal.toLocaleString('id-ID');
+
+            // URUTKAN DARI PENJUALAN TERBANYAK (QTY DESCENDING)
+            const sortedProducts = Object.values(productMap).sort((a, b) => b.qty - a.qty);
+
+            if (sortedProducts.length === 0) {
+                container.innerHTML = `<div style="text-align:center; color: var(--text-sub); padding:10px; font-size:0.7rem;">Tidak ada produk terjual pada periode ini.</div>`;
+                return;
+            }
+
+            let html = '';
+            sortedProducts.forEach((p, idx) => {
+                html += `
+                    <div class="sold-item-card">
+                        <div style="flex:1; min-width:0;">
+                            <div class="sold-item-title">${idx + 1}. ${p.name}</div>
+                            <div style="font-size:0.62rem; color:var(--text-sub); margin-top:2px;">
+                                Total Omset: <b style="color:var(--success); font-family:monospace;">Rp ${p.totalOmset.toLocaleString('id-ID')}</b> | 
+                                Laba: <b style="color:var(--primary); font-family:monospace;">Rp ${p.totalProfit.toLocaleString('id-ID')}</b>
+                            </div>
+                        </div>
+                        <span class="sold-item-badge"><i class="fa-solid fa-cart-shopping"></i> ${p.qty} Terjual</span>
+                    </div>
+                `;
+            });
+
+            container.innerHTML = html;
         }
 
         function keDetailMember(identifier, isRefId = false) {
@@ -854,6 +1005,7 @@
                 if (isFirstLoadTrx || manualRefresh || currentJson !== fetchedJson) {
                     rawTransactions = fetchedList;
                     renderAllTransactions(rawTransactions);
+                    renderDaftarProdukTerjual();
                     await loadMembers(true);
                 }
                 isFirstLoadTrx = false;

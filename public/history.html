@@ -128,8 +128,16 @@
             margin-bottom: 8px;
         }
 
+        .date-wrapper {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 12px;
+        }
+
         .date-header {
-            display: inline-block;
+            display: inline-flex;
+            align-items: center;
             font-size: 11px;
             font-weight: 800;
             color: var(--accent-purple);
@@ -137,8 +145,19 @@
             padding: 5px 14px;
             border-radius: 12px;
             box-shadow: var(--neu-shadow-inset);
-            margin-bottom: 12px;
             letter-spacing: 0.5px;
+        }
+
+        .date-count {
+            display: inline-flex;
+            align-items: center;
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--text-muted);
+            background: var(--bg-base);
+            padding: 5px 12px;
+            border-radius: 12px;
+            box-shadow: var(--neu-shadow-inset);
         }
 
         .card {
@@ -592,9 +611,13 @@
         let htmlList = "";
 
         for (const tanggal in groupedData) {
+            const count = groupedData[tanggal].length;
             htmlList += `
                 <div class="date-group">
-                    <div class="date-header"><i class="fa-regular fa-calendar-days me-1"></i> ${tanggal}</div>
+                    <div class="date-wrapper">
+                        <div class="date-header"><i class="fa-regular fa-calendar-days me-1"></i> ${tanggal}</div>
+                        <div class="date-count"><i class="fa-solid fa-list-check me-1"></i> ${count} Transaksi</div>
+                    </div>
             `;
 
             groupedData[tanggal].forEach(item => {
