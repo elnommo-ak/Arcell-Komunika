@@ -652,9 +652,8 @@
     <div id="checkoutBottomSheet" class="bottom-sheet">
         <div class="sheet-drag-handle"></div>
         
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-            <span style="font-size: 0.85rem; font-weight: 800; color: var(--text-main);" id="sheet_provider_title">Konfirmasi Pembelian</span>
-            <button type="button" onclick="tutupCheckoutSheet()" style="background: none; border: none; font-size: 1.1rem; color: var(--text-muted); cursor: pointer; padding: 0 4px;">&times;</button>
+        <div style="display: flex; justify-content: center; align-items: center; margin-bottom: 10px; width: 100%;">
+            <span style="font-size: 0.85rem; font-weight: 800; color: var(--accent-red); text-align: center; display: block; width: 100%;" id="sheet_provider_title">PASTIKAN NOMOR TUJUAN DAN KUOTA SUDAH SESUAI</span>
         </div>
 
         <div class="sheet-summary-box">
@@ -1037,7 +1036,7 @@
                 ref_id: 'TRX-' + Date.now()
             };
 
-            document.getElementById('sheet_provider_title').innerText = "Konfirmasi Pembelian";
+            document.getElementById('sheet_provider_title').innerText = "PASTIKAN NOMOR TUJUAN DAN KUOTA SUDAH SESUAI";
             document.getElementById('sheet_provider_label').innerText = provider;
             document.getElementById('sheet_nama_produk').innerText = productName;
             document.getElementById('sheet_no_tujuan').innerText = nomorTujuan;

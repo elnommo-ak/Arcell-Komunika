@@ -1,0 +1,860 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Indosat- Arcell Komunika</title>
+  
+  <!-- Font Awesome, Google Font & Bootstrap Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+  <!-- 🔒 PROTEKSI WAJIB LOGIN -->
+  <script>
+    (function() {
+        const isLoggedIn = localStorage.getItem('isLoggedIn');
+        if (isLoggedIn !== 'true') {
+            window.location.href = 'akun.html';
+        }
+    })();
+  </script>
+
+  <style>
+    :root {
+      /* Neumorphism Clean White Palette */
+      --bg-color: #e6eaf0;
+      --shadow-light: #ffffff;
+      --shadow-dark: #babecc;
+      
+      --accent-pink: #ec4899;          
+      --accent-blue: #3b82f6;          
+      --accent-yellow: #f59e0b;        
+      --accent-purple: #7052ff;
+      --accent-red: #ef4444;
+      
+      --text-main: #4a5568;            
+      --text-muted: #8c98a9;           
+      --text-bold: #2d3748;            
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Poppins', -apple-system, BlinkMacSystemFont, sans-serif;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      background-color: var(--bg-color);
+      min-height: 100vh;
+      color: var(--text-main);
+      padding-bottom: 20px;
+    }
+
+    body.no-scroll {
+      overflow: hidden !important;
+      touch-action: none;
+    }
+
+    /* HEADER STICKY */
+    .header {
+      position: sticky;
+      top: 0;
+      z-index: 102;
+      padding: 16px;
+      background: var(--bg-color);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .btn-back {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: var(--bg-color);
+      border: none;
+      box-shadow: 4px 4px 8px var(--shadow-dark), -4px -4px 8px var(--shadow-light);
+      color: var(--text-bold);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 0.95rem;
+      transition: all 0.2s ease;
+      text-decoration: none;
+    }
+
+    .btn-back:active {
+      box-shadow: inset 3px 3px 6px var(--shadow-dark), inset -3px -3px 6px var(--shadow-light);
+      transform: scale(0.95);
+    }
+
+    .header-title {
+      font-size: 1rem;
+      font-weight: 800;
+      color: var(--text-bold);
+      letter-spacing: 0.5px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .header-title i {
+      color: var(--accent-purple);
+    }
+
+    /* Input Card Section */
+    .card-wrapper {
+      padding: 0 16px 16px 16px;
+      background-color: var(--bg-color);
+    }
+
+    .input-pill-container {
+      background: var(--bg-color);
+      border-radius: 30px;
+      padding: 6px 6px 6px 14px;
+      display: flex;
+      align-items: center;
+      box-shadow: inset 4px 4px 8px var(--shadow-dark), 
+                  inset -4px -4px 8px var(--shadow-light);
+      transition: all 0.25s ease;
+    }
+
+    .input-icon-left {
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      background: var(--bg-color);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--accent-purple);
+      font-size: 14px;
+      margin-right: 8px;
+      box-shadow: 3px 3px 6px var(--shadow-dark), 
+                 -3px -3px 6px var(--shadow-light);
+    }
+
+    .input-pill-container input {
+      border: none;
+      outline: none;
+      flex: 1;
+      font-size: 13.5px;
+      font-weight: 600;
+      color: var(--text-bold);
+      background: transparent;
+      letter-spacing: 0.5px;
+    }
+
+    .input-pill-container input::placeholder {
+      color: var(--text-muted);
+      font-weight: 500;
+      font-size: 13px;
+    }
+
+    .operator-badge {
+      background: var(--bg-color);
+      color: var(--accent-purple);
+      padding: 4px 10px;
+      border-radius: 14px;
+      font-size: 10px;
+      font-weight: 700;
+      display: inline-block;
+      text-transform: uppercase;
+      margin-right: 6px;
+      letter-spacing: 0.5px;
+      box-shadow: 2px 2px 5px var(--shadow-dark), 
+                 -2px -2px 5px var(--shadow-light);
+    }
+
+    /* Filter Bar */
+    .filter-container {
+      display: flex;
+      justify-content: flex-end;
+      align-items: center;
+      padding: 0 16px 12px 16px;
+    }
+
+    .filter-select-wrapper {
+      position: relative;
+      display: inline-block;
+    }
+
+    .filter-select {
+      background: var(--bg-color);
+      color: var(--text-bold);
+      font-size: 11px;
+      font-weight: 600;
+      border: none;
+      outline: none;
+      padding: 8px 30px 8px 16px;
+      border-radius: 20px;
+      cursor: pointer;
+      box-shadow: 4px 4px 8px var(--shadow-dark), 
+                 -4px -4px 8px var(--shadow-light);
+      appearance: none;
+      -webkit-appearance: none;
+    }
+
+    .filter-select-wrapper::after {
+      content: '\f0dc';
+      font-family: 'Font Awesome 6 Free';
+      font-weight: 900;
+      font-size: 9px;
+      color: var(--accent-purple);
+      position: absolute;
+      right: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      pointer-events: none;
+    }
+
+    /* Empty State */
+    .empty-state {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      margin-top: 40px;
+      color: var(--text-muted);
+      text-align: center;
+      padding: 0 20px;
+    }
+
+    .empty-state i {
+      font-size: 32px;
+      color: var(--accent-purple);
+      margin-bottom: 16px;
+      background: var(--bg-color);
+      padding: 24px;
+      border-radius: 50%;
+      box-shadow: 8px 8px 16px var(--shadow-dark), 
+                 -8px -8px 16px var(--shadow-light);
+    }
+
+    .empty-state p {
+      font-size: 13px;
+      font-weight: 600;
+      line-height: 1.4;
+      color: var(--text-bold);
+    }
+
+    .fa-spin {
+      animation: fa-spin 1s infinite linear;
+    }
+
+    /* Content Area */
+    .content-area {
+      display: none;
+    }
+
+    /* Tab Subkategori Kapsul */
+    .sticky-tabs-container {
+      position: -webkit-sticky;
+      position: sticky;
+      top: 72px;
+      z-index: 100;
+      background-color: var(--bg-color);
+      padding: 4px 16px 12px 16px;
+    }
+
+    .tabs-wrapper {
+      display: flex;
+      gap: 12px;
+      overflow-x: auto;
+      scrollbar-width: none;
+      padding: 4px 2px;
+    }
+
+    .tabs-wrapper::-webkit-scrollbar {
+      display: none;
+    }
+
+    .tab-item {
+      white-space: nowrap;
+      padding: 9px 20px;
+      border-radius: 22px;
+      border: none;
+      background: var(--bg-color);
+      color: var(--text-main);
+      font-size: 11px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      box-shadow: 4px 4px 8px var(--shadow-dark), 
+                 -4px -4px 8px var(--shadow-light);
+    }
+
+    .tab-item.active {
+      color: var(--accent-purple);
+      box-shadow: inset 3px 3px 6px var(--shadow-dark), 
+                  inset -3px -3px 6px var(--shadow-light);
+    }
+
+    /* Container Inset / Product Section */
+    .product-inset-wrapper {
+      margin: 0 16px;
+      background: var(--bg-color);
+      border-radius: 28px;
+      padding: 18px;
+      box-shadow: 8px 8px 16px var(--shadow-dark), 
+                 -8px -8px 16px var(--shadow-light);
+    }
+
+    .product-list {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .product-card {
+      background: var(--bg-color);
+      border-radius: 20px;
+      padding: 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      cursor: pointer;
+      box-shadow: 5px 5px 10px var(--shadow-dark), 
+                 -5px -5px 10px var(--shadow-light);
+      transition: transform 0.15s ease, box-shadow 0.15s ease;
+      position: relative;
+    }
+
+    .product-card:active {
+      transform: scale(0.98);
+      box-shadow: inset 3px 3px 6px var(--shadow-dark), 
+                  inset -3px -3px 6px var(--shadow-light);
+    }
+
+    .product-card.promo-card {
+      border: 1px solid rgba(239, 68, 68, 0.25);
+    }
+
+    .promo-badge {
+      display: inline-block;
+      background: linear-gradient(135deg, #ef4444, #f97316);
+      color: #ffffff;
+      font-size: 0.58rem;
+      font-weight: 800;
+      padding: 2px 7px;
+      border-radius: 50px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      box-shadow: 2px 2px 5px rgba(239, 68, 68, 0.35);
+      margin-bottom: 3px;
+    }
+
+    .product-info {
+      flex: 1;
+      padding-right: 12px;
+    }
+
+    .product-title {
+      font-size: 12.5px;
+      font-weight: 700;
+      color: var(--text-bold);
+      line-height: 1.3;
+      margin-bottom: 4px;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      flex-wrap: wrap;
+    }
+
+    .product-price {
+      font-size: 14px;
+      font-weight: 800;
+      color: var(--accent-purple);
+    }
+
+    .dot-indicator {
+      display: inline-block;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      margin-left: 4px;
+      vertical-align: middle;
+      flex-shrink: 0;
+    }
+    .dot-digiflazz { background-color: #7052ff; box-shadow: 0 0 6px rgba(112, 82, 255, 0.5); }
+    .dot-okeconnect { background-color: #10b981; box-shadow: 0 0 6px rgba(16, 185, 129, 0.5); }
+
+    .product-action {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      background: var(--accent-purple);
+      color: #ffffff;
+      box-shadow: 3px 3px 6px var(--shadow-dark), 
+                 -3px -3px 6px var(--shadow-light);
+      font-size: 11px;
+    }
+
+    /* BOTTOM SHEET CHECKOUT */
+    .modal-checkout-backdrop {
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(15, 23, 42, 0.4); 
+      backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px);
+      z-index: 999 !important; display: none; opacity: 0; 
+      transition: opacity 0.25s ease;
+    }
+    .modal-checkout-backdrop.show { display: block; opacity: 1; }
+
+    .bottom-sheet {
+      position: fixed; bottom: -100%; left: 50%; transform: translateX(-50%);
+      width: 100%; max-width: 480px; background: var(--bg-color);
+      border-top-left-radius: 20px; border-top-right-radius: 20px;
+      box-shadow: 0px -8px 25px rgba(0, 0, 0, 0.12); z-index: 1000 !important;
+      padding: 12px 18px 24px 18px !important;
+      transition: bottom 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .bottom-sheet.active { bottom: 0; }
+
+    .sheet-drag-handle { width: 36px; height: 4px; background: var(--shadow-dark); border-radius: 10px; margin: 0 auto 10px auto; opacity: 0.7; }
+
+    .sheet-summary-box {
+      background: var(--bg-color); box-shadow: inset 3px 3px 6px var(--shadow-dark), inset -3px -3px 6px var(--shadow-light);
+      border-radius: 14px; padding: 12px 14px; margin-bottom: 14px; display: flex; flex-direction: column; gap: 8px;
+    }
+    .sheet-row { display: flex; justify-content: space-between; align-items: center; font-size: 0.78rem; }
+    .sheet-row .label { color: var(--text-muted); font-weight: 600; }
+    .sheet-row .val-title { font-weight: 700; color: var(--text-bold); text-align: right; max-width: 65%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .sheet-row .val-target { font-weight: 800; color: var(--accent-purple); font-family: monospace; font-size: 0.85rem; }
+    .sheet-divider { border: none; border-top: 1px dashed var(--shadow-dark); opacity: 0.8; margin: 2px 0; }
+    .sheet-row .val-price { font-size: 1rem; font-weight: 800; color: var(--accent-purple); }
+
+    .btn-bayar-now {
+      background: var(--accent-purple); color: #ffffff; font-weight: 800; border-radius: 50px;
+      padding: 12px; border: none; width: 100%;
+      box-shadow: 4px 4px 8px var(--shadow-dark), -4px -4px 8px var(--shadow-light); font-size: 0.82rem; text-transform: uppercase; letter-spacing: 0.5px; cursor: pointer;
+      display: flex; align-items: center; justify-content: center; gap: 8px; transition: all 0.2s ease;
+    }
+    .btn-bayar-now:active { box-shadow: inset 3px 3px 6px var(--shadow-dark), inset -3px -3px 6px var(--shadow-light); transform: scale(0.98); }
+  </style>
+</head>
+<body>
+
+  <!-- HEADER STICKY -->
+  <div class="header">
+    <div class="header-left">
+      <a href="javascript:history.back()" class="btn-back" title="Kembali">
+        <i class="fa-solid fa-arrow-left"></i>
+      </a>
+      <div class="header-title">
+        <i class="fa-solid fa-signal"></i> INDOSAT
+      </div>
+    </div>
+  </div>
+
+  <!-- Input Area Sticky -->
+  <div class="card-wrapper">
+    <div class="input-pill-container">
+      <div class="input-icon-left">
+        <i class="fa-solid fa-mobile-screen-button"></i>
+      </div>
+      <input 
+        type="tel" 
+        id="phoneInput" 
+        placeholder="Ketik Nomor Tujuan..." 
+        maxlength="20"
+        autocomplete="off"
+      />
+      <span class="operator-badge" id="operatorBadge">INDOSAT</span>
+    </div>
+  </div>
+
+  <!-- Empty / Loading State -->
+  <div class="empty-state" id="emptyState">
+    <i class="fa-solid fa-spinner fa-spin" id="stateIcon"></i>
+    <p id="emptyText">Memuat pilihan paket INDOSAT...</p>
+  </div>
+
+  <!-- Content Area -->
+  <div class="content-area" id="contentArea">
+    
+    <!-- Tab Subkategori Kapsul -->
+    <div class="sticky-tabs-container">
+      <div class="tabs-wrapper" id="tabsWrapper"></div>
+    </div>
+
+    <!-- Filter Urutan Harga -->
+    <div class="filter-container">
+      <div class="filter-select-wrapper">
+        <select id="sortFilter" class="filter-select" onchange="applyPriceSort()">
+          <option value="asc">Harga: Murah ke Mahal</option>
+          <option value="desc">Harga: Mahal ke Murah</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Kontainer Produk -->
+    <div class="product-inset-wrapper">
+      <div class="product-list" id="productList"></div>
+    </div>
+  </div>
+
+  <!-- MODAL POP-UP BOTTOM SHEET -->
+  <div id="checkoutBackdrop" class="modal-checkout-backdrop" onclick="tutupCheckoutSheet()"></div>
+  <div id="checkoutBottomSheet" class="bottom-sheet">
+      <div class="sheet-drag-handle"></div>
+      
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+          <span style="font-size: 0.85rem; font-weight: 800; color: var(--text-bold);" id="sheet_provider_title">Konfirmasi Pembelian</span>
+          <button type="button" onclick="tutupCheckoutSheet()" style="background: none; border: none; font-size: 1.1rem; color: var(--text-muted); cursor: pointer; padding: 0 4px;">&times;</button>
+      </div>
+
+      <div class="sheet-summary-box">
+          <div class="sheet-row">
+              <span class="label">Produk</span>
+              <span class="val-title" id="sheet_nama_produk">-</span>
+          </div>
+          <div class="sheet-row">
+              <span class="label">Jalur Server</span>
+              <span class="val-title" id="sheet_provider_label" style="text-transform: uppercase;">-</span>
+          </div>
+          <div class="sheet-row">
+              <span class="label">No. Tujuan</span>
+              <span class="val-target" id="sheet_no_tujuan">-</span>
+          </div>
+          <!-- INPUT PILIHAN WAKTU TERJADWAL -->
+          <div class="sheet-row" style="margin-top: 4px;">
+              <span class="label">Jadwalkan (Opsional)</span>
+              <input type="datetime-local" id="sheet_schedule_time" style="background: var(--bg-color); border: 1px solid var(--shadow-dark); border-radius: 8px; padding: 4px 8px; font-size: 0.75rem; color: var(--text-bold); outline: none;">
+          </div>
+          <div class="sheet-divider"></div>
+          <div class="sheet-row">
+              <span class="label" style="font-weight: 700; color: var(--text-bold);">Total</span>
+              <span class="val-price" id="sheet_total_harga">Rp 0</span>
+          </div>
+      </div>
+
+      <button id="btnProsesBayar" onclick="eksekusiCheckoutTerpilih()" class="btn-bayar-now">
+          <i class="fa-solid fa-shield-halved"></i> Bayar Sekarang
+      </button>
+  </div>
+
+  <script>
+    const inputPhone = document.getElementById('phoneInput');
+    const emptyState = document.getElementById('emptyState');
+    const emptyText = document.getElementById('emptyText');
+    const stateIcon = document.getElementById('stateIcon');
+    const contentArea = document.getElementById('contentArea');
+    const tabsWrapper = document.getElementById('tabsWrapper');
+    const productList = document.getElementById('productList');
+    const sortFilter = document.getElementById('sortFilter');
+
+    let groupedProducts = {};
+    let currentRawProducts = [];
+    let dataCheckoutAktif = {};
+    let memberSaldoAktif = 0;
+
+    // Load Data Otomatis Saat Dibuka
+    document.addEventListener("DOMContentLoaded", function() {
+      loadSaldoMember();
+      loadINDOSATProductsFromDatabase();
+    });
+
+    async function loadSaldoMember() {
+      const userPhone = localStorage.getItem('userPhone') || localStorage.getItem('user_hp');
+      if (!userPhone) return;
+
+      try {
+        const res = await fetch('/api/admin/members?t=' + Date.now());
+        const result = await res.json();
+        const listMember = Array.isArray(result) ? result : (result.data || []);
+        const currentMember = listMember.find(m => String(m.phone || m.nohp || '').trim() === String(userPhone).trim());
+
+        if (currentMember) {
+          memberSaldoAktif = parseFloat(currentMember.balance || 0);
+        }
+      } catch (err) {
+        console.error("Gagal sinkron saldo member:", err);
+      }
+    }
+
+    function showLoading(text) {
+      contentArea.style.display = 'none';
+      emptyState.style.display = 'flex';
+      stateIcon.className = "fa-solid fa-spinner fa-spin";
+      emptyText.innerHTML = text;
+    }
+
+    async function loadINDOSATProductsFromDatabase() {
+      showLoading("Memuat produk INDOSAT dari Database...");
+
+      try {
+        const response = await fetch('/api/user/products-by-prefix?brand=INDOSAT&t=' + Date.now());
+        const res = await response.json();
+
+        if (res.status === 'success' && res.data && Object.keys(res.data).length > 0) {
+          groupedProducts = res.data;
+          renderTabs(Object.keys(groupedProducts));
+        } else {
+          emptyState.style.display = 'flex';
+          stateIcon.className = "fa-solid fa-box-open";
+          emptyText.innerText = "Produk INDOSAT belum dimapping pada Database Admin.";
+        }
+      } catch (err) {
+        console.error(err);
+        emptyState.style.display = 'flex';
+        stateIcon.className = "fa-solid fa-triangle-exclamation";
+        emptyText.innerText = "Gagal terhubung ke database server.";
+      }
+    }
+
+    function renderTabs(tabKeysArray) {
+      let html = "";
+      tabKeysArray.forEach((cat, index) => {
+        html += `<button class="tab-item ${index === 0 ? 'active' : ''}" onclick="selectSubKategori(this, '${cat}')">${cat}</button>`;
+      });
+
+      tabsWrapper.innerHTML = html;
+      emptyState.style.display = 'none';
+      contentArea.style.display = 'block';
+
+      if (tabKeysArray.length > 0) {
+        selectSubKategori(tabsWrapper.children[0], tabKeysArray[0]);
+      }
+    }
+
+    function selectSubKategori(element, tabName) {
+      document.querySelectorAll('.tab-item').forEach(el => el.classList.remove('active'));
+      if (element) element.classList.add('active');
+
+      currentRawProducts = groupedProducts[tabName] || [];
+      applyPriceSort();
+    }
+
+    function applyPriceSort() {
+      if (!currentRawProducts || currentRawProducts.length === 0) {
+        productList.innerHTML = `<div style="text-align:center; color:var(--text-muted); padding:24px; font-size:12px;">Belum ada produk di kategori ini.</div>`;
+        return;
+      }
+
+      var sortValue = sortFilter.value;
+      var sortedProducts = [...currentRawProducts];
+
+      sortedProducts.sort(function(a, b) {
+        var hargaA = parseFloat(a.jual || a.price || a.harga || 0);
+        var hargaB = parseFloat(b.jual || b.price || b.harga || 0);
+        return sortValue === 'asc' ? hargaA - hargaB : hargaB - hargaA;
+      });
+
+      renderProdukCards(sortedProducts);
+    }
+
+    function renderProdukCards(produkList) {
+      var html = "";
+      produkList.forEach(function(prod) {
+        var harga = parseFloat(prod.jual || prod.price || prod.harga || 0);
+        var hargaFormatted = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(harga);
+        var namaProduk = prod.product_name || prod.nama_produk || 'Paket Indosat';
+        var skuProduk = prod.buyer_sku_code || prod.code || prod.sku || '';
+        var prov = prod._provider || prod.provider || 'digiflazz';
+
+        var dotHtml = prov === 'okeconnect' 
+            ? `<span class="dot-indicator dot-okeconnect"></span>`
+            : `<span class="dot-indicator dot-digiflazz"></span>`;
+
+        var isPromo = /promo|🔥/i.test(namaProduk);
+        var promoBadgeHtml = isPromo ? `<span class="promo-badge">PROMO</span>` : '';
+        var promoCardClass = isPromo ? 'promo-card' : '';
+
+        var namaClean = String(namaProduk).replace(/'/g, "\\'").replace(/"/g, '\\"');
+        var skuClean = String(skuProduk).replace(/'/g, "\\'").replace(/"/g, '\\"');
+
+        html += `
+          <div class="product-card ${promoCardClass}" onclick="prosesBeli('${prov}', '${skuClean}', '${namaClean}', ${harga})">
+            <div class="product-info">
+              ${promoBadgeHtml}
+              <div class="product-title">${namaProduk} ${dotHtml}</div>
+              <div class="product-price">${hargaFormatted}</div>
+            </div>
+            <div class="product-action">
+              <i class="fa-solid fa-chevron-right"></i>
+            </div>
+          </div>
+        `;
+      });
+      productList.innerHTML = html;
+    }
+
+    /* ========================================= */
+    /* LOGIKA BOTTOM SHEET & CHECKOUT            */
+    /* ========================================= */
+    window.prosesBeli = function(provider, skuCode, productName, price) {
+      let nomorTujuan = inputPhone.value.replace(/[^0-9]/g, '');
+
+      if (nomorTujuan.length < 10 || nomorTujuan.length > 13) {
+        alert('❌ Nomor HP tidak valid! Silakan isi minimal 10-13 digit.');
+        inputPhone.focus();
+        return;
+      }
+
+      if (memberSaldoAktif > 0 && memberSaldoAktif < price) {
+        return alert(`❌ Saldo Anda Tidak Mencukupi!\n\nHarga Produk: Rp ${price.toLocaleString('id-ID')}\nSaldo Anda: Rp ${memberSaldoAktif.toLocaleString('id-ID')}`);
+      }
+
+      dataCheckoutAktif = {
+        provider: provider,
+        buyer_sku_code: skuCode,
+        product_name: productName,
+        customer_no: nomorTujuan,
+        price: price,
+        ref_id: 'TRX-' + Date.now()
+      };
+
+      document.getElementById('sheet_provider_title').innerText = "Konfirmasi Pembelian";
+      document.getElementById('sheet_provider_label').innerText = provider;
+      document.getElementById('sheet_nama_produk').innerText = productName;
+      document.getElementById('sheet_no_tujuan').innerText = nomorTujuan;
+      document.getElementById('sheet_total_harga').innerText = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(price);
+      document.getElementById('sheet_schedule_time').value = "";
+
+      const backdrop = document.getElementById('checkoutBackdrop');
+      const sheet = document.getElementById('checkoutBottomSheet');
+
+      document.body.classList.add('no-scroll');
+      backdrop.classList.add('show');
+      setTimeout(() => { sheet.classList.add('active'); }, 10);
+    };
+
+    function tutupCheckoutSheet() {
+      const backdrop = document.getElementById('checkoutBackdrop');
+      const sheet = document.getElementById('checkoutBottomSheet');
+      sheet.classList.remove('active');
+      setTimeout(() => { 
+        backdrop.classList.remove('show'); 
+        document.body.classList.remove('no-scroll');
+      }, 300);
+    }
+
+    async function eksekusiCheckoutTerpilih() {
+      const btn = document.getElementById('btnProsesBayar');
+      const scheduleTime = document.getElementById('sheet_schedule_time').value;
+
+      btn.disabled = true;
+      btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Memproses...';
+
+      // 🔹 AMBIL OTOMATIS HP MEMBER LOGIN DARI VARIASI LOCALSTORAGE
+      const rawUserSession = localStorage.getItem('arcell_user') || localStorage.getItem('user') || '{}';
+      let parsedUser = {};
+      try { parsedUser = JSON.parse(rawUserSession); } catch(e){}
+
+      const userHp = localStorage.getItem('userPhone') || 
+                     localStorage.getItem('user_hp') || 
+                     parsedUser.phone || 
+                     parsedUser.hp || 
+                     parsedUser.user_hp || '';
+
+      const userName = localStorage.getItem('userName') || 
+                      localStorage.getItem('username') || 
+                      parsedUser.name || 'Member';
+
+      const subId = localStorage.getItem('onesignal_subscription_id') || '';
+
+      if (!userHp) {
+        alert('❌ Session login tidak valid. Silakan login kembali!');
+        window.location.href = 'akun.html';
+        return;
+      }
+
+      // 1. Eksekusi Transaksi Terjadwal Jika Diisi
+      if (scheduleTime) {
+        const formattedSchedule = scheduleTime.replace('T', ' ') + ':00';
+
+        const schedulePayload = {
+          user_hp: userHp,
+          username: userName,
+          buyer_sku_code: dataCheckoutAktif.buyer_sku_code,
+          customer_no: dataCheckoutAktif.customer_no,
+          nama_produk: dataCheckoutAktif.product_name,
+          harga_jual: dataCheckoutAktif.price,
+          provider: dataCheckoutAktif.provider,
+          schedule_time: formattedSchedule
+        };
+
+        try {
+          const response = await fetch('/api/user/schedule-transaction', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(schedulePayload)
+          });
+          const res = await response.json();
+
+          if (res.status === 'success') {
+            tutupCheckoutSheet();
+            alert('⏰ Transaksi XL berhasil dijadwalkan untuk: ' + formattedSchedule);
+            window.location.href = 'history.html';
+          } else {
+            alert('❌ Gagal menjadwalkan: ' + (res.message || 'Terjadi kesalahan'));
+          }
+        } catch (err) {
+          console.error(err);
+          alert('❌ Gagal terhubung ke Server');
+        } finally {
+          btn.disabled = false;
+          btn.innerHTML = '<i class="fa-solid fa-shield-halved"></i> Bayar Sekarang';
+        }
+        return;
+      }
+
+      // 2. Eksekusi Transaksi Langsung
+      const payload = {
+        buyer_sku_code: dataCheckoutAktif.buyer_sku_code,
+        customer_no: dataCheckoutAktif.customer_no,
+        user_hp: userHp,
+        username: userName,
+        nama_produk: dataCheckoutAktif.product_name,
+        harga_jual: dataCheckoutAktif.price,
+        subscription_id: subId
+      };
+
+      const endpointUrl = dataCheckoutAktif.provider === 'okeconnect' ? '/api/okeconnect/checkout' : '/api/digiflazz/checkout';
+
+      try {
+        const response = await fetch(endpointUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+
+        const res = await response.json();
+
+        if (res.status === 'success' || res.status === 200 || response.ok) {
+          tutupCheckoutSheet();
+          
+          var refIdResult = (res.data && (res.data.ref_id || res.data.id || res.data.trx_id)) 
+                            ? (res.data.ref_id || res.data.id || res.data.trx_id) 
+                            : (res.ref_id || dataCheckoutAktif.ref_id);
+
+          window.location.href = 'detail.html?id=' + encodeURIComponent(refIdResult);
+        } else {
+          alert('❌ Gagal Transaksi: ' + (res.message || 'Terjadi kesalahan'));
+          btn.disabled = false;
+          btn.innerHTML = '<i class="fa-solid fa-shield-halved"></i> Bayar Sekarang';
+        }
+      } catch (err) {
+        console.error(err);
+        alert('❌ Gagal terhubung ke Server');
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fa-solid fa-shield-halved"></i> Bayar Sekarang';
+      }
+    }
+  </script>
+</body>
+</html>
+

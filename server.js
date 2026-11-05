@@ -24,7 +24,7 @@ const OKECONNECT_CONFIG = {
     memberId: process.env.OKECONNECT_MEMBER_ID || 'OK2385636',
     password: process.env.OKECONNECT_PASSWORD || '@noMmo123',
     pin: process.env.OKECONNECT_PIN || '1122',
-    pricelistUrl: 'https://www.okeconnect.com/harga/json?id=905ccd028329b0a&produk=pulsa,kuota_telkomsel,kuota_byu,kuota_indosat,kuota_tri,kuota_xl,kuota_axis,kuota_smartfren,token_pln,saldo_gojek,cetak_voucher,digital,pascabayar',
+    pricelistUrl: 'https://www.okeconnect.com/harga/json?id=905ccd028329b0a&produk=pulsa,sms_telepon,kuota_nasional,kuota_telkomsel,bulk_telkomsel,bulk_cashback,kuota_byu,kuota_indosat,kuota_tri,kuota_xl,kuota_axis,kuota_smartfren,token_pln,saldo_gojek,ecommerce,tagihan,pascabayar',
     trxUrl: 'https://h2h.okeconnect.com/trx'
 };
 

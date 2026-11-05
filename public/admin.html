@@ -268,7 +268,7 @@
 
             <div class="glass-card">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
-                    <h3 style="margin:0;"><i class="fa-solid fa-list-check"></i> Monitoring Transaksi</h3>
+                    <h3 style="margin:0;"><i class="fa-solid fa-list-check"></i> Monitoring Transaksi (Hari Ini)</h3>
                     <button class="btn-sm" onclick="loadTransactions(true)"><i class="fa-solid fa-rotate-right"></i> Refresh</button>
                 </div>
                 <input type="text" id="searchAllTrx" placeholder="🔍 Cari Ref ID, No HP, Produk..." oninput="filterAllTransactions()" style="width: 100%; margin-bottom: 6px;">
@@ -332,7 +332,8 @@
             </div>
 
             <div class="glass-card">
-                <input type="text" id="searchMember" placeholder="🔍 Cari Member..." oninput="filterMember()" style="width: 100%; margin-bottom: 6px;">
+                <!-- FILTER PENCARIAN DI TAB MEMBER (BERDASARKAN REF ID, NO HP, NAMA, PRODUK, DLL) -->
+                <input type="text" id="searchMember" placeholder="🔍 Cari Ref ID, No HP, Nama Member, Produk..." oninput="filterMember()" style="width: 100%; margin-bottom: 6px;">
                 <div class="member-list-container" id="tabelMember">
                     <div style="text-align:center; color: var(--text-sub); padding: 10px; font-size:0.75rem;">Memuat data member...</div>
                 </div>
@@ -603,14 +604,29 @@
             }
         }
 
+        /* 1. BATASI MONITORING TRANSAKSI HANYA TRANSAKSI HARI INI */
         function renderAllTransactions(list) {
             const container = document.getElementById('allTrxContainer');
             if (!list || list.length === 0) {
-                container.innerHTML = `<div style="text-align:center; color: var(--text-sub); padding:10px; font-size:0.75rem;">Belum ada riwayat transaksi.</div>`;
+                container.innerHTML = `<div style="text-align:center; color: var(--text-sub); padding:10px; font-size:0.75rem;">Belum ada riwayat transaksi hari ini.</div>`;
                 return;
             }
 
-            const sorted = [...list].sort((a, b) => {
+            const now = new Date();
+            const todayStr = `${String(now.getDate()).padStart(2, '0')}/${String(now.getMonth() + 1).padStart(2, '0')}/${now.getFullYear()}`;
+
+            // Filter hanya transaksi hari ini
+            const todayTrx = list.filter(t => {
+                const parsedTime = parseWaktu(t.waktu || t.date || t.created_at || t.timestamp || '');
+                return parsedTime.tanggal === todayStr;
+            });
+
+            if (todayTrx.length === 0) {
+                container.innerHTML = `<div style="text-align:center; color: var(--text-sub); padding:10px; font-size:0.75rem;">Tidak ada transaksi pada hari ini (${todayStr}).</div>`;
+                return;
+            }
+
+            const sorted = [...todayTrx].sort((a, b) => {
                 const tA = parseWaktu(a.waktu || a.date || a.created_at || a.timestamp || '').dateObj.getTime();
                 const tB = parseWaktu(b.waktu || b.date || b.created_at || b.timestamp || '').dateObj.getTime();
                 return tB - tA;
@@ -955,9 +971,36 @@
             } catch (err) { alert('Error jaringan'); }
         }
 
+        /* 2. FILTER MEMBER BERDASARKAN REF ID, NO HP, NAMA, SERTA PRODUK TRANSAKSI */
         function filterMember() {
-            const kw = document.getElementById('searchMember').value.toLowerCase();
-            renderTabelMember(rawMembers.filter(m => String(m.name || m.nama || '').toLowerCase().includes(kw) || String(m.phone || m.nohp || '').includes(kw) || String(m.member_id || m.id || '').toLowerCase().includes(kw)));
+            const kw = document.getElementById('searchMember').value.toLowerCase().trim();
+            if (!kw) {
+                renderTabelMember(rawMembers);
+                return;
+            }
+
+            const filtered = rawMembers.filter(m => {
+                const nameMatch = String(m.name || m.nama || '').toLowerCase().includes(kw);
+                const phoneMatch = String(m.phone || m.nohp || '').toLowerCase().includes(kw);
+                const idMatch = String(m.member_id || m.id || '').toLowerCase().includes(kw);
+
+                // Cek apakah member ini memiliki transaksi yang cocok dengan Ref ID, No Tujuan, Produk, atau SN
+                const hasMatchingTrx = rawTransactions.some(t => {
+                    const isUserTrx = String(t.user_hp || t.customer_no || '') === String(m.phone || m.nohp || '');
+                    if (!isUserTrx) return false;
+
+                    const refIdMatch = String(t.ref_id || t.id || '').toLowerCase().includes(kw);
+                    const prodMatch = String(t.produk || t.product_name || '').toLowerCase().includes(kw);
+                    const targetMatch = String(t.no_tujuan || t.customer_no || '').toLowerCase().includes(kw);
+                    const snMatch = String(t.sn || t.sn_code || t.resi || '').toLowerCase().includes(kw);
+
+                    return refIdMatch || prodMatch || targetMatch || snMatch;
+                });
+
+                return nameMatch || phoneMatch || idMatch || hasMatchingTrx;
+            });
+
+            renderTabelMember(filtered);
         }
 
         function bukaModalMember() { document.getElementById('modalMember').style.display = 'flex'; }
