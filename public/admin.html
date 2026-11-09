@@ -23,7 +23,7 @@
         }
 
         await OneSignal.login("admin_arcell");
-        console.log("✅ Device Admin terhubung ka OneSignal salaku: admin_arcell");
+        console.log("✅ Device Admin terhubung ke OneSignal sebagai: admin_arcell");
       });
     </script>
 
@@ -62,9 +62,19 @@
         /* CARD PANELS */
         .glass-card { background: var(--otomax-card-bg); border: 1px solid var(--otomax-border); border-radius: 6px; padding: 10px; margin-bottom: 8px; }
 
+        /* GRID BALANCE CARDS */
+        .balance-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 8px;
+            margin-bottom: 8px;
+        }
+
         .main-balance-card { text-align: center; background: #ffffff; padding: 10px; border: 1px solid var(--otomax-border); border-top: 3px solid var(--primary); border-radius: 6px; }
+        .main-balance-card.okeconnect { border-top-color: var(--success); }
         .main-balance-card .title { font-size: 0.7rem; color: var(--text-sub); font-weight: 800; text-transform: uppercase; }
-        .main-balance-card .value { font-size: 1.5rem; font-weight: 900; color: var(--primary); font-family: monospace; margin: 2px 0; }
+        .main-balance-card .value { font-size: 1.4rem; font-weight: 900; color: var(--primary); font-family: monospace; margin: 2px 0; }
+        .main-balance-card .value.value-okec { color: var(--success); }
 
         /* TABS */
         .nav-tabs { display: grid; grid-template-columns: repeat(2, 1fr); gap: 4px; margin-bottom: 8px; }
@@ -130,10 +140,11 @@
         .member-stats-grid { display: flex; gap: 4px; align-items: center; margin-bottom: 6px; }
         .stat-box { flex: 1; background: #ffffff; border: 1px solid var(--otomax-border); padding: 4px; border-radius: 3px; text-align: center; }
         .stat-label { font-size: 0.55rem; color: var(--text-sub); font-weight: 800; text-transform: uppercase; }
-        .stat-val { font-size: 0.75rem; font-weight: 900; font-family: monospace; display: block; }
+        .stat-val { font-size: 0.72rem; font-weight: 900; font-family: monospace; display: block; }
         .stat-val.saldo { color: var(--success); }
         .stat-val.omset { color: var(--text-main); }
         .stat-val.profit { color: var(--primary); }
+        .stat-val.komisi { color: #d97706; }
 
         .btn-toggle-trx { background: #f1f5f9; color: var(--text-main); border-radius: 3px; padding: 5px 8px; font-size: 0.7rem; font-weight: 800; cursor: pointer; display: flex; align-items: center; justify-content: space-between; width: 100%; border: 1px solid var(--otomax-border); }
         .member-card.open .btn-toggle-trx .chevron-trx { transform: rotate(180deg); }
@@ -227,11 +238,22 @@
 
         <!-- TAB SALDO & TRANSAKSI -->
         <div id="tab-saldo" class="tab-content active">
-            <div class="glass-card main-balance-card">
-                <div class="title"><i class="fa-solid fa-wallet"></i> Saldo Digiflazz</div>
-                <div class="value" id="dispSaldoDigiflazz">Rp 0</div>
-                <div style="margin-top: 4px;">
-                    <button class="btn-sm" onclick="loadSaldoInfo()"><i class="fa-solid fa-rotate-right"></i> Refresh</button>
+            <!-- DISPLAY TAMPILAN DUA SALDO DIGIFLAZZ & OKECONNECT -->
+            <div class="balance-grid">
+                <div class="main-balance-card">
+                    <div class="title"><i class="fa-solid fa-wallet"></i> Saldo Server Digiflazz</div>
+                    <div class="value" id="dispSaldoDigiflazz">Rp 0</div>
+                    <div style="margin-top: 4px;">
+                        <button class="btn-sm" onclick="loadSaldoInfo()"><i class="fa-solid fa-rotate-right"></i> Refresh</button>
+                    </div>
+                </div>
+
+                <div class="main-balance-card okeconnect">
+                    <div class="title"><i class="fa-solid fa-bolt" style="color: var(--success);"></i> Saldo Server OkeConnect</div>
+                    <div class="value value-okec" id="dispSaldoOkeconnect">Rp 0</div>
+                    <div style="margin-top: 4px;">
+                        <button class="btn-sm" onclick="loadSaldoInfo()"><i class="fa-solid fa-rotate-right"></i> Refresh</button>
+                    </div>
                 </div>
             </div>
 
@@ -418,6 +440,10 @@
 
         const namaBulanIndo = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
 
+        function hitungKomisi(profit) {
+            return profit >= 4000 ? 2000 : 1000;
+        }
+
         function navTo(url) { window.location.replace(url); }
         function toggleDropdownMenu(evt) { evt.stopPropagation(); document.getElementById('dropdownMenu').classList.toggle('show'); }
         window.addEventListener('click', () => { const d = document.getElementById('dropdownMenu'); if (d && d.classList.contains('show')) d.classList.remove('show'); });
@@ -450,20 +476,18 @@
 
         function renderDaftarProdukTerjual() {
             const filterType = document.getElementById('soldFilterDateType').value;
-            const customDateVal = document.getElementById('soldCustomDate').value; // YYYY-MM-DD
+            const customDateVal = document.getElementById('soldCustomDate').value;
             const container = document.getElementById('soldProductsListContainer');
 
             const now = new Date();
             const todayStr = `${String(now.getDate()).padStart(2, '0')}/${String(now.getMonth() + 1).padStart(2, '0')}/${now.getFullYear()}`;
             const currentMonthKey = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
 
-            // Filter transaksi yang hanya berstatus SUKSES
             const trxsSukses = rawTransactions.filter(t => {
                 const st = String(t.status || '').toLowerCase();
                 return st.includes('sukses') || st.includes('success') || st === '1' || st === 'berhasil';
             });
 
-            // Filter berdasarkan tanggal pilihan
             const filteredTrx = trxsSukses.filter(t => {
                 const parsed = parseWaktu(t.waktu || t.date || t.created_at || t.timestamp || '');
                 
@@ -476,10 +500,9 @@
                     const targetFormat = `${d}/${m}/${y}`;
                     return parsed.tanggal === targetFormat;
                 }
-                return true; // ALL
+                return true;
             });
 
-            // Hitung akumulasi per produk
             const productMap = {};
             let grandTotalNominal = 0;
             let grandTotalQty = 0;
@@ -507,12 +530,10 @@
                 productMap[prodName].totalProfit += profit;
             });
 
-            // Update badge ringkasan header
             document.getElementById('dispTotalOmsetTerjual').innerText = 'Rp ' + grandTotalNominal.toLocaleString('id-ID');
             document.getElementById('dispSoldTotalQty').innerText = grandTotalQty + ' Item';
             document.getElementById('dispSoldTotalNominal').innerText = 'Rp ' + grandTotalNominal.toLocaleString('id-ID');
 
-            // URUTKAN DARI PENJUALAN TERBANYAK (QTY DESCENDING)
             const sortedProducts = Object.values(productMap).sort((a, b) => b.qty - a.qty);
 
             if (sortedProducts.length === 0) {
@@ -582,13 +603,60 @@
             if (evt) evt.currentTarget.classList.add('active');
         }
 
+        // FUNGSI MEMUAT SALDO SERVER DIGIFLAZZ & OKECONNECT
         async function loadSaldoInfo() {
+            // 1. Fetch Saldo Digiflazz
             try {
                 const res = await fetch('/api/saldo');
                 const data = await res.json();
                 const saldoVal = data.deposit !== undefined ? data.deposit : (data.data ? data.data.deposit : 0);
                 document.getElementById('dispSaldoDigiflazz').innerText = 'Rp ' + saldoVal.toLocaleString('id-ID');
             } catch (err) {}
+
+            // 2. Fetch Saldo OkeConnect (dengan fallback otomatis dari riwayat transaksi jika API H2H timeout/fail)
+            try {
+                const resOkec = await fetch('/api/saldo-okeconnect');
+                const dataOkec = await resOkec.json();
+                
+                let saldoOkecVal = dataOkec.deposit !== undefined 
+                    ? dataOkec.deposit 
+                    : (dataOkec.balance !== undefined 
+                        ? dataOkec.balance 
+                        : (dataOkec.saldo !== undefined 
+                            ? dataOkec.saldo 
+                            : (dataOkec.data ? (dataOkec.data.deposit || dataOkec.data.balance || dataOkec.data.saldo || 0) : 0)));
+
+                // Fallback jika API return 0, cari teks "Saldo 685.743" atau "= 685.743" dari transaksi OkeConnect di rawTransactions
+                if (saldoOkecVal === 0 && rawTransactions.length > 0) {
+                    for (const t of rawTransactions) {
+                        const msg = String(t.message || t.raw || '');
+                        if (msg.includes('Saldo') || msg.includes('=')) {
+                            const match = msg.match(/=\s*([\d\.]+)/) || msg.match(/Saldo\s*[\:\.\s]?\s*([\d\.]+)/i);
+                            if (match && match[1]) {
+                                saldoOkecVal = parseInt(match[1].replace(/\./g, ''), 10);
+                                if (saldoOkecVal > 0) break;
+                            }
+                        }
+                    }
+                }
+
+                document.getElementById('dispSaldoOkeconnect').innerText = 'Rp ' + saldoOkecVal.toLocaleString('id-ID');
+            } catch (err) {
+                // Fallback catch jika error jaringan
+                if (rawTransactions.length > 0) {
+                    for (const t of rawTransactions) {
+                        const msg = String(t.message || t.raw || '');
+                        const match = msg.match(/=\s*([\d\.]+)/) || msg.match(/Saldo\s*[\:\.\s]?\s*([\d\.]+)/i);
+                        if (match && match[1]) {
+                            const val = parseInt(match[1].replace(/\./g, ''), 10);
+                            if (val > 0) {
+                                document.getElementById('dispSaldoOkeconnect').innerText = 'Rp ' + val.toLocaleString('id-ID');
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
         }
 
         async function loadMembers(silent = false) {
@@ -604,7 +672,6 @@
             }
         }
 
-        /* 1. BATASI MONITORING TRANSAKSI HANYA TRANSAKSI HARI INI */
         function renderAllTransactions(list) {
             const container = document.getElementById('allTrxContainer');
             if (!list || list.length === 0) {
@@ -615,7 +682,6 @@
             const now = new Date();
             const todayStr = `${String(now.getDate()).padStart(2, '0')}/${String(now.getMonth() + 1).padStart(2, '0')}/${now.getFullYear()}`;
 
-            // Filter hanya transaksi hari ini
             const todayTrx = list.filter(t => {
                 const parsedTime = parseWaktu(t.waktu || t.date || t.created_at || t.timestamp || '');
                 return parsedTime.tanggal === todayStr;
@@ -644,6 +710,7 @@
                 const hModal = parseFloat(t.harga) || 0;
                 const hJual = parseFloat(t.harga_jual || t.price) || hModal;
                 const laba = hJual - hModal;
+                const komisiVal = hitungKomisi(laba);
                 const statusStr = String(t.status || 'PROSES').toUpperCase();
 
                 let statusClass = 'proses';
@@ -673,6 +740,7 @@
                             <div class="trx-right">
                                 <div class="trx-price-sell">Rp ${hJual.toLocaleString('id-ID')}</div>
                                 <div class="trx-price-sub">Modal: ${hModal.toLocaleString('id-ID')} | Laba: <b style="color:${laba >= 0 ? 'var(--primary)' : 'var(--danger)'};">${laba.toLocaleString('id-ID')}</b></div>
+                                ${statusClass === 'sukses' ? `<div class="trx-price-sub" style="color:#d97706;">Komisi: <b>Rp ${komisiVal.toLocaleString('id-ID')}</b></div>` : ''}
                             </div>
                         </div>
                         <div class="trx-actions" onclick="event.stopPropagation();">
@@ -701,7 +769,7 @@
             renderAllTransactions(filtered);
         }
 
-        function renderTabelMember(list) {
+        function renderTabelMember(list, searchKeyword = '') {
             const el = document.getElementById('tabelMember');
             if (!list || list.length === 0) { el.innerHTML = `<div style="text-align:center; color: var(--text-sub); padding:10px; font-size:0.75rem;">Belum ada member.</div>`; return; }
 
@@ -715,6 +783,7 @@
             let totalProfitHarianSemua = 0;
 
             let html = '';
+            const kw = searchKeyword.toLowerCase().trim();
 
             list.forEach(m => {
                 const idMem = m.member_id || m.id || '-';
@@ -732,6 +801,7 @@
                 let totalHarian = 0; 
                 let profitHariIni = 0;
                 let profitMemberIni = 0;
+                let komisiBulananMember = 0;
 
                 memberTrxSukses.forEach(t => {
                     const parsed = parseWaktu(t.waktu || t.date || t.created_at || t.timestamp || '');
@@ -741,10 +811,12 @@
                     const hModal = parseFloat(t.harga) || 0;
                     const hJual = parseFloat(t.harga_jual || t.price) || hModal;
                     const labaTrx = hJual - hModal;
+                    const komisiTrx = hitungKomisi(labaTrx);
 
                     profitMemberIni += labaTrx;
                     if (mKey === currentMonthKey) {
                         totalProfitBulananSemua += labaTrx;
+                        komisiBulananMember += komisiTrx;
                     }
                     if (dateKey === todayStr) {
                         totalHarian += hJual;
@@ -761,14 +833,17 @@
                     groupedByMonth[mKey].totalTrxMonth += 1;
 
                     if (!groupedByMonth[mKey].dates[dateKey]) {
-                        groupedByMonth[mKey].dates[dateKey] = { dateStr: dateKey, trxs: [], timestamp: parsed.dateObj.getTime() };
+                        groupedByMonth[mKey].dates[dateKey] = { dateStr: dateKey, trxs: [], timestamp: parsed.dateObj.getTime(), totalKomisiDate: 0 };
                     }
-                    groupedByMonth[mKey].dates[dateKey].trxs.push({ ...t, parsedTime: parsed });
+                    groupedByMonth[mKey].dates[dateKey].totalKomisiDate += komisiTrx;
+                    groupedByMonth[mKey].dates[dateKey].trxs.push({ ...t, parsedTime: parsed, labaTrx, komisiTrx });
                 });
 
                 totalProfitSemuaMember += profitMemberIni;
                 const sortedMonths = Object.values(groupedByMonth).sort((a, b) => b.monthKey.localeCompare(a.monthKey));
-                const isMemberOpen = openMemberCards.has(String(noHp));
+                
+                // Auto Open jika sedang melakukan pencarian transaksi
+                const isMemberOpen = openMemberCards.has(String(noHp)) || (kw.length > 0);
 
                 const safeName = namaMem.replace(/'/g, "\\'").replace(/"/g, "&quot;");
                 const safeId = String(idMem).replace(/'/g, "\\'").replace(/"/g, "&quot;");
@@ -800,6 +875,10 @@
                                 <span class="stat-label">Profit Hari Ini</span>
                                 <span class="stat-val profit">Rp ${profitHariIni.toLocaleString('id-ID')}</span>
                             </div>
+                            <div class="stat-box">
+                                <span class="stat-label">Komisi (1 Bulan)</span>
+                                <span class="stat-val komisi">Rp ${komisiBulananMember.toLocaleString('id-ID')}</span>
+                            </div>
                         </div>
                         <div>
                             <button class="btn-toggle-trx" onclick="toggleMemberTrx('${noHp}')">
@@ -815,7 +894,7 @@
                 } else {
                     sortedMonths.forEach(mGroup => {
                         const monthFolderKey = `${noHp}_MONTH_${mGroup.monthKey}`;
-                        const isMonthOpen = openMonthFolders.has(monthFolderKey);
+                        const isMonthOpen = openMonthFolders.has(monthFolderKey) || (kw.length > 0);
                         const sortedDateGroups = Object.values(mGroup.dates).sort((a, b) => b.timestamp - a.timestamp);
 
                         html += `
@@ -835,13 +914,17 @@
                             const trxsInDate = group.trxs;
                             const totalDateNominal = trxsInDate.reduce((a, b) => a + parseFloat(b.harga_jual || b.price || b.harga || 0), 0);
                             const dateFolderKey = `${noHp}_DATE_${group.dateStr}`;
-                            const isDateOpen = openDateFolders.has(dateFolderKey);
+                            const isDateOpen = openDateFolders.has(dateFolderKey) || (kw.length > 0);
 
                             html += `
                                 <div class="date-folder-card ${isDateOpen ? 'open' : ''}" data-key="${dateFolderKey}">
                                     <div class="date-folder-header" onclick="toggleDateFolder(this, '${dateFolderKey}')">
                                         <span><i class="fa-regular fa-calendar-check" style="color:var(--primary); margin-right:4px;"></i> ${group.dateStr} (${trxsInDate.length})</span>
-                                        <div><span style="color:var(--success); font-weight:900; margin-right:4px; font-family:monospace;">Rp ${totalDateNominal.toLocaleString('id-ID')}</span><i class="fa-solid fa-chevron-down date-chevron"></i></div>
+                                        <div>
+                                            <span style="font-size:0.6rem; color:#d97706; margin-right:4px;">Komisi: <b>Rp ${group.totalKomisiDate.toLocaleString('id-ID')}</b> | </span>
+                                            <span style="color:var(--success); font-weight:900; margin-right:4px; font-family:monospace;">Rp ${totalDateNominal.toLocaleString('id-ID')}</span>
+                                            <i class="fa-solid fa-chevron-down date-chevron"></i>
+                                        </div>
                                     </div>
                                     <div class="date-folder-body">
                             `;
@@ -849,32 +932,43 @@
                             trxsInDate.forEach(t => {
                                 const hM = parseFloat(t.harga) || 0;
                                 const hJ = parseFloat(t.harga_jual || t.price) || hM;
-                                const untung = hJ - hM;
+                                const untung = t.labaTrx;
+                                const komisi = t.komisiTrx;
                                 const refId = t.ref_id || t.id || '-';
                                 const snVal = t.sn || t.sn_code || t.resi || '';
+                                const prodName = t.produk || t.product_name || 'Produk PPOB';
                                 const safeSn = snVal.replace(/'/g, "\\'").replace(/"/g, "&quot;");
+                                const safeProdName = prodName.replace(/'/g, "\\'").replace(/"/g, "&quot;");
+
+                                // Filter highlight untuk hasil pencarian
+                                const refIdMatch = String(refId).toLowerCase().includes(kw);
+                                const prodMatch = String(prodName).toLowerCase().includes(kw);
+                                const targetMatch = String(t.no_tujuan || t.customer_no || '').toLowerCase().includes(kw);
+                                const snMatch = String(snVal).toLowerCase().includes(kw);
+                                const isMatch = kw.length > 0 && (refIdMatch || prodMatch || targetMatch || snMatch);
 
                                 html += `
-                                    <div class="sub-trx-card clickable" style="border-left-color: #16a34a;" onclick="keDetailMember('${refId}', true)">
+                                    <div class="sub-trx-card clickable" style="border-left-color: #16a34a; ${isMatch ? 'background:#e0e7ff; border:1px solid var(--primary);' : ''}" onclick="keDetailMember('${refId}', true)">
                                         <div class="trx-top-bar">
                                             <span>#${refId}</span>
                                             <span><i class="fa-regular fa-clock"></i> ${t.parsedTime.full}</span>
                                         </div>
                                         <div class="trx-main-info">
                                             <div class="trx-left">
-                                                <div class="trx-prod-title">${t.produk || t.product_name || 'Produk PPOB'}</div>
+                                                <div class="trx-prod-title">${prodName}</div>
                                                 <div class="trx-target-no"><i class="fa-solid fa-mobile-screen-button"></i> ${t.no_tujuan || t.customer_no || '-'}</div>
                                                 ${snVal ? `<div class="trx-sn-box">SN: ${snVal}</div>` : ''}
                                             </div>
                                             <div class="trx-right">
                                                 <div class="trx-price-sell">Rp ${hJ.toLocaleString('id-ID')}</div>
                                                 <div class="trx-price-sub">Modal: ${hM.toLocaleString('id-ID')} | Laba: <b style="color:${untung >= 0 ? 'var(--primary)' : 'var(--danger)'};">${untung.toLocaleString('id-ID')}</b></div>
+                                                <div class="trx-price-sub" style="color:#d97706;">Komisi: <b>Rp ${komisi.toLocaleString('id-ID')}</b></div>
                                             </div>
                                         </div>
                                         <div class="trx-actions" onclick="event.stopPropagation();">
                                             <span class="sub-trx-status sukses">SUKSES</span>
                                             <button class="btn-sm btn-success" onclick="bukaModalEditStatusTrx('${refId}', 'SUKSES', '${safeSn}')"><i class="fa-solid fa-list-check"></i> Status</button>
-                                            <button class="btn-sm btn-warning" onclick="editHargaTransaksi('${refId}', ${hM}, ${hJ})"><i class="fa-solid fa-pen"></i> Harga</button>
+                                            <button class="btn-sm btn-warning" title="Edit Harga Produk Ini untuk Member Ini" onclick="editHargaTransaksiMember('${noHp}', '${safeProdName}', ${hM}, ${hJ})"><i class="fa-solid fa-pen"></i> Harga</button>
                                         </div>
                                     </div>`;
                             });
@@ -888,7 +982,6 @@
                 html += `</div></div>`;
             });
             
-            // BINDING DATA KE HEADER SUMMARY PANEL
             const elTotalProfit = document.getElementById('dispTotalProfitMember');
             const elProfitBulanan = document.getElementById('dispTotalProfitBulanan');
             const elProfitHarian = document.getElementById('dispTotalTrxAndProfitHarian');
@@ -961,6 +1054,7 @@
             } catch (err) { alert('Error jaringan'); }
         }
 
+        /* EDIT HARGA TRANSAKSI REGULER (DARI TAB MONITORING) */
         async function editHargaTransaksi(refId, hModal, hJual) {
             const m = prompt(`Ubah HARGA MODAL #${refId}:`, hModal); if (m === null || m === "") return;
             const j = prompt(`Ubah HARGA JUAL #${refId}:`, hJual); if (j === null || j === "") return;
@@ -971,7 +1065,68 @@
             } catch (err) { alert('Error jaringan'); }
         }
 
-        /* 2. FILTER MEMBER BERDASARKAN REF ID, NO HP, NAMA, SERTA PRODUK TRANSAKSI */
+        /* EDIT HARGA SEBAGAI ATURAN MASSAL PER MEMBER & PER PRODUK */
+        async function editHargaTransaksiMember(phone, prodName, hModal, hJual) {
+            const m = prompt(`[${prodName}]\nUbah HARGA MODAL untuk member ${phone}:`, hModal); 
+            if (m === null || m === "") return;
+            const j = prompt(`[${prodName}]\nUbah HARGA JUAL untuk member ${phone}:`, hJual); 
+            if (j === null || j === "") return;
+
+            const modalBaru = parseInt(m);
+            const jualBaru = parseInt(j);
+
+            if (isNaN(modalBaru) || isNaN(jualBaru)) return alert('Nominal harga harus berupa angka!');
+
+            try {
+                const res = await fetch('/api/admin/update-member-product-price', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        phone: phone,
+                        product_name: prodName,
+                        harga_modal: modalBaru,
+                        harga_jual: jualBaru
+                    })
+                });
+
+                const result = await res.json();
+                if (result.status === 'success') {
+                    await loadTransactions(true);
+                    return;
+                }
+            } catch (err) {}
+
+            const targetTrxs = rawTransactions.filter(t => {
+                const isHpMatch = String(t.user_hp || t.customer_no || '') === String(phone);
+                const isProdMatch = String(t.produk || t.product_name || '') === String(prodName);
+                return isHpMatch && isProdMatch;
+            });
+
+            if (targetTrxs.length === 0) return alert('Tidak ada transaksi yang cocok untuk diperbarui.');
+
+            let successCount = 0;
+            for (const t of targetTrxs) {
+                const refId = t.ref_id || t.id;
+                if (!refId) continue;
+                try {
+                    const res = await fetch('/api/admin/update-transaction-price', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ ref_id: refId, harga_modal: modalBaru, harga_jual: jualBaru })
+                    });
+                    const resJson = await res.json();
+                    if (resJson.status === 'success') successCount++;
+                } catch (e) {}
+            }
+
+            if (successCount > 0) {
+                await loadTransactions(true);
+            } else {
+                alert('Gagal mengupdate harga transaksi.');
+            }
+        }
+
+        /* FILTER MEMBER BERDASARKAN REF ID, NO HP, NAMA, PRODUK, MAUPUN SN */
         function filterMember() {
             const kw = document.getElementById('searchMember').value.toLowerCase().trim();
             if (!kw) {
@@ -984,7 +1139,6 @@
                 const phoneMatch = String(m.phone || m.nohp || '').toLowerCase().includes(kw);
                 const idMatch = String(m.member_id || m.id || '').toLowerCase().includes(kw);
 
-                // Cek apakah member ini memiliki transaksi yang cocok dengan Ref ID, No Tujuan, Produk, atau SN
                 const hasMatchingTrx = rawTransactions.some(t => {
                     const isUserTrx = String(t.user_hp || t.customer_no || '') === String(m.phone || m.nohp || '');
                     if (!isUserTrx) return false;
@@ -1000,7 +1154,7 @@
                 return nameMatch || phoneMatch || idMatch || hasMatchingTrx;
             });
 
-            renderTabelMember(filtered);
+            renderTabelMember(filtered, kw);
         }
 
         function bukaModalMember() { document.getElementById('modalMember').style.display = 'flex'; }

@@ -1061,7 +1061,8 @@
             }, 300);
         }
 
-        async function eksekusiCheckoutTerpilih() {
+        // 🟢 FUNGSI CHECKOUT EKSEKUSI TERMASUK DIALOG KONFIRMASI DUPLIKASI
+        async function eksekusiCheckoutTerpilih(isForce = false) {
             const btn = document.getElementById('btnProsesBayar');
             const scheduleTime = document.getElementById('sheet_schedule_time').value;
 
@@ -1118,7 +1119,8 @@
                 username: userName,
                 nama_produk: dataCheckoutAktif.product_name,
                 harga_jual: dataCheckoutAktif.price,
-                subscription_id: subId
+                subscription_id: subId,
+                force: isForce // Kirim flag force jika user menyetujui transaksi duplikat
             };
 
             const endpointUrl = dataCheckoutAktif.provider === 'okeconnect' ? '/api/okeconnect/checkout' : '/api/digiflazz/checkout';
@@ -1131,6 +1133,19 @@
                 });
 
                 const res = await response.json();
+
+                // 🛡️ PENANGANAN DUPLIKAT WARNING
+                if (res.status === 'duplicate_warning' || res.is_duplicate) {
+                    btn.disabled = false;
+                    btn.innerHTML = '<i class="fa-solid fa-shield-halved"></i> Bayar Sekarang';
+                    
+                    const userChoice = confirm(res.message);
+                    if (userChoice) {
+                        // User menekan [OK / Tetap Proses] -> panggil ulang eksekusi dengan isForce = true
+                        eksekusiCheckoutTerpilih(true);
+                    }
+                    return;
+                }
 
                 if (res.status === 'success' || res.status === 200) {
                     tutupCheckoutSheet();
