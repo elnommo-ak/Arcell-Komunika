@@ -45,6 +45,126 @@
         * { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; margin: 0; padding: 0; }
         body { background-color: var(--otomax-bg); color: var(--text-main); padding-bottom: 30px; min-height: 100vh; }
 
+        /* PIN LOCK SCREEN OVERLAY */
+        #pinLockOverlay {
+            position: fixed;
+            inset: 0;
+            background: #0f172a;
+            z-index: 99999;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            color: #f8fafc;
+            user-select: none;
+        }
+        #pinLockOverlay.unlocked {
+            display: none;
+        }
+        .pin-box {
+            width: 100%;
+            max-width: 320px;
+            background: #1e293b;
+            border: 1px solid #334155;
+            border-top: 3px solid #0284c7;
+            border-radius: 8px;
+            padding: 22px 18px;
+            text-align: center;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.45);
+        }
+        .pin-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: rgba(2, 132, 199, 0.15);
+            color: #38bdf8;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.3rem;
+            margin-bottom: 10px;
+            border: 1px solid rgba(56, 189, 248, 0.3);
+        }
+        .pin-title {
+            font-size: 0.95rem;
+            font-weight: 800;
+            letter-spacing: 0.5px;
+            margin-bottom: 4px;
+        }
+        .pin-subtitle {
+            font-size: 0.72rem;
+            color: #94a3b8;
+            margin-bottom: 16px;
+        }
+        .pin-dots {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+        .pin-dot {
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            border: 2px solid #64748b;
+            background: transparent;
+            transition: all 0.15s ease;
+        }
+        .pin-dot.filled {
+            background: #38bdf8;
+            border-color: #38bdf8;
+            transform: scale(1.1);
+        }
+        .pin-dot.error {
+            background: #ef4444;
+            border-color: #ef4444;
+        }
+        .pin-error-msg {
+            font-size: 0.7rem;
+            color: #f87171;
+            font-weight: 700;
+            min-height: 16px;
+            margin-bottom: 12px;
+        }
+        .pin-keypad {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+        }
+        .pin-key {
+            background: #334155;
+            color: #f8fafc;
+            border: 1px solid #475569;
+            border-radius: 6px;
+            padding: 13px 0;
+            font-size: 1.15rem;
+            font-weight: 800;
+            font-family: monospace;
+            cursor: pointer;
+            transition: background 0.1s, transform 0.05s;
+        }
+        .pin-key:hover {
+            background: #475569;
+        }
+        .pin-key:active {
+            transform: scale(0.95);
+            background: #0284c7;
+        }
+        .pin-key.action-key {
+            font-size: 0.85rem;
+            background: #1e293b;
+            color: #94a3b8;
+        }
+        @keyframes shakePin {
+            0%, 100% { transform: translateX(0); }
+            20%, 60% { transform: translateX(-8px); }
+            40%, 80% { transform: translateX(8px); }
+        }
+        .shake {
+            animation: shakePin 0.35s ease;
+        }
+
         /* HEADER */
         .header { background: var(--otomax-header); color: #ffffff; padding: 10px 12px; border-bottom: 2px solid #0284c7; position: sticky; top: 0; z-index: 100; display: flex; align-items: center; justify-content: center; }
         .header h2 { font-size: 0.95rem; font-weight: 800; letter-spacing: 0.3px; color: #f8fafc; }
@@ -56,6 +176,7 @@
         .dropdown-item { padding: 8px 12px; color: var(--text-main); text-decoration: none; font-size: 0.78rem; font-weight: 700; display: flex; align-items: center; gap: 8px; border-bottom: 1px solid #f1f5f9; }
         .dropdown-item i { width: 16px; text-align: center; color: var(--primary); }
         .dropdown-item:hover { background: #e0e7ff; }
+        .dropdown-divider { height: 1px; background: #e2e8f0; }
 
         .container { max-width: 900px; margin: 8px auto 0 auto; padding: 0 8px; }
         
@@ -197,6 +318,41 @@
 </head>
 <body>
 
+    <!-- KUNCI PENGAMAN PIN 6 DIGIT -->
+    <div id="pinLockOverlay">
+        <div class="pin-box" id="pinBoxCard">
+            <div class="pin-icon"><i class="fa-solid fa-shield-halved"></i></div>
+            <div class="pin-title">OTOMAX ADMIN LOCK</div>
+            <div class="pin-subtitle">Masukkan 6 Digit PIN Keamanan</div>
+            
+            <div class="pin-dots" id="pinDotsContainer">
+                <span class="pin-dot"></span>
+                <span class="pin-dot"></span>
+                <span class="pin-dot"></span>
+                <span class="pin-dot"></span>
+                <span class="pin-dot"></span>
+                <span class="pin-dot"></span>
+            </div>
+            
+            <div class="pin-error-msg" id="pinErrorMsg"></div>
+
+            <div class="pin-keypad">
+                <button type="button" class="pin-key" onclick="inputPinDigit('1')">1</button>
+                <button type="button" class="pin-key" onclick="inputPinDigit('2')">2</button>
+                <button type="button" class="pin-key" onclick="inputPinDigit('3')">3</button>
+                <button type="button" class="pin-key" onclick="inputPinDigit('4')">4</button>
+                <button type="button" class="pin-key" onclick="inputPinDigit('5')">5</button>
+                <button type="button" class="pin-key" onclick="inputPinDigit('6')">6</button>
+                <button type="button" class="pin-key" onclick="inputPinDigit('7')">7</button>
+                <button type="button" class="pin-key" onclick="inputPinDigit('8')">8</button>
+                <button type="button" class="pin-key" onclick="inputPinDigit('9')">9</button>
+                <button type="button" class="pin-key action-key" onclick="clearPinInput()">CLEAR</button>
+                <button type="button" class="pin-key" onclick="inputPinDigit('0')">0</button>
+                <button type="button" class="pin-key action-key" onclick="backspacePin()"><i class="fa-solid fa-delete-left"></i></button>
+            </div>
+        </div>
+    </div>
+
     <div class="header">
         <button class="menu-btn" onclick="toggleDropdownMenu(event)" title="Menu Navigasi">
             <i class="fa-solid fa-bars"></i>
@@ -224,8 +380,11 @@
                 <i class="fa-solid fa-cash-register"></i> Kasir
             </a>
             <div class="dropdown-divider"></div>
+            <a href="#" class="dropdown-item" onclick="ubahPinKeamanan()">
+                <i class="fa-solid fa-key" style="color: var(--warning);"></i> Ganti PIN Keamanan
+            </a>
             <a href="#" class="dropdown-item" style="color: var(--danger);" onclick="prosesKeluar()">
-                <i class="fa-solid fa-right-from-bracket" style="color: var(--danger);"></i> Keluar
+                <i class="fa-solid fa-lock" style="color: var(--danger);"></i> Kunci & Keluar
             </a>
         </div>
     </div>
@@ -431,12 +590,117 @@
     </div>
 
     <script>
+        /* =========================================================
+           SISTEM KEAMANAN PIN 6 DIGIT (DEFAULT: 171124)
+        ========================================================= */
+        const DEFAULT_PIN = "171124";
+        let currentPinInput = "";
+
+        function getSavedPin() {
+            return localStorage.getItem("arcell_admin_pin") || DEFAULT_PIN;
+        }
+
+        function updatePinDots(isError = false) {
+            const dots = document.querySelectorAll("#pinDotsContainer .pin-dot");
+            dots.forEach((dot, idx) => {
+                dot.classList.remove("filled", "error");
+                if (isError) {
+                    dot.classList.add("error");
+                } else if (idx < currentPinInput.length) {
+                    dot.classList.add("filled");
+                }
+            });
+        }
+
+        function inputPinDigit(digit) {
+            if (currentPinInput.length >= 6) return;
+            document.getElementById("pinErrorMsg").innerText = "";
+            currentPinInput += digit;
+            updatePinDots();
+
+            if (currentPinInput.length === 6) {
+                setTimeout(verifyPin, 120);
+            }
+        }
+
+        function backspacePin() {
+            if (currentPinInput.length === 0) return;
+            currentPinInput = currentPinInput.slice(0, -1);
+            document.getElementById("pinErrorMsg").innerText = "";
+            updatePinDots();
+        }
+
+        function clearPinInput() {
+            currentPinInput = "";
+            document.getElementById("pinErrorMsg").innerText = "";
+            updatePinDots();
+        }
+
+        function verifyPin() {
+            if (currentPinInput === getSavedPin()) {
+                sessionStorage.setItem("arcell_admin_unlocked", "true");
+                document.getElementById("pinLockOverlay").classList.add("unlocked");
+                currentPinInput = "";
+                updatePinDots();
+                initAdminDashboard();
+            } else {
+                const box = document.getElementById("pinBoxCard");
+                document.getElementById("pinErrorMsg").innerText = "PIN Salah! Silakan coba lagi.";
+                updatePinDots(true);
+                box.classList.remove("shake");
+                void box.offsetWidth; // trigger reflow
+                box.classList.add("shake");
+
+                setTimeout(() => {
+                    currentPinInput = "";
+                    updatePinDots(false);
+                }, 450);
+            }
+        }
+
+        function ubahPinKeamanan() {
+            const lama = prompt("Masukkan PIN Lama (6 digit):");
+            if (lama === null) return;
+            if (lama !== getSavedPin()) {
+                return alert("PIN lama salah!");
+            }
+            const baru = prompt("Masukkan PIN Baru (harus 6 digit angka):");
+            if (baru === null) return;
+            if (!/^\d{6}$/.test(baru)) {
+                return alert("PIN baru harus terdiri dari 6 digit angka!");
+            }
+            const konfirmasi = prompt("Ulangi PIN Baru (6 digit):");
+            if (baru !== konfirmasi) {
+                return alert("Konfirmasi PIN tidak cocok!");
+            }
+            localStorage.setItem("arcell_admin_pin", baru);
+            alert("✅ PIN keamanan berhasil diubah!");
+        }
+
+        // Dukungan ketik keyboard fisik untuk PIN
+        document.addEventListener("keydown", (e) => {
+            const overlay = document.getElementById("pinLockOverlay");
+            if (overlay.classList.contains("unlocked")) return;
+
+            if (e.key >= "0" && e.key <= "9") {
+                inputPinDigit(e.key);
+            } else if (e.key === "Backspace") {
+                backspacePin();
+            } else if (e.key === "Escape" || e.key === "Delete") {
+                clearPinInput();
+            }
+        });
+
+        /* =========================================================
+           LOGIKA DASHBOARD ADMIN OTOMAX
+        ========================================================= */
         let rawMembers = [];
         let rawTransactions = [];
         let openMemberCards = new Set();
         let openMonthFolders = new Set();
         let openDateFolders = new Set();
         let isFirstLoadTrx = true;
+        let dashboardInitialized = false;
 
         const namaBulanIndo = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
 
@@ -447,7 +711,16 @@
         function navTo(url) { window.location.replace(url); }
         function toggleDropdownMenu(evt) { evt.stopPropagation(); document.getElementById('dropdownMenu').classList.toggle('show'); }
         window.addEventListener('click', () => { const d = document.getElementById('dropdownMenu'); if (d && d.classList.contains('show')) d.classList.remove('show'); });
-        function prosesKeluar() { if (confirm("Yakin ingin keluar?")) window.location.replace("login.html"); }
+        
+        function prosesKeluar() { 
+            if (confirm("Kunci panel admin dan keluar?")) {
+                sessionStorage.removeItem("arcell_admin_unlocked");
+                currentPinInput = "";
+                updatePinDots();
+                document.getElementById("pinErrorMsg").innerText = "";
+                document.getElementById("pinLockOverlay").classList.remove("unlocked");
+            }
+        }
 
         function toggleProfitDropdown() {
             const content = document.getElementById('profitDropdownContent');
@@ -605,7 +878,6 @@
 
         // FUNGSI MEMUAT SALDO SERVER DIGIFLAZZ & OKECONNECT
         async function loadSaldoInfo() {
-            // 1. Fetch Saldo Digiflazz
             try {
                 const res = await fetch('/api/saldo');
                 const data = await res.json();
@@ -613,7 +885,6 @@
                 document.getElementById('dispSaldoDigiflazz').innerText = 'Rp ' + saldoVal.toLocaleString('id-ID');
             } catch (err) {}
 
-            // 2. Fetch Saldo OkeConnect (dengan fallback otomatis dari riwayat transaksi jika API H2H timeout/fail)
             try {
                 const resOkec = await fetch('/api/saldo-okeconnect');
                 const dataOkec = await resOkec.json();
@@ -626,7 +897,6 @@
                             ? dataOkec.saldo 
                             : (dataOkec.data ? (dataOkec.data.deposit || dataOkec.data.balance || dataOkec.data.saldo || 0) : 0)));
 
-                // Fallback jika API return 0, cari teks "Saldo 685.743" atau "= 685.743" dari transaksi OkeConnect di rawTransactions
                 if (saldoOkecVal === 0 && rawTransactions.length > 0) {
                     for (const t of rawTransactions) {
                         const msg = String(t.message || t.raw || '');
@@ -642,7 +912,6 @@
 
                 document.getElementById('dispSaldoOkeconnect').innerText = 'Rp ' + saldoOkecVal.toLocaleString('id-ID');
             } catch (err) {
-                // Fallback catch jika error jaringan
                 if (rawTransactions.length > 0) {
                     for (const t of rawTransactions) {
                         const msg = String(t.message || t.raw || '');
@@ -702,7 +971,6 @@
             sorted.forEach(t => {
                 const refId = t.ref_id || t.id || '-';
                 const parsedTime = parseWaktu(t.waktu || t.date || t.created_at || t.timestamp || '');
-                const userHp = t.user_hp || t.customer_no || '-';
                 const userName = t.username || t.nama_member || '-';
                 const produk = t.produk || t.product_name || 'Produk PPOB';
                 const targetNo = t.no_tujuan || t.customer_no || '-';
@@ -842,7 +1110,6 @@
                 totalProfitSemuaMember += profitMemberIni;
                 const sortedMonths = Object.values(groupedByMonth).sort((a, b) => b.monthKey.localeCompare(a.monthKey));
                 
-                // Auto Open jika sedang melakukan pencarian transaksi
                 const isMemberOpen = openMemberCards.has(String(noHp)) || (kw.length > 0);
 
                 const safeName = namaMem.replace(/'/g, "\\'").replace(/"/g, "&quot;");
@@ -940,7 +1207,6 @@
                                 const safeSn = snVal.replace(/'/g, "\\'").replace(/"/g, "&quot;");
                                 const safeProdName = prodName.replace(/'/g, "\\'").replace(/"/g, "&quot;");
 
-                                // Filter highlight untuk hasil pencarian
                                 const refIdMatch = String(refId).toLowerCase().includes(kw);
                                 const prodMatch = String(prodName).toLowerCase().includes(kw);
                                 const targetMatch = String(t.no_tujuan || t.customer_no || '').toLowerCase().includes(kw);
@@ -1209,11 +1475,25 @@
             } catch (err) {}
         }
 
-        window.onload = async () => {
+        async function initAdminDashboard() {
+            if (dashboardInitialized) return;
+            dashboardInitialized = true;
             loadSaldoInfo();
             await loadTransactions();
             await loadMembers();
-            setInterval(() => { loadTransactions(); loadSaldoInfo(); }, 3000);
+            setInterval(() => {
+                if (sessionStorage.getItem("arcell_admin_unlocked") === "true") {
+                    loadTransactions();
+                    loadSaldoInfo();
+                }
+            }, 3000);
+        }
+
+        window.onload = async () => {
+            if (sessionStorage.getItem("arcell_admin_unlocked") === "true") {
+                document.getElementById("pinLockOverlay").classList.add("unlocked");
+                await initAdminDashboard();
+            }
         };
     </script>
 </body>
